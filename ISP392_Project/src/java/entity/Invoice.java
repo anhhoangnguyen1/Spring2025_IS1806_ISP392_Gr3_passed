@@ -1,7 +1,7 @@
-package Model;
+package entity;
 
 
-import Model.Customers;
+import entity.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;

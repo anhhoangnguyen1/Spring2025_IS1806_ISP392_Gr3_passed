@@ -1,6 +1,6 @@
-package Model;
+package entity;
 
-import Model.ImportExportDetails;
+import entity.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;

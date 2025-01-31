@@ -1,34 +1,36 @@
-package Model;
+package entity;
 
+import entity.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class NumberOfBags {
+public class Debt {
     private int id;
     private String type;
-    private int quantity;
-    private BigDecimal price;
+    private BigDecimal amount;
+    private PaymentHistory paymentHistory;
     private ImportExportProduct importExportProduct;
+    private Customers customer;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
-    private String note;
+    private String status;
 
-    // Getters and Setters
 
-    public NumberOfBags() {
+    public Debt() {
     }
 
-    public NumberOfBags(int id, String type, int quantity, BigDecimal price, ImportExportProduct importExportProduct, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String note) {
+    public Debt(int id, String type, BigDecimal amount, PaymentHistory paymentHistory, ImportExportProduct importExportProduct, Customers customer, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String status) {
         this.id = id;
         this.type = type;
-        this.quantity = quantity;
-        this.price = price;
+        this.amount = amount;
+        this.paymentHistory = paymentHistory;
         this.importExportProduct = importExportProduct;
+        this.customer = customer;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.createdBy = createdBy;
-        this.note = note;
+        this.status = status;
     }
 
     public int getId() {
@@ -47,20 +49,20 @@ public class NumberOfBags {
         this.type = type;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public PaymentHistory getPaymentHistory() {
+        return paymentHistory;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
+    public void setPaymentHistory(PaymentHistory paymentHistory) {
+        this.paymentHistory = paymentHistory;
     }
 
     public ImportExportProduct getImportExportProduct() {
@@ -69,6 +71,14 @@ public class NumberOfBags {
 
     public void setImportExportProduct(ImportExportProduct importExportProduct) {
         this.importExportProduct = importExportProduct;
+    }
+
+    public Customers getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customers customer) {
+        this.customer = customer;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -95,12 +105,12 @@ public class NumberOfBags {
         this.createdBy = createdBy;
     }
 
-    public String getNote() {
-        return note;
+    public String getStatus() {
+        return status;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setStatus(String status) {
+        this.status = status;
     }
     
 }

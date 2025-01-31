@@ -6,7 +6,7 @@
 package controller.authen;
 
 import dal.AccountDAO;
-import Model.*;
+import entity.*;
 import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
 import java.io.PrintWriter;
