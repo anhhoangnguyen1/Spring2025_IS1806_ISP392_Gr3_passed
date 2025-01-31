@@ -4,7 +4,7 @@
  */
 package dal;
 
-import Model.*;
+import entity.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

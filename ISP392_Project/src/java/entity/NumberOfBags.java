@@ -1,36 +1,35 @@
-package Model;
+package entity;
 
-import Model.Customers;
+import Model.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Debt {
+public class NumberOfBags {
     private int id;
     private String type;
-    private BigDecimal amount;
-    private PaymentHistory paymentHistory;
+    private int quantity;
+    private BigDecimal price;
     private ImportExportProduct importExportProduct;
-    private Customers customer;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
-    private String status;
+    private String note;
 
+    // Getters and Setters
 
-    public Debt() {
+    public NumberOfBags() {
     }
 
-    public Debt(int id, String type, BigDecimal amount, PaymentHistory paymentHistory, ImportExportProduct importExportProduct, Customers customer, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String status) {
+    public NumberOfBags(int id, String type, int quantity, BigDecimal price, ImportExportProduct importExportProduct, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String note) {
         this.id = id;
         this.type = type;
-        this.amount = amount;
-        this.paymentHistory = paymentHistory;
+        this.quantity = quantity;
+        this.price = price;
         this.importExportProduct = importExportProduct;
-        this.customer = customer;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.createdBy = createdBy;
-        this.status = status;
+        this.note = note;
     }
 
     public int getId() {
@@ -49,20 +48,20 @@ public class Debt {
         this.type = type;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
-    public PaymentHistory getPaymentHistory() {
-        return paymentHistory;
+    public BigDecimal getPrice() {
+        return price;
     }
 
-    public void setPaymentHistory(PaymentHistory paymentHistory) {
-        this.paymentHistory = paymentHistory;
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
     public ImportExportProduct getImportExportProduct() {
@@ -71,14 +70,6 @@ public class Debt {
 
     public void setImportExportProduct(ImportExportProduct importExportProduct) {
         this.importExportProduct = importExportProduct;
-    }
-
-    public Customers getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customers customer) {
-        this.customer = customer;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -105,12 +96,12 @@ public class Debt {
         this.createdBy = createdBy;
     }
 
-    public String getStatus() {
-        return status;
+    public String getNote() {
+        return note;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setNote(String note) {
+        this.note = note;
     }
     
 }

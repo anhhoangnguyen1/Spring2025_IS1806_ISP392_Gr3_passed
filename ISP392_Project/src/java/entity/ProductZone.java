@@ -1,5 +1,6 @@
-package Model;
+package entity;
 
+import Model.*;
 import java.time.LocalDateTime;
 
 public class ProductZone {

@@ -1,5 +1,6 @@
-package Model;
+package entity;
 
+import Model.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

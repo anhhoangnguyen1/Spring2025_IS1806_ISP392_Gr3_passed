@@ -1,5 +1,6 @@
-package Model;
+package entity;
 
+import Model.*;
 import java.math.BigDecimal;
 
 public class InvoiceDetails {
