@@ -4,7 +4,7 @@
  */
 package dal;
 
-import entity.Account;
+import Model.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -13,35 +13,35 @@ import java.util.List;
  *
  * @author ADMIN
  */
-public class AccountDAO implements I_DAO<Account>{
+public class AccountDAO implements I_DAO<Users>{
 
     @Override
-    public List<Account> findAll() {
+    public List<Users> findAll() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public boolean update(Account t) {
+    public boolean update(Users t) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public boolean delete(Account t) {
+    public boolean delete(Users t) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public int insert(Account t) {
+    public int insert(Users t) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public Account findById(Account t) {
+    public Users findById(Users t) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public Account getFromResultSet(ResultSet resultSet) throws SQLException {
+    public Users getFromResultSet(ResultSet resultSet) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
