@@ -162,5 +162,10 @@ public class Users {
     public void setStaffs(List<Staffs> staffs) {
         this.staffs = staffs;
     }
+
+    @Override
+    public String toString() {
+        return "Users{" + "userId=" + userId + ", role=" + role + ", username=" + username + ", password=" + password + ", email=" + email + ", phone=" + phone + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", updatedBy=" + updatedBy + ", createdBy=" + createdBy + ", isDelete=" + isDelete + ", deletedBy=" + deletedBy + ", deletedAt=" + deletedAt + ", status=" + status + ", staffs=" + staffs + '}';
+    }
     
 }
