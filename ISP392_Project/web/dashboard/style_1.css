@@ -402,7 +402,6 @@ ul.navbar-links li.active a .nav-text {
 .contents .description {
     width: 100%;
     display: grid;
-    grid-template-columns: 2fr 1fr;
     padding: 10px 0px;
     gap: 16px;
 }
@@ -709,6 +708,63 @@ ul.navbar-links li.active a .nav-text {
 .product-desc .product-row-2 p {
     color: var(--text-clr);
     font-size: 15px;
+}
+
+/* Style for the product table */
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--bg-primary);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.product-table thead {
+    background-color: var(--bg-secondary);
+}
+
+.product-table th,
+.product-table td {
+    padding: 12px;
+    text-align: left;
+    color: var(--heading-clr);
+    border-bottom: 1px solid var(--bg-ternary);
+}
+
+.product-table th {
+    font-weight: 500;
+}
+
+.product-table tbody tr:hover {
+    background-color: var(--bg-ternary);
+}
+
+/* Product Image */
+.product-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Buttons */
+.edit-btn,
+.delete-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background-color: #4caf50;
+    color: white;
+}
+
+.delete-btn {
+    background-color: #ff5733;
+    color: white;
 }
 
 /* Balance Card */
