@@ -1,7 +1,7 @@
 package entity;
 
 
-
+import entity.*;
 import java.util.List;
 
 public class Role {
