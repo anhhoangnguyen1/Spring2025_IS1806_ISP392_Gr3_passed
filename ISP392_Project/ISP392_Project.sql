@@ -209,9 +209,7 @@ CREATE TABLE Import_Export_details (
 INSERT INTO Role (role_id, name) VALUES
 (1, 'Admin'),
 (2, 'Staff'),
-(3, 'Customer'),
-(4, 'Manager'),
-(5, 'Operator');
+(3, 'Owner'),
 
 -- Insert into Users
 INSERT INTO Users (role_id, username, password, email, phone, created_by) VALUES
