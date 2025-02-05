@@ -114,7 +114,7 @@
                 </div>
                 <div class="button-container">
                     <button type="submit" class="button save-button">Save Changes</button>
-                    <a href="<%= request.getContextPath() %>/dashboard/dashboard.jsp" class="button back-button">Back</a>
+                    <a href="<%= request.getContextPath() %>/Views/profile.jsp" class="button back-button">Back</a>
                 </div>
             </form>
         </div>
