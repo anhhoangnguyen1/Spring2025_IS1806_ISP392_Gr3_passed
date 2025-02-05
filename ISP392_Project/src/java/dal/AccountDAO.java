@@ -89,13 +89,13 @@ public class AccountDAO implements I_DAO<Users> {
     }
 
     public static void main(String[] args) {
-        AccountDAO dao = new AccountDAO();
-        
-        Users user1 = dao.authenticate("admin", "123456");
-        if (user1 != null) {
-            System.out.println("Đăng nhập thành công: " + user1.getUsername() + " - Role: " + user1.getRole().getName());
-        } else {
-            System.out.println("Đăng nhập thất bại (admin, 123456)");
-        }
+//        AccountDAO dao = new AccountDAO();
+//        
+//        Users user1 = dao.authenticate("admin", "123456");
+//        if (user1 != null) {
+//            System.out.println("Đăng nhập thành công: " + user1.getUsername() + " - Role: " + user1.getRole().getName());
+//        } else {
+//            System.out.println("Đăng nhập thất bại (admin, 123456)");
+//        }
     }
 }

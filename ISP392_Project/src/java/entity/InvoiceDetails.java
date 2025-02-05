@@ -1,5 +1,6 @@
 package entity;
 
+import entity.*;
 import java.math.BigDecimal;
 
 public class InvoiceDetails {

@@ -1,5 +1,6 @@
 package entity;
 
+import entity.*;
 import java.time.LocalDateTime;
 
 public class ProductZone {

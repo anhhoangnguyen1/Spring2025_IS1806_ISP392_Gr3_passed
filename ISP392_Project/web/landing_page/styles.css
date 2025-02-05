@@ -549,7 +549,7 @@ nav {
   text-align: center;
 }
 
-@media (width > 540px) {
+@media (min-width: 540px) {
   .article__grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -604,7 +604,7 @@ nav {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
-@media (width > 768px) {
+@media (min-width: 768px) {
   nav {
     position: static;
     padding: 2rem 1rem;
@@ -694,7 +694,7 @@ nav {
   }
 }
 
-@media (width > 1024px) {
+@media (min-width: 1024px) {
   .article__grid {
     gap: 2rem;
   }
