@@ -5,12 +5,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class Users {
+
     private int userId;
     private Role role;
     private String username;
     private String password;
     private String email;
     private String phone;
+    private String avatar;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String updatedBy;
@@ -22,17 +24,26 @@ public class Users {
     private List<Staffs> staffs;
 
     // Getters and Setters
-
     public Users() {
     }
 
-    public Users(int userId, Role role, String username, String password, String email, String phone, LocalDateTime createdAt, LocalDateTime updatedAt, String updatedBy, String createdBy, boolean isDelete, String deletedBy, LocalDateTime deletedAt, String status, List<Staffs> staffs) {
+    public Users(int userId, String username, String password, String email, String phone, String avatar) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.phone = phone;
+        this.avatar = avatar;
+    }
+
+    public Users(int userId, Role role, String username, String password, String email, String phone, String avatar, LocalDateTime createdAt, LocalDateTime updatedAt, String updatedBy, String createdBy, boolean isDelete, String deletedBy, LocalDateTime deletedAt, String status, List<Staffs> staffs) {
         this.userId = userId;
         this.role = role;
         this.username = username;
         this.password = password;
         this.email = email;
         this.phone = phone;
+        this.avatar = avatar;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.updatedBy = updatedBy;
@@ -90,6 +101,14 @@ public class Users {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+    
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -166,7 +185,6 @@ public class Users {
 
     @Override
     public String toString() {
-        return "Users{" + "userId=" + userId + ", role=" + role + ", username=" + username + ", password=" + password + ", email=" + email + ", phone=" + phone + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", updatedBy=" + updatedBy + ", createdBy=" + createdBy + ", isDelete=" + isDelete + ", deletedBy=" + deletedBy + ", deletedAt=" + deletedAt + ", status=" + status + ", staffs=" + staffs + '}';
+        return "Users{" + "userId=" + userId + ", role=" + role + ", username=" + username + ", password=" + password + ", email=" + email + ", phone=" + phone + ", avatar=" + avatar + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", updatedBy=" + updatedBy + ", createdBy=" + createdBy + ", isDelete=" + isDelete + ", deletedBy=" + deletedBy + ", deletedAt=" + deletedAt + ", status=" + status + ", staffs=" + staffs + '}';
     }
-    
 }
