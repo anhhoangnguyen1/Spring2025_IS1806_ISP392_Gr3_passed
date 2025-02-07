@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,16 +18,15 @@ import java.util.logging.Logger;
  *
  * @author ADMIN
  */
-public class AccountDAO implements I_DAO<Users> {
+public class AccountDAO extends DBContext implements I_DAO<Users> {
 
     public static AccountDAO INSTANCE = new AccountDAO();
     private static final Logger LOGGER = Logger.getLogger(AccountDAO.class.getName());
-    private DBContext dbContext;
-    private Connection connection;
+    private RoleDAO roleDAO;
 
     public AccountDAO() {
-        dbContext = new DBContext();
-        connection = dbContext.connection;  // Lấy kết nối từ DBContext
+        connection = getConnection();
+        roleDAO = new RoleDAO();
     }
 
     // authenticate the login avaiable in the database
@@ -119,7 +119,24 @@ public class AccountDAO implements I_DAO<Users> {
 
     @Override
     public List<Users> findAll() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        List<Users> users = new ArrayList<>();
+        String sql = "SELECT * FROM Users"; // Select all users
+
+        try {
+            // Open connection
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                users.add(getFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving all users: {0}", e.getMessage());
+        } finally {
+            // Close resources
+            closeResources();
+        }
+        return users;
     }
 
     @Override
@@ -144,7 +161,70 @@ public class AccountDAO implements I_DAO<Users> {
 
     @Override
     public Users getFromResultSet(ResultSet resultSet) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+
+        //find role
+        Role role = new Role();
+        role.setRoleId(resultSet.getInt("role_id"));
+
+        Users user = new Users();
+        user.setUserId(resultSet.getInt("user_id"));
+
+        user.setRole(roleDAO.findById(role));
+        user.setUsername(resultSet.getString("username"));
+        user.setPassword(resultSet.getString("password"));
+        user.setEmail(resultSet.getString("email"));
+        user.setPhone(resultSet.getString("phone"));
+        user.setCreatedAt(resultSet.getTimestamp("created_at") != null
+                ? resultSet.getTimestamp("created_at").toLocalDateTime() : null);
+        user.setUpdatedAt(resultSet.getTimestamp("updated_at") != null
+                ? resultSet.getTimestamp("updated_at").toLocalDateTime() : null);
+        user.setUpdatedBy(resultSet.getString("updated_by"));
+        user.setCreatedBy(resultSet.getString("created_by"));
+        user.setDelete(resultSet.getBoolean("isDelete"));
+        user.setDeletedBy(resultSet.getString("deletedBy"));
+        user.setDeletedAt(resultSet.getTimestamp("deletedAt") != null
+                ? resultSet.getTimestamp("deletedAt").toLocalDateTime() : null);
+        user.setStatus(resultSet.getString("status"));
+
+        return user;
+    }
+
+    public Users findByEmail(Users userRequestEmail) {
+        List<Users> users = new ArrayList<>();
+        String sql = "SELECT * FROM Users\n"
+                + "where email = ?";
+
+        try {
+            // Open connection
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setObject(1, userRequestEmail.getEmail());
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return getFromResultSet(resultSet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Close resources
+            closeResources();
+        }
+        return null;
+    }
+
+    public boolean updatePassword(Users account) {
+        String sql = "UPDATE Users SET password = ? WHERE email = ?";
+        try {
+            // Open connection
+            connection = getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, account.getPassword());
+            statement.setObject(2, account.getEmail());
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating password: {0}", e.getMessage());
+        }
+        return false;
     }
 
     public static void main(String[] args) {
