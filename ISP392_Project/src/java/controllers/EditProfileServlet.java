@@ -98,7 +98,14 @@ public class EditProfileServlet extends HttpServlet {
         String password = request.getParameter("password");
         String avatar = request.getParameter("avatar");
 
-        Users user = new Users(userId, username, password, email, phone, avatar);
+          Users user = Users.builder()
+                            .userId(userId)
+                            .username(username)
+                            .password(password)
+                            .email(email)
+                            .phone(phone)
+                            .avatar(avatar)
+                            .build();
 
 
         // Update user in the database

@@ -4,10 +4,21 @@
  */
 package utils;
 
+import java.util.Random;
+
 /**
  *
  * @author ADMIN
  */
 public class GlobalUtils {
-    
+    public static int generateOTP(int length) {
+        Random rand = new Random();
+        StringBuilder otp = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            otp.append(rand.nextInt(10));
+        }
+
+        return Integer.parseInt(otp.toString());
+    }
 }
