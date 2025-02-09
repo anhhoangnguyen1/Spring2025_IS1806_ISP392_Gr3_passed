@@ -1,59 +1,26 @@
 CREATE SCHEMA ISP392_Project2;
 USE ISP392_Project2;
-
--- Table Accounts (Tạo trước để tránh lỗi khóa ngoại)
-CREATE TABLE Accounts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    role ENUM('admin', 'staff', 'owner') NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    updated_by VARCHAR(255),
-    created_by VARCHAR(255),
-    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
-    deletedBy VARCHAR(255),
-    deletedAt DATETIME,
-    status VARCHAR(255)
-);
-
 -- Table Users
 CREATE TABLE Users (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     phone VARCHAR(15) NOT NULL,
     address TEXT NOT NULL,
     gender VARCHAR(15) NOT NULL,
     dob DATE,
-    account_id INT NOT NULL,
+    role ENUM('admin', 'staff', 'owner') NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status VARCHAR(255),
-    deletedAt DATETIME,
-    FOREIGN KEY (account_id) REFERENCES Accounts(id) ON DELETE CASCADE
+    deletedAt DATETIME
 );
 
--- Table Products
-CREATE TABLE Products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    image VARCHAR(255) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
-    wholesale_price DECIMAL(10,2) NOT NULL,
-    retail_price DECIMAL(10,2) NOT NULL,
-    weight INT NOT NULL,
-    location VARCHAR(255),
-    description TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
-    deletedAt DATETIME,
-    status VARCHAR(255)
-);
 
--- Table Zone
-CREATE TABLE Zone (
+-- Table Zones
+CREATE TABLE Zones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     capacity INT NOT NULL,
@@ -65,28 +32,30 @@ CREATE TABLE Zone (
     status VARCHAR(255)
 );
 
--- Table Product_Zone
-CREATE TABLE Product_Zone (
+-- Table Products
+CREATE TABLE Products (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id INT NOT NULL,
-    zone_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    image VARCHAR(255) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
     quantity INT NOT NULL,
-    FOREIGN KEY (product_id) REFERENCES Products(id) ON DELETE CASCADE,
-    FOREIGN KEY (zone_id) REFERENCES Zone(id) ON DELETE CASCADE,
+    zone_id INT,
+    description TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
     deletedAt DATETIME,
-    status VARCHAR(255)
+    status VARCHAR(255),
+    FOREIGN KEY (zone_id) REFERENCES Zone(id)
 );
 
 -- Table Customers
 CREATE TABLE Customers (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    type ENUM('wholesale', 'retail') NOT NULL,
     name VARCHAR(255) NOT NULL,
     phone VARCHAR(15) NOT NULL UNIQUE,
     address TEXT NOT NULL,
+    balance DECIMAL(10,2) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by VARCHAR(255),
@@ -106,33 +75,30 @@ CREATE TABLE Invoice (
     transaction_date DATETIME NOT NULL,
     quantity INT NOT NULL,
     weight INT NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
     payment DECIMAL(10,2) NOT NULL,
     total DECIMAL(10,2) NOT NULL,
     customers_id INT,
-    product_id INT,
     users_id INT,
     FOREIGN KEY (customers_id) REFERENCES Customers(id),
-    FOREIGN KEY (product_id) REFERENCES Products(id),
     FOREIGN KEY (users_id) REFERENCES Users(id)
 );
 
--- Table Number_of_bags (Có thể đổi tên thành NumberOfBags)
-CREATE TABLE Number_of_bags (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    type ENUM('yes', 'no') NOT NULL,
-    quantity INT NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
+-- Table Invoice detail
+CREATE TABLE Invoice_detail (
+	id INT AUTO_INCREMENT PRIMARY KEY,
     invoice_id INT,
-    FOREIGN KEY (invoice_id) REFERENCES Invoice(id) ON DELETE CASCADE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by VARCHAR(255),
-    note TEXT
+    product_id INT,
+	price DECIMAL(10,2) NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    quantity INT NOT NULL,
+    description TEXT,
+    FOREIGN KEY (invoice_id) REFERENCES Invoice(id),
+    FOREIGN KEY (product_id) REFERENCES Products(id)
 );
 
--- Table Debt
-CREATE TABLE Debt (
+-- Table Debt note
+CREATE TABLE Debt_note (
     id INT AUTO_INCREMENT PRIMARY KEY,
     type ENUM('debt', 'repay') NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
@@ -141,11 +107,12 @@ CREATE TABLE Debt (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(255),
-    status VARCHAR(255)
+    status VARCHAR(255),
+    description TEXT,
+    image VARCHAR(255) NOT NULL
 );
 
-ALTER TABLE Invoice ADD COLUMN product_name VARCHAR(255) NOT NULL;
-
+/*
 -- Insert data into Accounts
 INSERT INTO Accounts (username, password, email, role, created_by, updated_by, status) VALUES
 ('admin_user', 'adminpass', 'admin@example.com', 'admin', 'system', 'system', 'active'),
@@ -210,4 +177,4 @@ INSERT INTO Debt (type, amount, customers_id, created_by, status) VALUES
 ('debt', 500.00, 3, 'owner', 'pending'),
 ('repay', 200.00, 4, 'owner', 'completed');
 
-
+*/
