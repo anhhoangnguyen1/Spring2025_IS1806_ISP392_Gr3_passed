@@ -29,8 +29,8 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
         roleDAO = new RoleDAO();
     }
 
-    // authenticate the login avaiable in the database
-    public Users authenticate(String username, String password) {
+    // get username, password for authenticate
+    public Users getUser(String username, String password) {
         String sql = "SELECT Users.user_id, Users.username, Users.password, Role.name "
                 + "FROM Users "
                 + "JOIN Role ON Users.role_id = Role.role_id "
