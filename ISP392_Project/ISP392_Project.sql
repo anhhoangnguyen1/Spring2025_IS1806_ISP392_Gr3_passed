@@ -46,7 +46,7 @@ CREATE TABLE Products (
     isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
     deletedAt DATETIME,
     status VARCHAR(255),
-    FOREIGN KEY (zone_id) REFERENCES Zone(id)
+    FOREIGN KEY (zone_id) REFERENCES Zones(id)
 );
 
 -- Table Customers
@@ -112,69 +112,66 @@ CREATE TABLE Debt_note (
     image VARCHAR(255) NOT NULL
 );
 
-/*
--- Insert data into Accounts
-INSERT INTO Accounts (username, password, email, role, created_by, updated_by, status) VALUES
-('admin_user', 'adminpass', 'admin@example.com', 'admin', 'system', 'system', 'active'),
-('owner_user', 'ownerpass', 'owner@example.com', 'owner', 'system', 'system', 'active'),
-('staff_user1', 'staffpass1', 'staff1@example.com', 'staff', 'system', 'system', 'active'),
-('staff_user2', 'staffpass2', 'staff2@example.com', 'staff', 'system', 'system', 'active'),
-('staff_user3', 'staffpass3', 'staff3@example.com', 'staff', 'system', 'system', 'active');
+-- Insert into Users
+INSERT INTO Users (username, password, name, phone, address, gender, dob, role, email, status)
+VALUES 
+('admin1', 'password123', 'Nguyễn Văn A', '0987654321', '123 Đường Nguyễn Trãi, Hà Nội', 'Male', '1980-01-01', 'admin', 'admin1@example.com', 'Active'),
+('owner1', 'password123', 'Trần Thị B', '0987654322', '456 Đường Lê Lợi, TP.HCM', 'Female', '1985-02-02', 'owner', 'owner1@example.com', 'Active'),
+('staff1', 'password123', 'Lê Văn C', '0987654323', '789 Đường Trần Hưng Đạo, Đà Nẵng', 'Male', '1990-03-03', 'staff', 'staff1@example.com', 'Active'),
+('staff2', 'password123', 'Phạm Thị D', '0987654324', '101 Đường Hai Bà Trưng, Cần Thơ', 'Female', '1992-04-04', 'staff', 'staff2@example.com', 'Active');
 
--- Insert data into Users
-INSERT INTO Users (name, phone, address, gender, dob, account_id, status) VALUES
-('Admin Name', '1234567890', '123 Admin St', 'Male', '1980-01-01', 1, 'active'),
-('Owner Name', '1112223333', '789 Owner St', 'Male', '1985-04-04', 2, 'active'),
-('Staff One', '0987654321', '456 Staff St', 'Female', '1990-02-02', 3, 'active'),
-('Staff Two', '2223334444', '999 Staff St', 'Female', '1993-05-05', 4, 'active'),
-('Staff Three', '5556667777', '222 Staff St', 'Male', '1995-07-07', 5, 'active');
+-- Insert into Zones
+INSERT INTO Zones (name, capacity, remain_capacity, status)
+VALUES 
+('Kho Miền Bắc', 100, 90, 'Active'),
+('Kho Miền Trung', 200, 150, 'Active'),
+('Kho Miền Nam', 150, 130, 'Active');
 
--- Insert data into Products
-INSERT INTO Products (name, image, price, wholesale_price, retail_price, weight, location, description, status) VALUES
-('Product A', 'imageA.jpg', 50.00, 45.00, 55.00, 10, 'Shelf A', 'Description A', 'available'),
-('Product B', 'imageB.jpg', 30.00, 25.00, 35.00, 5, 'Shelf B', 'Description B', 'available'),
-('Product C', 'imageC.jpg', 40.00, 35.00, 45.00, 8, 'Shelf C', 'Description C', 'available'),
-('Product D', 'imageD.jpg', 60.00, 55.00, 65.00, 12, 'Shelf D', 'Description D', 'available');
+-- Insert into Products
+INSERT INTO Products (name, image, price, quantity, zone_id, description, status)
+VALUES 
+('Gạo ST25', 'st25.jpg', 30.00, 100, 1, 'Gạo thơm ngon đạt giải nhất thế giới', 'Available'),
+('Gạo Lài Sữa', 'laisua.jpg', 22.00, 80, 1, 'Gạo thơm mềm, xuất xứ từ An Giang', 'Available'),
+('Gạo Tám Thơm', 'tamthom.jpg', 18.00, 120, 2, 'Gạo thơm đặc sản Nam Định', 'Available'),
+('Gạo Nàng Hoa', 'nanghoa.jpg', 25.50, 50, 2, 'Gạo dẻo, thơm, không bạc bụng', 'Available'),
+('Gạo Japonica', 'japonica.jpg', 40.00, 60, 3, 'Gạo nhập khẩu từ Nhật Bản', 'Available'),
+('Gạo Hương Lài', 'huonglai.jpg', 21.00, 200, 1, 'Gạo đặc sản Sóc Trăng', 'Available'),
+('Gạo Tài Nguyên', 'tainguyen.jpg', 19.00, 90, 2, 'Gạo mềm, thơm, thích hợp nấu cơm tấm', 'Available'),
+('Gạo Đài Loan', 'dailoan.jpg', 28.00, 75, 3, 'Gạo ngon, dẻo, nhập khẩu Đài Loan', 'Available'),
+('Gạo ST24', 'st24.jpg', 27.50, 110, 1, 'Gạo thơm ngon gần giống ST25', 'Available'),
+('Gạo Hương Sen', 'huongsen.jpg', 23.50, 95, 3, 'Gạo thơm tự nhiên, dẻo', 'Available');
 
--- Insert data into Zone
-INSERT INTO Zone (name, capacity, remain_capacity, status) VALUES
-('Zone 1', 100, 80, 'active'),
-('Zone 2', 200, 150, 'active'),
-('Zone 3', 300, 250, 'active');
+-- Insert into Customers
+INSERT INTO Customers (name, phone, address, balance, created_by, status)
+VALUES 
+('Nguyễn Văn Minh', '0912345678', '123 Nguyễn Huệ, TP.HCM', 500.00, 'admin1', 'Active'),
+('Trần Thị Lan', '0912345679', '456 Quang Trung, Hà Nội', 600.75, 'admin1', 'Active'),
+('Lê Hoàng Nam', '0912345680', '789 Lê Lợi, Đà Nẵng', 700.00, 'admin1', 'Active'),
+('Phạm Văn Hùng', '0912345681', '101 Trần Hưng Đạo, Hải Phòng', 150.00, 'staff1', 'Active'),
+('Hoàng Thị Hạnh', '0912345682', '222 Hai Bà Trưng, Cần Thơ', 225.25, 'staff1', 'Active'),
+('Nguyễn Văn Khải', '0912345683', '333 Nguyễn Du, Bình Dương', 175.50, 'staff2', 'Active'),
+('Lê Thị Mai', '0912345684', '444 Phan Chu Trinh, Đồng Nai', 275.00, 'staff2', 'Active'),
+('Bùi Minh Tuấn', '0912345685', '555 Cách Mạng Tháng 8, Quảng Ninh', 190.00, 'admin1', 'Active'),
+('Đặng Hồng Phúc', '0912345686', '666 Nguyễn Đình Chiểu, Hà Nội', 320.60, 'staff1', 'Active'),
+('Nguyễn Văn Quang', '0912345687', '777 Điện Biên Phủ, TP.HCM', 450.80, 'staff2', 'Active'),
+('Trần Thị Thu', '0912345688', '888 Võ Văn Kiệt, Đà Nẵng', 280.90, 'admin1', 'Active'),
+('Lê Quang Hiếu', '0912345689', '999 Nguyễn Trãi, Hải Phòng', 510.00, 'staff1', 'Active'),
+('Hoàng Văn Sơn', '0912345690', '000 Lý Thường Kiệt, Cần Thơ', 160.50, 'staff2', 'Active'),
+('Võ Thị Ngọc', '0912345691', '111 Trần Phú, Bình Định', 145.30, 'staff1', 'Active'),
+('Nguyễn Văn Long', '0912345692', '222 Bạch Đằng, Tây Ninh', 195.75, 'staff2', 'Active');
 
--- Insert data into Product_Zone
-INSERT INTO Product_Zone (product_id, zone_id, quantity, status) VALUES
-(1, 1, 20, 'available'),
-(2, 2, 30, 'available'),
-(3, 3, 50, 'available'),
-(4, 1, 10, 'available');
+-- Insert into Debt_note
+INSERT INTO Debt_note (type, amount, customers_id, created_by, status, description, image)
+VALUES 
+('debt', 500.50, 1, 'staff1', 'Pending', 'Khách hàng nợ đơn hàng lớn', 'debt1.jpg'),
+('repay', 300.00, 2, 'staff2', 'Completed', 'Khách hàng đã thanh toán một phần', 'repay1.jpg'),
+('debt', 650.75, 3, 'staff1', 'Pending', 'Khách hàng mua gạo ST25 nhưng chưa thanh toán', 'debt2.jpg'),
+('repay', 500.00, 4, 'staff2', 'Completed', 'Khách hàng trả xong đơn hàng', 'repay2.jpg'),
+('debt', 800.00, 5, 'staff1', 'Pending', 'Khách hàng chưa trả tiền nhập kho', 'debt3.jpg'),
+('repay', 450.50, 6, 'staff2', 'Completed', 'Khách hàng thanh toán đủ', 'repay3.jpg'),
+('debt', 900.00, 7, 'staff1', 'Pending', 'Nợ lâu chưa thanh toán', 'debt4.jpg'),
+('repay', 600.00, 8, 'staff2', 'Completed', 'Đã thanh toán đơn hàng', 'repay4.jpg'),
+('debt', 1200.00, 9, 'staff1', 'Pending', 'Khách hàng đặt hàng số lượng lớn chưa thanh toán', 'debt5.jpg'),
+('repay', 750.00, 10, 'staff2', 'Completed', 'Khách hàng trả đủ', 'repay5.jpg');
 
--- Insert data into Customers
-INSERT INTO Customers (type, name, phone, address, created_by, updated_by, status) VALUES
-('wholesale', 'Wholesale Customer', '4445556666', 'Wholesale Address', 'admin', 'admin', 'active'),
-('retail', 'Retail Customer', '7778889999', 'Retail Address', 'staff', 'staff', 'active'),
-('wholesale', 'Big Buyer', '8889990000', 'Warehouse Address', 'owner', 'owner', 'active'),
-('retail', 'Small Shopper', '9990001111', 'Mall Address', 'staff', 'staff', 'active');
 
--- Insert data into Invoice
-INSERT INTO Invoice (name, type, transaction_date, quantity, weight, price, payment, total, customers_id, product_id, users_id, product_name) VALUES
-('Invoice 1', 'import', '2025-02-06 10:00:00', 10, 100, 500.00, 250.00, 750.00, 1, 1, 1, 'Product A'),
-('Invoice 2', 'export', '2025-02-06 11:00:00', 5, 50, 250.00, 125.00, 375.00, 2, 2, 2, 'Product B'),
-('Invoice 3', 'import', '2025-02-07 12:00:00', 15, 120, 600.00, 300.00, 900.00, 3, 3, 3, 'Product C'),
-('Invoice 4', 'export', '2025-02-08 14:00:00', 8, 80, 480.00, 240.00, 720.00, 4, 4, 4, 'Product D');
-
--- Insert data into Number_of_bags
-INSERT INTO Number_of_bags (type, quantity, price, invoice_id, created_by, note) VALUES
-('yes', 2, 20.00, 1, 'owner', 'Includes packaging'),
-('no', 1, 10.00, 2, 'owner', 'No packaging included'),
-('yes', 3, 30.00, 3, 'owner', 'Special wrapping'),
-('no', 2, 15.00, 4, 'owner', 'No additional packaging');
-
--- Insert data into Debt
-INSERT INTO Debt (type, amount, customers_id, created_by, status) VALUES
-('debt', 300.00, 1, 'owner', 'pending'),
-('repay', 150.00, 2, 'owner', 'completed'),
-('debt', 500.00, 3, 'owner', 'pending'),
-('repay', 200.00, 4, 'owner', 'completed');
-
-*/
