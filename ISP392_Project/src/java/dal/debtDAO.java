@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package DAO;
+package dal;
 
+import dal.DBContext;
 import java.sql.SQLException;
 import entity.DebtNote;
 import java.math.BigDecimal;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
  *
  * @author phamh
  */
-public class debtDAO extends DBcontext {
+public class debtDAO extends DBContext {
 
     public List<DebtNote> viewAllDebt(String command, int index) {
         List<DebtNote> list = new ArrayList<>();
@@ -30,34 +31,33 @@ public class debtDAO extends DBcontext {
         String sqlDebt = "SELECT id, type, amount,customers_id,image,description, created_at, updated_at, created_by, status "
                 + "FROM Debt_note ORDER BY " + command + " LIMIT 10 OFFSET ?";
 
-        try {
-            try (PreparedStatement stCustomers = connection.prepareStatement(sqlCustomers); ResultSet rs = stCustomers.executeQuery()) {
-                while (rs.next()) {
-                    customerMap.put(rs.getInt("id"), rs.getString("name"));
-                }
+        try (PreparedStatement stCustomers = connection.prepareStatement(sqlCustomers); ResultSet rs = stCustomers.executeQuery()) {
+            while (rs.next()) {
+                customerMap.put(rs.getInt("id"), rs.getString("name"));
             }
-            try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
-                st.setInt(1, (index - 1) * 10);
+        } catch (SQLException e) {
 
-                try (ResultSet rs = st.executeQuery()) {
-                    while (rs.next()) {
-                        int customerId = rs.getInt("customers_id");
-                        String customerName = customerMap.getOrDefault(customerId, "Unknown");
+        }
+        try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
+            st.setInt(1, (index - 1) * 10);
 
-                        DebtNote debts = new DebtNote(
-                                rs.getInt("id"),
-                                rs.getString("type"),
-                                rs.getBigDecimal("amount"),
-                                rs.getString("image"),
-                                rs.getString("description"),
-                                customerName,
-                                rs.getObject("created_at", LocalDateTime.class),
-                                rs.getObject("updated_at", LocalDateTime.class),
-                                rs.getString("created_by"),
-                                rs.getString("status")
-                        );
-                        list.add(debts);
-                    }
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    int customerId = rs.getInt("customers_id");
+                    String customerName = customerMap.getOrDefault(customerId, "Unknown");
+
+                    DebtNote debts = new DebtNote(
+                            rs.getInt("id"),
+                            rs.getString("type"),
+                            rs.getBigDecimal("amount"),
+                            rs.getString("image"),
+                            rs.getString("description"),
+                            customerName,
+                            rs.getObject("created_at", LocalDateTime.class),
+                            rs.getObject("updated_at", LocalDateTime.class),
+                            rs.getString("created_by"),
+                            rs.getString("status")
+                    );
                 }
             }
         } catch (SQLException e) {
@@ -84,57 +84,56 @@ public class debtDAO extends DBcontext {
     }
 
     public List<DebtNote> searchDebts(String name) {
-    List<DebtNote> list = new ArrayList<>();
-    Map<Integer, String> customerMap = new HashMap<>();
+        List<DebtNote> list = new ArrayList<>();
+        Map<Integer, String> customerMap = new HashMap<>();
 
-    String sqlCustomers = "SELECT id, name FROM customers WHERE name LIKE ?";
-    try (PreparedStatement stCustomers = connection.prepareStatement(sqlCustomers)) {
-        stCustomers.setString(1, "%" + name + "%");
-        try (ResultSet rs = stCustomers.executeQuery()) {
-            while (rs.next()) {
-                customerMap.put(rs.getInt("id"), rs.getString("name"));
+        String sqlCustomers = "SELECT id, name FROM customers WHERE name LIKE ?";
+        try (PreparedStatement stCustomers = connection.prepareStatement(sqlCustomers)) {
+            stCustomers.setString(1, "%" + name + "%");
+            try (ResultSet rs = stCustomers.executeQuery()) {
+                while (rs.next()) {
+                    customerMap.put(rs.getInt("id"), rs.getString("name"));
+                }
             }
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-
-    String placeholders = customerMap.keySet().stream().map(id -> "?").collect(Collectors.joining(","));
-    String sqlDebt = "SELECT * FROM Debt_note WHERE customer_id IN (" + placeholders + ")";
-
-    try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
-        int index = 1;
-        for (int customerId : customerMap.keySet()) {
-            st.setInt(index++, customerId);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-        try (ResultSet rs = st.executeQuery()) {
-            while (rs.next()) {
-                int customerId = rs.getInt("customer_id");
-                String customerName = customerMap.getOrDefault(customerId, "Unknown");
+        String placeholders = customerMap.keySet().stream().map(id -> "?").collect(Collectors.joining(","));
+        String sqlDebt = "SELECT * FROM Debt_note WHERE customer_id IN (" + placeholders + ")";
 
-                DebtNote debt = new DebtNote(
-                        rs.getInt("id"),
-                        rs.getString("type"),
-                        rs.getBigDecimal("amount"),
-                        rs.getString("image"),
-                        rs.getString("description"),
-                        customerName,
-                        rs.getObject("created_at", LocalDateTime.class),
-                        rs.getObject("updated_at", LocalDateTime.class),
-                        rs.getString("created_by"),
-                        rs.getString("status")
-                );
-                list.add(debt);
+        try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
+            int index = 1;
+            for (int customerId : customerMap.keySet()) {
+                st.setInt(index++, customerId);
             }
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    
-    return list;
-}
 
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    int customerId = rs.getInt("customer_id");
+                    String customerName = customerMap.getOrDefault(customerId, "Unknown");
+
+                    DebtNote debt = new DebtNote(
+                            rs.getInt("id"),
+                            rs.getString("type"),
+                            rs.getBigDecimal("amount"),
+                            rs.getString("image"),
+                            rs.getString("description"),
+                            customerName,
+                            rs.getObject("created_at", LocalDateTime.class),
+                            rs.getObject("updated_at", LocalDateTime.class),
+                            rs.getString("created_by"),
+                            rs.getString("status")
+                    );
+                    list.add(debt);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 
     public void insertDebt(DebtNote debts) {
         String findCustomerIdSQL = "SELECT id FROM Customers WHERE name = ?";
@@ -142,7 +141,7 @@ public class debtDAO extends DBcontext {
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement stFindCustomer = connection.prepareStatement(findCustomerIdSQL)) {
-            stFindCustomer.setString(1, debts.getCustomerName());
+            stFindCustomer.setString(1, debts.getCustomer());
             try (ResultSet rs = stFindCustomer.executeQuery()) {
                 if (rs.next()) {
                     int customerId = rs.getInt("id");
@@ -167,17 +166,17 @@ public class debtDAO extends DBcontext {
 
     public static void main(String[] args) {
         debtDAO dao = new debtDAO();
-DebtNote newDebt = new DebtNote();
-    newDebt.setCustomerName("Phạm Văn D");
-    // Change the type to one of the allowed values ('debt' or 'repay')
-    newDebt.setType("debt");  
-    newDebt.setAmount(new BigDecimal("1"));
-    newDebt.setImage("path/to/image.jpg");
-    newDebt.setDescription("Loan for business expansion");
-    newDebt.setCreatedAt(LocalDateTime.now());
-    newDebt.setUpdatedAt(null);
-    newDebt.setCreatedBy("Admin");
-    newDebt.setStatus("Pending");
+        DebtNote newDebt = new DebtNote();
+        newDebt.setCustomer("Pham văn");
+        // Change the type to one of the allowed values ('debt' or 'repay')
+        newDebt.setType("debt");
+        newDebt.setAmount(new BigDecimal("1"));
+        newDebt.setImage("path/to/image.jpg");
+        newDebt.setDescription("Loan for business expansion");
+        newDebt.setCreatedAt(LocalDateTime.now());
+        newDebt.setUpdatedAt(null);
+        newDebt.setCreatedBy("Admin");
+        newDebt.setStatus("Pending");
         dao.insertDebt(newDebt);
         String command = null;
         List<DebtNote> debts = dao.viewAllDebt(command, 1);

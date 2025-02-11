@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-package controller;
+package controller.product;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import entity.Products;
-import DAO.productsDAO;
+import dal.productsDAO;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
 import java.io.File;
@@ -21,7 +21,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Date;
+import java.sql.Date;
 import java.util.List;
 
 /**
@@ -83,7 +83,7 @@ public class controllerProducts extends HttpServlet {
             if (notification != null && !notification.isEmpty()) {
                 request.setAttribute("Notification", notification);
             }
-            request.getRequestDispatcher("webapp/products/products.jsp").forward(request, response);
+            request.getRequestDispatcher("products/products.jsp").forward(request, response);
         }
         if (service.equals("searchProducts")) {
             String name = request.getParameter("browser");
@@ -164,7 +164,7 @@ public class controllerProducts extends HttpServlet {
         String description = request.getParameter("description");
         String status = request.getParameter("status");
 
-        Date updatedAt = new java.sql.Timestamp(System.currentTimeMillis());
+        Date updatedAt = new java.sql.Date(System.currentTimeMillis());
         boolean isDelete = false;
         Date deletedAt = null;
         Date createdAt = new java.sql.Date(System.currentTimeMillis());
@@ -239,7 +239,7 @@ public class controllerProducts extends HttpServlet {
             String isDeleteRaw = request.getParameter("isDelete");
             boolean isDelete = Boolean.parseBoolean(isDeleteRaw);
 
-            Products product = new Products(0, name, imageFileName, price,quantity, zone_id, description, new Date(), new Date(), isDelete, null, status);
+            Products product = new Products(0, name, imageFileName, price,quantity, zone_id, description, new java.sql.Date(System.currentTimeMillis()), new java.sql.Date(System.currentTimeMillis()), isDelete, null, status);
             products.insertProduct(product);
             request.getRequestDispatcher("Products?service=products").forward(request, response);
         }

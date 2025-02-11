@@ -17,7 +17,7 @@
     <link
       rel="stylesheet"
       type="text/css"
-      href="<%= request.getContextPath() %>/css/style.css"
+      href="<%= request.getContextPath() %>/product/css/style.css"
     />
     <link
       rel="stylesheet"
@@ -203,7 +203,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script
       type="text/javascript"
-      src="<%= request.getContextPath() %>/css/script.js"
+      src="<%= request.getContextPath() %>/product/css/script.js"
     ></script>
   </body>
 </html>

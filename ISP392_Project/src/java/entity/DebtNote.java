@@ -1,6 +1,7 @@
 package entity;
 
-import java.sql.Date;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,17 +15,17 @@ import lombok.ToString;
 @NoArgsConstructor
 
 public class DebtNote {
+
     private int id;
     private String type;
-    private double amount;
-    private Customers customer;
-    private Date createdAt;
-    private Date updatedAt;
+    private BigDecimal amount;
+    private String image;
+    private String description;
+    private String customer;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String createdBy;
     private String status;
-    private String description;
-    private String image;
-
-
+    
     
 }
