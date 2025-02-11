@@ -1,6 +1,5 @@
-CREATE SCHEMA ISP392_Project2;
-USE ISP392_Project2;
-
+CREATE SCHEMA ISP392_Project;
+USE ISP392_Project;
 -- Table Users
 CREATE TABLE Users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -116,10 +115,10 @@ CREATE TABLE Debt_note (
 -- Insert into Users
 INSERT INTO Users (username, password, name, phone, address, gender, dob, role, email, status)
 VALUES 
-('admin', 'password123', 'Nguyễn Văn A', '0987654321', '123 Đường Nguyễn Trãi, Hà Nội', 'Male', '1980-01-01', 'admin', 'hoangnahe181458@fpt.edu.vn', 'Active'),
-('owner', 'password123', 'Trần Thị B', '0987654322', '456 Đường Lê Lợi, TP.HCM', 'Female', '1985-02-02', 'owner', 'phanngocmai2411@gmail.con', 'Active'),
-('staff1', 'password123', 'Lê Văn C', '0987654323', '789 Đường Trần Hưng Đạo, Đà Nẵng', 'Male', '1990-03-03', 'staff', 'phuonglinh2611.cv@gmail.com', 'Active'),
-('staff2', 'password123', 'Phạm Thị D', '0987654324', '101 Đường Hai Bà Trưng, Cần Thơ', 'Female', '1992-04-04', 'staff', 'anhhoangyh3@gmail.com', 'Active');
+('admin1', 'password123', 'Nguyễn Văn A', '0987654321', '123 Đường Nguyễn Trãi, Hà Nội', 'Male', '1980-01-01', 'admin', 'admin1@example.com', 'Active'),
+('owner1', 'password123', 'Trần Thị B', '0987654322', '456 Đường Lê Lợi, TP.HCM', 'Female', '1985-02-02', 'owner', 'owner1@example.com', 'Active'),
+('staff1', 'password123', 'Lê Văn C', '0987654323', '789 Đường Trần Hưng Đạo, Đà Nẵng', 'Male', '1990-03-03', 'staff', 'staff1@example.com', 'Active'),
+('staff2', 'password123', 'Phạm Thị D', '0987654324', '101 Đường Hai Bà Trưng, Cần Thơ', 'Female', '1992-04-04', 'staff', 'staff2@example.com', 'Active');
 
 -- Insert into Zones
 INSERT INTO Zones (name, capacity, remain_capacity, status)
@@ -128,7 +127,7 @@ VALUES
 ('Kho Miền Trung', 200, 150, 'Active'),
 ('Kho Miền Nam', 150, 130, 'Active');
 
--- Insert into Products
+-- Insert into Products (10 values with real rice names)
 INSERT INTO Products (name, image, price, quantity, zone_id, description, status)
 VALUES 
 ('Gạo ST25', 'st25.jpg', 30.00, 100, 1, 'Gạo thơm ngon đạt giải nhất thế giới', 'Available'),
@@ -142,7 +141,7 @@ VALUES
 ('Gạo ST24', 'st24.jpg', 27.50, 110, 1, 'Gạo thơm ngon gần giống ST25', 'Available'),
 ('Gạo Hương Sen', 'huongsen.jpg', 23.50, 95, 3, 'Gạo thơm tự nhiên, dẻo', 'Available');
 
--- Insert into Customers
+-- Insert into Customers (15 values with real names)
 INSERT INTO Customers (name, phone, address, balance, created_by, status)
 VALUES 
 ('Nguyễn Văn Minh', '0912345678', '123 Nguyễn Huệ, TP.HCM', 500.00, 'admin1', 'Active'),
@@ -161,7 +160,7 @@ VALUES
 ('Võ Thị Ngọc', '0912345691', '111 Trần Phú, Bình Định', 145.30, 'staff1', 'Active'),
 ('Nguyễn Văn Long', '0912345692', '222 Bạch Đằng, Tây Ninh', 195.75, 'staff2', 'Active');
 
--- Insert into Debt_note
+-- Insert into Debt_note (10 values with real names)
 INSERT INTO Debt_note (type, amount, customers_id, created_by, status, description, image)
 VALUES 
 ('debt', 500.50, 1, 'staff1', 'Pending', 'Khách hàng nợ đơn hàng lớn', 'debt1.jpg'),

@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package DAO;
+package dal;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,7 +15,7 @@ import entity.Products;
  *
  * @author phamh
  */
-public class productsDAO extends DBcontext {
+public class productsDAO extends DBContext {
 public List<Products> viewAllProducts(String command, int index) {
     List<Products> list = new ArrayList<>();
     
@@ -37,10 +37,10 @@ public List<Products> viewAllProducts(String command, int index) {
                         rs.getInt("quantity"),
                         rs.getInt("zone_id"),
                         rs.getString("description"),
-                        rs.getTimestamp("created_at"),
-                        rs.getTimestamp("updated_at"),
+                        rs.getDate("created_at"),
+                        rs.getDate("updated_at"),
                         rs.getBoolean("isDeleted"),
-                        rs.getTimestamp("deletedAt"),
+                        rs.getDate("deletedAt"),
                         rs.getString("status")
                 );
                 list.add(product);
@@ -83,10 +83,10 @@ public List<Products> viewAllProducts(String command, int index) {
                         rs.getInt("quantity"),                
                         rs.getInt("zone_id"),      
                         rs.getString("description"),        
-                        rs.getTimestamp("created_at"),   
-                        rs.getTimestamp("updated_at"),    
+                        rs.getDate("created_at"),   
+                        rs.getDate("updated_at"),    
                         rs.getBoolean("isDelete"),         
-                        rs.getTimestamp("deletedAt"),       
+                        rs.getDate("deletedAt"),       
                         rs.getString("status") 
                 );
                 productsList.add(products);
@@ -152,14 +152,14 @@ public List<Products> viewAllProducts(String command, int index) {
         // You don't need to set 'created_at' here since it's handled by the database (unless needed explicitly)
         // st.setDate(9, new java.sql.Date(products.getCreatedAt().getTime())); // Removed
 
-        st.setBoolean(7, products.isIsDelete());  // Adjusted index since created_at was removed
+        st.setBoolean(7, products.isDeleted());  // Adjusted index since created_at was removed
         if (products.getDeletedAt() != null) {
             st.setDate(8, new java.sql.Date(products.getDeletedAt().getTime()));
         } else {
             st.setNull(9, java.sql.Types.DATE);
         }
         st.setString(10, products.getStatus());
-        st.setInt(11, products.getProductId()); // Adjusted index
+        st.setInt(11, products.getId()); // Adjusted index
 
         st.executeUpdate();
     } catch (SQLException e) {

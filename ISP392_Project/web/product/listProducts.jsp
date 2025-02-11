@@ -79,9 +79,9 @@
                         <c:forEach var="product" items="${list}">
                             <tr>
                                 <td class="checkbox-column" style="display: none; width: 200px">
-                                    <input type="checkbox" name="selectedProducts" value="${product.getProductId()}" class="product-checkbox" />
+                                    <input type="checkbox" name="selectedProducts" value="${product.getId()}" class="product-checkbox" />
                                 </td>
-                                <td>${product.getProductId()}</td>
+                                <td>${product.getId()}</td>
                                 <td class="bold-row">${product.getName()}</td>
                                 <td>
                                     <img src="images/${product.getImage()}" style="width: 100px; height: 100px; object-fit: cover;" alt="Product Image" />
@@ -99,13 +99,13 @@
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <a class="btn btn-outline-info" href="Products?service=getProductById&product_id=${product.getProductId()}">
+                                        <a class="btn btn-outline-info" href="Products?service=getProductById&product_id=${product.getId()}">
                                             <i class="fas fa-info-circle"></i>
                                         </a>
-                                        <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#editProductModal${product.getProductId()}">
+                                        <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#editProductModal${product.getId()}">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <a class="btn btn-outline-danger" href="Products?service=deleteProduct&id=${product.getProductId()}" onclick="return doDelete(${product.getProductId()})">
+                                        <a class="btn btn-outline-danger" href="Products?service=deleteProduct&id=${product.getId()}" onclick="return doDelete(${product.getId()})">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
