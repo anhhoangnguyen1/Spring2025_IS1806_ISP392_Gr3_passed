@@ -117,8 +117,8 @@ CREATE TABLE Debt_note (
 INSERT INTO Users (username, password, name, phone, address, gender, dob, role, email, status)
 VALUES 
 ('admin', 'password123', 'Nguyễn Văn A', '0987654321', '123 Đường Nguyễn Trãi, Hà Nội', 'Male', '1980-01-01', 'admin', 'hoangnahe181458@fpt.edu.vn', 'Active'),
-('owner', 'password123', 'Trần Thị B', '0987654322', '456 Đường Lê Lợi, TP.HCM', 'Female', '1985-02-02', 'owner', 'anhhoangyh1@gmail.com', 'Active'),
-('staff1', 'password123', 'Lê Văn C', '0987654323', '789 Đường Trần Hưng Đạo, Đà Nẵng', 'Male', '1990-03-03', 'staff', 'anhhoangyh2@gmail.com', 'Active'),
+('owner', 'password123', 'Trần Thị B', '0987654322', '456 Đường Lê Lợi, TP.HCM', 'Female', '1985-02-02', 'owner', 'phanngocmai2411@gmail.con', 'Active'),
+('staff1', 'password123', 'Lê Văn C', '0987654323', '789 Đường Trần Hưng Đạo, Đà Nẵng', 'Male', '1990-03-03', 'staff', 'phuonglinh2611.cv@gmail.com', 'Active'),
 ('staff2', 'password123', 'Phạm Thị D', '0987654324', '101 Đường Hai Bà Trưng, Cần Thơ', 'Female', '1992-04-04', 'staff', 'anhhoangyh3@gmail.com', 'Active');
 
 -- Insert into Zones

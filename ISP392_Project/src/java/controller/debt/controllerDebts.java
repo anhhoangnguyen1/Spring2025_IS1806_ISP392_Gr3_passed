@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import DAO.debtDAO;
-import entity.Debt;
+import entity.DebtNote;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
@@ -92,7 +92,7 @@ public class controllerDebts extends HttpServlet {
             if (count % 10 != 0) {
                 endPage++;
             }
-            List<Debt> listProducts = debts.viewAllDebt(command, index);
+            List<DebtNote> listProducts = debts.viewAllDebt(command, index);
             request.setAttribute("list", listProducts);
             request.setAttribute("endPage", endPage);
             request.setAttribute("index", index);
@@ -105,7 +105,7 @@ public class controllerDebts extends HttpServlet {
         if (service.equals("searchDebts")) {
             String name = request.getParameter("browser");
             try {
-                List<Debt> list = debts.searchDebts(name);
+                List<DebtNote> list = debts.searchDebts(name);
                 request.setAttribute("list", list);
                 request.getRequestDispatcher("webapp/debts/debts.jsp").forward(request, response);
             } catch (NumberFormatException e) {
@@ -164,8 +164,8 @@ public class controllerDebts extends HttpServlet {
             LocalDateTime createdAt = LocalDateTime.now();  // Current timestamp
             LocalDateTime updatedAt = LocalDateTime.now();  // Current timestamp
 
-            // Create Debt object
-            Debt debt = new Debt(customerName, type, amount, imageFileName, description, createdAt, updatedAt, createdBy, status);
+            // Create DebtNote object
+            DebtNote debt = new DebtNote(customerName, type, amount, imageFileName, description, createdAt, updatedAt, createdBy, status);
     debts.insertDebt(debt);
     response.sendRedirect("Debts?service=debts");
 }
