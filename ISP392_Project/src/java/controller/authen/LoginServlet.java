@@ -43,13 +43,13 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        Users login = AccountDAO.INSTANCE.authenticate(username, password);
+        Users login = AccountDAO.INSTANCE.getUser(username, password);
 
         //if authenticate success 
         if (login != null) {
             HttpSession session = request.getSession();
             session.setAttribute("username", login.getUsername()); 
-            session.setAttribute("role", login.getRole().getName()); 
+            session.setAttribute("role", login.getRole()); 
             session.setMaxInactiveInterval(30 * 60); 
 
             Cookie userCookie = new Cookie("username", login.getUsername());

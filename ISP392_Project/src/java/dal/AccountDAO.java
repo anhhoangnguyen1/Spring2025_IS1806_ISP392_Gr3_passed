@@ -31,9 +31,8 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
 
     // get username, password for authenticate
     public Users getUser(String username, String password) {
-        String sql = "SELECT Users.user_id, Users.username, Users.password, Role.name "
+        String sql = "SELECT Users.id, Users.username, Users.password, Users.role "
                 + "FROM Users "
-                + "JOIN Role ON Users.role_id = Role.role_id "
                 + "WHERE Users.username = ? AND Users.password = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, username);
@@ -41,13 +40,10 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Users login = new Users();
-                    login.setUserId(rs.getInt("user_id"));
+                    login.setUserId(rs.getInt("id"));
                     login.setUsername(rs.getString("username"));
                     login.setPassword(rs.getString("password"));
-
-                    Role role = new Role();
-                    role.setName(rs.getString("name"));
-                    login.setRole(role);
+                    login.setRole("role");
 
                     return login;
                 }
@@ -63,7 +59,6 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
                 + "u.created_at, u.updated_at, u.updated_by, u.created_by, u.is_delete, "
                 + "u.deleted_by, u.deleted_at, u.status, r.role_id, r.name "
                 + "FROM Users u "
-                + "JOIN Role r ON u.role_id = r.role_id "
                 + "WHERE u.user_id = ? AND u.is_delete = 0";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -75,7 +70,7 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
                     role.setName(rs.getString("name"));
                     return new Users(
                             rs.getInt("user_id"),
-                            role,
+                            rs.getRole("role"),
                             rs.getString("username"),
                             rs.getString("password"),
                             rs.getString("email"),
@@ -162,12 +157,13 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
     @Override
     public Users getFromResultSet(ResultSet resultSet) throws SQLException {
 
-        //find role
-        Role role = new Role();
-        role.setRoleId(resultSet.getInt("role_id"));
+//        //find role
+//        Role role = new Role();
+//        role.setRoleId(resultSet.getInt("role_id"));
 
         Users user = new Users();
         user.setUserId(resultSet.getInt("user_id"));
+        user.setRoleId(resultSet.getString("role"));
 
         user.setRole(roleDAO.findById(role));
         user.setUsername(resultSet.getString("username"));
@@ -228,14 +224,14 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
     }
 
     public static void main(String[] args) {
-//        AccountDAO dao = new AccountDAO();
-//        
-//        Users user1 = dao.authenticate("admin", "123456");
-//        if (user1 != null) {
-//            System.out.println("Đăng nhập thành công: " + user1.getUsername() + " - Role: " + user1.getRole().getName());
-//        } else {
-//            System.out.println("Đăng nhập thất bại (admin, 123456)");
-//        }
+        AccountDAO dao = new AccountDAO();
+        
+        Users user1 = dao.getUser("admin1", "password123");
+        if (user1 != null) {
+            System.out.println("Đăng nhập thành công: " + user1.getUsername() + " - Role: " + user1.getRole());
+        } else {
+            System.out.println("Đăng nhập thất bại (admin, 123456)");
+        }
 
     }
 }
