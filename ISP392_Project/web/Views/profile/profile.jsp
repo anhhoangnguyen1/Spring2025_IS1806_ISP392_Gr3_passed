@@ -3,12 +3,10 @@
     Created on : Feb 4, 2025, 1:51:14 PM
     Author     : THC
 --%>
-
 <%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@page import="entity.Users"%>
-<%@page import="entity.Role"%>
-<jsp:useBean id="user" class="entity.Users" scope="request"/>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -40,9 +38,9 @@
             .avatar {
                 width: 150px;
                 height: 150px;
-                border-radius: 50%; /* Bo tròn avatar */
-                object-fit: cover; /* Đảm bảo hình ảnh vừa với khung */
-                border: 3px solid #007BFF; /* Viền màu xanh */
+                border-radius: 50%;
+                object-fit: cover;
+                border: 3px solid #007BFF;
             }
             .user-name {
                 font-size: 20px;
@@ -90,18 +88,19 @@
     <body>
         <div class="profile-container">
             <div class="avatar-section">
-                <img src="<%= user.getAvatar() != null && !user.getAvatar().isEmpty() ? user.getAvatar() : "default-avatar.png" %>" 
+                <img src="<%= request.getContextPath() %>/avatars/<%= user.getUserId() %>.png" 
+                     onerror="this.onerror=null; this.src='<%= request.getContextPath() %>/avatars/default-avatar.png';"
                      alt="User Avatar" class="avatar">
-                <div class="user-name"><%= user.getUsername() %></div>
-                <div class="username">@<%= user.getUsername() %></div>
+                <div class="user-name"><%= user.getName() != null ? user.getName() : "No Name" %></div>
+                <div class="username">@<%= user.getUsername() != null ? user.getUsername() : "unknown_user" %></div>
             </div>
             <div class="user-info">
                 <h2>User Profile</h2>
                 <p class="info"><strong>User ID:</strong> <%= user.getUserId() %></p>
-                <p class="info"><strong>Role:</strong> <%= user.getRole() != null ? user.getRole().getName() : "No Role Assigned" %></p>
-                <p class="info"><strong>Email:</strong> <%= user.getEmail() %></p>
-                <p class="info"><strong>Phone:</strong> <%= user.getPhone() %></p>
-                <p class="info"><strong>Status:</strong> <%= user.getStatus() %></p>
+                <p class="info"><strong>Role:</strong> <%= user.getRole() != null ? user.getRole() : "No Role Assigned" %></p>
+                <p class="info"><strong>Email:</strong> <%= user.getEmail() != null ? user.getEmail() : "No Email" %></p>
+                <p class="info"><strong>Phone:</strong> <%= user.getPhone() != null ? user.getPhone() : "No Phone" %></p>
+                <p class="info"><strong>Status:</strong> <%= user.getStatus() != null ? user.getStatus() : "No Status" %></p>
                 <div class="button-container">
                     <a href="editProfile.jsp" class="button">Edit Profile</a>
                     <a href="<%= request.getContextPath() %>/dashboard/dashboard.jsp" class="button back-button">Back</a>

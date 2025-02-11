@@ -3,13 +3,10 @@
     Created on : Feb 4, 2025, 2:15:00 PM
     Author     : THC
 --%>
-
 <%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@page import="entity.Users"%>
-<jsp:useBean id="user" class="entity.Users" scope="request"/>
 
-<!DOCTYPE html>
 <!DOCTYPE html>
 <html>
     <head>
@@ -89,32 +86,30 @@
     <body>
         <div class="profile-container">
             <h2>Edit Profile</h2>
-            <img src="<%= user.getAvatar() != null && !user.getAvatar().isEmpty() ? user.getAvatar() : "default-avatar.png" %>" 
+            <img src="${user.avatar}" 
+                 onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/avatars/default-avatar.png';"
                  alt="User Avatar" class="avatar">
-            <form action="EditProfileServlet" method="post" enctype="multipart/form-data">
+            <form action="<%= request.getContextPath() %>/EditProfileServlet" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="avatar">Change Avatar:</label>
                     <input type="file" id="avatar" name="avatar" accept="image/*">
                 </div>
                 <div class="form-group">
-                    <label for="username">Name:</label>
-                    <input type="text" id="username" name="username" value="<%= user.getUsername() %>" required>
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" value="${user.name}" required>
                 </div>
                 <div class="form-group">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" value="<%= user.getEmail() %>" required>
+                    <input type="email" id="email" name="email" value="${user.email}" required>
                 </div>
                 <div class="form-group">
                     <label for="phone">Phone:</label>
-                    <input type="text" id="phone" name="phone" value="<%= user.getPhone() %>" required>
+                    <input type="text" id="phone" name="phone" value="${user.phone}" required>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" value="<%= user.getPassword() %>" required>
-                </div>
+               
                 <div class="button-container">
                     <button type="submit" class="button save-button">Save Changes</button>
-                    <a href="<%= request.getContextPath() %>/Views/profile.jsp" class="button back-button">Back</a>
+                    <a href="<%= request.getContextPath() %>/profile" class="button back-button">Back</a>
                 </div>
             </form>
         </div>

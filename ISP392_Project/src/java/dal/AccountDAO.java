@@ -54,63 +54,7 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
         return null;
     }
 
-    public Users getUserById(int userId) {
-        String sql = "SELECT u.user_id, u.username, u.password, u.email, u.phone, "
-                + "u.created_at, u.updated_at, u.updated_by, u.created_by, u.is_delete, "
-                + "u.deleted_by, u.deleted_at, u.status, r.role_id, r.name "
-                + "FROM Users u "
-                + "WHERE u.user_id = ? AND u.is_delete = 0";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Role role = new Role();
-                    role.setRoleId(rs.getInt("role_id"));
-                    role.setName(rs.getString("name"));
-                    return new Users(
-                            rs.getInt("user_id"),
-                            rs.getRole("role"),
-                            rs.getString("username"),
-                            rs.getString("password"),
-                            rs.getString("email"),
-                            rs.getString("phone"),
-                            rs.getString("avatar"),
-                            rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null,
-                            rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null,
-                            rs.getString("updated_by"),
-                            rs.getString("created_by"),
-                            rs.getBoolean("is_delete"),
-                            rs.getString("deleted_by"),
-                            rs.getTimestamp("deleted_at") != null ? rs.getTimestamp("deleted_at").toLocalDateTime() : null,
-                            rs.getString("status"),
-                            null // Staff list can be loaded separately if needed
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error retrieving user by ID: {0}", e.getMessage());
-        }
-        return null;
-    }
-
-        public boolean updateUser(Users user) {
-    String sql = "UPDATE Users SET username = ?, email = ?, phone = ?, password = ?, avatar = ?, status = ?, updated_at = CURRENT_TIMESTAMP, updated_by = ? WHERE user_id = ? AND is_delete = 0";
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setString(1, user.getUsername());
-        ps.setString(2, user.getEmail());
-        ps.setString(3, user.getPhone());
-        ps.setString(4, user.getPassword());
-        ps.setString(5, user.getAvatar()); 
-        ps.setString(6, user.getStatus());
-        ps.setString(7, user.getUpdatedBy());
-        ps.setInt(8, user.getUserId());
-        return ps.executeUpdate() > 0;
-    } catch (SQLException e) {
-        LOGGER.log(Level.SEVERE, "Error updating user: {0}", e.getMessage());
-    }
-    return false;
-}
 
     @Override
     public List<Users> findAll() {
