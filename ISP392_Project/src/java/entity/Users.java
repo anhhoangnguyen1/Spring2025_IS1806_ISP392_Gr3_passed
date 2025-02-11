@@ -2,6 +2,7 @@ package entity;
 
 import entity.*;
 import java.time.LocalDateTime;
+import java.sql.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,21 +18,20 @@ import lombok.ToString;
 public class Users {
 
     private int userId;
-    private String role;
     private String username;
     private String password;
-    private String email;
+    private String name;
     private String phone;
-    private String avatar;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private String updatedBy;
-    private String createdBy;
-    private boolean isDelete;
-    private String deletedBy;
-    private LocalDateTime deletedAt;
+    private String address;
+    private String gender;
+    private Date dob;
+    private String role;
+    private String email;
+    private Date createdAt;
+    private Date updatedAt;
     private String status;
-    private List<Staffs> staffs;
+    private Date deletedAt;
+    private List<Invoice> invoices;
 
 //    // Getters and Setters
 //    public Users() {

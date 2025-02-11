@@ -5,7 +5,7 @@
 package DAO;
 
 import java.sql.SQLException;
-import entity.Debt;
+import entity.DebtNote;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
  */
 public class debtDAO extends DBcontext {
 
-    public List<Debt> viewAllDebt(String command, int index) {
-        List<Debt> list = new ArrayList<>();
+    public List<DebtNote> viewAllDebt(String command, int index) {
+        List<DebtNote> list = new ArrayList<>();
         Map<Integer, String> customerMap = new HashMap<>();
 
         String sqlCustomers = "SELECT id, name FROM Customers";
@@ -44,7 +44,7 @@ public class debtDAO extends DBcontext {
                         int customerId = rs.getInt("customers_id");
                         String customerName = customerMap.getOrDefault(customerId, "Unknown");
 
-                        Debt debts = new Debt(
+                        DebtNote debts = new DebtNote(
                                 rs.getInt("id"),
                                 rs.getString("type"),
                                 rs.getBigDecimal("amount"),
@@ -83,8 +83,8 @@ public class debtDAO extends DBcontext {
         return 0;
     }
 
-    public List<Debt> searchDebts(String name) {
-    List<Debt> list = new ArrayList<>();
+    public List<DebtNote> searchDebts(String name) {
+    List<DebtNote> list = new ArrayList<>();
     Map<Integer, String> customerMap = new HashMap<>();
 
     String sqlCustomers = "SELECT id, name FROM customers WHERE name LIKE ?";
@@ -113,7 +113,7 @@ public class debtDAO extends DBcontext {
                 int customerId = rs.getInt("customer_id");
                 String customerName = customerMap.getOrDefault(customerId, "Unknown");
 
-                Debt debt = new Debt(
+                DebtNote debt = new DebtNote(
                         rs.getInt("id"),
                         rs.getString("type"),
                         rs.getBigDecimal("amount"),
@@ -136,7 +136,7 @@ public class debtDAO extends DBcontext {
 }
 
 
-    public void insertDebt(Debt debts) {
+    public void insertDebt(DebtNote debts) {
         String findCustomerIdSQL = "SELECT id FROM Customers WHERE name = ?";
         String insertDebtSQL = "INSERT INTO Debt_note (type, amount, customers_id,image,description, created_at, updated_at, created_by, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -167,7 +167,7 @@ public class debtDAO extends DBcontext {
 
     public static void main(String[] args) {
         debtDAO dao = new debtDAO();
-Debt newDebt = new Debt();
+DebtNote newDebt = new DebtNote();
     newDebt.setCustomerName("Phạm Văn D");
     // Change the type to one of the allowed values ('debt' or 'repay')
     newDebt.setType("debt");  
@@ -180,8 +180,8 @@ Debt newDebt = new Debt();
     newDebt.setStatus("Pending");
         dao.insertDebt(newDebt);
         String command = null;
-        List<Debt> debts = dao.viewAllDebt(command, 1);
-        for (Debt debt : debts) {
+        List<DebtNote> debts = dao.viewAllDebt(command, 1);
+        for (DebtNote debt : debts) {
             System.out.println(debt);
         }
 

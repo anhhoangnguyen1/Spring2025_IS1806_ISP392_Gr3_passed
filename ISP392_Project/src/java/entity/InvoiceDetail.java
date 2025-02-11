@@ -1,6 +1,11 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package entity;
 
 import entity.*;
+import java.time.LocalDateTime;
 import java.sql.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -16,19 +21,12 @@ import lombok.ToString;
 @NoArgsConstructor
 
 
-public class Products {
+public class InvoiceDetail {
     private int id;
-    private String name;
-    private String image;
+    private Invoice invoice;
+    private Products product;
     private double price;
+    private double unitPrice;
     private int quantity;
-    private int zone_id;
     private String description;
-    private Date createdAt;
-    private Date updatedAt;
-    private boolean isDeleted;
-    private Date deletedAt;
-    private String status;
-    private List<InvoiceDetail> invoiceDetails;
-
 }

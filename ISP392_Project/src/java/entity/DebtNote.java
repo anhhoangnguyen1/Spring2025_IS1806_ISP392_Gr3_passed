@@ -1,7 +1,6 @@
 package entity;
 
 import java.sql.Date;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,22 +13,18 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class Customers {
+public class DebtNote {
     private int id;
-    private String name;
-    private String phone;
-    private String address;
-    private double balance;
+    private String type;
+    private double amount;
+    private Customers customer;
     private Date createdAt;
     private Date updatedAt;
-    private String updatedBy;
     private String createdBy;
-    private boolean isDeleted;
-    private String deletedBy;
-    private Date deletedAt;
     private String status;
-    private List<Invoice> invoices;
-    private List<DebtNote> debtNotes;
+    private String description;
+    private String image;
 
 
+    
 }
