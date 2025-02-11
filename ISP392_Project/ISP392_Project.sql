@@ -1,5 +1,6 @@
 CREATE SCHEMA ISP392_Project2;
 USE ISP392_Project2;
+
 -- Table Users
 CREATE TABLE Users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -46,7 +47,7 @@ CREATE TABLE Products (
     isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
     deletedAt DATETIME,
     status VARCHAR(255),
-    FOREIGN KEY (zone_id) REFERENCES Zone(id)
+    FOREIGN KEY (zone_id) REFERENCES Zones(id)
 );
 
 -- Table Customers
