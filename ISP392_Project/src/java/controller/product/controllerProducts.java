@@ -90,7 +90,7 @@ public class controllerProducts extends HttpServlet {
             try {
                 List<Products> list = products.searchProducts(name);
                 request.setAttribute("list", list);
-                request.getRequestDispatcher("webapp/products/products.jsp").forward(request, response);
+                request.getRequestDispatcher("Views/product/products.jsp").forward(request, response);
             } catch (NumberFormatException e) {
             }
         }
@@ -101,7 +101,7 @@ public class controllerProducts extends HttpServlet {
                 id = Integer.parseInt(id_raw);
                 List<Products> product = products.getProductById(id);
                 request.setAttribute("list", product);
-                request.getRequestDispatcher("webapp/products/detailProduct.jsp").forward(request, response);
+                request.getRequestDispatcher("Views/product/detailProduct.jsp").forward(request, response);
             } catch (NumberFormatException e) {
             }
         }
@@ -109,7 +109,7 @@ public class controllerProducts extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("product_id"));
             List<Products> list = products.getProductById(id);
             request.setAttribute("product", list);
-            request.getRequestDispatcher("webapp/products/editProduct.jsp").forward(request, response);
+            request.getRequestDispatcher("Views/product/editProduct.jsp").forward(request, response);
 
         }
  if (service.equals("editProduct")) {
