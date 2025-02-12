@@ -1,4 +1,4 @@
-package DAO;
+package dal;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,18 +6,18 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DBcontext {
+public class DBContext {
     protected Connection connection;
 
-    public DBcontext() {
+    public DBContext() {
         try {
-            String username = "Huy15";
-            String password = "Phamhaihuy123";
-            String url = "jdbc:mysql://localhost:3306/ISP392_Project_Test"; 
+            String username = "root";
+            String password = "123456";
+            String url = "jdbc:mysql://localhost:3306/ISP392_Project2"; 
             Class.forName("com.mysql.cj.jdbc.Driver"); 
             connection = DriverManager.getConnection(url, username, password);
         } catch (ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(DBcontext.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
