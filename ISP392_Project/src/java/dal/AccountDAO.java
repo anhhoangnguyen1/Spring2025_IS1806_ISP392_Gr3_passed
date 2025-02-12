@@ -22,11 +22,9 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
 
     public static AccountDAO INSTANCE = new AccountDAO();
     private static final Logger LOGGER = Logger.getLogger(AccountDAO.class.getName());
-    private RoleDAO roleDAO;
 
     public AccountDAO() {
         connection = getConnection();
-        roleDAO = new RoleDAO();
     }
 
     // get username, password for authenticate
