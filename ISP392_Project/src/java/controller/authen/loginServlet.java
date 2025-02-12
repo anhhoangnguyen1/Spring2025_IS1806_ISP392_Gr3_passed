@@ -56,7 +56,7 @@ public class loginServlet extends HttpServlet {
             userCookie.setMaxAge(30 * 60); 
             response.addCookie(userCookie);
 
-            response.sendRedirect("dashboard/dashboard.jsp");
+            response.sendRedirect("Views/dashboard/dashboard.jsp");
         } else {// if authenticate fail
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.html");
             PrintWriter out = response.getWriter();
