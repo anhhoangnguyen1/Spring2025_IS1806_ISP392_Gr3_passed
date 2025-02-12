@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package DAO;
+package dal;
 
 /**
  *
  * @author phamh
  */
-public class customerDAO extends DBcontext{
+public class customerDAO extends DBContext{
     
 }
