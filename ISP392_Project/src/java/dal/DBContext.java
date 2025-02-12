@@ -1,48 +1,27 @@
-package dal;
-import java.sql.*;
+package DAO;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DBContext {
+public class DBcontext {
+    protected Connection connection;
 
-    public Connection connection;
-    public PreparedStatement statement;
-    public ResultSet resultSet;
-
-    public DBContext() {
+    public DBcontext() {
         try {
-            //Change the username password and url to connect your own database
-            String username = "root";
-            String password = "123456";
-            String url = "jdbc:mysql://localhost:3306/ISP392_Project2";
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            String username = "Huy15";
+            String password = "Phamhaihuy123";
+            String url = "jdbc:mysql://localhost:3306/ISP392_Project_Test"; 
+            Class.forName("com.mysql.cj.jdbc.Driver"); 
             connection = DriverManager.getConnection(url, username, password);
         } catch (ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DBcontext.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(new DBContext().connection);
-    }
-    
     public Connection getConnection() {
-        return new DBContext().connection;
-    }
-    
-    public void closeResources() {
-        try {
-            if (resultSet != null && !resultSet.isClosed()) {
-                resultSet.close();
-            }
-            if (statement != null && !statement.isClosed()) {
-                statement.close();
-            }
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        return connection;
     }
 }
