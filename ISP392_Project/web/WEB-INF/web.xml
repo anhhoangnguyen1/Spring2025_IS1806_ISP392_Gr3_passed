@@ -18,7 +18,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>loginServlet</servlet-name>
-        <url-pattern>/Views/loginServlet</url-pattern>
+        <url-pattern>/views/loginServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>NotificationController</servlet-name>
