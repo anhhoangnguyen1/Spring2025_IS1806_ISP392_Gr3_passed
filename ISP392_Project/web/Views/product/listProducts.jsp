@@ -67,11 +67,11 @@
                             <th style="width: 150px">Image</th>
                             <th style="width: 70px">Price</th>
                             <th style="width: 85px">Weight</th>
-                            <th>Description</th>
-                            <th>Created At</th>
-                            <th>Updated At</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th style="width: 400px">Description</th>
+                            <th style="width: 150px">Created At</th>
+                            <th style="width: 150px">Updated At</th>
+                            <th style="width: 150px">Status</th>
+                            <th style="width: 150px">Action</th>
                         </tr>
                     </thead>
                     <tbody id="myTable">
