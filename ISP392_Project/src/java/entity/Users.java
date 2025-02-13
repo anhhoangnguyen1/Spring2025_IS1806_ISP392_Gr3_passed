@@ -20,6 +20,7 @@ public class Users {
     private int userId;
     private String username;
     private String password;
+    private String image;
     private String name;
     private String phone;
     private String address;
@@ -29,8 +30,9 @@ public class Users {
     private String email;
     private Date createdAt;
     private Date updatedAt;
+    private boolean isDelete;
     private String status;
     private Date deletedAt;
     private List<Invoice> invoices;
-    private String avatar;
+    
 }
