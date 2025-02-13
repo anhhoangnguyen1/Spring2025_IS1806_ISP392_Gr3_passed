@@ -16,6 +16,10 @@
         <servlet-name>EditProfileServlet</servlet-name>
         <servlet-class>controller.profile.EditProfileServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>controllerTopProducts</servlet-name>
+        <servlet-class>controller.dashboard.controllerTopProducts</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>loginServlet</servlet-name>
         <url-pattern>/views/loginServlet</url-pattern>
@@ -31,5 +35,9 @@
     <servlet-mapping>
         <servlet-name>EditProfileServlet</servlet-name>
         <url-pattern>/editprofile</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>controllerTopProducts</servlet-name>
+        <url-pattern>/dashboard</url-pattern> 
     </servlet-mapping>
 </web-app>

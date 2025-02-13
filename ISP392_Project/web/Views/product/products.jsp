@@ -76,7 +76,7 @@
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
                     <li>
-                        <a href="views/dashboard/dashboard.jsp">
+                        <a href="/ISP392_Project/dashboard">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-house"></i>
                             </span>
