@@ -1,10 +1,10 @@
-<!-- <%-- 
+<%-- 
     Document   : dashboard.jsp
     Created on : Jan 28, 2025, 10:04:28 AM
     Author     : bsd12418
 --%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%> -->
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -12,6 +12,7 @@
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
+
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Dashboard</title>
@@ -30,25 +31,15 @@
                     <div class="logo mr-5">
                         <img src="images/logo.png" style="width: 120px; height: 70px" />
                     </div>
+
                 </div>
-                <form action="Products" method="POST" class="custom-search-form">
-                    <input type="hidden" name="service" value="searchProducts" />
+                <form action="Debts" method="POST" class="custom-search-form">
+                    <input type="hidden" name="service" value="searchDebts">
                     <div class="search-box">
-                        <input
-                            type="text"
-                            id="myInput"
-                            class="input-box"
-                            list="browsers"
-                            name="browser"
-                            id="browser"
-                            placeholder="Search for a product..."
-                            autocomplete="off"
-                            />
+                        <input type="text" class="input-box" list="browsers" name="browser" id="browser" placeholder="Search for a debts..." autocomplete="off">
                         <datalist id="browsers">
-                            <c:forEach var="product" items="${list}">
-                                <option value="${product.name}">
-                                    ${product.name}
-                                </option>
+                            <c:forEach var="debt" items="${list}">
+                                <option value="${debt.getCustomerName()}">${debt.getCustomerName()}</option>
                             </c:forEach>
                         </datalist>
                         <button type="submit" class="search-btn">
@@ -75,7 +66,7 @@
                 <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
-                    <li>
+                    <li >
                         <a href="views/dashboard/dashboard.jsp">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-house"></i>
@@ -83,7 +74,7 @@
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="active">
+                    <li>
                         <a href="/ISP392_Project/Products">
                             <span class="nav-icon">
                                 <i class="fas fa-box"></i>
@@ -115,7 +106,8 @@
                             <span class="nav-text">Invoices</span>
                         </a>
                     </li>
-                    <li>
+
+                    <li class="active">
                         <a href="/ISP392_Project/Debts">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-money-bill"></i>
@@ -158,31 +150,24 @@
                 <div class="panel-bar1">
                     <c:if test="${not empty requestScope.Notification}">
                         <div class="alert alert-warning alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert">
-                                &times;
-                            </button>
-                            <strong>${requestScope.Notification}</strong>
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            <strong>${requestScope.Notification}</strong> 
                         </div>
                     </c:if>
-                    <c:if test="${not empty sessionScope.Notification}">
-                        <div class="alert alert-warning alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert">
-                                &times;
-                            </button>
-                            <strong>${sessionScope.Notification}</strong>
-                        </div>
-                        <c:remove var="Notification" scope="session" />
-                    </c:if>
-
-                    <c:import url="listProducts.jsp" />
+                    <c:import url="listDebts.jsp" />
                 </div>
             </div>
-        </div>
-        <c:import url="addProduct.jsp" />
-        <c:import url="editProduct.jsp" />
+
+        </div> 
+       <c:import url="addDebt.jsp" />
+
         <!--   === java script ===   -->
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+
+
     </body>
 </html>
+
+

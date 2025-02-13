@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import dal.customerDAO;
 
 /**
  *
@@ -65,6 +66,7 @@ public class controllerDebts extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         String service = request.getParameter("service");
+        customerDAO customers = new customerDAO();
         debtDAO debts = new debtDAO();
         if (service == null) {
             service = "debts";
@@ -76,7 +78,7 @@ public class controllerDebts extends HttpServlet {
             if (command == null || command.isEmpty()) {
                 command = (String) session.getAttribute("command");
                 if (command == null || command.isEmpty()) {
-                    command = "id";
+                    command = "id DESC";
                 }
             } else {
                 session.setAttribute("command", command);
@@ -92,22 +94,25 @@ public class controllerDebts extends HttpServlet {
             if (count % 10 != 0) {
                 endPage++;
             }
-            List<DebtNote> listProducts = debts.viewAllDebt(command, index);
-            request.setAttribute("list", listProducts);
+            List<DebtNote> listDebts = debts.viewAllDebt(command, index);
+            List<String> listCustomer = customers.getAllCustomerNames();
+            request.setAttribute("listName", listCustomer);
+            request.setAttribute("list", listDebts);
             request.setAttribute("endPage", endPage);
             request.setAttribute("index", index);
+            
             String notification = (String) request.getAttribute("Notification");
             if (notification != null && !notification.isEmpty()) {
                 request.setAttribute("Notification", notification);
             }
-            request.getRequestDispatcher("webapp/debts/debts.jsp").forward(request, response);
+            request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
         }
         if (service.equals("searchDebts")) {
             String name = request.getParameter("browser");
             try {
                 List<DebtNote> list = debts.searchDebts(name);
                 request.setAttribute("list", list);
-                request.getRequestDispatcher("webapp/debts/debts.jsp").forward(request, response);
+                request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
             } catch (NumberFormatException e) {
             }
         }
@@ -166,10 +171,17 @@ public class controllerDebts extends HttpServlet {
 
             // Create DebtNote object
             DebtNote debt = new DebtNote(customerName, type, amount, imageFileName, description, createdAt, updatedAt, createdBy, status);
+            
     debts.insertDebt(debt);
     response.sendRedirect("Debts?service=debts");
 }
+        if (service.equals("debtHistory")) {
+            int id = Integer.parseInt(request.getParameter("id"));
+            List<DebtNote> list = debts.getDebtById(id);
+            request.setAttribute("list", list);
+            request.getRequestDispatcher("views/debtHistory/debtHistory.jsp").forward(request, response);
 
+        }
     }
 
     private static String getSubmittedFileName(Part part) {
