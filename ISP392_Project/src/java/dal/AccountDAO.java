@@ -126,40 +126,47 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
 //        user.setStatus(resultSet.getString("status"));
 //
 //        return user;
-//    }
-//
-//    public Users findByEmail(Users userRequestEmail) {
-//        List<Users> users = new ArrayList<>();
-//        String sql = "SELECT * FROM Users\n"
-//                + "where email = ?";
-//
-//        try {
-//            // Open connection
-//            connection = getConnection();
-//            statement = connection.prepareStatement(sql);
-//            statement.setObject(1, userRequestEmail.getEmail());
-//            resultSet = statement.executeQuery();
-//            if (resultSet.next()) {
-//                return getFromResultSet(resultSet);
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        } finally {
-//            // Close resources
-//            closeResources();
-//        }
-//        return null;
+    }
+
+    public Users findByEmail(Users userRequestEmail) {
+        String sql = "SELECT * FROM Users WHERE email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, userRequestEmail.getEmail());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Users(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("image"),
+                        rs.getString("name"),
+                        rs.getString("phone"),
+                        rs.getString("address"),
+                        rs.getString("gender"),
+                        rs.getDate("dob"),
+                        rs.getString("role"),
+                        rs.getString("email"),
+                        rs.getDate("createdAt"),
+                        rs.getDate("updatedAt"),
+                        rs.getBoolean("isDelete"),
+                        rs.getString("status"),
+                        rs.getDate("deletedAt"),
+                        null // Assuming invoices list needs to be populated separately
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding user by email: {0}", e.getMessage());
+        }
+        return null;
     }
 
     public boolean updatePassword(Users account) {
         String sql = "UPDATE Users SET password = ? WHERE email = ?";
-        try {
-            // Open connection
-            connection = getConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setString(1, account.getPassword());
-            statement.setObject(2, account.getEmail());
-            return statement.executeUpdate() > 0;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, account.getPassword());
+            ps.setString(2, account.getEmail());
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error updating password: {0}", e.getMessage());
         }
