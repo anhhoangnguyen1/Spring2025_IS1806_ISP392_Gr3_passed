@@ -4,14 +4,9 @@
  */
 package dal;
 
-import dal.DBContext;
 import entity.Users;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,7 +27,7 @@ public class profileDAO extends DBContext {
 
     public Users getUserById(int userId) {
         Users user = null;
-        String sql = "SELECT * FROM users WHERE userId = ?";
+        String sql = "SELECT * FROM users WHERE id = ?";
         PreparedStatement ps = null;
         ResultSet rs = null;
 
@@ -43,7 +38,7 @@ public class profileDAO extends DBContext {
 
             if (rs.next()) {
                 user = Users.builder()
-                        .userId(rs.getInt("userId"))
+                        .id(rs.getInt("id"))
                         .username(rs.getString("username"))
                         .password(rs.getString("password"))
                         .name(rs.getString("name"))
@@ -57,7 +52,7 @@ public class profileDAO extends DBContext {
                         .updatedAt(rs.getDate("updatedAt"))
                         .status(rs.getString("status"))
                         .deletedAt(rs.getDate("deletedAt"))
-                        .avatar(rs.getString("avatar")) // Nếu database có avatar
+                        .image(rs.getString("image")) // Nếu database có avatar
                         .build();
             }
         } catch (SQLException e) {
@@ -70,7 +65,7 @@ public class profileDAO extends DBContext {
 
     public String getAvatarByUserId(int userId) {
         String avatarPath = "/avatars/default-avatar.png"; 
-        String sql = "SELECT avatar FROM users WHERE userId = ?";
+        String sql = "SELECT avatar FROM users WHERE id = ?";
         PreparedStatement ps = null;
         ResultSet rs = null;
 
@@ -91,13 +86,13 @@ public class profileDAO extends DBContext {
     }
     
     public boolean updateUser(Users user) {
-    String sql = "UPDATE users SET name = ?, email = ?, phone = ?, avatar = ? WHERE userId = ?";
+    String sql = "UPDATE users SET name = ?, email = ?, phone = ?, avatar = ? WHERE id = ?";
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
         ps.setString(1, user.getName());
         ps.setString(2, user.getEmail());
         ps.setString(3, user.getPhone());
-        ps.setString(4, user.getAvatar());
-        ps.setInt(5, user.getUserId());
+        ps.setString(4, user.getImage());
+        ps.setInt(5, user.getId());
         return ps.executeUpdate() > 0;
     } catch (SQLException e) {
         e.printStackTrace();

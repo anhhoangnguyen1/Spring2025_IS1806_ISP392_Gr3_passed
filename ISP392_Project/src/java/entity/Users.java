@@ -1,7 +1,5 @@
 package entity;
 
-import entity.*;
-import java.time.LocalDateTime;
 import java.sql.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -17,7 +15,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class Users {
 
-    private int userId;
+    private int id;
     private String username;
     private String password;
     private String image;
