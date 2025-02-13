@@ -52,7 +52,7 @@ public class EditProfileServlet extends HttpServlet {
         }
 
         request.setAttribute("user", user);
-        request.getRequestDispatcher("Views/editProfile.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/profile/editProfile.jsp").forward(request, response);
     }
 
     /**
@@ -109,7 +109,7 @@ public class EditProfileServlet extends HttpServlet {
 
         // Xử lý upload avatar
         Part filePart = request.getPart("avatar");
-        String avatarFileName = existingUser.getImage(); // Mặc định giữ ảnh cũ
+        String avatarFileName = existingUser.getImage(); 
 
         if (filePart != null && filePart.getSize() > 0) {
             String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
@@ -142,11 +142,12 @@ public class EditProfileServlet extends HttpServlet {
         boolean updateSuccess = profileDAO.updateUser(updatedUser);
         if (updateSuccess) {
             session.setAttribute("successMessage", "Profile updated successfully!");
-            response.sendRedirect("profile");
+            response.sendRedirect(request.getContextPath() + "/user");
+
         } else {
             request.setAttribute("errorMessage", "Failed to update profile!");
             request.setAttribute("user", updatedUser);
-            request.getRequestDispatcher("Views/profile/editProfile.jsp").forward(request, response);
+            request.getRequestDispatcher("/views/profile/editProfile.jsp").forward(request, response);
         }
 
     }

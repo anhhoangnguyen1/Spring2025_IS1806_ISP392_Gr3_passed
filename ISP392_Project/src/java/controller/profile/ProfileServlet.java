@@ -35,7 +35,7 @@ public class ProfileServlet extends HttpServlet {
 
         // Lấy thông tin người dùng từ database
         Users user = profileDAO.INSTANCE.getUserById(userId);
-
+            System.out.println("User fetched from DB: " + user);
         // Kiểm tra user có tồn tại không
         if (user == null) {
             request.setAttribute("errorMessage", "User not found!");

@@ -56,8 +56,8 @@
             <img src="images/profile-img.jpg" id="profile-img" />
             <div class="profile-menu">
               <ul>
-                <li><i class="fa-solid fa-user"></i> Thông tin User</li>
-                <li><i class="fa-solid fa-pen"></i> Chỉnh sửa User</li>
+                  <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> Thông tin User</a></li>
+                <li><a href="/ISP392_Project/editprofile"><i class="fa-solid fa-pen"></i> Chỉnh sửa User</a></li>
               </ul>
             </div>
           </div>

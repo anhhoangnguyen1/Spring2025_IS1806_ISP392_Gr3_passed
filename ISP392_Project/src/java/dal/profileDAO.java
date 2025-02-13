@@ -28,7 +28,7 @@ public class profileDAO extends DBContext {
    public Users getUserById(int userId) {
     Users user = null;
     String sql = "SELECT id, username, password, image, name, phone, address, gender, dob, role, email, " +
-                 "createdAt, updatedAt, status, deletedAt FROM users WHERE id = ?";
+                 "status FROM users WHERE id = ?";
 
     PreparedStatement ps = null;
     ResultSet rs = null;
@@ -51,10 +51,10 @@ public class profileDAO extends DBContext {
                     .dob(rs.getDate("dob")) // Có thể kiểm tra NULL nếu cần
                     .role(rs.getString("role"))
                     .email(rs.getString("email"))
-                    .createdAt(rs.getDate("createdAt"))
-                    .updatedAt(rs.getDate("updatedAt"))
+              //      .createdAt(rs.getDate("createdAt"))
+                //    .updatedAt(rs.getDate("updatedAt"))
                     .status(rs.getString("status"))
-                    .deletedAt(rs.getDate("deletedAt"))
+                  //  .deletedAt(rs.getDate("deletedAt"))
                     .build();
 
             // Lấy danh sách hóa đơn của user
@@ -87,7 +87,29 @@ public class profileDAO extends DBContext {
     return false;
 }
 
-
+  public static void main(String[] args) {
+        profileDAO dao = new profileDAO();
+        
+        int testUserId = 1; // Thay ID này bằng ID có trong database
+        Users user = dao.getUserById(testUserId);
+        
+        if (user != null) {
+            System.out.println("Lấy dữ liệu thành công:");
+            System.out.println("User ID: " + user.getId());
+            System.out.println("Username: " + user.getUsername());
+            System.out.println("Email: " + user.getEmail());
+            System.out.println("Phone: " + user.getPhone());
+            System.out.println("Name: " + user.getName());
+            System.out.println("Address: " + user.getAddress());
+            System.out.println("Gender: " + user.getGender());
+            System.out.println("Date of Birth: " + user.getDob());
+            System.out.println("Role: " + user.getRole());
+            System.out.println("Status: " + user.getStatus());
+            System.out.println("Avatar: " + user.getImage());
+        } else {
+            System.out.println("Không tìm thấy user có ID = " + testUserId);
+        }
+    }
 
     /**
      * Đóng các tài nguyên (PreparedStatement, ResultSet) sau khi truy vấn
