@@ -25,8 +25,7 @@ public class InvoiceDetail {
     private int id;
     private Invoice invoice;
     private Products product;
-    private double price;
-    private double unitPrice;
     private int quantity;
+    private double unitPrice;   
     private String description;
 }
