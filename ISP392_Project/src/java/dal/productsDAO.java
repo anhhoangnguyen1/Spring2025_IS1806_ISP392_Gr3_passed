@@ -152,14 +152,14 @@ public List<Products> viewAllProducts(String command, int index) {
         // You don't need to set 'created_at' here since it's handled by the database (unless needed explicitly)
         // st.setDate(9, new java.sql.Date(products.getCreatedAt().getTime())); // Removed
 
-        st.setBoolean(7, products.isIsDeleted());  // Adjusted index since created_at was removed
+        st.setBoolean(7, products.isDelete());  // Adjusted index since created_at was removed
         if (products.getDeletedAt() != null) {
             st.setDate(8, new java.sql.Date(products.getDeletedAt().getTime()));
         } else {
             st.setNull(9, java.sql.Types.DATE);
         }
         st.setString(10, products.getStatus());
-        st.setInt(11, products.getId()); // Adjusted index
+        st.setInt(11, products.getProductId()); // Adjusted index
 
         st.executeUpdate();
     } catch (SQLException e) {

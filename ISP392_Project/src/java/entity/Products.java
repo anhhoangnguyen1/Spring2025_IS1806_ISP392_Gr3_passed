@@ -1,8 +1,6 @@
 package entity;
 
-import entity.*;
 import java.math.BigDecimal;
-import java.sql.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,25 +15,16 @@ import lombok.ToString;
 
 
 public class Products {
-    private int id;
+    private int productId;
     private String name;
     private String image;
     private BigDecimal price;
     private int quantity;
     private int zone_id;
     private String description;
-    private Date created_at;
-    private Date updated_at;
-    private boolean isDeleted;
-    private Date deletedAt;
+    private java.util.Date createdAt;
+    private java.util.Date updatedAt;
+    private boolean isDelete;
+    private java.util.Date deletedAt;
     private String status;
-
-    public boolean isIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(boolean isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
 }

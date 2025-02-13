@@ -80,7 +80,7 @@
         <td class="checkbox-column" style="display: none; width: 200px">
             <input type="checkbox" name="selectedProducts" value="${product.productId}" class="product-checkbox" />
         </td>
-        <td>${product.productId}</td>  <!-- Corrected to use productId -->
+        <td>${product.productId}</td>  <!-- Corrected to use id -->
         <td class="bold-row">${product.name}</td>  <!-- Corrected to use name -->
         <td>
             <img src="images/${product.image}" style="width: 100px; height: 100px; object-fit: cover;" alt="Product Image" />
