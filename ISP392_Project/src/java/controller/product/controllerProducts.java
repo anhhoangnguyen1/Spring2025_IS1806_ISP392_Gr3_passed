@@ -83,14 +83,14 @@ public class controllerProducts extends HttpServlet {
             if (notification != null && !notification.isEmpty()) {
                 request.setAttribute("Notification", notification);
             }
-            request.getRequestDispatcher("Views/product/products.jsp").forward(request, response);
+            request.getRequestDispatcher("views/product/products.jsp").forward(request, response);
         }
         if (service.equals("searchProducts")) {
             String name = request.getParameter("browser");
             try {
                 List<Products> list = products.searchProducts(name);
                 request.setAttribute("list", list);
-                request.getRequestDispatcher("Views/product/products.jsp").forward(request, response);
+                request.getRequestDispatcher("views/product/products.jsp").forward(request, response);
             } catch (NumberFormatException e) {
             }
         }
@@ -101,7 +101,7 @@ public class controllerProducts extends HttpServlet {
                 id = Integer.parseInt(id_raw);
                 List<Products> product = products.getProductById(id);
                 request.setAttribute("list", product);
-                request.getRequestDispatcher("Views/product/detailProduct.jsp").forward(request, response);
+                request.getRequestDispatcher("views/product/detailProduct.jsp").forward(request, response);
             } catch (NumberFormatException e) {
             }
         }
@@ -109,7 +109,7 @@ public class controllerProducts extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("product_id"));
             List<Products> list = products.getProductById(id);
             request.setAttribute("product", list);
-            request.getRequestDispatcher("Views/product/editProduct.jsp").forward(request, response);
+            request.getRequestDispatcher("views/product/editProduct.jsp").forward(request, response);
 
         }
  if (service.equals("editProduct")) {
