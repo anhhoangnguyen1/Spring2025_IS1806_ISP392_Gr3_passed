@@ -114,7 +114,7 @@ public class AuthenController extends HttpServlet {
         session.setAttribute("otp", otp);
         session.setAttribute("email", email);
         session.setAttribute("otp_purpose", "password_reset");
-        session.setAttribute("account_id", foundAccount.getUserId());
+        session.setAttribute("account_id", foundAccount.getId());
 
         // Đặt thời gian hết hạn cho session (ví dụ: 15 phút)
         session.setMaxInactiveInterval(15 * 60);
