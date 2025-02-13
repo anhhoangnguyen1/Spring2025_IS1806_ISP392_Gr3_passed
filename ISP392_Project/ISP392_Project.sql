@@ -170,4 +170,4 @@ VALUES
 INSERT INTO Debt_note (type, amount, customers_id, created_by, status, description, image)
 VALUES 
 ('debt', 22000000, 1, 'Lê Phương Linh', 'Pending', 'Khách hàng nợ', 'debt1.jpg'),
-('repay', 9200000, 4, 'Phan Ngọc Mai', 'Completed', 'Khách hàng trả nợ một phần', 'repay1.jpg');
+('debt', 10000000, 4, 'Phan Ngọc Mai', 'Pending', 'Khách hàng trả nợ một phần', 'repay1.jpg');
