@@ -20,17 +20,20 @@ import jakarta.servlet.http.HttpSession;
  */
 public class ProfileServlet extends HttpServlet {
 
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");
 
+        // Kiểm tra nếu user chưa đăng nhập
         if (userId == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login.html");
             return;
         }
 
+        // Lấy thông tin người dùng từ database
         Users user = profileDAO.INSTANCE.getUserById(userId);
 
         // Kiểm tra user có tồn tại không
@@ -42,8 +45,9 @@ public class ProfileServlet extends HttpServlet {
 
         // Gửi thông tin user đến trang JSP
         request.setAttribute("user", user);
-        request.getRequestDispatcher("Views/profile/profile.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/profile/profile.jsp").forward(request, response);
     }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
