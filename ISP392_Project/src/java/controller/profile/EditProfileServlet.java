@@ -86,11 +86,11 @@ public class EditProfileServlet extends HttpServlet {
         }
         // Cập nhật user bằng Builder
         Users updatedUser = Users.builder()
-                .userId(userId)
+                .id(userId)
                 .name(name)
                 .email(email)
                 .phone(phone)
-                   .avatar("/avatars/" + avatarFileName) // Lưu đường dẫn avatar
+                .image("/avatars/" + avatarFileName) // Lưu đường dẫn avatar
                 .build();
 
         // Gọi DAO cập nhật
