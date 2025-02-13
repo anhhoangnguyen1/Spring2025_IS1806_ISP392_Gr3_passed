@@ -83,7 +83,7 @@ public class controllerProducts extends HttpServlet {
             if (notification != null && !notification.isEmpty()) {
                 request.setAttribute("Notification", notification);
             }
-            request.getRequestDispatcher("products/products.jsp").forward(request, response);
+            request.getRequestDispatcher("Views/product/products.jsp").forward(request, response);
         }
         if (service.equals("searchProducts")) {
             String name = request.getParameter("browser");

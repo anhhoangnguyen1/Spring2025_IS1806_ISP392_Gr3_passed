@@ -1164,4 +1164,69 @@ input[type="checkbox"]:checked::after {
     display: block;
 }
 
-
+.debt-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    Exitground-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.debt-container h2 {
+    text-align: center;
+    color: #5c6bc0;
+    margin-bottom: 20px;
+}
+.debt-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+.debt-detail:last-child {
+    border-bottom: none;
+}
+.debt-detail label {
+    font-weight: bold;
+    color: #333;
+}
+.debt-detail span, .debt-detail img {
+    text-align: right;
+}
+.debt-detail img {
+    max-width: 150px;
+    border-radius: 5px;
+}
+.product-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    Exitground-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.product-container h2 {
+    text-align: center;
+    color: #5c6bc0;
+    margin-bottom: 20px;
+}
+.product-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+.product-detail:last-child {
+    border-bottom: none;
+}
+.product-detail label {
+    font-weight: bold;
+    color: #333;
+}
+.product-detail span, .product-detail img {
+    text-align: right;
+}
+.product-detail img {
+    max-width: 150px;
+    border-radius: 5px;
+}
