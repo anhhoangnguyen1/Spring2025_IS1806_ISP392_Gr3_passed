@@ -79,7 +79,7 @@
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="/ISP392_Project/Products">
               <span class="nav-icon">
                 <i class="fas fa-box"></i>
               </span>

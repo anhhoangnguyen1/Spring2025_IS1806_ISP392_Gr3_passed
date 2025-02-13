@@ -31,7 +31,7 @@
                         <img src="images/logo.png" style="width: 120px; height: 70px" />
                     </div>
                 </div>
-                <form action="Products" method="POST" class="custom-search-form">
+                <form action="Views/Products" method="POST" class="custom-search-form">
                     <input type="hidden" name="service" value="searchProducts" />
                     <div class="search-box">
                         <input
@@ -76,7 +76,7 @@
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
                     <li>
-                        <a href="#">
+                        <a href="Views/dashboard/dashboard.jsp">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-house"></i>
                             </span>
@@ -116,19 +116,11 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-bag-shopping"></i>
-                            </span>
-                            <span class="nav-text">Number of bags</span>
-                        </a>
-                    </li>
-                    <li>
                         <a href="Debts?service=debts">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-money-bill"></i>
                             </span>
-                            <span class="nav-text">Debts</span>
+                            <span class="nav-text">Debts History</span>
                         </a>
                     </li>
                 </ul>
