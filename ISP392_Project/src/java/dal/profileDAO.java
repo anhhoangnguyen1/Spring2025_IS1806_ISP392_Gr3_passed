@@ -25,80 +25,68 @@ public class profileDAO extends DBContext {
         connection = getConnection();
     }
 
-    public Users getUserById(int userId) {
-        Users user = null;
-        String sql = "SELECT * FROM users WHERE id = ?";
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+   public Users getUserById(int userId) {
+    Users user = null;
+    String sql = "SELECT id, username, password, image, name, phone, address, gender, dob, role, email, " +
+                 "createdAt, updatedAt, status, deletedAt FROM users WHERE id = ?";
 
-        try {
-            ps = connection.prepareStatement(sql);
-            ps.setInt(1, userId);
-            rs = ps.executeQuery();
+    PreparedStatement ps = null;
+    ResultSet rs = null;
 
-            if (rs.next()) {
-                user = Users.builder()
-                        .id(rs.getInt("id"))
-                        .username(rs.getString("username"))
-                        .password(rs.getString("password"))
-                        .name(rs.getString("name"))
-                        .phone(rs.getString("phone"))
-                        .address(rs.getString("address"))
-                        .gender(rs.getString("gender"))
-                        .dob(rs.getDate("dob"))
-                        .role(rs.getString("role"))
-                        .email(rs.getString("email"))
-                        .createdAt(rs.getDate("createdAt"))
-                        .updatedAt(rs.getDate("updatedAt"))
-                        .status(rs.getString("status"))
-                        .deletedAt(rs.getDate("deletedAt"))
-                        .image(rs.getString("image")) // Nếu database có avatar
-                        .build();
-            }
-        } catch (SQLException e) {
-            LOGGER.severe("Error" + e.getMessage());
-        } finally {
-            closeResources(ps, rs);
+    try {
+        ps = connection.prepareStatement(sql);
+        ps.setInt(1, userId);
+        rs = ps.executeQuery();
+
+        if (rs.next()) {
+            user = Users.builder()
+                    .id(rs.getInt("id"))
+                    .username(rs.getString("username"))
+                    .password(rs.getString("password"))
+                    .image(rs.getString("image"))
+                    .name(rs.getString("name"))
+                    .phone(rs.getString("phone"))
+                    .address(rs.getString("address"))
+                    .gender(rs.getString("gender"))
+                    .dob(rs.getDate("dob")) // Có thể kiểm tra NULL nếu cần
+                    .role(rs.getString("role"))
+                    .email(rs.getString("email"))
+                    .createdAt(rs.getDate("createdAt"))
+                    .updatedAt(rs.getDate("updatedAt"))
+                    .status(rs.getString("status"))
+                    .deletedAt(rs.getDate("deletedAt"))
+                    .build();
+
+            // Lấy danh sách hóa đơn của user
+           // user.setInvoices(getUserInvoices(userId));
         }
-        return user;
+    } catch (SQLException e) {
+        LOGGER.severe("Error retrieving user by ID: " + e.getMessage());
+    } finally {
+        closeResources(ps, rs);
     }
-
-    public String getAvatarByUserId(int userId) {
-        String avatarPath = "/avatars/default-avatar.png"; 
-        String sql = "SELECT avatar FROM users WHERE id = ?";
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            ps = connection.prepareStatement(sql);
-            ps.setInt(1, userId);
-            rs = ps.executeQuery();
-
-            if (rs.next() && rs.getString("avatar") != null) {
-                avatarPath = "/avatars/" + rs.getString("avatar");
-            }
-        } catch (SQLException e) {
-            LOGGER.severe("Error" + e.getMessage());
-        } finally {
-            closeResources(ps, rs);
-        }
-        return avatarPath;
-    }
+    return user;
+}
     
-    public boolean updateUser(Users user) {
-    String sql = "UPDATE users SET name = ?, email = ?, phone = ?, avatar = ? WHERE id = ?";
+   public boolean updateUser(Users user) {
+    String sql = "UPDATE users SET name = ?, email = ?, phone = ?, address = ?, gender = ?, dob = ?, status = ?, image = ? WHERE id = ?";
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
         ps.setString(1, user.getName());
         ps.setString(2, user.getEmail());
         ps.setString(3, user.getPhone());
-        ps.setString(4, user.getImage());
-        ps.setInt(5, user.getId());
+        ps.setString(4, user.getAddress());
+        ps.setString(5, user.getGender());
+        ps.setDate(6, user.getDob());
+        ps.setString(7, user.getStatus());
+        ps.setString(8, user.getImage());
+        ps.setInt(9, user.getId());
         return ps.executeUpdate() > 0;
     } catch (SQLException e) {
         e.printStackTrace();
     }
     return false;
 }
+
 
 
     /**

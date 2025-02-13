@@ -5,7 +5,7 @@
 package controller.profile;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.nio.file.Paths;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,9 +22,9 @@ import java.io.File;
  * @author THC
  */
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024 * 2, // 2MB - Kích thước tối thiểu trước khi lưu vào file
-    maxFileSize = 1024 * 1024 * 10,      // 10MB - Kích thước tối đa cho 1 file
-    maxRequestSize = 1024 * 1024 * 50    // 50MB - Tổng kích thước request
+        fileSizeThreshold = 1024 * 1024 * 2, // 2MB - Kích thước tối thiểu trước khi lưu vào file
+        maxFileSize = 1024 * 1024 * 10, // 10MB - Kích thước tối đa cho 1 file
+        maxRequestSize = 1024 * 1024 * 50 // 50MB - Tổng kích thước request
 )
 
 public class EditProfileServlet extends HttpServlet {
@@ -40,7 +40,7 @@ public class EditProfileServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
 
         if (userId == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("login.html");
             return;
         }
 
@@ -66,7 +66,15 @@ public class EditProfileServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
 
         if (userId == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("login.html");
+            return;
+        }
+
+        // Lấy thông tin user từ database
+        Users existingUser = profileDAO.INSTANCE.getUserById(userId);
+        if (existingUser == null) {
+            request.setAttribute("errorMessage", "User not found!");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
         }
 
@@ -74,23 +82,60 @@ public class EditProfileServlet extends HttpServlet {
         String name = request.getParameter("name");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
+        String address = request.getParameter("address");
+        String gender = request.getParameter("gender");
+        String dob = request.getParameter("dob");
+        String status = request.getParameter("status");
+
+        // Nếu input bị bỏ trống, giữ nguyên giá trị cũ
+        name = (name != null && !name.trim().isEmpty()) ? name : existingUser.getName();
+        email = (email != null && !email.trim().isEmpty()) ? email : existingUser.getEmail();
+        phone = (phone != null && !phone.trim().isEmpty()) ? phone : existingUser.getPhone();
+        address = (address != null && !address.trim().isEmpty()) ? address : existingUser.getAddress();
+        gender = (gender != null && !gender.trim().isEmpty()) ? gender : existingUser.getGender();
+        status = (status != null && !status.trim().isEmpty()) ? status : existingUser.getStatus();
+
+        // Xử lý ngày sinh
+        java.sql.Date sqlDob = null;
+        try {
+            if (dob != null && !dob.trim().isEmpty()) {
+                sqlDob = java.sql.Date.valueOf(dob);
+            } else {
+                sqlDob = existingUser.getDob();
+            }
+        } catch (IllegalArgumentException e) {
+            sqlDob = existingUser.getDob();
+        }
 
         // Xử lý upload avatar
         Part filePart = request.getPart("avatar");
-        String avatarFileName = userId + ".png";
-        String uploadPath = getServletContext().getRealPath("/") + File.separator + AVATAR_DIR;
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) uploadDir.mkdir();
-        if (filePart.getSize() > 0) {
-            filePart.write(uploadPath + File.separator + avatarFileName);
+        String avatarFileName = existingUser.getImage(); // Mặc định giữ ảnh cũ
+
+        if (filePart != null && filePart.getSize() > 0) {
+            String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+            if (extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png") || extension.equals("gif")) {
+                avatarFileName = userId + "." + extension;
+                String uploadPath = getServletContext().getRealPath("/") + File.separator + AVATAR_DIR;
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdir();
+                }
+                filePart.write(uploadPath + File.separator + avatarFileName);
+            }
         }
+
         // Cập nhật user bằng Builder
         Users updatedUser = Users.builder()
                 .id(userId)
                 .name(name)
                 .email(email)
                 .phone(phone)
-                .image("/avatars/" + avatarFileName) // Lưu đường dẫn avatar
+                .address(address)
+                .gender(gender)
+                .dob(sqlDob)
+                .status(status)
+                .image(avatarFileName) // Lưu đường dẫn avatar
                 .build();
 
         // Gọi DAO cập nhật
@@ -103,6 +148,7 @@ public class EditProfileServlet extends HttpServlet {
             request.setAttribute("user", updatedUser);
             request.getRequestDispatcher("Views/profile/editProfile.jsp").forward(request, response);
         }
+
     }
 
     /**
