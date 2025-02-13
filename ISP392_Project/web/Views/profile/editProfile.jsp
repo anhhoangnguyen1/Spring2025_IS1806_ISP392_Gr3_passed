@@ -111,7 +111,7 @@
         <div id="avatar-preview" class="avatar" 
              style="background-image: url('${pageContext.request.contextPath}/avatars/${user.image}');"></div>
 
-        <form action="<%= request.getContextPath() %>/EditProfileServlet" method="post" enctype="multipart/form-data" onsubmit="return confirmSave();">
+        <form action="<%= request.getContextPath() %>/editprofile" method="post" enctype="multipart/form-data" onsubmit="return confirmSave();">
             <div class="form-group">
                 <label for="avatar">Change Avatar:</label>
                 <input type="file" id="avatar" name="avatar" accept="image/*" onchange="previewImage(event)">
@@ -146,7 +146,7 @@
             
             <div class="button-container">
                 <button type="submit" class="button save-button">Save Changes</button>
-                <a href="<%= request.getContextPath() %>/views/profile/profile.jsp" class="back-button">Back</a>
+                <a href="<%= request.getContextPath() %>/user" class="back-button">Back</a>
             </div>
         </form>
     </div>
