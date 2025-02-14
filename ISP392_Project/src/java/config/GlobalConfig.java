@@ -17,13 +17,13 @@ public class GlobalConfig {
     /**
      * USERNAME_EMAIL: Địa chỉ email được sử dụng để gửi email từ ứng dụng
      */
-    public static final String USERNAME_EMAIL = "";
+    public static final String USERNAME_EMAIL = "isp1804cardweb3@gmail.com";
 
     /**
      * PASSWORD_APP_EMAIL: Mật khẩu của địa chỉ email được sử dụng để gửi email từ
      * ứng dụng
      */
-    public static final String PASSWORD_APP_EMAIL = "";
+    public static final String PASSWORD_APP_EMAIL = "pchn xlef opnr bhca";
 
     /**
      * GOOGLE_CLIENT_ID: ID của ứng dụng khách (client) được cấp bởi Google để xác

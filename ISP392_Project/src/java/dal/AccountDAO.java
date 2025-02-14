@@ -99,33 +99,25 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
 
     @Override
     public Users getFromResultSet(ResultSet resultSet) throws SQLException {
-
-//        //find role
-//        Role role = new Role();
-//        role.setRoleId(resultSet.getInt("role_id"));
-        throw new UnsupportedOperationException("Not supported yet.");
-//        Users user = new Users();
-//        user.setUserId(resultSet.getInt("user_id"));
-//        user.setRoleId(resultSet.getString("role"));
-//
-//        user.setRole(roleDAO.findById(role));
-//        user.setUsername(resultSet.getString("username"));
-//        user.setPassword(resultSet.getString("password"));
-//        user.setEmail(resultSet.getString("email"));
-//        user.setPhone(resultSet.getString("phone"));
-//        user.setCreatedAt(resultSet.getTimestamp("created_at") != null
-//                ? resultSet.getTimestamp("created_at").toLocalDateTime() : null);
-//        user.setUpdatedAt(resultSet.getTimestamp("updated_at") != null
-//                ? resultSet.getTimestamp("updated_at").toLocalDateTime() : null);
-//        user.setUpdatedBy(resultSet.getString("updated_by"));
-//        user.setCreatedBy(resultSet.getString("created_by"));
-//        user.setDelete(resultSet.getBoolean("isDelete"));
-//        user.setDeletedBy(resultSet.getString("deletedBy"));
-//        user.setDeletedAt(resultSet.getTimestamp("deletedAt") != null
-//                ? resultSet.getTimestamp("deletedAt").toLocalDateTime() : null);
-//        user.setStatus(resultSet.getString("status"));
-//
-//        return user;
+        return new Users(
+                resultSet.getInt("id"),
+                resultSet.getString("username"),
+                resultSet.getString("password"),
+                resultSet.getString("image"),
+                resultSet.getString("name"),
+                resultSet.getString("phone"),
+                resultSet.getString("address"),
+                resultSet.getString("gender"),
+                resultSet.getDate("dob"),
+                resultSet.getString("role"),
+                resultSet.getString("email"),
+                resultSet.getDate("created_at"),
+                resultSet.getDate("updated_at"),
+                resultSet.getBoolean("isDeleted"),
+                resultSet.getString("status"),
+                resultSet.getDate("deletedAt"),
+                null // Invoices list needs to be populated separately
+        );
     }
 
     public Users findByEmail(Users userRequestEmail) {
@@ -134,25 +126,7 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
             ps.setString(1, userRequestEmail.getEmail());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new Users(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        rs.getString("password"),
-                        rs.getString("image"),
-                        rs.getString("name"),
-                        rs.getString("phone"),
-                        rs.getString("address"),
-                        rs.getString("gender"),
-                        rs.getDate("dob"),
-                        rs.getString("role"),
-                        rs.getString("email"),
-                        rs.getDate("createdAt"),
-                        rs.getDate("updatedAt"),
-                        rs.getBoolean("isDelete"),
-                        rs.getString("status"),
-                        rs.getDate("deletedAt"),
-                        null // Assuming invoices list needs to be populated separately
-                    );
+                    return getFromResultSet(rs);
                 }
             }
         } catch (SQLException e) {

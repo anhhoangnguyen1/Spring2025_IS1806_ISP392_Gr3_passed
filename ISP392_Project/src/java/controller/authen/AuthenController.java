@@ -19,6 +19,7 @@ import utils.EmailUtils;
 public class AuthenController extends HttpServlet {
 
     private AccountDAO accDAO;
+    private final String FORGOT_PASSWORD_JSP_PAGE = "Views/authen/forgotPassword.jsp";
 
     @Override
     public void init() throws ServletException {
@@ -44,7 +45,7 @@ public class AuthenController extends HttpServlet {
                 url = "";
                 break;
             case "/forgotpw":
-                url = "Views/authen/forgotPassword.jsp";
+                url = FORGOT_PASSWORD_JSP_PAGE;
                 break;
             default:
                 url = "view/authen/login.jsp";
@@ -102,7 +103,7 @@ public class AuthenController extends HttpServlet {
         if (foundAccount == null) {
             // Email không tìm thấy trong cơ sở dữ liệu
             request.setAttribute("error", "No account found with this email address.");
-            url = "view/authen/enterEmailForgotPassword.jsp";
+            url = FORGOT_PASSWORD_JSP_PAGE;
             return url;
         }
 
