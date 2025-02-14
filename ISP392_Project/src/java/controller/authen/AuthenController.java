@@ -179,7 +179,7 @@ public class AuthenController extends HttpServlet {
         boolean updated = accDAO.updatePassword(account);
         if (updated) {
             request.setAttribute("message", "Your password has been successfully reset.");
-            return "view/authen/login.jsp";
+            return "/Views/login.html";
         } else {
             request.setAttribute("error", "Failed to reset password. Please try again.");
             return "Views/authen/newPassword.jsp";
