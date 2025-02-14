@@ -92,7 +92,6 @@
             <div class="avatar-section">
                 <div class="avatar" style="background-image: url('${pageContext.request.contextPath}/avatars/${user.image}');"></div>
                 <div class="user-name"><c:out value="${user.name}" /></div>
-                <div class="username">@<c:out value="${user.username}" /></div>
             </div>
             <div class="user-info">
                 <h2>User Profile</h2>
