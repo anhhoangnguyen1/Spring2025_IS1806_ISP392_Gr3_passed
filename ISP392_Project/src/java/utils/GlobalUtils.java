@@ -11,7 +11,7 @@ import java.util.Random;
  * @author ADMIN
  */
 public class GlobalUtils {
-    public static int generateOTP(int length) {
+    public static String generateOTP(int length) {
         Random rand = new Random();
         StringBuilder otp = new StringBuilder();
 
@@ -19,6 +19,6 @@ public class GlobalUtils {
             otp.append(rand.nextInt(10));
         }
 
-        return Integer.parseInt(otp.toString());
+        return otp.toString();
     }
 }
