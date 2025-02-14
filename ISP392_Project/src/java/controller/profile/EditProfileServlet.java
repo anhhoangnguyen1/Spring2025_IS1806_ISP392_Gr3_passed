@@ -22,9 +22,9 @@ import java.io.File;
  * @author THC
  */
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024 * 2, // 2MB - Kích thước tối thiểu trước khi lưu vào file
-        maxFileSize = 1024 * 1024 * 10, // 10MB - Kích thước tối đa cho 1 file
-        maxRequestSize = 1024 * 1024 * 50 // 50MB - Tổng kích thước request
+        fileSizeThreshold = 1024 * 1024 * 2, 
+        maxFileSize = 1024 * 1024 * 10, 
+        maxRequestSize = 1024 * 1024 * 50 
 )
 
 public class EditProfileServlet extends HttpServlet {
@@ -55,10 +55,6 @@ public class EditProfileServlet extends HttpServlet {
         request.getRequestDispatcher("/views/profile/editProfile.jsp").forward(request, response);
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method. Updates the user profile with
-     * the submitted data.
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -70,7 +66,7 @@ public class EditProfileServlet extends HttpServlet {
             return;
         }
 
-        // Lấy thông tin user từ database
+
         Users existingUser = profileDAO.INSTANCE.getUserById(userId);
         if (existingUser == null) {
             request.setAttribute("errorMessage", "User not found!");
@@ -78,7 +74,7 @@ public class EditProfileServlet extends HttpServlet {
             return;
         }
 
-        // Lấy thông tin từ form
+
         String name = request.getParameter("name");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
@@ -87,7 +83,7 @@ public class EditProfileServlet extends HttpServlet {
         String dob = request.getParameter("dob");
         String status = request.getParameter("status");
 
-        // Nếu input bị bỏ trống, giữ nguyên giá trị cũ
+
         name = (name != null && !name.trim().isEmpty()) ? name : existingUser.getName();
         email = (email != null && !email.trim().isEmpty()) ? email : existingUser.getEmail();
         phone = (phone != null && !phone.trim().isEmpty()) ? phone : existingUser.getPhone();
@@ -95,7 +91,7 @@ public class EditProfileServlet extends HttpServlet {
         gender = (gender != null && !gender.trim().isEmpty()) ? gender : existingUser.getGender();
         status = (status != null && !status.trim().isEmpty()) ? status : existingUser.getStatus();
 
-        // Xử lý ngày sinh
+
         java.sql.Date sqlDob = null;
         try {
             if (dob != null && !dob.trim().isEmpty()) {
@@ -107,7 +103,7 @@ public class EditProfileServlet extends HttpServlet {
             sqlDob = existingUser.getDob();
         }
 
-        // Xử lý upload avatar
+
         Part filePart = request.getPart("avatar");
         String avatarFileName = existingUser.getImage(); 
 
@@ -125,7 +121,6 @@ public class EditProfileServlet extends HttpServlet {
             }
         }
 
-        // Cập nhật user bằng Builder
         Users updatedUser = Users.builder()
                 .id(userId)
                 .name(name)
@@ -135,10 +130,9 @@ public class EditProfileServlet extends HttpServlet {
                 .gender(gender)
                 .dob(sqlDob)
                 .status(status)
-                .image(avatarFileName) // Lưu đường dẫn avatar
+                .image(avatarFileName) 
                 .build();
 
-        // Gọi DAO cập nhật
         boolean updateSuccess = profileDAO.updateUser(updatedUser);
         if (updateSuccess) {
             session.setAttribute("successMessage", "Profile updated successfully!");

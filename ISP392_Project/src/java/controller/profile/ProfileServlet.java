@@ -27,23 +27,21 @@ public class ProfileServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");
 
-        // Kiểm tra nếu user chưa đăng nhập
+
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login.html");
             return;
         }
 
-        // Lấy thông tin người dùng từ database
         Users user = profileDAO.INSTANCE.getUserById(userId);
-            System.out.println("User fetched from DB: " + user);
-        // Kiểm tra user có tồn tại không
+
         if (user == null) {
             request.setAttribute("errorMessage", "User not found!");
             request.getRequestDispatcher("/error.jsp").forward(request, response);
             return;
         }
 
-        // Gửi thông tin user đến trang JSP
+
         request.setAttribute("user", user);
         request.getRequestDispatcher("/views/profile/profile.jsp").forward(request, response);
     }

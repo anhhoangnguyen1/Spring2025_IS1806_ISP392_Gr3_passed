@@ -6,7 +6,6 @@
 <%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@page import="entity.Users"%>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -65,18 +64,20 @@
         }
         .button {
             padding: 10px 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             border: none;
             font-size: 16px;
             color: white;
             cursor: pointer;
         }
+
         .save-button {
-            background-color: #28a745;
+            background-color: #007BFF;
         }
         .save-button:hover {
-            background-color: #218838;
+            background-color: #0056b3;
         }
+
         .back-button {
             background-color: #6c757d;
             text-decoration: none;
@@ -102,6 +103,9 @@
             };
             reader.readAsDataURL(event.target.files[0]);
         }
+        function goBack() {
+            window.history.back();
+        }
     </script>
 </head>
 <body>
@@ -111,7 +115,7 @@
         <div id="avatar-preview" class="avatar" 
              style="background-image: url('${pageContext.request.contextPath}/avatars/${user.image}');"></div>
 
-        <form action="<%= request.getContextPath() %>/editprofile" method="post" enctype="multipart/form-data" onsubmit="return confirmSave();">
+        <form action="${pageContext.request.contextPath}/editprofile" method="post" enctype="multipart/form-data" onsubmit="return confirmSave();">
             <div class="form-group">
                 <label for="avatar">Change Avatar:</label>
                 <input type="file" id="avatar" name="avatar" accept="image/*" onchange="previewImage(event)">
@@ -141,12 +145,9 @@
                 <input type="text" id="address" name="address" value="${user.address}">
             </div>
             
-            
-   
-            
             <div class="button-container">
                 <button type="submit" class="button save-button">Save Changes</button>
-                <a href="<%= request.getContextPath() %>/user" class="back-button">Back</a>
+                <button type="button" class="button back-button" onclick="goBack();">Back</button>
             </div>
         </form>
     </div>
