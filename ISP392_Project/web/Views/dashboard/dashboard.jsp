@@ -100,7 +100,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Customers">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user"></i>
                             </span>
