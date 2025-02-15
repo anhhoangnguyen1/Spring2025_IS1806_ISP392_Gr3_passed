@@ -29,7 +29,7 @@
                         <span></span>
                     </div>
                     <div class="logo mr-5">
-                        <img src="images/logo.png" style="width: 120px; height: 70px" />
+                        <img src="/ISP392_Project/views/debtHistory/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
 
                 </div>
@@ -55,7 +55,7 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="images/profile-img.jpg" />
+                        <img src="/ISP392_Project/views/debtHistory/images/profile-img.jpg" />
                     </div>
                 </div>
             </div>
@@ -67,7 +67,7 @@
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
                     <li >
-                        <a href="views/dashboard/dashboard.jsp">
+                        <a href="/ISP392_Project/dashboard">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-house"></i>
                             </span>
@@ -91,7 +91,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Customers">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user"></i>
                             </span>

@@ -39,7 +39,7 @@
                         <span></span>
                     </div>
                     <div class="logo">
-                        <img src="images/logo.png" />
+                        <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
 
@@ -58,7 +58,7 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="images/profile-img.jpg" id="profile-img" />
+                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
                         <div class="profile-menu">
                             <ul>
                                 <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> Thông tin User</a></li>
@@ -116,7 +116,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Debts">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-money-bill"></i>
                             </span>
@@ -164,7 +164,6 @@
                     </div>
                     <div class="row-2">
                         <a href="#" class="active">Overwiew</a>
-                        <a href="top_product.jsp">Top Products</a>
                     </div>
                 </div>
                 <!--   === Panel Bar Ends ===   -->
