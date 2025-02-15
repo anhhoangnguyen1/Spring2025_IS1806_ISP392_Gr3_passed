@@ -28,7 +28,7 @@
                         <span></span>
                     </div>
                     <div class="logo mr-5">
-                        <img src="images/logo.png" style="width: 120px; height: 70px" />
+                        <img src="/ISP392_Project/views/product/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
                 <form action="Products" method="POST" class="custom-search-form">
@@ -64,7 +64,7 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="images/profile-img.jpg" />
+                        <img src="/ISP392_Project/views/product/images/profile-img.jpg" />
                     </div>
                 </div>
             </div>
@@ -100,7 +100,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Customers">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user"></i>
                             </span>

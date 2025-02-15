@@ -27,7 +27,7 @@
                         <span></span>
                     </div>
                     <div class="logo mr-5">
-                        <img src="images/logo.png" style="width: 120px; height: 70px" />
+                        <img src="/ISP392_Project/views/customer/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
 
@@ -64,7 +64,7 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="images/profile-img.jpg" />
+                        <img src="/ISP392_Project/views/customer/images/profile-img.jpg" />
                     </div>
                 </div>
             </div>
@@ -83,7 +83,7 @@
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="active">
+                    <li>
                         <a href="/ISP392_Project/Products">
                             <span class="nav-icon">
                                 <i class="fas fa-box"></i>
@@ -99,8 +99,8 @@
                             <span class="nav-text">Zones</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="#">
+                    <li class="active">
+                        <a href="/ISP392_Project/Customers">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user"></i>
                             </span>
