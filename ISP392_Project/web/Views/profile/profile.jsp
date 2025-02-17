@@ -105,7 +105,7 @@
                 <p class="info"><strong>Status:</strong> <c:out value="${user.status}" /></p>
                 <div class="button-container">
                     <a href="editprofile" class="button">Edit Profile</a>
-                    <a href="<%= request.getContextPath() %>/views/dashboard/dashboard.jsp" class="button back-button">Back</a>
+                    <a href="/ISP392_Project/dashboard" class="button back-button">Back</a>
                 </div>
             </div>
         </div>
