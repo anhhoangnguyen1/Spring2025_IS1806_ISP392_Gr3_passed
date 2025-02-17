@@ -84,7 +84,6 @@
                         <td>${debt.getAmount()}</td>
                         <td><img src="images/${debt.getImage()}" style="width: 100px; height: 100px; object-fit: cover;" alt="Debt evidence"/></td>
                         <td>${debt.getDescription()}</td>
-                        <td>${debt.getCustomerName()}</td>
                         <td>${debt.getCreatedAt()}</td>
                         <td>${debt.getUpdatedAt()}</td>
                         <td>${debt.getCreatedBy()}</td>

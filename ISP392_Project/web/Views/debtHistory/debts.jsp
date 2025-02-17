@@ -33,20 +33,7 @@
                     </div>
 
                 </div>
-                <form action="Debts" method="POST" class="custom-search-form">
-                    <input type="hidden" name="service" value="searchDebts">
-                    <div class="search-box">
-                        <input type="text" class="input-box" list="browsers" name="browser" id="browser" placeholder="Search for a debts..." autocomplete="off">
-                        <datalist id="browsers">
-                            <c:forEach var="debt" items="${list}">
-                                <option value="${debt.getCustomerName()}">${debt.getCustomerName()}</option>
-                            </c:forEach>
-                        </datalist>
-                        <button type="submit" class="search-btn">
-                            <i class="fa-solid fa-search"></i>
-                        </button>
-                    </div>
-                </form>
+
                 <div class="top-bar-right">
                     <div class="mode-switch">
                         <i class="fa-solid fa-moon"></i>
@@ -97,7 +84,7 @@
                             </span>
                             <span class="nav-text">Customers</span>
                         </a>
-                    </li>
+                        </li>
                     <li>
                         <a href="#">
                             <span class="nav-icon">
