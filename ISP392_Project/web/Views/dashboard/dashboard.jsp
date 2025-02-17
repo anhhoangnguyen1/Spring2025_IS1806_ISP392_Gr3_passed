@@ -43,12 +43,6 @@
                     </div>
                 </div>
 
-                <div class="search-box">
-                    <input type="text" class="input-box" placeholder="Search..." />
-                    <span class="search-btn">
-                        <i class="fa-solid fa-search"></i>
-                    </span>
-                </div>
 
                 <div class="top-bar-right">
                     <div class="mode-switch">
@@ -61,8 +55,7 @@
                         <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
                         <div class="profile-menu">
                             <ul>
-                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> Thông tin User</a></li>
-                                <li><a href="/ISP392_Project/editprofile"><i class="fa-solid fa-pen"></i> Chỉnh sửa User</a></li>
+                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
                             </ul>
                         </div>
                     </div>
@@ -266,12 +259,11 @@
                                 <% for (String[] product : topProducts) { %>
                                 <div class="product">
                                     <div class="product-img">
-                                        <img src="images/products/default-product.jpg" /> <!-- Thay bằng đường dẫn ảnh thực tế nếu có -->
+                                        <img src="/ISP392_Project/views/dashboard/images/products/product-1.jpg" /> <!-- Thay bằng đường dẫn ảnh thực tế nếu có -->
                                     </div>
                                     <div class="product-desc">
                                         <div class="product-row-1">
                                             <h2><%= product[0] %></h2> <!-- Tên sản phẩm -->
-                                            <i class="fa-solid fa-shopping-cart"></i>
                                         </div>
                                         <div class="product-row-2">
                                             <p>Đã bán: <%= product[1] %> đơn</p> <!-- Số lượng bán -->
