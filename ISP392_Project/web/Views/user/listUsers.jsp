@@ -58,9 +58,9 @@
                                     <td>${user.email}</td>
                                     <td>${user.status}</td>
                                     <td class="sticky-col">
-                                        <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#viewUserModal${user.id}">
+                                        <a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=${user.id}" class="btn btn-outline-primary">
                                             View
-                                        </button>
+                                        </a>
                                         
                                         <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#">
                                             Ban
