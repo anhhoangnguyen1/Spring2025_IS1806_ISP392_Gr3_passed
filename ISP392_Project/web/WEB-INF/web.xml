@@ -11,6 +11,7 @@
         <url-pattern>/editprofile</url-pattern>
         <url-pattern>/Customers</url-pattern>
         <url-pattern>/Debts</url-pattern>
+        <url-pattern>/Users</url-pattern>
         <url-pattern>/Products</url-pattern>
     </filter-mapping>
     <servlet>

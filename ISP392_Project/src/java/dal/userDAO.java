@@ -8,7 +8,6 @@ package dal;
  *
  * @author THC
  */
-
 import entity.Users;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -83,6 +82,48 @@ public class userDAO extends DBContext {
         return null;
     }
 
+    // Thêm người dùng mới vào cơ sở dữ liệu
+    public boolean insertUsers(Users user) {
+        String sql = "INSERT INTO users (username, password, name, phone, address, gender, dob, role, email, created_at, status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, user.getUsername());
+            st.setString(2, user.getPassword());
+            st.setString(3, user.getName());
+            st.setString(4, user.getPhone());
+            st.setString(5, user.getAddress());
+            st.setString(6, user.getGender());
+            st.setDate(7, new java.sql.Date(user.getDob().getTime()));
+            st.setString(8, user.getRole());
+            st.setString(9, user.getEmail());
+            st.setString(10, user.getStatus());
+            st.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Chỉnh sửa thông tin người dùng
+    public boolean editUser(Users user) {
+        String sql = "UPDATE users SET name = ?, phone = ?, address = ?, gender = ?, dob = ?, role = ?, email = ?, updated_at = NOW(), status = ? "
+                + "WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, user.getName());
+            st.setString(2, user.getPhone());
+            st.setString(3, user.getAddress());
+            st.setString(4, user.getGender());
+            st.setDate(5, new java.sql.Date(user.getDob().getTime()));
+            st.setString(6, user.getRole());
+            st.setString(7, user.getEmail());
+            st.setString(8, user.getStatus());
+            st.setInt(9, user.getId());
+            st.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     private Users mapResultSetToUser(ResultSet rs) throws SQLException {
         return Users.builder()
@@ -103,9 +144,9 @@ public class userDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-        userDAO dao = new userDAO();  
+        userDAO dao = new userDAO();
 
-        int pageIndex = 1; 
+        int pageIndex = 1;
         List<Users> users = dao.viewAllUsers(pageIndex);
 
         if (users.isEmpty()) {
