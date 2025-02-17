@@ -60,7 +60,7 @@ public class logoutServlet extends HttpServlet {
             session.invalidate(); 
         }
 
-        response.sendRedirect("/ISP392_Project/views/loginServlet");
+        response.sendRedirect("/ISP392_Project/views/landing_page/landing_page.jsp");
     }
 
     /** 
