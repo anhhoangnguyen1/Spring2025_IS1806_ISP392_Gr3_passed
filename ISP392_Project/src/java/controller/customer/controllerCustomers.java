@@ -5,14 +5,15 @@
 package controller.customer;
 
 import dal.customerDAO;
+import dal.debtDAO;
 import entity.Customers;
+import entity.DebtNote;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -28,59 +29,58 @@ public class controllerCustomers extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-      
-    String service = request.getParameter("service");
-    if (service == null) {
-        service = "customers"; // Mặc định hiển thị danh sách khách hàng nếu không có service
-    }
+        HttpSession session = request.getSession();
+        String service = request.getParameter("service");
+        if (service == null) {
+            service = "customers"; // Mặc định hiển thị danh sách khách hàng nếu không có service
+        }
 
-    switch (service) {
-        case "customers":
-            // Logic xem danh sách khách hàng
-            int index = 1;
-            try {
-                index = Integer.parseInt(request.getParameter("index"));
-            } catch (NumberFormatException ignored) {
-            }
+        switch (service) {
+            case "customers":
+                int index = 1; // Mặc định là trang đầu tiên
+                try {
+                    index = Integer.parseInt(request.getParameter("index"));
+                } catch (NumberFormatException ignored) {
+                }
 
-            // Lấy danh sách khách hàng từ database
-            List<Customers> list = customerDAO.viewAllCustomers("name", index);
-            int total = customerDAO.countCustomers();
-            int endPage = (total % 10 == 0) ? total / 10 : (total / 10) + 1;
+                // Gọi DAO để lấy danh sách khách hàng kèm theo khoản nợ
+                List<Customers> list = customerDAO.viewAllCustomersWithDebts("name", index);
 
-            // Chuyển thông tin vào request
-            request.setAttribute("list", list);
-            request.setAttribute("endPage", endPage);
-            request.setAttribute("index", index);
+                // Đếm tổng số khách hàng để tính số trang
+                int total = customerDAO.countCustomers();
+                int endPage = (total % 10 == 0) ? total / 10 : (total / 10) + 1;
 
-            // Chuyển tiếp đến JSP danh sách khách hàng
-            request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
-            break;
+                // Đưa dữ liệu vào request để truyền sang JSP
+                request.setAttribute("list", list);
+                request.setAttribute("endPage", endPage);
+                request.setAttribute("index", index);
 
-        case "getCustomerById":
-            // Lấy thông tin khách hàng theo ID
-            int id = Integer.parseInt(request.getParameter("customer_id"));
-            Customers customer = customerDAO.getCustomerById(id);
-            request.setAttribute("customer", customer);
+                // Chuyển hướng đến trang danh sách khách hàng
+                request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
+                break;
 
-            // Chuyển tiếp đến trang chi tiết khách hàng
-            request.getRequestDispatcher("views/customer/detailCustomer.jsp").forward(request, response);
-            break;
+            case "getCustomerById":
+                // Lấy thông tin khách hàng theo ID
+                int id = Integer.parseInt(request.getParameter("customer_id"));
+                Customers customer = customerDAO.getCustomerById(id);
+                request.setAttribute("customer", customer);
 
-        case "editCustomer":
-            // Lấy thông tin khách hàng cần chỉnh sửa
-            int customerId = Integer.parseInt(request.getParameter("customer_id"));
-            Customers customerForEdit = customerDAO.getCustomerById(customerId);
-            request.setAttribute("customer", customerForEdit);
+                // Chuyển tiếp đến trang chi tiết khách hàng
+                request.getRequestDispatcher("views/customer/detailCustomer.jsp").forward(request, response);
+                break;
 
-            // Lấy tên người dùng từ session
-            HttpSession session = request.getSession();
-            String userName = (String) session.getAttribute("username"); // Lấy username từ session
-            request.setAttribute("userName", userName); // Đưa username vào request
+            case "editCustomer":
+                // Lấy thông tin khách hàng cần chỉnh sửa
+                int customerId = Integer.parseInt(request.getParameter("customer_id"));
+                Customers customerForEdit = customerDAO.getCustomerById(customerId);
+                request.setAttribute("customer", customerForEdit);
 
-          
-            request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
-            break;
+                // Lấy tên người dùng từ session
+                String userName = (String) session.getAttribute("username"); // Lấy username từ session
+                request.setAttribute("userName", userName); // Đưa username vào request
+
+                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
+                break;
         }
     }
 

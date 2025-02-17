@@ -4,7 +4,6 @@
  */
 package dal;
 
-import dal.DBContext;
 import java.sql.SQLException;
 import entity.DebtNote;
 import java.math.BigDecimal;
@@ -13,9 +12,9 @@ import java.util.List;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -23,50 +22,40 @@ import java.util.stream.Collectors;
  */
 public class debtDAO extends DBContext {
 
-    public List<DebtNote> viewAllDebt(String command, int index) {
+    public List<DebtNote> viewAllDebt(String command, int customerId, int index) {
         List<DebtNote> list = new ArrayList<>();
-        Map<Integer, String> customerMap = new HashMap<>();
-        String sqlCustomers = "SELECT id, name FROM Customers";
-        String sqlDebt = "SELECT id, type, amount, customers_id, image, description, created_at, updated_at, created_by, status "
+
+        String sqlDebt = "SELECT id, type, amount, image, description, created_at, updated_at, created_by, status "
                 + "FROM Debt_note "
-                + "WHERE (customers_id, created_at) IN ("
-                + "    SELECT customers_id, MAX(created_at) AS latest_created_at "
-                + "    FROM Debt_note "
-                + "    GROUP BY customers_id"
-                + ") "
-                + "ORDER BY " + command
-                + " LIMIT 10 OFFSET ?";
+                + "WHERE customers_id = ? "
+                + "ORDER BY " + command + " DESC "
+                + "LIMIT 10 OFFSET ?";
 
-        try {
-            try (PreparedStatement stCustomers = connection.prepareStatement(sqlCustomers); ResultSet rs = stCustomers.executeQuery()) {
+        try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
+            st.setInt(1, customerId);
+            st.setInt(2, (index - 1) * 10);
+
+            try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
-                    customerMap.put(rs.getInt("id"), rs.getString("name"));
-                }
-            }
-
-            try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
-                st.setInt(1, (index - 1) * 10);
-
-                try (ResultSet rs = st.executeQuery()) {
-                    while (rs.next()) {
-                        int customerId = rs.getInt("customers_id");
-                        String customerName = customerMap.getOrDefault(customerId, "Unknown");
-
-                        DebtNote debts = new DebtNote(
-                                rs.getInt("id"),
-                                rs.getString("type"),
-                                rs.getBigDecimal("amount"),
-                                rs.getString("image"),
-                                rs.getString("description"),
-                                customerId,
-                                customerName,
-                                rs.getObject("created_at", LocalDateTime.class),
-                                rs.getObject("updated_at", LocalDateTime.class),
-                                rs.getString("created_by"),
-                                rs.getString("status")
-                        );
-                        list.add(debts);
+                    BigDecimal amount = rs.getBigDecimal("amount");
+                    String type = rs.getString("type");
+                    if ("-".equals(type)) {
+                        amount = amount.negate();  // Thêm dấu âm
                     }
+
+                    DebtNote debt = new DebtNote(
+                            rs.getInt("id"),
+                            rs.getString("type"),
+                            amount,
+                            rs.getString("image"),
+                            rs.getString("description"),
+                            customerId,
+                            rs.getObject("created_at", LocalDateTime.class),
+                            rs.getObject("updated_at", LocalDateTime.class),
+                            rs.getString("created_by"),
+                            rs.getString("status")
+                    );
+                    list.add(debt);
                 }
             }
         } catch (SQLException e) {
@@ -96,52 +85,19 @@ public class debtDAO extends DBContext {
         return 0;
     }
 
-    public List<DebtNote> searchDebts(String name) {
+    public List<DebtNote> searchDebts(int customerId) {
         List<DebtNote> list = new ArrayList<>();
-        Map<Integer, String> customerMap = new HashMap<>();
 
-        // Tìm danh sách khách hàng theo tên
-        String sqlCustomers = "SELECT id, name FROM customers WHERE name LIKE ?";
-        try (PreparedStatement stCustomers = connection.prepareStatement(sqlCustomers)) {
-            stCustomers.setString(1, "%" + name + "%");
-            try (ResultSet rs = stCustomers.executeQuery()) {
-                while (rs.next()) {
-                    customerMap.put(rs.getInt("id"), rs.getString("name"));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return list; // Trả về danh sách rỗng nếu lỗi
-        }
-
-        // Nếu không có khách hàng nào, trả về danh sách rỗng ngay
-        if (customerMap.isEmpty()) {
-            System.out.println("Không tìm thấy khách hàng nào với tên: " + name);
-            return list;
-        }
-
-        // Tạo danh sách tham số '?' cho câu truy vấn
-        String placeholders = customerMap.keySet().stream().map(id -> "?").collect(Collectors.joining(","));
-        String sqlDebt = "SELECT d.* FROM Debt_note d "
-                + "INNER JOIN ( "
-                + "    SELECT customers_id, MAX(created_at) AS latest_created_at "
-                + "    FROM Debt_note "
-                + "    WHERE customers_id IN (" + placeholders + ") "
-                + "    GROUP BY customers_id "
-                + ") latest_debts "
-                + "ON d.customers_id = latest_debts.customers_id AND d.created_at = latest_debts.latest_created_at";
+        String sqlDebt = "SELECT id, type, amount, image, description, created_at, updated_at, created_by, status "
+                + "FROM Debt_note "
+                + "WHERE customers_id = ? "
+                + "ORDER BY created_at DESC";
 
         try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
-            int index = 1;
-            for (int customerId : customerMap.keySet()) {
-                st.setInt(index++, customerId);
-            }
+            st.setInt(1, customerId);
 
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
-                    int customerId = rs.getInt("customers_id");
-                    String customerName = customerMap.getOrDefault(customerId, "Unknown");
-
                     DebtNote debt = new DebtNote(
                             rs.getInt("id"),
                             rs.getString("type"),
@@ -149,7 +105,6 @@ public class debtDAO extends DBContext {
                             rs.getString("image"),
                             rs.getString("description"),
                             customerId,
-                            customerName,
                             rs.getObject("created_at", LocalDateTime.class),
                             rs.getObject("updated_at", LocalDateTime.class),
                             rs.getString("created_by"),
@@ -159,6 +114,7 @@ public class debtDAO extends DBContext {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching debts: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -166,29 +122,22 @@ public class debtDAO extends DBContext {
     }
 
     public void insertDebt(DebtNote debts) {
-        String findCustomerIdSQL = "SELECT id FROM Customers WHERE name = ?";
-        String insertDebtSQL = "INSERT INTO Debt_note (type, amount, customers_id,image,description, created_at, updated_at, created_by, status) "
+        String insertDebtSQL = "INSERT INTO Debt_note (type, amount, customers_id, image, description, created_at, updated_at, created_by, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement stFindCustomer = connection.prepareStatement(findCustomerIdSQL)) {
-            stFindCustomer.setString(1, debts.getCustomerName());
-            try (ResultSet rs = stFindCustomer.executeQuery()) {
-                if (rs.next()) {
-                    int customerId = rs.getInt("id");
-                    try (PreparedStatement stInsertDebt = connection.prepareStatement(insertDebtSQL)) {
-                        stInsertDebt.setString(1, debts.getType());
-                        stInsertDebt.setBigDecimal(2, debts.getAmount());
-                        stInsertDebt.setInt(3, customerId);
-                        stInsertDebt.setString(4, debts.getImage());
-                        stInsertDebt.setString(5, debts.getDescription());
-                        stInsertDebt.setObject(6, debts.getCreatedAt());
-                        stInsertDebt.setObject(7, debts.getUpdatedAt());
-                        stInsertDebt.setString(8, debts.getCreatedBy());
-                        stInsertDebt.setString(9, debts.getStatus());
-                        stInsertDebt.executeUpdate();
-                    }
-                }
-            }
+        try (PreparedStatement stInsertDebt = connection.prepareStatement(insertDebtSQL)) {
+            stInsertDebt.setString(1, debts.getType());
+            stInsertDebt.setBigDecimal(2, debts.getAmount());
+            stInsertDebt.setInt(3, debts.getCustomer_id());  // Lấy trực tiếp từ DebtNote
+            stInsertDebt.setString(4, debts.getImage());
+            stInsertDebt.setString(5, debts.getDescription());
+            stInsertDebt.setObject(6, debts.getCreatedAt());
+            stInsertDebt.setObject(7, debts.getUpdatedAt());
+            stInsertDebt.setString(8, debts.getCreatedBy());
+            stInsertDebt.setString(9, debts.getStatus());
+
+            int rowsAffected = stInsertDebt.executeUpdate();
+            System.out.println("Debt inserted successfully! Rows affected: " + rowsAffected);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -220,7 +169,6 @@ public class debtDAO extends DBContext {
                                 rs.getString("image"),
                                 rs.getString("description"),
                                 customerId,
-                                customerName,
                                 rs.getObject("created_at", LocalDateTime.class),
                                 rs.getObject("updated_at", LocalDateTime.class),
                                 rs.getString("created_by"),
@@ -239,15 +187,43 @@ public class debtDAO extends DBContext {
         return debts;
     }
 
+    public void deleteDebt(int debtId) {
+        String deleteDebtSQL = "DELETE FROM Debt_note WHERE id = ?";
+
+        try (PreparedStatement stDeleteDebt = connection.prepareStatement(deleteDebtSQL)) {
+            stDeleteDebt.setInt(1, debtId);  
+
+            int rowsAffected = stDeleteDebt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Debt deleted successfully! Rows affected: " + rowsAffected);
+            } else {
+                System.out.println("No debt found with the provided ID.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         debtDAO dao = new debtDAO();
         DebtNote newDebt = new DebtNote();
 
-        String command = null;
-        List<DebtNote> debts = dao.viewAllDebt(command, 1);
+        String command = "id";
+
+        List<DebtNote> debts = dao.viewAllDebt(command, 1, 1);
         for (DebtNote debt : debts) {
             System.out.println(debt);
         }
-
+        DebtNote debt = DebtNote.builder()
+                .type("-")
+                .amount(new BigDecimal("500000"))
+                .customer_id(1) // Giả sử khách hàng có ID = 1
+                .image("test_image.jpg")
+                .description("Test debt insertion")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .createdBy("admin")
+                .status("unpaid")
+                .build();
     }
 }

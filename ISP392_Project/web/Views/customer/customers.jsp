@@ -5,15 +5,15 @@
 --%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <!DOCTYPE html>
 <html>
-<head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dashboard</title>
     </head>
     <body>
         <!--   *** Page Wrapper Starts ***   -->
@@ -31,31 +31,6 @@
                     </div>
                 </div>
 
-            <form action="Customers" method="POST" class="custom-search-form">
-                <input type="hidden" name="service" value="searchCustomers" />
-                                    <div class="search-box">
-                        <input
-                            type="text"
-                            id="myInput"
-                            class="input-box"
-                            list="browsers"
-                            name="browser"
-                            id="browser"
-                            placeholder="Search for a product..."
-                            autocomplete="off"
-                            />
-                        <datalist id="browsers">
-                            <c:forEach var="product" items="${list}">
-                                <option value="${product.name}">
-                                    ${product.name}
-                                </option>
-                            </c:forEach>
-                        </datalist>
-                        <button type="submit" class="search-btn">
-                            <i class="fa-solid fa-search"></i>
-                        </button>
-                    </div>
-                </form>
                 <div class="top-bar-right">
                     <div class="mode-switch">
                         <i class="fa-solid fa-moon"></i>
@@ -173,15 +148,21 @@
                         </div>
                         <c:remove var="Notification" scope="session" />
                     </c:if>
-
-                <c:import url="listCustomers.jsp" />
+                    <c:import url="listCustomers.jsp" />
+                </div>
             </div>
         </div>
-    </div>
-    <c:import url="addCustomer.jsp" />
-    <c:import url="editCustomer.jsp" />
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
-</body>
+        
+        <c:import url="addCustomer.jsp" />
+        <c:import url="editCustomer.jsp" />
+        <c:import url="debtHistory.jsp" />
+        <c:import url="addDebt.jsp" />
+        
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Bootstrap JS -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+    </body>
 </html>

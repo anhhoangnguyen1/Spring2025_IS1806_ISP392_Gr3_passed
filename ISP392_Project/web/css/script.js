@@ -41,45 +41,37 @@ $(document).ready(function () {
     });
 });
 document.addEventListener("DOMContentLoaded", function () {
-    const table = document.querySelector(".resizable-table");
-    const headers = table.querySelectorAll("th");
+    const resizableHeaders = document.querySelectorAll(".resizable");
+    let isResizing = false;
+    let currentHeader, startX, startWidth;
 
-    headers.forEach((header, index) => {
-        // Create resizer
-        const resizer = document.createElement("div");
-        resizer.classList.add("resizer");
-        resizer.style.height = `${table.offsetHeight}px`;
-
-        // Add resizer to header
-        header.style.position = "relative";
-        header.appendChild(resizer);
-
-        let startX, startWidth;
-
-        resizer.addEventListener("mousedown", (e) => {
-            startX = e.pageX;
-            startWidth = header.offsetWidth;
-
-            document.addEventListener("mousemove", resizeColumn);
-            document.addEventListener("mouseup", stopResize);
+    resizableHeaders.forEach(header => {
+        header.addEventListener("mousedown", function (event) {
+            if (event.offsetX > header.clientWidth - 5) {
+                isResizing = true;
+                currentHeader = header;
+                startX = event.pageX;
+                startWidth = header.clientWidth;
+                document.addEventListener("mousemove", resizeColumn);
+                document.addEventListener("mouseup", stopResize);
+            }
         });
-
-        function resizeColumn(e) {
-            const width = startWidth + (e.pageX - startX);
-            header.style.width = `${width}px`;
-
-            // Apply width to all cells in this column
-            table.querySelectorAll(`tr td:nth-child(${index + 1})`).forEach((cell) => {
-                cell.style.width = `${width}px`;
-            });
-        }
-
-        function stopResize() {
-            document.removeEventListener("mousemove", resizeColumn);
-            document.removeEventListener("mouseup", stopResize);
-        }
     });
+
+    function resizeColumn(event) {
+        if (isResizing && currentHeader) {
+            let newWidth = startWidth + (event.pageX - startX);
+            currentHeader.style.width = newWidth + "px";
+        }
+    }
+
+    function stopResize() {
+        isResizing = false;
+        document.removeEventListener("mousemove", resizeColumn);
+        document.removeEventListener("mouseup", stopResize);
+    }
 });
+
 
 function doDelete(Id) {
     return confirm(`Are you sure you want to delete this ?`);
@@ -237,3 +229,175 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     });
+document.addEventListener("DOMContentLoaded", function () {
+    const headers = document.querySelectorAll(".resizable");
+
+    headers.forEach(header => {
+        if (!header.classList.contains("sticky-col")) { // Bỏ qua cột "Actions"
+            const resizer = document.createElement("div");
+            resizer.classList.add("resizer");
+            header.appendChild(resizer);
+            resizer.addEventListener("mousedown", initResize);
+        }
+    });
+
+    function initResize(e) {
+        const header = e.target.parentElement;
+        const startX = e.clientX;
+        const startWidth = header.offsetWidth;
+
+        function onMouseMove(event) {
+            const newWidth = startWidth + (event.clientX - startX);
+            header.style.width = `${newWidth}px`;
+        }
+
+        function onMouseUp() {
+            document.removeEventListener("mousemove", onMouseMove);
+            document.removeEventListener("mouseup", onMouseUp);
+        }
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+    }
+});
+
+
+function sortTable(n) {
+  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  table = document.getElementById("myTable");
+  switching = true;
+  dir = "asc"; 
+
+  while (switching) {
+    switching = false;
+    rows = table.rows;
+    
+    for (i = 1; i < (rows.length - 1); i++) {
+      shouldSwitch = false;
+      
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+
+      // Xử lý giá trị trống thành "\uFFFF" để luôn ở cuối khi sắp xếp
+      let xVal = x.innerHTML.trim() || "\uFFFF";
+      let yVal = y.innerHTML.trim() || "\uFFFF";
+
+      if (dir == "asc") {
+        if (xVal > yVal) {
+          shouldSwitch = true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (xVal < yVal) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      switchcount++;      
+    } else {
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+
+  // Gọi lại hàm tìm kiếm sau khi sắp xếp
+  searchTable();
+}
+
+
+function sortTable1(customerId, columnIndex) {
+    var table = document.getElementById(`myTable1-${customerId}`);
+    if (!table) return;
+
+    var tbody = table.querySelector("tbody");
+    var rows = Array.from(tbody.querySelectorAll("tr"));
+
+    var isAscending = table.getAttribute("data-sort-dir") !== "asc";
+
+    rows.sort((rowA, rowB) => {
+        var cellA = rowA.cells[columnIndex]?.innerText.trim() || "";
+        var cellB = rowB.cells[columnIndex]?.innerText.trim() || "";
+
+        // Xử lý giá trị số
+        var numA = parseFloat(cellA.replace(/,/g, ""));
+        var numB = parseFloat(cellB.replace(/,/g, ""));
+
+        // Nếu cả hai đều là số, sắp xếp theo số
+        if (!isNaN(numA) && !isNaN(numB)) {
+            return isAscending ? numA - numB : numB - numA;
+        }
+
+        // Nếu một trong hai giá trị rỗng (dòng trống), luôn đặt dòng trống ở cuối
+        if (!cellA && !cellB) return 0; // Cả hai đều rỗng => không đổi vị trí
+        if (!cellA) return 1; // Dòng trống xuống cuối
+        if (!cellB) return -1; // Dòng trống xuống cuối
+
+        // Nếu không phải số, so sánh như chuỗi
+        return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+    table.setAttribute("data-sort-dir", isAscending ? "asc" : "desc");
+}
+
+
+// Get the modal
+            var modal = document.getElementById("myModal");
+
+// Get all images with class "myImg"
+            var imgs = document.getElementsByClassName("myImg");
+            var modalImg = document.getElementById("img01");
+            var captionText = document.getElementById("caption");
+
+// Loop through all images and add event listener to each
+            document.querySelectorAll(".myImg").forEach(img => {
+                img.addEventListener("click", function () {
+                    modal.style.display = "block";
+                    modalImg.src = this.src;
+                    captionText.innerHTML = this.alt;
+                });
+            });
+
+
+// Get the <span> element that closes the modal
+            document.querySelectorAll(".close").forEach(closeBtn => {
+                closeBtn.addEventListener("click", function () {
+                    modal.style.display = "none";
+                });
+            });
+
+
+         document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".openDebtModal").forEach(button => {
+        button.addEventListener("click", function () {
+            // Lấy dữ liệu từ data-attribute của nút được click
+            const debtId = this.getAttribute("data-id");
+            const amount = this.getAttribute("data-amount");
+            const type = this.getAttribute("data-type");
+            const createdAt = this.getAttribute("data-createdat");
+            const description = this.getAttribute("data-description");
+            const status = this.getAttribute("data-status");
+            const image = this.getAttribute("data-image");
+
+            // Gán dữ liệu vào input readonly
+            document.getElementById("modalDebtId").textContent = debtId;
+            document.getElementById("modalDebtAmount").value = amount;
+            document.getElementById("modalDebtType").value = type;
+            document.getElementById("modalDebtCreatedAt").value = createdAt;
+            document.getElementById("modalDebtDescription").value = description;
+            document.getElementById("modalDebtStatus").value = status;
+            document.getElementById("modalDebtImage").src = image;
+
+            // Hiển thị modal
+            $("#debtDetailModal").modal("show");
+        });
+    });
+});
+

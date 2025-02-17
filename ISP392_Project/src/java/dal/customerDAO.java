@@ -3,11 +3,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package dal;
-
+import dal.debtDAO;
 import entity.Customers;
+import entity.DebtNote;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +19,7 @@ import java.util.List;
  * @author phamh
  */
 public class customerDAO extends DBContext {
-
+    debtDAO debtDao = new debtDAO();
     public List<String> getAllCustomerNames() {
         List<String> list = new ArrayList<>();
         String sql = "SELECT name FROM Customers";
@@ -33,21 +36,38 @@ public class customerDAO extends DBContext {
         return list;
     }
 
-    public List<Customers> viewAllCustomers(String command, int index) {
-        List<Customers> list = new ArrayList<>();
-        String sql = "SELECT * FROM customers ORDER BY " + command + " LIMIT 10 OFFSET ?";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setInt(1, (index - 1) * 10);
-            try (ResultSet rs = st.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapResultSetToCustomer(rs));
+public List<Customers> viewAllCustomersWithDebts(String command, int index) {
+    List<Customers> customersList = new ArrayList<>();
+    String sqlCustomers = "SELECT * FROM customers ORDER BY " + command + " LIMIT 10 OFFSET ?";
+
+    try (PreparedStatement st = connection.prepareStatement(sqlCustomers)) {
+        st.setInt(1, (index - 1) * 10);
+
+        try (ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                Customers customer = mapResultSetToCustomer(rs);
+
+                // Lấy danh sách nợ của khách hàng
+                List<DebtNote> debts = debtDao.viewAllDebt("id", customer.getId(), 1);
+
+                // Nếu danh sách nợ bị null, gán một danh sách rỗng để tránh lỗi JSP
+                if (debts == null) {
+                    debts = new ArrayList<>();
                 }
+                customer.setDebtNotes(debts);
+
+                customersList.add(customer);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return list;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+
+    return customersList;
+}
+
+
+
 
     public int countCustomers() {
         String sql = "SELECT COUNT(*) FROM customers";
@@ -147,28 +167,45 @@ public class customerDAO extends DBContext {
     
   
 
+
     public static void main(String[] args) {
-        customerDAO dao = new customerDAO();
-        
-        int testCustomerId = 2; // Thay ID này bằng ID có trong database
-        Customers customer = dao.getCustomerById(testCustomerId);
-        
-        if (customer != null) {
-            System.out.println("Lấy dữ liệu khách hàng thành công:");
+    customerDAO dao = new customerDAO();  // Thay CustomerDAO bằng DAO thực tế của bạn
+
+    int pageIndex = 1;  // Lấy trang đầu tiên
+    List<Customers> customers = dao.viewAllCustomersWithDebts("id", pageIndex);
+
+    if (customers.isEmpty()) {
+        System.out.println("❌ Không có khách hàng nào được tìm thấy!");
+    } else {
+        System.out.println("✅ Danh sách khách hàng:");
+        for (Customers customer : customers) {
+            System.out.println("------------------------------------------------------");
             System.out.println("Customer ID: " + customer.getId());
             System.out.println("Name: " + customer.getName());
             System.out.println("Phone: " + customer.getPhone());
             System.out.println("Address: " + customer.getAddress());
             System.out.println("Balance: " + customer.getBalance());
             System.out.println("Created By: " + customer.getCreatedBy());
-            System.out.println("Updated By: " + customer.getUpdatedBy());
-            System.out.println("Status: " + customer.getStatus());
             System.out.println("Created At: " + customer.getCreatedAt());
-            System.out.println("Updated At: " + customer.getUpdatedAt());
-        } else {
-            System.out.println("Không tìm thấy khách hàng có ID = " + testCustomerId);
+
+            // Kiểm tra danh sách nợ
+            List<DebtNote> debts = customer.getDebtNotes();
+            if (debts.isEmpty()) {
+                System.out.println("  - 🚨 Không có khoản nợ nào.");
+            } else {
+                System.out.println("  - 🔥 Danh sách khoản nợ:");
+                for (DebtNote debt : debts) {
+                    System.out.println("    + Debt ID: " + debt.getId() + 
+                                       ", Type: " + debt.getType() + 
+                                       ", Amount: " + debt.getAmount() + 
+                                       ", Status: " + debt.getStatus());
+                }
+            }
         }
     }
 }
+
+}
+
 
 
