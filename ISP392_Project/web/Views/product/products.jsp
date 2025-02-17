@@ -146,10 +146,11 @@
                         <span class="text">Settings</span>
                     </div>
                     <div class="logoutBtn">
-                        <span class="logout-icon">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </span>
-                        <span class="text">Logout</span>
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
                     </div>
                 </div>
             </aside>
