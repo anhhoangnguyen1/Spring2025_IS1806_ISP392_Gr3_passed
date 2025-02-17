@@ -38,8 +38,8 @@
                     <li><a href="#faq">FAQ</a></li>
                 </ul>
                 <div class="nav__btns">
-                    <a href="../login.html">
-                        <button class="btn">Sign Up</button>
+                    <a href="/ISP392_Project/views/loginServlet">
+                        <button class="btn">Sign In</button>
                     </a>
                 </div>
             </nav>
@@ -101,7 +101,7 @@
         </section>
 
         <a href="../login.html">
-            <button class="subscribe-btn">Sign Up Now</button>
+            <button class="subscribe-btn">Sign In</button>
         </a>
 
         <section class="section__container faq__container" id="faq">
@@ -163,7 +163,7 @@
                 </div>
                 <div class="banner__form">
                     <a href="../login.html">
-                        <button class="subscribe-btn">Sign Up Now</button>
+                        <button class="subscribe-btn">Sign In</button>
                     </a>
                 </div>
             </div>
