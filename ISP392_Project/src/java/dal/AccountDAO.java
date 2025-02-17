@@ -146,7 +146,7 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
     public static void main(String[] args) {
         AccountDAO dao = new AccountDAO();
         
-        Users user1 = dao.getUser("admin", "password123");
+        Users user1 = dao.getUser("admin1", "password123");
         if (user1 != null) {
             System.out.println("Đăng nhập thành công: " + user1.getUsername() + " - Role: " + user1.getRole());
         } else {
