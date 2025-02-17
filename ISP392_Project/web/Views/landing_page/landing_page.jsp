@@ -100,7 +100,7 @@
             </div>
         </section>
 
-        <a href="../login.html">
+        <a href="/ISP392_Project/views/loginServlet">
             <button class="subscribe-btn">Sign In</button>
         </a>
 
@@ -162,7 +162,7 @@
                     </p>
                 </div>
                 <div class="banner__form">
-                    <a href="../login.html">
+                    <a href="/ISP392_Project/views/loginServlet">
                         <button class="subscribe-btn">Sign In</button>
                     </a>
                 </div>

@@ -121,10 +121,11 @@
                         <span class="text">Settings</span>
                     </div>
                     <div class="logoutBtn">
-                        <span class="logout-icon">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </span>
-                        <span class="text">Logout</span>
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
                     </div>
                 </div>
             </aside>
@@ -152,12 +153,12 @@
                 </div>
             </div>
         </div>
-        
+
         <c:import url="addCustomer.jsp" />
         <c:import url="editCustomer.jsp" />
         <c:import url="debtHistory.jsp" />
         <c:import url="addDebt.jsp" />
-        
+
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

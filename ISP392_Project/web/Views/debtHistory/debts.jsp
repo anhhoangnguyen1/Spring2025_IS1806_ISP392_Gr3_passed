@@ -84,7 +84,7 @@
                             </span>
                             <span class="nav-text">Customers</span>
                         </a>
-                        </li>
+                    </li>
                     <li>
                         <a href="#">
                             <span class="nav-icon">
@@ -125,12 +125,12 @@
                         <span class="text">Settings</span>
                     </div>
                     <div class="logoutBtn">
-                        <span class="logout-icon">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </span>
-                        <span class="text">Logout</span>
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
                     </div>
-                </div>
             </aside>
 
             <div class="contents">
@@ -146,7 +146,7 @@
             </div>
 
         </div> 
-       <c:import url="addDebt.jsp" />
+        <c:import url="addDebt.jsp" />
 
         <!--   === java script ===   -->
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
