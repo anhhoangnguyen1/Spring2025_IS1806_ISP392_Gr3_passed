@@ -19,7 +19,7 @@ import utils.EmailUtils;
 public class AuthenController extends HttpServlet {
 
     private AccountDAO accDAO;
-    private final String FORGOT_PASSWORD_JSP_PAGE = "Views/authen/forgotPassword.jsp";
+    private final String FORGOT_PASSWORD_JSP_PAGE = "views/authen/forgotPassword.jsp";
 
     @Override
     public void init() throws ServletException {
@@ -120,7 +120,7 @@ public class AuthenController extends HttpServlet {
         // Đặt thời gian hết hạn cho session (ví dụ: 15 phút)
         session.setMaxInactiveInterval(15 * 60);
 
-        url = "Views/authen/verifyOTP.jsp";
+        url = "views/authen/verifyOTP.jsp";
         return url;
     }
 
@@ -157,7 +157,7 @@ public class AuthenController extends HttpServlet {
     
     private String handlePasswordReset(HttpServletRequest request, HttpSession session) {
         // Redirect to password reset page
-        return "Views/authen/newPassword.jsp";
+        return "views/authen/newPassword.jsp";
     }
     
     private String resetPassword(HttpServletRequest request, HttpServletResponse response) {
@@ -179,10 +179,10 @@ public class AuthenController extends HttpServlet {
         boolean updated = accDAO.updatePassword(account);
         if (updated) {
             request.setAttribute("message", "Your password has been successfully reset.");
-            return "/Views/login.html";
+            return "/views/login.html";
         } else {
             request.setAttribute("error", "Failed to reset password. Please try again.");
-            return "Views/authen/newPassword.jsp";
+            return "views/authen/newPassword.jsp";
         }
     }
 }
