@@ -132,16 +132,17 @@
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
                     <div class="settings">
-                        <span class="gear-icon">
-                            <i class="fa-solid fa-gear"></i>
-                        </span>
-                        <span class="text">Settings</span>
+                            <span class="gear-icon">
+                                <i class="fa-solid fa-gear"></i>
+                            </span>
+                            <span class="text">Settings</span>
                     </div>
                     <div class="logoutBtn">
-                        <span class="logout-icon">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </span>
-                        <span class="text">Logout</span>
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
                     </div>
                 </div>
                 <!--   === Side Bar Footer Ends ===   -->
@@ -318,6 +319,6 @@
         <!--   *** Page Wrapper Ends ***   -->
 
         <!--   *** Link To Custom Script File ***   -->
-       <script type="text/javascript" src="<%= request.getContextPath() %>/views/dashboard/script.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath() %>/views/dashboard/script.js"></script>
     </body>
 </html>
