@@ -41,36 +41,118 @@ body {
     width: auto;
     text-align: center;
     word-wrap: break-word;
+    white-space: nowrap; /* Ngăn xuống dòng */
+    overflow: hidden; /* Ẩn nội dung tràn */
+    text-overflow: ellipsis;
+    cursor: pointer;
 }
+.table-bordered th:hover,
+.table-bordered td:hover {
+    background-color: #f0f0f0; /* Màu nền khi hover */
+    transition: 0.3s ease-in-out;
+}
+
 .table-bordered td img {
     width: 100px;
     height: 100px;
     object-fit: cover;
 }
-.table-bordered {
-    table-layout: fixed;
-    width: 150%;
-}
+/* Đảm bảo bảng có thể cuộn ngang */
+/* Đảm bảo bảng có thể cuộn ngang */
 .table-container {
     overflow-x: auto;
-    width: 100%;
+    max-width: 100%;
+    position: relative;
 }
-.bold-row {
-    font-weight: bold;
+
+/* Cấu hình bảng */
+.table-bordered {
+    table-layout: fixed; /* Cố định kích thước cột */
+    width: 150%;
+    border-collapse: collapse;
+    word-wrap: break-word;
 }
-.resizer {
+
+/* Ô chung */
+th, td {
+    padding: 8px;
+    text-align: center;
+    white-space: nowrap; /* Ngăn xuống dòng mặc định */
+    overflow: hidden; /* Ẩn nội dung tràn */
+    text-overflow: ellipsis; /* Hiển thị "..." khi bị thu nhỏ */
+}
+
+/* ✅ Cột "Action" cố định và KHÔNG bị "..." */
+/* Cấu hình cho cột cố định */
+.sticky-col {
+    table-layout: auto; /* Để bảng có thể co giãn theo nội dung */
+    width: 280px !important; /* Đặt chiều rộng cố định cho cột */
+    min-width: 280px !important;
+    max-width: 280px !important; /* Giới hạn chiều rộng không thể nhỏ hoặc lớn hơn */
+    white-space: nowrap; /* Giữ nội dung trên 1 dòng */
+    overflow: visible !important; /* Không ẩn nội dung */
+    text-overflow: clip; /* Không hiển thị "..." */
+    position: sticky;
+    right: 0; /* Cố định cột bên phải */
+    background: white; /* Nền trắng khi cuộn */
+    z-index: 2; /* Đảm bảo cột luôn nằm trên các cột khác */
+
+}
+.sticky-col::after {
+    content: "";
     position: absolute;
+    left: 0;
     top: 0;
+    width: 1px;
+    height: 100%;
+    background-color: gray;
+}
+.sticky-col1 {
+    table-layout: auto; /* Để bảng có thể co giãn theo nội dung */
+    width: 100px !important; /* Đặt chiều rộng cố định cho cột */
+    min-width: 100px !important;
+    max-width: 100px !important; /* Giới hạn chiều rộng không thể nhỏ hoặc lớn hơn */
+    white-space: nowrap; /* Giữ nội dung trên 1 dòng */
+    overflow: visible !important; /* Không ẩn nội dung */
+    text-overflow: clip; /* Không hiển thị "..." */
+    position: sticky;
+    right: 0; /* Cố định cột bên phải */
+    background: white; /* Nền trắng khi cuộn */
+    z-index: 2; /* Đảm bảo cột luôn nằm trên các cột khác */
+
+}
+.sticky-col1::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background-color: gray;
+}
+
+/* ✅ Cột khác có thể co giãn và hiển thị "..." */
+.resizable {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Thanh kéo cho cột resizable */
+.resizable::after {
+    content: "";
+    position: absolute;
     right: 0;
-    width: 5px;
+    top: 0;
+    width: 5px; /* Thanh kéo */
     height: 100%;
     cursor: col-resize;
     background-color: transparent;
-    z-index: 1;
 }
 
-.resizer:hover {
-    background-color: #ccc;
+.resizable:hover::after {
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .page-wrapper {
@@ -1229,4 +1311,227 @@ input[type="checkbox"]:checked::after {
 .product-detail img {
     max-width: 150px;
     border-radius: 5px;
+}
+.search-box {
+    position: relative;
+    width: 400px;
+    height: 37px;
+    background-color: var(--bg-ternary);
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.search-box .input-box {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    padding: 0px 50px 0px 20px;
+    border-radius: inherit;
+    background-color: var(--bg-ternary);
+    color: var(--heading-clr);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    outline: none;
+    border: none;
+}
+
+.search-box .search-btn {
+    position: absolute;
+    width: 37px;
+    height: 37px;
+    right: 0;
+    border-radius: 50px;
+    background-color: var(--bg-ternary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.search-box .search-btn i {
+    color: var(--text-clr);
+    font-size: 15px;
+}
+.search-box1 {
+    position: relative;
+    width: 400px;
+    height: 37px;
+    background-color: var(--bg-ternary);
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 27%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.search-box1 .input-box {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    padding: 0px 50px 0px 20px;
+    border-radius: inherit;
+    background-color: var(--bg-ternary);
+    color: var(--heading-clr);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    outline: none;
+    border: none;
+}
+
+.search-box1 .search-btn {
+    position: absolute;
+    width: 37px;
+    height: 37px;
+    right: 0;
+    border-radius: 50px;
+    background-color: var(--bg-ternary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.search-box1 .search-btn i {
+    color: var(--text-clr);
+    font-size: 15px;
+}
+.product-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    Exitground-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.product-container h2 {
+    text-align: center;
+    color: #5c6bc0;
+    margin-bottom: 20px;
+}
+.product-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+.product-detail:last-child {
+    border-bottom: none;
+}
+.product-detail label {
+    font-weight: bold;
+    color: #333;
+}
+.product-detail span, .product-detail img {
+    text-align: right;
+}
+.product-detail img {
+    max-width: 150px;
+    border-radius: 5px;
+}
+#myImg {
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#myImg:hover {
+    opacity: 0.7;
+}
+
+/* The Modal (background) */
+.modalImage {  /* 🔥 Đổi từ .modal thành .modalImage */
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 10000;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.9);
+}
+
+/* Modal Content (image) */
+.modalImage-content {
+    margin: auto;
+    display: block;
+    width: 50%;
+    max-width: 800px;
+    max-height: 600px;
+    object-fit: contain;
+}
+
+/* Caption of Modal Image */
+#caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 10px 0;
+    height: 150px;
+}
+
+/* Add Animation */
+.modalImage-content, #caption {  /* 🔥 Đổi từ .modal-content thành .modalImage-content */
+    -webkit-animation-name: zoom;
+    -webkit-animation-duration: 0.6s;
+    animation-name: zoom;
+    animation-duration: 0.6s;
+}
+
+@-webkit-keyframes zoom {
+    from {
+        -webkit-transform:scale(0);
+    }
+    to {
+        -webkit-transform:scale(1);
+    }
+}
+
+@keyframes zoom {
+    from {
+        transform:scale(0);
+    }
+    to {
+        transform:scale(1);
+    }
+}
+
+/* The Close Button */
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+#imageModal {
+    z-index: 1051 !important; /* Bootstrap modal mặc định 1050 */
 }

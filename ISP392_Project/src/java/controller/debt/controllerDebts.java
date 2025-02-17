@@ -72,13 +72,14 @@ public class controllerDebts extends HttpServlet {
             service = "debts";
         }
         if (service.equals("debts")) {
+            int customer_id = 1;
             String indexPage = request.getParameter("index");
             String command = request.getParameter("command");
 
             if (command == null || command.isEmpty()) {
                 command = (String) session.getAttribute("command");
                 if (command == null || command.isEmpty()) {
-                    command = "id DESC";
+                    command = "id";
                 }
             } else {
                 session.setAttribute("command", command);
@@ -94,13 +95,13 @@ public class controllerDebts extends HttpServlet {
             if (count % 10 != 0) {
                 endPage++;
             }
-            List<DebtNote> listDebts = debts.viewAllDebt(command, index);
+            List<DebtNote> listDebts = debts.viewAllDebt(command, customer_id, index);
             List<String> listCustomer = customers.getAllCustomerNames();
             request.setAttribute("listName", listCustomer);
             request.setAttribute("list", listDebts);
             request.setAttribute("endPage", endPage);
             request.setAttribute("index", index);
-            
+
             String notification = (String) request.getAttribute("Notification");
             if (notification != null && !notification.isEmpty()) {
                 request.setAttribute("Notification", notification);
@@ -108,61 +109,48 @@ public class controllerDebts extends HttpServlet {
             request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
         }
         if (service.equals("searchDebts")) {
-            String name = request.getParameter("browser");
+            int id = Integer.parseInt(request.getParameter("browser"));
             try {
-                List<DebtNote> list = debts.searchDebts(name);
+                List<DebtNote> list = debts.searchDebts(id);
                 request.setAttribute("list", list);
                 request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
             } catch (NumberFormatException e) {
             }
         }
         if (service.equals("addDebt")) {
-    String type = request.getParameter("type");
-    BigDecimal amount = new BigDecimal(request.getParameter("amount"));
-    String customerName = request.getParameter("customerName");
-    Part file = request.getPart("image");
+            String type = request.getParameter("type");
+            BigDecimal amount = new BigDecimal(request.getParameter("amount"));
+            int customer_id = Integer.parseInt(request.getParameter("customer_id"));
+            Part file = request.getPart("image");
 
-    if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-        request.setAttribute("Notification", "Amount must be greater than zero.");
-        request.getRequestDispatcher("Debts?service=debts").forward(request, response);
-        return;
-    }
+            String imageFileName = null;
+            if (file != null && file.getSize() > 0) {
+                String fileType = file.getContentType();
+                if (!ALLOWED_MIME_TYPES.contains(fileType)) {
+                    request.setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
+                    request.getRequestDispatcher("Debts?service=debts").forward(request, response);
+                    return;
+                }
+                imageFileName = getSubmittedFileName(file);
 
-    if (customerName == null || customerName.trim().isEmpty()) {
-        request.setAttribute("Notification", "Customer Name is required.");
-        request.getRequestDispatcher("Debts?service=debts").forward(request, response);
-        return;
-    }
+                String uploadDirectory = getServletContext().getRealPath("/") + "images";
+                File uploadDir = new File(uploadDirectory);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
 
-    String imageFileName = null;
-    if (file != null && file.getSize() > 0) {
-        String fileType = file.getContentType();
-        if (!ALLOWED_MIME_TYPES.contains(fileType)) {
-            request.setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
-            request.getRequestDispatcher("Debts?service=debts").forward(request, response);
-            return;
-        }
-        imageFileName = getSubmittedFileName(file);
-
-        String uploadDirectory = getServletContext().getRealPath("/") + "images";
-        File uploadDir = new File(uploadDirectory);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
-
-        String uploadPath = uploadDirectory + File.separator + imageFileName;
-        try (FileOutputStream fos = new FileOutputStream(uploadPath); InputStream is = file.getInputStream()) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = is.read(buffer)) != -1) {
-                fos.write(buffer, 0, bytesRead);
+                String uploadPath = uploadDirectory + File.separator + imageFileName;
+                try (FileOutputStream fos = new FileOutputStream(uploadPath); InputStream is = file.getInputStream()) {
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = is.read(buffer)) != -1) {
+                        fos.write(buffer, 0, bytesRead);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-            
             String description = request.getParameter("description");
             String createdBy = request.getParameter("createdBy");
             String status = request.getParameter("status");
@@ -170,18 +158,29 @@ public class controllerDebts extends HttpServlet {
             LocalDateTime updatedAt = LocalDateTime.now();  // Current timestamp
 
             // Create DebtNote object
-            DebtNote debt = new DebtNote(customerName, type, amount, imageFileName, description, createdAt, updatedAt, createdBy, status);
-            
-    debts.insertDebt(debt);
-    response.sendRedirect("Debts?service=debts");
-}
-        if (service.equals("debtHistory")) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            List<DebtNote> list = debts.getDebtById(id);
-            request.setAttribute("list", list);
-            request.getRequestDispatcher("views/debtHistory/debtHistory.jsp").forward(request, response);
+            DebtNote debt = new DebtNote(0,type, amount, imageFileName, description, customer_id, createdAt, updatedAt, createdBy, status);
 
+            debts.insertDebt(debt);
+            response.sendRedirect("Customers?service=customers");
         }
+if (service.equals("deleteDebt")) {
+    String[] selectedDebts = request.getParameterValues("id");
+
+    if (selectedDebts != null && selectedDebts.length > 0) {
+        try {
+            for (String id : selectedDebts) {
+                int debtId = Integer.parseInt(id);
+                // Xóa nợ
+                debts.deleteDebt(debtId);  // Gọi phương thức deleteDebt từ service của bạn
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+    }
+
+    response.sendRedirect("Customers");  // Chuyển hướng đến trang quản lý nợ sau khi xóa
+}
+
     }
 
     private static String getSubmittedFileName(Part part) {
