@@ -18,7 +18,7 @@
     <body>
         <!--   *** Page Wrapper Starts ***   -->
         <div class="page-wrapper">
-                        <!--   *** Top Bar Starts ***   -->
+            <!--   *** Top Bar Starts ***   -->
             <div class="top-bar">
                 <div class="top-bar-left">
                     <div class="hamburger-btn">
@@ -26,11 +26,10 @@
                         <span></span>
                         <span></span>
                     </div>
-                    <div class="logo">
-                        <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
+                    <div class="logo mr-5">
+                        <img src="/ISP392_Project/views/customer/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
-
 
                 <div class="top-bar-right">
                     <div class="mode-switch">
@@ -40,13 +39,7 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
-                        <div class="profile-menu">
-                            <ul>
-                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
-                                <li><a href="/ISP392_Project/change-password"><i class="fa-solid fa-pen"></i> Change Password</a></li>
-                            </ul>
-                        </div>
+                        <img src="/ISP392_Project/views/customer/images/profile-img.jpg" />
                     </div>
                 </div>
             </div>
@@ -109,7 +102,7 @@
                 <span class="menu-label">OWNER ZONE</span>
                 <ul class="navbar-links navbar-links-2">
                     <li>
-                        <a href="/ISP392_Project/Users">
+                        <a href="#">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user-tie"></i>
                             </span>
@@ -161,15 +154,13 @@
             </div>
         </div>
 
-        <c:import url="addCustomer.jsp" />
-        <c:import url="editCustomer.jsp" />
+
         <c:import url="debtHistory.jsp" />
         <c:import url="addDebt.jsp" />
 
 
-        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <!-- Bootstrap JS -->
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
     </body>

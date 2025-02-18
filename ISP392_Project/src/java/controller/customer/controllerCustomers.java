@@ -32,53 +32,48 @@ public class controllerCustomers extends HttpServlet {
         HttpSession session = request.getSession();
         String service = request.getParameter("service");
         if (service == null) {
-            service = "customers"; // Mặc định hiển thị danh sách khách hàng nếu không có service
+            service = "customers";
         }
 
         switch (service) {
             case "customers":
-                int index = 1; // Mặc định là trang đầu tiên
+                int index = 1;
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
                 } catch (NumberFormatException ignored) {
                 }
 
-                // Gọi DAO để lấy danh sách khách hàng kèm theo khoản nợ
                 List<Customers> list = customerDAO.viewAllCustomersWithDebts("name", index);
 
-                // Đếm tổng số khách hàng để tính số trang
                 int total = customerDAO.countCustomers();
                 int endPage = (total % 10 == 0) ? total / 10 : (total / 10) + 1;
-
-                // Đưa dữ liệu vào request để truyền sang JSP
                 request.setAttribute("list", list);
                 request.setAttribute("endPage", endPage);
                 request.setAttribute("index", index);
-
-                // Chuyển hướng đến trang danh sách khách hàng
                 request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
                 break;
 
             case "getCustomerById":
-                // Lấy thông tin khách hàng theo ID
+
                 int id = Integer.parseInt(request.getParameter("customer_id"));
                 Customers customer = customerDAO.getCustomerById(id);
                 request.setAttribute("customer", customer);
-
-                // Chuyển tiếp đến trang chi tiết khách hàng
                 request.getRequestDispatcher("views/customer/detailCustomer.jsp").forward(request, response);
                 break;
 
+            case "addCustomer":
+                String createdBy = (String) session.getAttribute("username");
+                request.setAttribute("userName", createdBy);
+                request.getRequestDispatcher("views/customer/addCustomer.jsp").forward(request, response);
+                break;
+
             case "editCustomer":
-                // Lấy thông tin khách hàng cần chỉnh sửa
+
                 int customerId = Integer.parseInt(request.getParameter("customer_id"));
                 Customers customerForEdit = customerDAO.getCustomerById(customerId);
                 request.setAttribute("customer", customerForEdit);
-
-                // Lấy tên người dùng từ session
-                String userName = (String) session.getAttribute("username"); // Lấy username từ session
-                request.setAttribute("userName", userName); // Đưa username vào request
-
+                String userName = (String) session.getAttribute("username");
+                request.setAttribute("userName", userName);
                 request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
                 break;
         }
@@ -90,14 +85,13 @@ public class controllerCustomers extends HttpServlet {
         String service = request.getParameter("service");
 
         if ("addCustomer".equals(service)) {
-            // Thêm khách hàng mới
             Customers customer = Customers.builder()
                     .name(request.getParameter("name"))
                     .phone(request.getParameter("phone"))
                     .address(request.getParameter("address"))
                     .balance(Double.parseDouble(request.getParameter("balance")))
                     .createdBy(request.getParameter("createdBy"))
-                    .updatedBy(request.getParameter("createdBy")) // Ban đầu updatedBy = createdBy
+                    .updatedBy(request.getParameter("createdBy"))
                     .status(request.getParameter("status"))
                     .build();
             customerDAO.insertCustomer(customer);
@@ -105,14 +99,13 @@ public class controllerCustomers extends HttpServlet {
         }
 
         if ("editCustomer".equals(service)) {
-            // Chỉnh sửa thông tin khách hàng
             Customers customer = Customers.builder()
                     .id(Integer.parseInt(request.getParameter("customer_id")))
                     .name(request.getParameter("name"))
                     .phone(request.getParameter("phone"))
                     .address(request.getParameter("address"))
                     .balance(Double.parseDouble(request.getParameter("balance")))
-                    .updatedBy(request.getParameter("updatedBy")) // Người chỉnh sửa là tên người dùng hiện tại
+                    .updatedBy(request.getParameter("updatedBy"))
                     .status(request.getParameter("status"))
                     .build();
             customerDAO.editCustomer(customer);
@@ -131,3 +124,4 @@ public class controllerCustomers extends HttpServlet {
     }// </editor-fold>
 
 }
+

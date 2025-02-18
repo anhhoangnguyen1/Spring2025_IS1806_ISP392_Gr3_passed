@@ -6,55 +6,67 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Add Customer</title>
-</head>
-<body>
-    <div id="addCustomerModal" class="modal fade show">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <form action="${pageContext.request.contextPath}/Customers" method="POST">
-                    <input type="hidden" name="service" value="addCustomer"/>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Add Customer</title>
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container mt-4">
+            <h2>Add Customer</h2>
 
-                    <div class="modal-header">
-                        <h4 class="modal-title">Add Customer</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    </div>
 
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Name</label>
-                            <input type="text" class="form-control" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Phone</label>
-                            <input type="text" class="form-control" name="phone" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Address</label>
-                            <input type="text" class="form-control" name="address" required>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label>Balance</label>
-                                <input type="number" step="0.01" class="form-control" name="balance" required>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label>Created By</label>
-                                <input type="text" class="form-control" name="createdBy" required>
-                            </div>
-                        </div>
-                       
-                    </div>
+            <form action="${pageContext.request.contextPath}/Customers" method="POST" onsubmit="return confirmAdd()">
+                <input type="hidden" name="service" value="addCustomer"/>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-                        <input type="submit" class="btn btn-primary" value="Add">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="text" class="form-control" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <input type="text" class="form-control" name="address" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="balance">Balance</label>
+                        <input type="number" step="0.01" class="form-control" name="balance" required>
                     </div>
-                </form>
-            </div>
+                    <div class="form-group col-md-6">
+                        <label for="createdBy">Created By</label>
+                        <input type="text" class="form-control" name="createdBy" value="${userName}" readonly>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Add Customer</button>        
+                    <a href="${pageContext.request.contextPath}/Customers?service=customers" class="btn btn-secondary">
+                        Back to Customers List
+                    </a>
+                </div>    
+            </form>
         </div>
-    </div>
-</body>
+
+
+        <script>
+            function confirmAdd() {
+                return confirm("Are you sure you want to add this customer?");
+            }
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </body>
 </html>
+
