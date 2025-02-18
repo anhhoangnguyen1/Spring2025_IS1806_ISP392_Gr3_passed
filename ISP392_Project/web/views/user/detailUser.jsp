@@ -10,7 +10,7 @@
     </head>
     <body>
         <div class="container mt-4">
-            <h2>Staff Details</h2>
+            <h2>User Details</h2>
 
             <form action="${pageContext.request.contextPath}/Users" method="POST">
                 <input type="hidden" name="service" value="editUser" />
@@ -71,7 +71,7 @@
 
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a href="${pageContext.request.contextPath}/Users?service=users" class="btn btn-secondary">Back to Staffs List</a>
+                    <a href="${pageContext.request.contextPath}/Users?service=users" class="btn btn-secondary">Back to Users</a>
                 </div>
             </form>
         </div>
