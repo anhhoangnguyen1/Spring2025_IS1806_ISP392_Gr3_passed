@@ -67,6 +67,14 @@
                         </a>
                     </li>
                     <li>
+                        <a href="#">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-table"></i>
+                            </span>
+                            <span class="nav-text">Zones</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="/ISP392_Project/Customers">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user"></i>
@@ -74,12 +82,12 @@
                             <span class="nav-text">Customers</span>
                         </a>
                     </li>
-                    <li class="active">
-                        <a href="/ISP392_Project/Users">
+                    <li>
+                        <a href="#">
                             <span class="nav-icon">
-                                <i class="fa-solid fa-users"></i>
+                                <i class="fa-solid fa-file-invoice"></i>
                             </span>
-                            <span class="nav-text">Users</span>
+                            <span class="nav-text">Invoices</span>
                         </a>
                     </li>
                     <li>
@@ -93,8 +101,8 @@
                 </ul>
                 <span class="menu-label">OWNER ZONE</span>
                 <ul class="navbar-links navbar-links-2">
-                    <li>
-                        <a href="#">
+                    <li class="active">
+                        <a href="/ISP392_Project/Users">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user-tie"></i>
                             </span>
@@ -102,7 +110,26 @@
                         </a>
                     </li>
                 </ul>
+                <!--   === Nav Bar Links Ends ===   -->
+                <!--   === Side Bar Footer Starts ===   -->
+                <div class="sidebar-footer">
+                    <div class="settings">
+                            <span class="gear-icon">
+                                <i class="fa-solid fa-gear"></i>
+                            </span>
+                            <span class="text">Settings</span>
+                    </div>
+                    <div class="logoutBtn">
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
+                    </div>
+                </div>
+                <!--   === Side Bar Footer Ends ===   -->
             </aside>
+            <!--   === Side Bar Ends ===   -->
 
             <div class="contents">
                 <div class="panel-bar1">
