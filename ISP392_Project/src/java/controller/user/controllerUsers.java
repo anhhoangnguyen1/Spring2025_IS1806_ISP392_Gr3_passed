@@ -93,7 +93,7 @@ public class controllerUsers extends HttpServlet {
             String role = request.getParameter("role");
             String updatedBy = request.getParameter("updatedBy");
             java.sql.Date dob = java.sql.Date.valueOf(request.getParameter("dob"));
-            
+
             // Chỉnh sửa thông tin người dùng
             Users user = Users.builder()
                     .id(Integer.parseInt(request.getParameter("user_id")))
@@ -108,6 +108,20 @@ public class controllerUsers extends HttpServlet {
                     .build();
             userDAO.editUser(user);
             response.sendRedirect("Users?service=users");
+        }
+        if ("search".equals(service)) {
+            String searchStaff = request.getParameter("searchStaff"); // Lấy giá trị tìm kiếm từ form
+            List<Users> list;
+
+            // Kiểm tra nếu có từ khóa tìm kiếm
+            if (searchStaff != null && !searchStaff.isEmpty()) {
+                list = userDAO.searchUsers(searchStaff);  // Gọi phương thức tìm kiếm
+            } else {
+                list = userDAO.viewAllUsers(1);  // Hiển thị tất cả người dùng nếu không có tìm kiếm
+            }
+
+            request.setAttribute("userList", list);
+            request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
         }
     }
 

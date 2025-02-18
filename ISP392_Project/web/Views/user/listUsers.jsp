@@ -20,12 +20,15 @@
             <h1>Staff List</h1>
 
             <!-- Search Box -->
-            <div class="search-box">
-                <input type="text" id="myInput" class="input-box" placeholder="Search for a user..." autocomplete="off" />
-                <button type="submit" class="search-btn">
-                    <i class="fa-solid fa-search"></i>
-                </button>
-            </div>
+            <form action="${pageContext.request.contextPath}/Users" method="POST">
+                <div class="search-box">
+                    <input type="hidden" name="service" value="search" />
+                    <input type="text" id="myInput" class="input-box" name="searchStaff" placeholder="Search for a user..." autocomplete="off" />
+                    <button type="submit" class="search-btn">
+                        <i class="fa-solid fa-search"></i>
+                    </button>
+                </div>
+            </form>
 
             <!-- Table Container -->
             <div class="table-container mt-4">
@@ -61,7 +64,6 @@
                                         <a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=${user.id}" class="btn btn-outline-primary">
                                             View
                                         </a>
-                                        
                                         <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#">
                                             Ban
                                         </button>
