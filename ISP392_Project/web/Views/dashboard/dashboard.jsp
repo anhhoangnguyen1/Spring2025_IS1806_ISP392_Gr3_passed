@@ -56,6 +56,7 @@
                         <div class="profile-menu">
                             <ul>
                                 <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
+                                <li><a href="/ISP392_Project/change-password"><i class="fa-solid fa-pen"></i> Change Password</a></li>
                             </ul>
                         </div>
                     </div>
