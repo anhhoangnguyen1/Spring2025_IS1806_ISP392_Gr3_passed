@@ -18,7 +18,7 @@
     <body>
         <!--   *** Page Wrapper Starts ***   -->
         <div class="page-wrapper">
-            <!--   *** Top Bar Starts ***   -->
+                        <!--   *** Top Bar Starts ***   -->
             <div class="top-bar">
                 <div class="top-bar-left">
                     <div class="hamburger-btn">
@@ -26,10 +26,11 @@
                         <span></span>
                         <span></span>
                     </div>
-                    <div class="logo mr-5">
-                        <img src="/ISP392_Project/views/customer/images/logo.png" style="width: 170px; height: 70px" />
+                    <div class="logo">
+                        <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
+
 
                 <div class="top-bar-right">
                     <div class="mode-switch">
@@ -39,7 +40,13 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="/ISP392_Project/views/customer/images/profile-img.jpg" />
+                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
+                        <div class="profile-menu">
+                            <ul>
+                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
+                                <li><a href="/ISP392_Project/change-password"><i class="fa-solid fa-pen"></i> Change Password</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

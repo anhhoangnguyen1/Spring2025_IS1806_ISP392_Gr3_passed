@@ -40,6 +40,27 @@ $(document).ready(function () {
         colReorder: true,
     });
 });
+
+// Set menu profile
+document.addEventListener("DOMContentLoaded", function () {
+    var profileImg = document.getElementById("profile-img");
+    var profileMenu = document.querySelector(".profile-menu");
+
+    profileImg.addEventListener("click", function (event) {
+        event.stopPropagation(); // Ngăn chặn sự kiện lan ra ngoài
+        profileMenu.style.display =
+                profileMenu.style.display === "block" ? "none" : "block";
+    });
+
+    document.addEventListener("click", function (event) {
+        if (
+                !profileImg.contains(event.target) &&
+                !profileMenu.contains(event.target)
+                ) {
+            profileMenu.style.display = "none";
+        }
+    });
+});
 document.addEventListener("DOMContentLoaded", function () {
     const resizableHeaders = document.querySelectorAll(".resizable");
     let isResizing = false;
@@ -170,26 +191,26 @@ function myFunction() {
     document.getElementById("myDropdown").classList.toggle("show");
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const searchBox = document.getElementById("searchBox");
     const optionsContainer = document.getElementById("optionsContainer");
     const selectedOption = document.getElementById("selectedOption");
     const options = document.querySelectorAll(".option");
 
     // Toggle options container visibility
-    selectedOption.addEventListener("click", function() {
+    selectedOption.addEventListener("click", function () {
         optionsContainer.style.display = optionsContainer.style.display === "block" ? "none" : "block";
     });
 
     // Hide options when clicked outside
-    document.addEventListener("click", function(e) {
+    document.addEventListener("click", function (e) {
         if (!e.target.closest(".custom-select")) {
             optionsContainer.style.display = "none";
         }
     });
 
     // Search functionality
-    searchBox.addEventListener("input", function() {
+    searchBox.addEventListener("input", function () {
         const searchTerm = searchBox.value.toLowerCase();
         options.forEach(option => {
             const optionText = option.textContent.toLowerCase();
@@ -203,32 +224,32 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Select option and update the selected option text
     options.forEach(option => {
-        option.addEventListener("click", function() {
+        option.addEventListener("click", function () {
             selectedOption.textContent = option.textContent;
             optionsContainer.style.display = "none"; // Hide options after selection
             searchBox.value = ""; // Clear the search box after selection
         });
     });
 });
-    document.addEventListener("DOMContentLoaded", function () {
-        const search = document.getElementById("name");
-        const optionsContainer = document.getElementById("optionsContainer");
+document.addEventListener("DOMContentLoaded", function () {
+    const search = document.getElementById("name");
+    const optionsContainer = document.getElementById("optionsContainer");
 
-        // Bắt sự kiện khi click vào danh sách khách hàng
-        optionsContainer.addEventListener("click", function (event) {
-            const clickedOption = event.target.closest(".option");
-            if (clickedOption) {
-                search.value = clickedOption.getAttribute("data-value"); // Gán giá trị vào input
-            }
-        });
-
-        // Ngăn auto-submit khi nhấn Enter trong ô tìm kiếm
-        search.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault(); 
-            }
-        });
+    // Bắt sự kiện khi click vào danh sách khách hàng
+    optionsContainer.addEventListener("click", function (event) {
+        const clickedOption = event.target.closest(".option");
+        if (clickedOption) {
+            search.value = clickedOption.getAttribute("data-value"); // Gán giá trị vào input
+        }
     });
+
+    // Ngăn auto-submit khi nhấn Enter trong ô tìm kiếm
+    search.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+        }
+    });
+});
 document.addEventListener("DOMContentLoaded", function () {
     const headers = document.querySelectorAll(".resizable");
 
@@ -263,58 +284,59 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 function sortTable(n) {
-  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-  table = document.getElementById("myTable");
-  switching = true;
-  dir = "asc"; 
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("myTable");
+    switching = true;
+    dir = "asc";
 
-  while (switching) {
-    switching = false;
-    rows = table.rows;
-    
-    for (i = 1; i < (rows.length - 1); i++) {
-      shouldSwitch = false;
-      
-      x = rows[i].getElementsByTagName("TD")[n];
-      y = rows[i + 1].getElementsByTagName("TD")[n];
+    while (switching) {
+        switching = false;
+        rows = table.rows;
 
-      // Xử lý giá trị trống thành "\uFFFF" để luôn ở cuối khi sắp xếp
-      let xVal = x.innerHTML.trim() || "\uFFFF";
-      let yVal = y.innerHTML.trim() || "\uFFFF";
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
 
-      if (dir == "asc") {
-        if (xVal > yVal) {
-          shouldSwitch = true;
-          break;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+
+            // Xử lý giá trị trống thành "\uFFFF" để luôn ở cuối khi sắp xếp
+            let xVal = x.innerHTML.trim() || "\uFFFF";
+            let yVal = y.innerHTML.trim() || "\uFFFF";
+
+            if (dir == "asc") {
+                if (xVal > yVal) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (xVal < yVal) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
         }
-      } else if (dir == "desc") {
-        if (xVal < yVal) {
-          shouldSwitch = true;
-          break;
+
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
         }
-      }
     }
 
-    if (shouldSwitch) {
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-      switchcount++;      
-    } else {
-      if (switchcount == 0 && dir == "asc") {
-        dir = "desc";
-        switching = true;
-      }
-    }
-  }
-
-  // Gọi lại hàm tìm kiếm sau khi sắp xếp
-  searchTable();
+    // Gọi lại hàm tìm kiếm sau khi sắp xếp
+    searchTable();
 }
 
 
 function sortTable1(customerId, columnIndex) {
     var table = document.getElementById(`myTable1-${customerId}`);
-    if (!table) return;
+    if (!table)
+        return;
 
     var tbody = table.querySelector("tbody");
     var rows = Array.from(tbody.querySelectorAll("tr"));
@@ -335,9 +357,12 @@ function sortTable1(customerId, columnIndex) {
         }
 
         // Nếu một trong hai giá trị rỗng (dòng trống), luôn đặt dòng trống ở cuối
-        if (!cellA && !cellB) return 0; // Cả hai đều rỗng => không đổi vị trí
-        if (!cellA) return 1; // Dòng trống xuống cuối
-        if (!cellB) return -1; // Dòng trống xuống cuối
+        if (!cellA && !cellB)
+            return 0; // Cả hai đều rỗng => không đổi vị trí
+        if (!cellA)
+            return 1; // Dòng trống xuống cuối
+        if (!cellB)
+            return -1; // Dòng trống xuống cuối
 
         // Nếu không phải số, so sánh như chuỗi
         return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
@@ -349,32 +374,32 @@ function sortTable1(customerId, columnIndex) {
 
 
 // Get the modal
-            var modal = document.getElementById("myModal");
+var modal = document.getElementById("myModal");
 
 // Get all images with class "myImg"
-            var imgs = document.getElementsByClassName("myImg");
-            var modalImg = document.getElementById("img01");
-            var captionText = document.getElementById("caption");
+var imgs = document.getElementsByClassName("myImg");
+var modalImg = document.getElementById("img01");
+var captionText = document.getElementById("caption");
 
 // Loop through all images and add event listener to each
-            document.querySelectorAll(".myImg").forEach(img => {
-                img.addEventListener("click", function () {
-                    modal.style.display = "block";
-                    modalImg.src = this.src;
-                    captionText.innerHTML = this.alt;
-                });
-            });
+document.querySelectorAll(".myImg").forEach(img => {
+    img.addEventListener("click", function () {
+        modal.style.display = "block";
+        modalImg.src = this.src;
+        captionText.innerHTML = this.alt;
+    });
+});
 
 
 // Get the <span> element that closes the modal
-            document.querySelectorAll(".close").forEach(closeBtn => {
-                closeBtn.addEventListener("click", function () {
-                    modal.style.display = "none";
-                });
-            });
+document.querySelectorAll(".close").forEach(closeBtn => {
+    closeBtn.addEventListener("click", function () {
+        modal.style.display = "none";
+    });
+});
 
 
-         document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".openDebtModal").forEach(button => {
         button.addEventListener("click", function () {
             // Lấy dữ liệu từ data-attribute của nút được click

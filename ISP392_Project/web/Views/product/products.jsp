@@ -19,7 +19,7 @@
     <body>
         <!--   *** Page Wrapper Starts ***   -->
         <div class="page-wrapper">
-            <!--   *** Top Bar Starts ***   -->
+                        <!--   *** Top Bar Starts ***   -->
             <div class="top-bar">
                 <div class="top-bar-left">
                     <div class="hamburger-btn">
@@ -27,35 +27,12 @@
                         <span></span>
                         <span></span>
                     </div>
-                    <div class="logo mr-5">
-                        <img src="/ISP392_Project/views/product/images/logo.png" style="width: 170px; height: 70px" />
+                    <div class="logo">
+                        <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
-                <form action="Products" method="POST" class="custom-search-form">
-                    <input type="hidden" name="service" value="searchProducts" />
-                    <div class="search-box">
-                        <input
-                            type="text"
-                            id="myInput"
-                            class="input-box"
-                            list="browsers"
-                            name="browser"
-                            id="browser"
-                            placeholder="Search for a product..."
-                            autocomplete="off"
-                            />
-                        <datalist id="browsers">
-                            <c:forEach var="product" items="${list}">
-                                <option value="${product.name}">
-                                    ${product.name}
-                                </option>
-                            </c:forEach>
-                        </datalist>
-                        <button type="submit" class="search-btn">
-                            <i class="fa-solid fa-search"></i>
-                        </button>
-                    </div>
-                </form>
+
+
                 <div class="top-bar-right">
                     <div class="mode-switch">
                         <i class="fa-solid fa-moon"></i>
@@ -64,7 +41,13 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="/ISP392_Project/views/product/images/profile-img.jpg" />
+                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
+                        <div class="profile-menu">
+                            <ul>
+                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
+                                <li><a href="/ISP392_Project/change-password"><i class="fa-solid fa-pen"></i> Change Password</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
