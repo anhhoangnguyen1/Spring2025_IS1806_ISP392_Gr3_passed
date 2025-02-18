@@ -8,7 +8,6 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <!--   ***** Link To Custom Stylesheet *****   -->
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
