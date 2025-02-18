@@ -255,6 +255,11 @@ th, td {
 .top-bar .top-bar-right .notifications {
     position: relative;
 }
+
+.top-bar .top-bar-right .mode-switch{
+    display: none;
+}
+
 .top-bar .top-bar-right .mode-switch i,
 .top-bar .top-bar-right .notifications i {
     font-size: 20px;

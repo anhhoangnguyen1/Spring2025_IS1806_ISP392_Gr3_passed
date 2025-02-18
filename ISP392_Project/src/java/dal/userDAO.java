@@ -51,11 +51,9 @@ public class userDAO extends DBContext {
 
     public List<Users> searchUsers(String keyword) {
         List<Users> list = new ArrayList<>();
-        String sql = "SELECT * FROM users WHERE username LIKE ? OR name LIKE ? OR email LIKE ?";
+        String sql = "SELECT * FROM users WHERE name LIKE ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, "%" + keyword + "%");
-            st.setString(2, "%" + keyword + "%");
-            st.setString(3, "%" + keyword + "%");
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapResultSetToUser(rs));
