@@ -17,7 +17,7 @@
     </head>
     <body>
         <div class="container mt-4">
-            <h1>Staff List</h1>
+            <h1>Staffs List</h1>
 
             <!-- Search Box -->
             <form action="${pageContext.request.contextPath}/Users" method="POST">
