@@ -14,21 +14,18 @@
     </head>
     <body>
         <h1>Customers</h1>
-        <div class="search-box">
-            <input type="text" id="myInput" class="input-box" list="browsers" name="browser" id="browser" placeholder="Search for a product..."
-                   autocomplete="off"
-                   />
-            <datalist id="browsers">
-                <c:forEach var="product" items="${list}">
-                    <option value="${product.name}">
-                        ${product.name}
-                    </option>
-                </c:forEach>
-            </datalist>
-            <button type="submit" class="search-btn">
-                <i class="fa-solid fa-search"></i>
-            </button>
-        </div>
+        <form action="${pageContext.request.contextPath}/Customers" method="POST">
+            <div class="search-box">
+                <input type="hidden" name="service" value="search" />
+                <input type="text" id="myInput" class="input-box" name="searchCustomer" placeholder="Search for a product..."
+                       autocomplete="off"
+                       />
+                <button type="submit" class="search-btn">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+            </div>
+        </form>
+
         <div class="action-bar d-flex align-items-center">
             <div class="dropdown">
                 <button type="button" class="btn btn-outline-primary dropdown-toggle mr-2" data-toggle="dropdown">Choose arrange</button>

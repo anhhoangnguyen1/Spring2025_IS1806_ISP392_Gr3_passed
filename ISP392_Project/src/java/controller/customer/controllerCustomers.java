@@ -111,6 +111,20 @@ public class controllerCustomers extends HttpServlet {
             customerDAO.editCustomer(customer);
             response.sendRedirect("Customers?service=customers");
         }
+        if ("search".equals(service)) {
+            String searchCustomer = request.getParameter("searchCustomer"); // Lấy giá trị tìm kiếm từ form
+            List<Customers> list;
+
+            // Kiểm tra nếu có từ khóa tìm kiếm
+            if (searchCustomer != null && !searchCustomer.isEmpty()) {
+                list = customerDAO.searchCustomers(searchCustomer);  // Gọi phương thức tìm kiếm
+            } else {
+                list = customerDAO.viewAllCustomersWithDebts("name",1);  // Hiển thị tất cả người dùng nếu không có tìm kiếm
+            }
+
+            request.setAttribute("list", list);
+            request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
+        }
     }
 
     /**
