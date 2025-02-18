@@ -5,7 +5,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Detail User</title>
+        <title>Detail Staff</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
@@ -130,7 +130,7 @@
 
             <div class="contents">
                 <div class="panel-bar1">
-                    <h2>User Details</h2>
+                    <h2>Staff Details</h2>
 
                     <form action="${pageContext.request.contextPath}/Users" method="POST">
                         <input type="hidden" name="service" value="editUser" />
@@ -191,7 +191,7 @@
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>
-                            <a href="${pageContext.request.contextPath}/Users?service=users" class="btn btn-secondary">Back to Users</a>
+                            <a href="${pageContext.request.contextPath}/Users?service=users" class="btn btn-secondary">Back to Staffs list</a>
                         </div>
                     </form>
                 </div>
