@@ -280,6 +280,37 @@ th, td {
     object-fit: cover;
     cursor: pointer;
 }
+
+.top-bar .top-bar-right .profile .profile-menu {
+  display: none;
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 167px;
+  z-index: 100;
+}
+
+.top-bar .top-bar-right .profile .profile-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.top-bar .top-bar-right .profile .profile-menu li {
+  padding: 10px;
+  cursor: pointer;
+  color: var(--heading-clr);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-bar .top-bar-right .profile .profile-menu li:hover {
+  background: var(--bg-secondary);
+}
 /*   === Top Bar Code Ends ===   */
 
 /*   === Code For Side Bar Starts ===   */

@@ -11,6 +11,7 @@
     </head>
     <body>
         <div class="page-wrapper">
+<!--   *** Top Bar Starts ***   -->
             <div class="top-bar">
                 <div class="top-bar-left">
                     <div class="hamburger-btn">
@@ -18,10 +19,12 @@
                         <span></span>
                         <span></span>
                     </div>
-                    <div class="logo mr-5">
-                        <img src="<%= request.getContextPath() %>/views/product/images/logo.png" style="width: 120px; height: 70px" />
+                    <div class="logo">
+                        <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
+
+
                 <div class="top-bar-right">
                     <div class="mode-switch">
                         <i class="fa-solid fa-moon"></i>
@@ -30,7 +33,13 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="<%= request.getContextPath() %>/views/product/images/profile-img.jpg" />
+                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
+                        <div class="profile-menu">
+                            <ul>
+                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
+                                <li><a href="/ISP392_Project/change-password"><i class="fa-solid fa-pen"></i> Change Password</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -98,6 +107,23 @@
                         </a>
                     </li>
                 </ul>
+                <!--   === Side Bar Footer Starts ===   -->
+                <div class="sidebar-footer">
+                    <div class="settings">
+                        <span class="gear-icon">
+                            <i class="fa-solid fa-gear"></i>
+                        </span>
+                        <span class="text">Settings</span>
+                    </div>
+                    <div class="logoutBtn">
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
+                    </div>
+                </div>
+                <!--   === Side Bar Footer Ends ===   -->
             </aside>
 
             <div class="contents">
@@ -125,7 +151,7 @@
                                 <label>Confirm New Password</label>
                                 <input name="confirmPassword" type="password" class="form-control" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">Change Password</button>
+                            <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Change Password</button>
                         </form>
                     </div>
                 </div>
