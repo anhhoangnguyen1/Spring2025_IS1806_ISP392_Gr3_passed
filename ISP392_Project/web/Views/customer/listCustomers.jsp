@@ -45,7 +45,10 @@
                     </form>
                 </div>
             </div>
-            <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#addCustomerModal">Add Customer</button>
+            <a href="${pageContext.request.contextPath}/Customers?service=addCustomer" class="btn btn-outline-primary mr-lg-auto">
+                Add Customer
+            </a>
+
         </div>
 
         <!-- Table Container -->
@@ -81,7 +84,9 @@
                                     <button type="button" class="btn btn-outline-danger mr-lg-auto" data-toggle="modal" data-target="#debtListModal${customer.id}">
                                         Debt note
                                     </button>
-                                    <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#editCustomerModal${customer.id}">Edit</button>
+                                    <a href="${pageContext.request.contextPath}/Customers?service=editCustomer&customer_id=${customer.id}" class="btn btn-outline-primary">
+                                        Edit
+                                    </a>
                                 </td>
                             </tr>
                         </c:forEach>
