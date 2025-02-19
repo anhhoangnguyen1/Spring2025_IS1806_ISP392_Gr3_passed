@@ -1,10 +1,24 @@
 CREATE SCHEMA ISP392_Project2;
 USE ISP392_Project2;
 
+-- Table Store
+CREATE TABLE Stores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    address TEXT NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,   
+    is_deleted BOOLEAN DEFAULT FALSE,
+    deletedAt DATETIME,
+    status VARCHAR(255)
+);
+
 -- Table Users
 CREATE TABLE Users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     image VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -14,11 +28,13 @@ CREATE TABLE Users (
     dob DATE,
     role ENUM('admin', 'staff', 'owner') NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
+    store_id INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
     status VARCHAR(255),
-    deletedAt DATETIME
+    deletedAt DATETIME,
+    FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
 );
 
 
@@ -47,7 +63,6 @@ CREATE TABLE Products (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
-    deletedAt DATETIME,
     status VARCHAR(255),
     FOREIGN KEY (zone_id) REFERENCES Zones(id)
 );
@@ -64,8 +79,6 @@ CREATE TABLE Customers (
     updated_by VARCHAR(255),
     created_by VARCHAR(255),
     isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
-    deletedBy VARCHAR(255),
-    deletedAt DATETIME,
     status VARCHAR(255)
 );
 
@@ -109,13 +122,18 @@ CREATE TABLE Debt_note (
     image VARCHAR(255) NOT NULL
 );
 
--- Insert into Users
-INSERT INTO Users (username, password, image, name, phone, address, gender, dob, role, email, status)
+-- Insert into Stores
+INSERT INTO Stores(name, address, phone, email, status)
 VALUES 
-('admin', 'password123', 'admin.jpg', 'Nguyễn Văn Hoàng', '0987654321', '123 Đường Nguyễn Trãi, Hà Nội', 'Male', '1980-01-01', 'admin', 'hoangnahe181458@fpt.edu.vn', 'Active'),
-('owner', 'password123', 'owner.jpg', 'Phan Ngọc Mai', '0987654322', '456 Đường Khuất Duy Tiến, Hà Nội', 'Female', '1990-02-02', 'owner', 'phanngocmai2411@gmail.com', 'Active'),
-('staff1', 'password123', 'staff1.jpg', 'Lê Phương Linh', '0987654323', '789 Đường Trần Hưng Đạo, Hà Nội', 'Female', '2000-03-03', 'staff', 'phuonglinh2611.cv@gmail.com', 'Active'),
-('staff2', 'password123', 'staff2.jpg', 'Phạm Hoàng Anh', '0987654324', '101 Đường Hai Bà Trưng, Hà Nội', 'Male', '1999-04-04', 'staff', 'anhhoangyh3@gmail.com', 'Active');
+('Store 1', '65 Đường Nguyễn Trãi, Hà Nội', '0912639622', 'store1@gmail.com', 'Active');
+
+-- Insert into Users
+INSERT INTO Users (username, password, image, name, phone, address, gender, dob, role, email, store_id, status)
+VALUES 
+('admin', 'password123', 'admin.jpg', 'Nguyễn Văn Hoàng', '0987654321', '123 Đường Nguyễn Trãi, Hà Nội', 'Male', '1980-01-01', 'admin', 'hoangnahe181458@fpt.edu.vn', null, 'Active'),
+('owner', 'password123', 'owner.jpg', 'Phan Ngọc Mai', '0987654322', '456 Đường Khuất Duy Tiến, Hà Nội', 'Female', '1990-02-02', 'owner', 'phanngocmai2411@gmail.com', 1, 'Active'),
+('staff1', 'password123', 'staff1.jpg', 'Lê Phương Linh', '0987654323', '789 Đường Trần Hưng Đạo, Hà Nội', 'Female', '2000-03-03', 'staff', 'phuonglinh2611.cv@gmail.com', 1, 'Active'),
+('staff2', 'password123', 'staff2.jpg', 'Phạm Hoàng Anh', '0987654324', '101 Đường Hai Bà Trưng, Hà Nội', 'Male', '1999-04-04', 'staff', 'anhhoangyh3@gmail.com', 1, 'Active');
 
 -- Insert into Zones
 INSERT INTO Zones (name, capacity, remain_capacity, status)
@@ -170,4 +188,6 @@ VALUES
 INSERT INTO Debt_note (type, amount, customers_id, created_by, status, description, image)
 VALUES 
 ('debt', 22000000, 1, 'Lê Phương Linh', 'Pending', 'Khách hàng nợ', 'debt1.jpg'),
-('debt', 10000000, 4, 'Phan Ngọc Mai', 'Pending', 'Khách hàng trả nợ một phần', 'repay1.jpg');
+('debt', 10000000, 4, 'Phan Ngọc Mai', 'Pending', 'Khách hàng trả nợ một phần', 'debt2.jpg');
+
+select * from Users;
