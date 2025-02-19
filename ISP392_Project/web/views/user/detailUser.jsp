@@ -144,6 +144,9 @@
                         <div class="form-group">
                             <label for="email">Email</label>
                             <input type="email" class="form-control" name="email" value="${user.email}" required>
+                            <c:if test="${not empty emailError}">
+                                <span style="color: red;">${emailError}</span>
+                            </c:if>
                         </div>
 
                         <div class="form-group">
@@ -159,7 +162,11 @@
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label for="phone">Phone</label>
-                                <input type="text" class="form-control" name="phone" value="${user.phone}" required>
+                                <input type="text" class="form-control" name="phone" pattern="\d{10}" minlength="10" maxlength="10" 
+                                       title="Please enter a valid 10-digit phone number." value="${user.phone}" required>
+                                <c:if test="${not empty phoneError}">
+                                    <span style="color: red;">${phoneError}</span>
+                                </c:if>
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="gender">Gender</label>

@@ -94,6 +94,22 @@ public class controllerUsers extends HttpServlet {
             String updatedBy = request.getParameter("updatedBy");
             java.sql.Date dob = java.sql.Date.valueOf(request.getParameter("dob"));
 
+            boolean emailExists = userDAO.checkEmailExists(email, userId);
+            boolean phoneExists = userDAO.checkPhoneExists(phone, userId);
+
+            if (emailExists) {
+                request.setAttribute("emailError", "Email đã tồn tại.");
+                request.setAttribute("user", getUserFromRequest(request));
+                request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
+                return;
+            }
+            if (phoneExists) {
+                request.setAttribute("phoneError", "Số điện thoại đã tồn tại.");
+                request.setAttribute("user", getUserFromRequest(request));
+                request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
+                return;
+            }
+
             // Chỉnh sửa thông tin người dùng
             Users user = Users.builder()
                     .id(Integer.parseInt(request.getParameter("user_id")))
@@ -123,6 +139,20 @@ public class controllerUsers extends HttpServlet {
             request.setAttribute("userList", list);
             request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
         }
+    }
+
+    private Users getUserFromRequest(HttpServletRequest request) {
+        Users user = new Users();
+        user.setId(Integer.parseInt(request.getParameter("user_id")));
+        user.setName(request.getParameter("name"));
+        user.setEmail(request.getParameter("email"));
+        user.setPhone(request.getParameter("phone"));
+        user.setAddress(request.getParameter("address"));
+        user.setDob(java.sql.Date.valueOf(request.getParameter("dob")));
+        user.setGender(request.getParameter("gender"));
+        user.setStatus(request.getParameter("status"));
+        user.setRole(request.getParameter("role"));
+        return user;
     }
 
     /**
