@@ -98,13 +98,13 @@ public class controllerUsers extends HttpServlet {
             boolean phoneExists = userDAO.checkPhoneExists(phone, userId);
 
             if (emailExists) {
-                request.setAttribute("emailError", "Email đã tồn tại.");
+                request.setAttribute("emailError", "Email is existed.");
                 request.setAttribute("user", getUserFromRequest(request));
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 return;
             }
             if (phoneExists) {
-                request.setAttribute("phoneError", "Số điện thoại đã tồn tại.");
+                request.setAttribute("phoneError", "Phone is existed.");
                 request.setAttribute("user", getUserFromRequest(request));
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 return;
