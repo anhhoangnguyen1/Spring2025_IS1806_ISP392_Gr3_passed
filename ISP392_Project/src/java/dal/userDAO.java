@@ -123,6 +123,36 @@ public class userDAO extends DBContext {
         return false;
     }
 
+    public boolean checkEmailExists(String email, int userId) {
+        String sql = "SELECT COUNT(*) FROM users WHERE email = ? AND id != ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, email);
+            st.setInt(2, userId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean checkPhoneExists(String phone, int userId) {
+        String sql = "SELECT COUNT(*) FROM users WHERE phone = ? AND id != ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, phone);
+            st.setInt(2, userId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private Users mapResultSetToUser(ResultSet rs) throws SQLException {
         return Users.builder()
                 .id(rs.getInt("id"))
