@@ -1,4 +1,4 @@
-
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -10,7 +10,7 @@
         <div class="modal-content">
             
             <form action="${pageContext.request.contextPath}/Debts" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="service" value="addDebt" />
+                <input type="hidden" name="service" value="addDebtInCustomers" />
                 
                 <div class="modal-header">
                     <h4 class="modal-title">Add Debt</h4>
@@ -30,7 +30,7 @@
                     <!-- Amount Field -->
                     <div class="form-group">
                         <label>Amount</label>
-                        <input type="number" step="0.01" class="form-control" name="amount" required />
+                        <input type="text" oninput="formatNumber(event)" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="amount" required />
                     </div>
 
                     <!-- Image Upload -->
@@ -39,12 +39,17 @@
                         <input type="file" name="image">
                     </div>
                     
-                    <!-- Customer ID -->
-                    <input type="hidden" name="customer_id" value="${customer.id}" />
+                   
+              
                     <div class="form-group">
-                        <label>Created by</label>
-                        <input type="text" name="createdBy" value="${sessionScope.username}" class="form-control" required />
+                        <label>Created at</label>
+                        <input type="datetime-local" name="created_at" value="" class="form-control" required />
                     </div>
+                     <!-- Customer ID -->
+                    <input type="hidden" name="customer_id" value="${customer.id}" />
+
+                        <input type="hidden" name="createdBy" value="${sessionScope.username}" class="form-control" required />
+
 
                     <!-- Description -->
                     <div class="form-group">
@@ -52,8 +57,8 @@
                         <textarea class="form-control" name="description" rows="3"></textarea>
                     </div>
 
-                    <!-- Created By (Hidden) -->
-                    <input type="hidden" name="createdBy" value="owner" />
+
+
 
                     <!-- Status -->
                     <div class="form-group">

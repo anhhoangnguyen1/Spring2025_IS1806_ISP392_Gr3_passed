@@ -5,8 +5,9 @@
 package dal;
 
 import dal.debtDAO;
-import entity.Customers;
+import entity.Customers; 
 import entity.DebtNote;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,7 +50,7 @@ public class customerDAO extends DBContext {
                     Customers customer = mapResultSetToCustomer(rs);
 
                     // Lấy danh sách nợ của khách hàng
-                    List<DebtNote> debts = debtDao.viewAllDebt("id", customer.getId(), 1);
+                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("id", customer.getId(), 1);
 
                     // Nếu danh sách nợ bị null, gán một danh sách rỗng để tránh lỗi JSP
                     if (debts == null) {
@@ -138,6 +139,17 @@ public class customerDAO extends DBContext {
             st.setString(5, customer.getUpdatedBy());
             st.setString(6, customer.getStatus());
             st.setInt(7, customer.getId());
+            st.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+     public void editCustomerBalance(BigDecimal balance, int customerId) {
+        String sql = "UPDATE customers SET  balance = balance +  ?  WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) { 
+            st.setBigDecimal(1, balance);
+            st.setInt(2, customerId);
             st.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

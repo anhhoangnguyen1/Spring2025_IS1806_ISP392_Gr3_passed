@@ -73,7 +73,7 @@
                                                     </button>
 
                                                     <!-- Xóa nợ -->
-                                                    <a class="btn btn-outline-danger" href="Debts?service=deleteDebt&id=${debt.id}" onclick="return confirm('Are you sure?')">
+                                                    <a class="btn btn-outline-danger" href="Debts?service=deleteDebtCustomers&id=${debt.id}" onclick="return confirm('Are you sure?')">
                                                         <i class="fas fa-trash"></i>
                                                     </a>
                                                 </td>

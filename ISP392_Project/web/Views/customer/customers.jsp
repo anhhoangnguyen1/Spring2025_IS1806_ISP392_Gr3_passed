@@ -154,7 +154,7 @@
             </div>
         </div>
 
-
+                
         <c:import url="debtHistory.jsp" />
         <c:import url="addDebt.jsp" />
 
