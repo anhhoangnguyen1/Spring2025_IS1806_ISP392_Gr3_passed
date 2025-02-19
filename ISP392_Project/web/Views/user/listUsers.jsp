@@ -36,9 +36,9 @@
                     <table class="table table-striped table-hover table-bordered" id="myTable">
                         <thead>
                             <tr>
-                                <th class="resizable">ID</th>
+                                <th class="resizable" onclick="sortTable(0)">ID</th>
                                 <th class="resizable">Role</th>
-                                <th class="resizable">Name</th>
+                                <th class="resizable" onclick="sortTable(2)">Name</th>
                                 <th class="resizable">Phone</th>
                                 <th class="resizable">Address</th>
                                 <th class="resizable">Gender</th>
