@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller.authen;
 
 import dal.AccountDAO;
@@ -20,6 +16,8 @@ public class AuthenController extends HttpServlet {
 
     private AccountDAO accDAO;
     private final String FORGOT_PASSWORD_JSP_PAGE = "views/authen/forgotPassword.jsp";
+    private final String RESET_PASSWORD_JSP_PAGE = "views/authen/newPassword.jsp";
+    private final String VERIFY_OTP_JSP_PAGE = "views/authen/verifyOTP.jsp";
 
     @Override
     public void init() throws ServletException {
@@ -120,7 +118,7 @@ public class AuthenController extends HttpServlet {
         // Đặt thời gian hết hạn cho session (ví dụ: 15 phút)
         session.setMaxInactiveInterval(15 * 60);
 
-        url = "views/authen/verifyOTP.jsp";
+        url = VERIFY_OTP_JSP_PAGE;
         return url;
     }
 
@@ -141,34 +139,39 @@ public class AuthenController extends HttpServlet {
                 return handlePasswordReset(request, session);
             } else {
                 request.setAttribute("error", "Invalid OTP purpose.");
-                return "view/authen/otp-verification.jsp";
+                return VERIFY_OTP_JSP_PAGE;
             }
         } else {
             // Incorrect OTP
             request.setAttribute("error", "Incorrect OTP. Please try again.");
-            return "view/authen/otp-verification.jsp";
+            return VERIFY_OTP_JSP_PAGE;
         }
     }
-    
+
     private String handleAccountActivation(HttpServletRequest request, HttpSession session) {
         //Todo
         return null;
     }
-    
+
     private String handlePasswordReset(HttpServletRequest request, HttpSession session) {
         // Redirect to password reset page
-        return "views/authen/newPassword.jsp";
+        return RESET_PASSWORD_JSP_PAGE;
     }
-    
+
     private String resetPassword(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
         String email = (String) session.getAttribute("email");
         String newPassword = request.getParameter("new_password");
         String confirmPassword = request.getParameter("confirm_password");
 
+        if (newPassword == null || newPassword.length() < 6) {
+            request.setAttribute("error", "Password must be at least 6 characters long.");
+            return RESET_PASSWORD_JSP_PAGE; // Stop execution
+        }
+
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "Passwords do not match.");
-            return "view/authen/resetPassword.jsp";
+            return RESET_PASSWORD_JSP_PAGE;
         }
 
         Users account = Users.builder()
@@ -179,10 +182,10 @@ public class AuthenController extends HttpServlet {
         boolean updated = accDAO.updatePassword(account);
         if (updated) {
             request.setAttribute("message", "Your password has been successfully reset.");
-            return "/views/login.html";
+            return "/views/loginServlet";
         } else {
             request.setAttribute("error", "Failed to reset password. Please try again.");
-            return "views/authen/newPassword.jsp";
+            return RESET_PASSWORD_JSP_PAGE;
         }
     }
 }

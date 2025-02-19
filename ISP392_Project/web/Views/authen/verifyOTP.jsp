@@ -69,6 +69,9 @@
                 <input type="text" name="otp" placeholder="Enter OTP" required>
                 <button type="submit">Verify OTP</button>
             </form>
+            <div style="text-align: right;">
+                <p><a href="/ISP392_Project/views/loginServlet" class="btn">Un-Forgot password?</a></p>
+            </div>
         </div>
     </body>
 </html>
