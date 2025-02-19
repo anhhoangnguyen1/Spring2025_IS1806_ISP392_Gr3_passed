@@ -153,6 +153,11 @@
 
         </div> 
         <c:import url="addDebt.jsp" />
+        <div id="myModal" class="modalImage">
+            <span class="close">&times;</span>
+            <img class="modalImage-content" id="img01">
+            <div id="caption"></div>
+        </div>
 
         <!--   === java script ===   -->
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>

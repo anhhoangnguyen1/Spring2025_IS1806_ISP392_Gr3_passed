@@ -1,4 +1,4 @@
-
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -20,34 +20,38 @@
                             <div class="form-group">
                                 <label>Debt Type</label>
                                 <select class="form-control" name="type">
-                                    <option value="debt">Debt</option>
-                                    <option value="repay">Repay</option>
+                                    <option value="+">+</option>
+                                    <option value="-">-</option>
                                 </select>
                             </div>
 
                             <!-- Amount Field -->
                             <div class="form-group">
                                 <label>Amount</label>
-                                <input type="number" step="0.01" class="form-control" name="amount" required />
+                                <input type="text" oninput="formatNumber(event)" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="amount" required />
                             </div>
 
                             <div class="form-group">
                                 <label>Image</label>
-                                <input  type="file" name="image" required>
+                                <input  type="file" name="image">
                             </div>
                             
                               <div class="form-group">
-                                <label>Customer Name</label>
-                                <div class="custom-select">
-                                    <div class="options-container" id="optionsContainer">
-                                        <input type="text" id="searchBox" class="search-box" placeholder="Search customer name..."  autocomplete="off">
-                                        <c:forEach var="name" items="${listName}">
-                                            <div class="option" data-value="${name}">${name}</div>
-                                        </c:forEach>
-                                    </div>
-                                    <input type="hidden" name="customerName" id="name"/>
-                                    <div class="selected-option" id="selectedOption">Select a customer</div>
-                                </div>
+                                <label>Name</label>
+                                <input type="text" name="debtorName" class="form-control" value="" required/>
+                            </div>
+                              <div class="form-group">
+                                <label>Address</label>
+                                <input type="text" name="debtorAddress" class="form-control" value="" required/>
+                            </div>
+                              <div class="form-group">
+                                <label>Create at</label>
+                                <input type="datetime-local" name="created_at" class="form-control" value="" required/>
+                            </div>
+                            
+                              <div class="form-group">
+                                <label>Phone</label>
+                                <input type="text" name="debtorPhone"  class="form-control" value="" required/>
                             </div>
 
                             
@@ -57,7 +61,7 @@
                             </div>
                             
                             <div class="form-group">
-                                <input type="hidden" name="createdBy" value="owner" />
+                                <input type="hidden" name="createdBy" value="${sessionScope.username}" />
                             </div>
                             
                             <div class="form-group">

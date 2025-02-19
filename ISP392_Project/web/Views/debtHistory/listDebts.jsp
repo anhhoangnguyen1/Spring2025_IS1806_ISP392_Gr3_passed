@@ -8,41 +8,35 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
         <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>JSP Page</title>
     </head>
     <body>
         <h1>Debts</h1>
+        <div class="search-box">
+            <input type="text" id="myInput" class="input-box" list="browsers" name="browser" id="browser" placeholder="Search for a product..."
+                   autocomplete="off"
+                   />
+            <datalist id="browsers">
+                <c:forEach var="debt" items="${list}">
+                    <option value="${debt.getDebtorName()}">
+                        ${debt.getDebtorName()}
+                    </option>
+                </c:forEach>
+            </datalist>
+            <button type="submit" class="search-btn">
+                <i class="fa-solid fa-search"></i>
+            </button>
+        </div>
         <div class="action-bar d-flex align-items-center">
-            <div class="dropdown">
-                <button type="button" class="btn btn-outline-primary dropdown-toggle mr-2" color: var(--heading-clr); data-toggle="dropdown">
-                    Choose arrange
-                </button>
-                <div class="dropdown-menu">
-                    <form action="Debts" method="POST" class="dropdown-item">
-                        <input type="hidden" name="service" value="debts" />
-                        <input type="hidden" name="command" value="created_at" />
-                        <button class="btn btn-outline-primary" type="submit">Latest</button>
-                    </form>
-                    <form action="Debts" method="POST" class="dropdown-item">
-                        <input type="hidden" name="service" value="debts" />
-                        <input type="hidden" name="command" value="amount DESC " />
-                        <button class="btn btn-outline-primary" type="submit">High - Low</button>
-                    </form>
-                    <form action="Debts" method="POST" class="dropdown-item">
-                        <input type="hidden" name="service" value="debts" />
-                        <input type="hidden" name="command" value="amount ASC" />
-                        <button class="btn btn-outline-primary" type="submit">Low - High</button>
-                    </form>
-                </div>
-            </div>
             <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#addDebtModal">
                 Add Debt
             </button>
-            
+
             <div class="btn-group">
-                <!-- Nút Toggle Checkboxes -->
+                <!-- N?t Toggle Checkboxes -->
                 <button type="button" class="btn btn-outline-primary" id="toggle-checkbox-btn" title="Show Checkboxes">
                     <i class="fa-solid fa-list-check"></i>
                 </button>
@@ -53,57 +47,61 @@
         </div>
         <br>
         <div class="table-container">
-    <form action="Debts" method="POST">
-        <table class="table-bordered" style="color: var(--heading-clr);">
-            <thead>
-                <tr>
-                    <th class="checkbox-column" style="display: none;">
-                        <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" />
-                    </th>
-                    <th>ID</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Image</th>
-                    <th>Description</th>
-                    <th>Customer name</th>
-                    <th>Created At</th>
-                    <th>Updated At</th>
-                    <th>Created By</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="myTable">
-                <c:forEach var="debt" items="${list}">
-                    <tr>
-                        <td class="checkbox-column" style="display: none;">
+            <form action="Debts" method="POST">
+                <table class="table-bordered" style="color: var(--heading-clr);">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-column" style="display: none;" >
+                                <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" />
+                            </th>
+                            <th class="resizable" onclick="sortTable(1)">ID</th>
+                            <th class="resizable" onclick="sortTable(2)">Amount</th>
+                            <th class="resizable">Image</th>
+                            <th class="resizable" onclick="sortTable(4)">Description</th>
+                            <th class="resizable" onclick="sortTable(5)">name</th>
+                            <th class="resizable" onclick="sortTable(6)">Address</th>
+                            <th class="resizable" onclick="sortTable(7)">Phone</th>
+                            <th class="resizable" onclick="sortTable(8)">Created At</th>
+                            <th class="resizable" onclick="sortTable(9)">Updated At</th>
+                            <th class="resizable" onclick="sortTable(10)">Created By</th>
+                            <th class="resizable">Status</th>
+                            <th class="sticky-col1">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        <c:forEach var="debt" items="${list}">
+                            <tr>
+                                <td class="checkbox-column" style="display: none;">
                                     <input type="checkbox" name="selectedProducts" value="${debt.getId()}" class="product-checkbox" />
-                        </td>
-                        <td>${debt.getId()}</td>
-                        <td>${debt.getType()}</td>
-                        <td>${debt.getAmount()}</td>
-                        <td><img src="images/${debt.getImage()}" style="width: 100px; height: 100px; object-fit: cover;" alt="Debt evidence"/></td>
-                        <td>${debt.getDescription()}</td>
-                        <td>${debt.getCreatedAt()}</td>
-                        <td>${debt.getUpdatedAt()}</td>
-                        <td>${debt.getCreatedBy()}</td>
-                        <td>${debt.getStatus()}</td>
-                        <td>
-                            <div class="btn-group">
-                                <a class="btn btn-outline-info" href="Debts?service=debtHistory&id=${debt.getId()}">
-                                    <i class="fas fa-info-circle"></i>
-                                </a>
-                                <a class="btn btn-outline-danger" href="Debts?service=deleteDebt&id=${debt.getId()}" onclick="return doDelete(${debt.getId()})">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                </c:forEach>
-            </tbody>
-        </table>
-    </form>
-</div>
+                                </td>
+                                <td>${debt.getId()}</td>
+                                <td class="${debt.type == '-' ? 'text-danger' : ''}">
+                                     <fmt:formatNumber value="${debt.amount}" />
+                                </td>
+
+                                <td><img src="images/${debt.getImage()}" class="myImg" style="width: 100px; height: 100px; object-fit: cover;" alt="Debt evidence"/></td>
+                                <td>${debt.getDescription()}</td>
+                                <td>${empty debt.customers_name ? debt.debtorName : debt.customers_name}</td>
+                                <td>${empty debt.address ? debt.debtorAddress : debt.address}</td>
+                                <td>${empty debt.phone ? debt.debtorPhone : debt.phone}</td>
+
+                                <td>${debt.getCreatedAt()}</td>
+                                <td>${debt.getUpdatedAt()}</td>
+                                <td>${debt.getCreatedBy()}</td>
+                                <td>${debt.getStatus()}</td>
+                                <td class="sticky-col1">
+                                    <div class="btn-group">
+                                        <a class="btn btn-outline-info" href="Debts?service=debtHistory&id=${debt.getId()}">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </form>
+        </div>
 
         <div class="container d-flex justify-content-center mt-4" >
             <ul class="pagination" >
@@ -142,6 +140,6 @@
                 </c:if>
             </ul>
         </div>
-        
+
     </body>
 </html>
