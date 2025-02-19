@@ -25,6 +25,5 @@ public class Products {
     private java.util.Date createdAt;
     private java.util.Date updatedAt;
     private boolean isDelete;
-    private java.util.Date deletedAt;
     private String status;
 }

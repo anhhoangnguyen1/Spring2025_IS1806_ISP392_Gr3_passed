@@ -1,7 +1,10 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package entity;
 
 import java.sql.Date;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,20 +17,17 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class Customers {
+public class Stores {
+
     private int id;
     private String name;
-    private String phone;
     private String address;
-    private double balance;
+    private String phone;
+    private String email;
     private Date createdAt;
     private Date updatedAt;
-    private String updatedBy;
-    private String createdBy;
-    private boolean isDeleted;
+    private boolean isDelete;
+    private Date deletedAt;
     private String status;
-    private List<Invoice> invoices;
-    private List<DebtNote> debtNotes;
-
 
 }
