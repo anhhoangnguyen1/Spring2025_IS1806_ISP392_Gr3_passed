@@ -25,7 +25,7 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
 
     // get username, password for authenticate
     public Users getUser(String username, String password) {
-        String sql = "SELECT * "
+        String sql = "SELECT id, username, password, image, name, phone, address, gender, dob, role, email, created_at, updated_at, isDeleted, status, deletedAt "
                 + "FROM Users "
                 + "WHERE Users.username = ? AND Users.password = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -138,7 +138,7 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
     public static void main(String[] args) {
         AccountDAO dao = new AccountDAO();
 
-        Users user1 = dao.getUser("admin1", "password123");
+        Users user1 = dao.getUser("admin", "password123");
         if (user1 != null) {
             System.out.println("Đăng nhập thành công: " + user1.getUsername() + " - Role: " + user1.getRole());
         } else {
