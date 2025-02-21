@@ -18,6 +18,7 @@
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
             />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="styles.css" />
         <title>Rice Retail Management</title>
     </head>
@@ -72,7 +73,7 @@
                 </div>
             </div>
         </header>
-
+        <button onclick="topFunction()" id="myBtn" title="Go to top"><i class="fa-solid fa-arrow-up"></i></button>
         <section class="section__container about__container" id="about">
             <div class="about__header">
                 <div>
@@ -174,6 +175,7 @@
                 Copyright © 2024 Rice Retail Management. All rights reserved.
             </div>
         </footer>
+
 
         <script src="https://unpkg.com/scrollreveal"></script>
         <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
