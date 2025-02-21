@@ -19,6 +19,13 @@
         <div class="container mt-4">
             <h1>Staffs List</h1>
 
+            <c:if test="${not empty sessionScope.successMessage}">
+                <div class="alert alert-success">
+                    <strong>Success!</strong> ${sessionScope.successMessage}
+                </div>
+                <c:set var="successMessage" value="${sessionScope.successMessage}" />
+                <c:remove var="successMessage" />
+            </c:if>
             <!-- Search Box -->
             <form action="${pageContext.request.contextPath}/Users" method="POST">
                 <div class="search-box">
