@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -44,7 +45,7 @@ public class controllerCustomers extends HttpServlet {
                 }
 
                 List<Customers> list = customerDAO.viewAllCustomersWithDebts("name", index);
-
+                  list.sort(Comparator.comparingInt(Customers::getId));
                 int total = customerDAO.countCustomers();
                 int endPage = (total % 10 == 0) ? total / 10 : (total / 10) + 1;
                 request.setAttribute("list", list);
@@ -112,14 +113,14 @@ public class controllerCustomers extends HttpServlet {
             response.sendRedirect("Customers?service=customers");
         }
         if ("search".equals(service)) {
-            String searchCustomer = request.getParameter("searchCustomer"); // Lấy giá trị tìm kiếm từ form
+            String searchCustomer = request.getParameter("searchCustomer"); 
             List<Customers> list;
 
-            // Kiểm tra nếu có từ khóa tìm kiếm
+           
             if (searchCustomer != null && !searchCustomer.isEmpty()) {
-                list = customerDAO.searchCustomers(searchCustomer);  // Gọi phương thức tìm kiếm
+                list = customerDAO.searchCustomers(searchCustomer);  
             } else {
-                list = customerDAO.viewAllCustomersWithDebts("name",1);  // Hiển thị tất cả người dùng nếu không có tìm kiếm
+                list = customerDAO.viewAllCustomersWithDebts("name",1); 
             }
 
             request.setAttribute("list", list);

@@ -17,7 +17,7 @@
         <form action="${pageContext.request.contextPath}/Customers" method="POST">
             <div class="search-box">
                 <input type="hidden" name="service" value="search" />
-                <input type="text" id="myInput" class="input-box" name="searchCustomer" placeholder="Search for a product..."
+                <input type="text" id="myInput" class="input-box" name="searchCustomer" placeholder="Search for a customer..."
                        autocomplete="off"
                        />
                 <button type="submit" class="search-btn">
@@ -26,21 +26,6 @@
             </div>
         </form>
 
-        <div class="action-bar d-flex align-items-center">
-            <div class="dropdown">
-                <button type="button" class="btn btn-outline-primary dropdown-toggle mr-2" data-toggle="dropdown">Choose arrange</button>
-                <div class="dropdown-menu">
-                    <form action="Customers" method="POST" class="dropdown-item">
-                        <input type="hidden" name="service" value="customers" />
-                        <input type="hidden" name="command" value="name" />
-                        <button class="btn btn-outline-primary" type="submit">Name A-Z</button>
-                    </form>
-                    <form action="Customers" method="POST" class="dropdown-item">
-                        <input type="hidden" name="service" value="customers" />
-                        <input type="hidden" name="command" value="balance DESC" />
-                        <button class="btn btn-outline-primary" type="submit">Balance High-Low</button>
-                    </form>
-                </div>
             </div>
             <a href="${pageContext.request.contextPath}/Customers?service=addCustomer" class="btn btn-outline-primary mr-lg-auto">
                 Add Customer
@@ -54,7 +39,7 @@
                 <table class="table table-striped table-hover table-bordered" id="myTable">
                     <thead>
                         <tr>
-                            <th class="resizable" onclick="sortTable(0)">ID</th>
+                            <th class="resizable">ID</th>
                             <th class="resizable" onclick="sortTable(1)">Name</th>
                             <th class="resizable">Phone</th>
                             <th class="resizable">Address</th>

@@ -168,22 +168,20 @@ public class customerDAO extends DBContext {
                 .createdBy(rs.getString("created_by"))
                 .updatedBy(rs.getString("updated_by"))
                 .isDeleted(rs.getBoolean("isDeleted"))
-                .deletedBy(rs.getString("deletedBy"))
-                .deletedAt(rs.getDate("deletedAt"))
                 .status(rs.getString("status"))
                 .build();
     }
 
     public static void main(String[] args) {
-        customerDAO dao = new customerDAO();  // Thay CustomerDAO bằng DAO thực tế của bạn
+        customerDAO dao = new customerDAO();  
 
-        int pageIndex = 1;  // Lấy trang đầu tiên
+        int pageIndex = 1;
         List<Customers> customers = dao.viewAllCustomersWithDebts("id", pageIndex);
 
         if (customers.isEmpty()) {
-            System.out.println("❌ Không có khách hàng nào được tìm thấy!");
+            System.out.println("Không có khách hàng nào được tìm thấy!");
         } else {
-            System.out.println("✅ Danh sách khách hàng:");
+            System.out.println("Danh sách khách hàng:");
             for (Customers customer : customers) {
                 System.out.println("------------------------------------------------------");
                 System.out.println("Customer ID: " + customer.getId());
@@ -194,17 +192,17 @@ public class customerDAO extends DBContext {
                 System.out.println("Created By: " + customer.getCreatedBy());
                 System.out.println("Created At: " + customer.getCreatedAt());
 
-                // Kiểm tra danh sách nợ
-                List<DebtNote> debts = customer.getDebtNotes();
-                if (debts.isEmpty()) {
-                    System.out.println("  - 🚨 Không có khoản nợ nào.");
-                } else {
-                    System.out.println("  - 🔥 Danh sách khoản nợ:");
-                    for (DebtNote debt : debts) {
-                        System.out.println("    + Debt ID: " + debt.getId()
-                                + ", Type: " + debt.getType()
-                                + ", Amount: " + debt.getAmount()
-                                + ", Status: " + debt.getStatus());
+                
+//                List<DebtNote> debts = customer.getDebtNotes();
+//                if (debts.isEmpty()) {
+//                    System.out.println(" Không có khoản nợ nào.");
+//                } else {
+//                    System.out.println("Danh sách khoản nợ:");
+//                    for (DebtNote debt : debts) {
+//                        System.out.println("    + Debt ID: " + debt.getId()
+//                                + ", Type: " + debt.getType()
+//                                + ", Amount: " + debt.getAmount()
+//                                + ", Status: " + debt.getStatus());
                     }
                 }
             }
