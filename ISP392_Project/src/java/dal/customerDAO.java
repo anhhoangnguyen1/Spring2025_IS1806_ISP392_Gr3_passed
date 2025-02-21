@@ -193,16 +193,16 @@ public class customerDAO extends DBContext {
                 System.out.println("Created At: " + customer.getCreatedAt());
 
                 
-//                List<DebtNote> debts = customer.getDebtNotes();
-//                if (debts.isEmpty()) {
-//                    System.out.println(" Không có khoản nợ nào.");
-//                } else {
-//                    System.out.println("Danh sách khoản nợ:");
-//                    for (DebtNote debt : debts) {
-//                        System.out.println("    + Debt ID: " + debt.getId()
-//                                + ", Type: " + debt.getType()
-//                                + ", Amount: " + debt.getAmount()
-//                                + ", Status: " + debt.getStatus());
+                List<DebtNote> debts = customer.getDebtNotes();
+                if (debts.isEmpty()) {
+                    System.out.println(" Không có khoản nợ nào.");
+                } else {
+                    System.out.println("Danh sách khoản nợ:");
+                    for (DebtNote debt : debts) {
+                        System.out.println("    + Debt ID: " + debt.getId()
+                                + ", Type: " + debt.getType()
+                                + ", Amount: " + debt.getAmount()
+                                + ", Status: " + debt.getStatus());
                     }
                 }
             }

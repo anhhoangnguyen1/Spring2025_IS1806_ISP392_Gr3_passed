@@ -26,7 +26,8 @@
             </div>
         </form>
 
-            </div>
+        <div class="action-bar d-flex align-items-center">
+
             <a href="${pageContext.request.contextPath}/Customers?service=addCustomer" class="btn btn-outline-primary mr-lg-auto">
                 Add Customer
             </a>
@@ -39,7 +40,7 @@
                 <table class="table table-striped table-hover table-bordered" id="myTable">
                     <thead>
                         <tr>
-                            <th class="resizable">ID</th>
+                            <th class="resizable" onclick="sortTable(0)">ID</th>
                             <th class="resizable" onclick="sortTable(1)">Name</th>
                             <th class="resizable">Phone</th>
                             <th class="resizable">Address</th>
