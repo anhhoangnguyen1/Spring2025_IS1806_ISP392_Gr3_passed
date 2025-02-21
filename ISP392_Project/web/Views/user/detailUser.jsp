@@ -132,7 +132,7 @@
                 <div class="panel-bar1">
                     <h2>Staff Details</h2>
 
-                    <form action="${pageContext.request.contextPath}/Users" method="POST">
+                    <form action="${pageContext.request.contextPath}/Users" method="POST" onsubmit="return confirmSave()">
                         <input type="hidden" name="service" value="editUser" />
                         <input type="hidden" name="user_id" value="${user.id}" />
 
@@ -203,6 +203,12 @@
                     </form>
                 </div>
             </div>
+
+            <script>
+                function confirmSave() {
+                    return confirm("Are you sure you want to save the changes?");
+                }
+            </script>
 
             <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>

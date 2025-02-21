@@ -123,6 +123,9 @@ public class controllerUsers extends HttpServlet {
                     .status(request.getParameter("status"))
                     .build();
             userDAO.editUser(user);
+            
+            HttpSession session = request.getSession();
+            session.setAttribute("successMessage", "User details updated successfully.");
             response.sendRedirect("Users?service=users");
         }
         if ("search".equals(service)) {
