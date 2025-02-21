@@ -36,11 +36,6 @@
                     <input type="text" class="form-control" name="address" required>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="balance">Balance</label>
-                        <input type="number" step="0.01" class="form-control" name="balance" required>
-                    </div>
                     <div class="form-group col-md-6">
                         <label for="createdBy">Created By</label>
                         <input type="text" class="form-control" name="createdBy" value="${userName}" readonly>
