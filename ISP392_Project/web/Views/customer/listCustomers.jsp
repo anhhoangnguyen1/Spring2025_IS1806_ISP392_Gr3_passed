@@ -14,17 +14,28 @@
     </head>
     <body>
         <h1>Customers</h1>
-        <form action="${pageContext.request.contextPath}/Customers" method="POST">
+
+        <form action="${pageContext.request.contextPath}/Customers" method="GET">
             <div class="search-box">
-                <input type="hidden" name="service" value="search" />
-                <input type="text" id="myInput" class="input-box" name="searchCustomer" placeholder="Search for a customer..."
-                       autocomplete="off"
-                       />
+
+                <input type="hidden" name="service" value="customers" />
+                <input type="text" id="myInput" class="input-box" name="searchCustomer"
+                       placeholder="Search for information."
+                       value="${searchCustomer}" autocomplete="off" />
+
+                <button type="button" class="clear-btn"
+                        onclick="window.location.href = '${pageContext.request.contextPath}/Customers?service=customers'">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
                 <button type="submit" class="search-btn">
                     <i class="fa-solid fa-search"></i>
                 </button>
+
+
             </div>
         </form>
+
 
         <div class="action-bar d-flex align-items-center">
 
@@ -83,8 +94,9 @@
             <ul class="pagination">
                 <c:if test="${index > 1}">
                     <li class="page-item">
-                        <form action="Customers" method="POST" style="display: inline;">
+                        <form action="Customers" method="GET" style="display: inline;">
                             <input type="hidden" name="service" value="customers" />
+                            <input type="hidden" name="searchCustomer" value="${searchCustomer}" />
                             <input type="hidden" name="index" value="${index - 1}" />
                             <button type="submit" class="page-link"><<</button>
                         </form>
@@ -93,8 +105,9 @@
 
                 <c:forEach begin="1" end="${endPage}" var="page">
                     <li class="page-item ${index == page ? 'active' : ''}">
-                        <form action="Customers" method="POST" style="display: inline;">
+                        <form action="Customers" method="GET" style="display: inline;">
                             <input type="hidden" name="service" value="customers" />
+                            <input type="hidden" name="searchCustomer" value="${searchCustomer}" />
                             <input type="hidden" name="index" value="${page}" />
                             <button type="submit" class="page-link">${page}</button>
                         </form>
@@ -103,8 +116,9 @@
 
                 <c:if test="${index < endPage}">
                     <li class="page-item">
-                        <form action="Customers" method="POST" style="display: inline;">
+                        <form action="Customers" method="GET" style="display: inline;">
                             <input type="hidden" name="service" value="customers" />
+                            <input type="hidden" name="searchCustomer" value="${searchCustomer}" />
                             <input type="hidden" name="index" value="${index + 1}" />
                             <button type="submit" class="page-link">>></button>
                         </form>

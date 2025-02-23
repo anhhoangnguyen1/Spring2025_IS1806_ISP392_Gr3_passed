@@ -5,7 +5,7 @@
 package dal;
 
 import dal.debtDAO;
-import entity.Customers; 
+import entity.Customers;
 import entity.DebtNote;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -40,19 +40,19 @@ public class customerDAO extends DBContext {
 
     public List<Customers> viewAllCustomersWithDebts(String command, int index) {
         List<Customers> customersList = new ArrayList<>();
-        String sqlCustomers = "SELECT * FROM customers ORDER BY " + command + " LIMIT 10 OFFSET ?";
+        String sqlCustomers = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, status "
+                + "FROM customers "
+                + " ORDER BY " + "id" + " LIMIT 5 OFFSET ?";
 
         try (PreparedStatement st = connection.prepareStatement(sqlCustomers)) {
-            st.setInt(1, (index - 1) * 10);
+            st.setInt(1, (index - 1) * 5);
 
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     Customers customer = mapResultSetToCustomer(rs);
 
-                    // Lấy danh sách nợ của khách hàng
                     List<DebtNote> debts = debtDao.viewAllDebtInCustomer("id", customer.getId(), 1);
 
-                    // Nếu danh sách nợ bị null, gán một danh sách rỗng để tránh lỗi JSP
                     if (debts == null) {
                         debts = new ArrayList<>();
                     }
@@ -68,31 +68,78 @@ public class customerDAO extends DBContext {
         return customersList;
     }
 
-    public int countCustomers() {
-        String sql = "SELECT COUNT(*) FROM customers";
-        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
+    public int countCustomers(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            String sql = "SELECT COUNT(*) FROM customers";
+            try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+
+            String sql = "SELECT COUNT(*) FROM customers WHERE name LIKE ? OR phone LIKE ? OR address LIKE ?";
+            try (PreparedStatement st = connection.prepareStatement(sql)) {
+                String param = "%" + keyword + "%";
+                st.setString(1, param);
+                st.setString(2, param);
+                st.setString(3, param);
+                try (ResultSet rs = st.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return 0;
     }
 
-    public List<Customers> searchCustomers(String keyword) {
+    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize) {
         List<Customers> list = new ArrayList<>();
-        String sql = "SELECT * FROM customers WHERE name LIKE ?";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setString(1, "%" + keyword + "%");
-            try (ResultSet rs = st.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapResultSetToCustomer(rs));
+        String sql;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            sql = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, status "
+                    + "FROM customers "
+                    + "ORDER BY id "
+                    + "LIMIT ? OFFSET ?";
+            try (PreparedStatement st = connection.prepareStatement(sql)) {
+                st.setInt(1, pageSize);
+                st.setInt(2, (pageIndex - 1) * pageSize);
+                try (ResultSet rs = st.executeQuery()) {
+                    while (rs.next()) {
+                        list.add(mapResultSetToCustomer(rs));
+                    }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+            sql = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, status "
+                    + "FROM customers "
+                    + "WHERE name LIKE ? OR phone LIKE ? OR address LIKE ? "
+                    + "ORDER BY id "
+                    + "LIMIT ? OFFSET ?";
+            try (PreparedStatement st = connection.prepareStatement(sql)) {
+                String param = "%" + keyword + "%";
+                st.setString(1, param);
+                st.setString(2, param);
+                st.setString(3, param);
+                st.setInt(4, pageSize);
+                st.setInt(5, (pageIndex - 1) * pageSize);
+                try (ResultSet rs = st.executeQuery()) {
+                    while (rs.next()) {
+                        list.add(mapResultSetToCustomer(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+
         return list;
     }
 
@@ -144,10 +191,10 @@ public class customerDAO extends DBContext {
             e.printStackTrace();
         }
     }
-    
-     public void editCustomerBalance(BigDecimal balance, int customerId) {
+
+    public void editCustomerBalance(BigDecimal balance, int customerId) {
         String sql = "UPDATE customers SET  balance = balance +  ?  WHERE id = ?";
-        try (PreparedStatement st = connection.prepareStatement(sql)) { 
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setBigDecimal(1, balance);
             st.setInt(2, customerId);
             st.executeUpdate();
@@ -173,7 +220,7 @@ public class customerDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-        customerDAO dao = new customerDAO();  
+        customerDAO dao = new customerDAO();
 
         int pageIndex = 1;
         List<Customers> customers = dao.viewAllCustomersWithDebts("id", pageIndex);
@@ -192,7 +239,6 @@ public class customerDAO extends DBContext {
                 System.out.println("Created By: " + customer.getCreatedBy());
                 System.out.println("Created At: " + customer.getCreatedAt());
 
-                
                 List<DebtNote> debts = customer.getDebtNotes();
                 if (debts.isEmpty()) {
                     System.out.println(" Không có khoản nợ nào.");

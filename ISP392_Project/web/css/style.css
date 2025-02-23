@@ -1561,6 +1561,16 @@ input[type="checkbox"]:checked::after {
     font-weight: bold;
     transition: 0.3s;
 }
+.search-box .clear-btn {
+    position: absolute;
+    right: 45px; 
+    background: none;
+    border: none;
+    color: var(--text-clr);
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+}
 
 .close:hover,
 .close:focus {
