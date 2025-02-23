@@ -410,6 +410,8 @@ ul.navbar-links li.active a .nav-text {
     padding: 10px 0px;
     gap: 16px;
 }
+
+
 /*   === Code For Column 1 Starts ===   */
 .contents .description .col-1 {
     position: relative;
@@ -674,8 +676,10 @@ ul.navbar-links li.active a .nav-text {
     border-radius: 5px;
 }
 .top-products .products-wrapper .product {
-    padding: 10px 0px;
+    padding: 15px; /* Tăng padding để thẻ dài hơn */
+    min-height: 100px; /* Tăng chiều cao tối thiểu */
     display: flex;
+    align-items: center; /* Canh giữa nội dung */
     border-top: 1px solid var(--bg-ternary);
 }
 .top-products .products-wrapper .product:nth-of-type(1) {
@@ -697,7 +701,9 @@ ul.navbar-links li.active a .nav-text {
 }
 .products-wrapper .product .product-desc {
     width: 100%;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 .product .product-desc .product-row-1 {
     display: flex;
