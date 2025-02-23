@@ -190,4 +190,4 @@ VALUES
 ('debt', 22000000, 1, 'Lê Phương Linh', 'Pending', 'Khách hàng nợ', 'debt1.jpg'),
 ('debt', 10000000, 4, 'Phan Ngọc Mai', 'Pending', 'Khách hàng trả nợ một phần', 'debt2.jpg');
 
-select * from Users;
+select * from customers;

@@ -31,45 +31,52 @@ public class controllerCustomers extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        String service = request.getParameter("service");
+         String service = request.getParameter("service");
         if (service == null) {
             service = "customers";
         }
 
         switch (service) {
-            case "customers":
+            case "customers": {
+                String keyword = request.getParameter("searchCustomer");
+                if (keyword == null) {
+                    keyword = "";
+                }
+
                 int index = 1;
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
-                } catch (NumberFormatException ignored) {
-                }
+                } catch (NumberFormatException ignored) { }
 
-                List<Customers> list = customerDAO.viewAllCustomersWithDebts("name", index);
-                  list.sort(Comparator.comparingInt(Customers::getId));
-                int total = customerDAO.countCustomers();
-                int endPage = (total % 10 == 0) ? total / 10 : (total / 10) + 1;
+                int total = customerDAO.countCustomers(keyword);
+                int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
+
+                List<Customers> list = customerDAO.searchCustomers(keyword, index, 5);
+
                 request.setAttribute("list", list);
                 request.setAttribute("endPage", endPage);
                 request.setAttribute("index", index);
+                request.setAttribute("searchCustomer", keyword);
+
                 request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
                 break;
-
-            case "getCustomerById":
+            }
+            case "getCustomerById":{
 
                 int id = Integer.parseInt(request.getParameter("customer_id"));
                 Customers customer = customerDAO.getCustomerById(id);
                 request.setAttribute("customer", customer);
                 request.getRequestDispatcher("views/customer/detailCustomer.jsp").forward(request, response);
                 break;
-
-            case "addCustomer":
+            }
+            case "addCustomer":{
                 String createdBy = (String) session.getAttribute("username");
                 request.setAttribute("userName", createdBy);
                 request.getRequestDispatcher("views/customer/addCustomer.jsp").forward(request, response);
-                break;
+                break;}
 
             case "editCustomer":
-
+            {
                 int customerId = Integer.parseInt(request.getParameter("customer_id"));
                 Customers customerForEdit = customerDAO.getCustomerById(customerId);
                 request.setAttribute("customer", customerForEdit);
@@ -77,6 +84,7 @@ public class controllerCustomers extends HttpServlet {
                 request.setAttribute("userName", userName);
                 request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
                 break;
+            }
         }
     }
 
@@ -112,20 +120,20 @@ public class controllerCustomers extends HttpServlet {
             customerDAO.editCustomer(customer);
             response.sendRedirect("Customers?service=customers");
         }
-        if ("search".equals(service)) {
-            String searchCustomer = request.getParameter("searchCustomer"); 
-            List<Customers> list;
-
-           
-            if (searchCustomer != null && !searchCustomer.isEmpty()) {
-                list = customerDAO.searchCustomers(searchCustomer);  
-            } else {
-                list = customerDAO.viewAllCustomersWithDebts("name",1); 
-            }
-
-            request.setAttribute("list", list);
-            request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
-        }
+//        if ("search".equals(service)) {
+//            String searchCustomer = request.getParameter("searchCustomer"); 
+//            List<Customers> list;
+//
+//           
+//            if (searchCustomer != null && !searchCustomer.isEmpty()) {
+//                list = customerDAO.searchCustomers(searchCustomer);  
+//            } else {
+//                list = customerDAO.viewAllCustomersWithDebts("name",1); 
+//            }
+//
+//            request.setAttribute("list", list);
+//            request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
+//        }
     }
 
     /**
