@@ -26,4 +26,10 @@ public class Products {
     private java.util.Date updatedAt;
     private boolean isDelete;
     private String status;
+    
+    public Products(int productId, String name, int quantity) {
+        this.productId = productId;
+        this.name = name;
+        this.quantity = quantity;
+    }
 }

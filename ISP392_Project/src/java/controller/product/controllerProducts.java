@@ -160,16 +160,14 @@ public class controllerProducts extends HttpServlet {
             return;
         }
         
-        String location = request.getParameter("location");
         String description = request.getParameter("description");
         String status = request.getParameter("status");
 
         Date updatedAt = new java.sql.Date(System.currentTimeMillis());
         boolean isDelete = false;
-        Date deletedAt = null;
         Date createdAt = new java.sql.Date(System.currentTimeMillis());
 
-        Products product = new Products(productId, name, imageFileName, price, quantity, zone_id, description, createdAt, updatedAt, isDelete, deletedAt, status);
+        Products product = new Products(productId, name, imageFileName, price, quantity, zone_id, description, createdAt, updatedAt, isDelete, status);
         products.editProduct(product);
         response.sendRedirect("Products");
     } catch (NumberFormatException e) {
@@ -239,7 +237,7 @@ public class controllerProducts extends HttpServlet {
             String isDeleteRaw = request.getParameter("isDelete");
             boolean isDelete = Boolean.parseBoolean(isDeleteRaw);
 
-            Products product = new Products(0, name, imageFileName, price,quantity, zone_id, description, new java.sql.Date(System.currentTimeMillis()), new java.sql.Date(System.currentTimeMillis()), isDelete, null, status);
+            Products product = new Products(0, name, imageFileName, price,quantity, zone_id, description, new java.sql.Date(System.currentTimeMillis()), new java.sql.Date(System.currentTimeMillis()), isDelete, status);
             products.insertProduct(product);
             request.getRequestDispatcher("Products?service=products").forward(request, response);
         }

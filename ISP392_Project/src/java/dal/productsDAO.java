@@ -42,7 +42,6 @@ public class productsDAO extends DBContext {
                             rs.getDate("created_at"),
                             rs.getDate("updated_at"),
                             rs.getBoolean("isDeleted"),
-                            rs.getDate("deletedAt"),
                             rs.getString("status")
                     );
                     list.add(product);
@@ -88,7 +87,6 @@ public class productsDAO extends DBContext {
                             rs.getDate("created_at"),
                             rs.getDate("updated_at"),
                             rs.getBoolean("isDelete"),
-                            rs.getDate("deletedAt"),
                             rs.getString("status")
                     );
                     productsList.add(products);
@@ -118,7 +116,6 @@ public class productsDAO extends DBContext {
                             rs.getDate("created_at"),
                             rs.getDate("updated_at"),
                             rs.getBoolean("isDelete"),
-                            rs.getDate("deletedAt"),
                             rs.getString("status")
                     );
                     products.add(product);
@@ -166,7 +163,6 @@ public class productsDAO extends DBContext {
                 + "`description` = ?, "
                 + "`updated_at` = CURRENT_TIMESTAMP, "
                 + "`isDelete` = ?, "
-                + "`deletedAt` = ?, "
                 + "`status` = ? "
                 + "WHERE `id` = ?;";
 
@@ -181,13 +177,9 @@ public class productsDAO extends DBContext {
             // You don't need to set 'created_at' here since it's handled by the database (unless needed explicitly)
             // st.setDate(9, new java.sql.Date(products.getCreatedAt().getTime())); // Removed
             st.setBoolean(7, products.isDelete());  // Adjusted index since created_at was removed
-            if (products.getDeletedAt() != null) {
-                st.setDate(8, new java.sql.Date(products.getDeletedAt().getTime()));
-            } else {
-                st.setNull(9, java.sql.Types.DATE);
-            }
-            st.setString(10, products.getStatus());
-            st.setInt(11, products.getProductId()); // Adjusted index
+                st.setNull(8, java.sql.Types.DATE);
+            st.setString(9, products.getStatus());
+            st.setInt(10, products.getProductId()); // Adjusted index
 
             st.executeUpdate();
         } catch (SQLException e) {
@@ -241,6 +233,23 @@ public class productsDAO extends DBContext {
             e.printStackTrace();
         }
     }
+    
+    public List<Products> getLowStockProducts(int threshold) {
+        List<Products> products = new ArrayList<>();
+        String sql = "SELECT id, name, quantity FROM Products WHERE quantity <= ? ORDER BY quantity ASC";
+        
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, threshold);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                products.add(new Products(rs.getInt("id"), rs.getString("name"), rs.getInt("quantity")));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
 
     public static void main(String[] args) {
         productsDAO productsDAO = new productsDAO();
@@ -257,13 +266,25 @@ public class productsDAO extends DBContext {
 //        } catch (Exception e) {
 //            e.printStackTrace(); // Handle any errors during database connection or insertion
 //        }
-        // Lấy top 3 sản phẩm bán chạy trong tháng
-        List<String[]> topProducts = productsDAO.getTopSellingProductNamesOfMonth();
 
-        // In ra danh sách
-        System.out.println("Top 3 sản phẩm bán chạy trong tháng:");
-        for (String[] product : topProducts) {
-            System.out.println("Sản phẩm: " + product[0] + " - Số lượng bán: " + product[1]);
+
+//        // Lấy top 3 sản phẩm bán chạy trong tháng
+//        List<String[]> topProducts = productsDAO.getTopSellingProductNamesOfMonth();
+//
+//        // In ra danh sách
+//        System.out.println("Top 3 sản phẩm bán chạy trong tháng:");
+//        for (String[] product : topProducts) {
+//            System.out.println("Sản phẩm: " + product[0] + " - Số lượng bán: " + product[1]);
+//        }
+
+
+
+        int threshold = 1300; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
+        List<Products> lowStockProducts = productsDAO.getLowStockProducts(threshold);
+        
+        System.out.println("Low Stock Products:");
+        for (Products p : lowStockProducts) {
+            System.out.println("ID: " + p.getProductId() + ", Name: " + p.getName() + ", Quantity: " + p.getQuantity());
         }
     }
 }

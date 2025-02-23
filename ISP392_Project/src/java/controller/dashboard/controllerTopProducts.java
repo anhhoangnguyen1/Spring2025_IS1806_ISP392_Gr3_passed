@@ -4,7 +4,9 @@
  */
 package controller.dashboard;
 
+import com.google.gson.Gson;
 import dal.productsDAO;
+import entity.Products;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -58,10 +60,71 @@ public class controllerTopProducts extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         productsDAO dao = new productsDAO();
-        List<String[]> topProducts = dao.getTopSellingProductNamesOfMonth(); // Lấy danh sách top sản phẩm
+        List<String[]> topProducts = dao.getTopSellingProductNamesOfMonth();
+        request.setAttribute("topProducts", topProducts);
 
-        request.setAttribute("topProducts", topProducts); // Đưa vào request
-        request.getRequestDispatcher("views/dashboard/dashboard.jsp").forward(request, response); // Chuyển về trang dashboard
+        // Lấy doanh thu
+        revenueDAO revenueDAO = new revenueDAO();
+
+        // Kiểm tra period từ request
+        String period = request.getParameter("period");
+
+        // Nếu không có period từ request, lấy từ session
+        if (period == null) {
+            period = (String) request.getSession().getAttribute("selectedPeriod");
+        }
+
+        // Nếu vẫn chưa có, đặt mặc định là "last7days"
+        if (period == null) {
+            period = "last7days";
+        }
+
+        // Lưu lựa chọn vào session
+        request.getSession().setAttribute("selectedPeriod", period);
+
+        // Lấy dữ liệu doanh thu theo period
+        Object revenueData = null;
+        switch (period) {
+            case "today":
+                revenueData = revenueDAO.getRevenueToday();
+                break;
+            case "yesterday":
+                revenueData = revenueDAO.getRevenueYesterday();
+                break;
+            case "last7days":
+                revenueData = revenueDAO.getRevenueLast7Days();
+                break;
+            case "thismonth":
+                revenueData = revenueDAO.getRevenueThisMonth();
+                break;
+            case "lastmonth":
+                revenueData = revenueDAO.getRevenueLastMonth();
+                break;
+            default:
+                revenueData = "Invalid period";
+                break;
+        }
+
+        if (revenueData == null) {
+            revenueData = "[]";  // Tránh lỗi JSON null
+        }
+
+        request.setAttribute("revenueData", new Gson().toJson(revenueData));
+        request.setAttribute("selectedPeriod", period);  // Gửi về JSP để đánh dấu mặc định
+
+        double revenueToday = revenueDAO.getRevenueToday();
+        int invoiceCountToday = revenueDAO.getInvoiceCountToday();
+
+        request.setAttribute("revenueToday", revenueToday);
+        request.setAttribute("invoiceCountToday", invoiceCountToday);
+        
+        
+        
+        int threshold = 1400; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
+        List<Products> lowStockProducts = dao.getLowStockProducts(threshold);
+        
+        request.setAttribute("lowStockProducts", lowStockProducts);
+        request.getRequestDispatcher("views/dashboard/dashboard.jsp").forward(request, response);
     }
 
     /**
