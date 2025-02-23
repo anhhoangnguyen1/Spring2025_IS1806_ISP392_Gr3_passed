@@ -23,6 +23,7 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
             />
 
+
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Dashboard</title>
     </head>
@@ -172,6 +173,102 @@
                     </div>
                 </div>
                 <!--   === Panel Bar Ends ===   -->
+                <!-- Low Stock Products Alert - One Line -->
+                <c:if test="${not empty lowStockProducts}">
+                    <div class="low-stock-alert">
+                        <span class="close-btn" onclick="this.parentElement.style.display = 'none';">&times;</span>
+                        ⚠ <strong>Warning! Low Stock Products:   </strong> 
+                        <c:forEach var="product" items="${lowStockProducts}" varStatus="loop">
+                            <strong>${product.name}</strong> (<span class="low-stock-qty">${product.quantity} units</span>)
+                            <c:if test="${!loop.last}">,</c:if>
+                        </c:forEach>
+                    </div>
+                </c:if>
+                <style>
+
+                    /* Hiệu ứng xuất hiện (fade-in) */
+                    @keyframes fadeIn {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-10px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    /* Hiệu ứng biến mất (fade-out) */
+                    @keyframes fadeOut {
+                        from {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                        to {
+                            opacity: 0;
+                            transform: translateY(-10px);
+                        }
+                    }
+
+                    /* Low Stock Alert - One Line */
+                    .low-stock-alert {
+                        background-color: #F8D7DA;
+                        color: #333;
+                        padding: 10px 15px;
+                        border-radius: 12px;
+                        font-size: 16px;
+                        margin: 10px 0;
+                        position: relative;
+                        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+                        max-width: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: left; /* Căn cách đều các phần tử */
+                        white-space: nowrap; /* Không xuống dòng */
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        gap: 10px; /* Khoảng cách giữa các phần tử */
+                        animation: fadeIn 0.5s ease-out; /* Áp dụng hiệu ứng fade-in */
+                    }
+
+
+                    .low-stock-qty {
+                        font-weight: bold;
+                        color: red;
+                    }
+
+                    .close-btn {
+                        font-size: 20px;
+                        cursor: pointer;
+                        margin-left: 10px;
+                        color: #333;
+                    }
+
+                    .close-btn:hover {
+                        color: red;
+                    }
+                    /* Ẩn thông báo với hiệu ứng fade-out */
+                    .low-stock-alert.fade-out {
+                        animation: fadeOut 0.5s ease-out;
+                        opacity: 0;
+                        pointer-events: none; /* Ngăn người dùng tương tác khi đang ẩn */
+                    }
+                </style>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const closeButton = document.querySelector(".low-stock-alert .close-btn");
+                        if (closeButton) {
+                            closeButton.addEventListener("click", function () {
+                                const alertBox = this.parentElement;
+                                alertBox.classList.add("fade-out");
+                                setTimeout(() => alertBox.style.display = "none", 500); // Chờ hiệu ứng hoàn tất
+                            });
+                        }
+                    });
+                </script>
+
+
+
                 <!--   === Description Starts ===   -->
                 <div class="description">
                     <!--   === Column 1 Starts ===   -->
@@ -374,37 +471,6 @@
                         </script>
 
                         <!--   === Top Products Ends ===   -->
-                        <!--   === Low Stock Products Starts ===   -->
-                        <div class="top-products">
-                            <header class="products-header">
-                                <h1>Low Stock Products</h1>
-                            </header>
-                            <div class="products-wrapper">
-                                <c:choose>
-                                    <c:when test="${not empty lowStockProducts}">
-                                        <c:forEach var="product" items="${lowStockProducts}">
-                                            <div class="product">
-                                                <div class="product-img">
-                                                    <img src="/ISP392_Project/views/dashboard/images/products/product-1.jpg" /> <!-- Thay bằng đường dẫn ảnh thực tế nếu có -->
-                                                </div>
-                                                <div class="product-desc">
-                                                    <div class="product-row-1">
-                                                        <h2>${product.name}</h2>
-                                                    </div>
-                                                    <div class="product-row-2">
-                                                        <p>Stock left: <span class="count-up" data-count="${product.quantity}">${product.quantity}</span> units</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <p>Hooray! There is no low stock products.</p>
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
-                        </div>
-                        <!--   === Low Stock Products Ends ===   -->
                     </div>
                     <!--   === Column 2 Ends ===   -->
                 </div>
