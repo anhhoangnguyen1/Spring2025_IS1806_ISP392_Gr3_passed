@@ -6,6 +6,8 @@
 --%> 
 <%@page import="java.util.List" %>
 <%@page import="java.lang.String" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%> -->
 <!DOCTYPE html>
@@ -13,6 +15,7 @@
     <head>
         <!--   ***** Link To Custom Stylesheet *****   -->
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/views/dashboard/style.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
 
         <!-- *******  Font Awesome Icons Link  ******* -->
         <link
@@ -28,6 +31,13 @@
         <% 
         List<String[]> topProducts = (List<String[]>) request.getAttribute("topProducts");
         %>
+        <%
+            String selectedPeriod = (String) request.getAttribute("selectedPeriod");
+            if (selectedPeriod == null) {
+                selectedPeriod = "last7days"; // Mặc định nếu không có giá trị
+            }
+        %>
+
         <!--   *** Page Wrapper Starts ***   -->
         <div class="page-wrapper">
             <!--   *** Top Bar Starts ***   -->
@@ -133,10 +143,10 @@
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
                     <div class="settings">
-                            <span class="gear-icon">
-                                <i class="fa-solid fa-gear"></i>
-                            </span>
-                            <span class="text">Settings</span>
+                        <span class="gear-icon">
+                            <i class="fa-solid fa-gear"></i>
+                        </span>
+                        <span class="text">Settings</span>
                     </div>
                     <div class="logoutBtn">
                         <a href="/ISP392_Project/logout">
@@ -171,81 +181,143 @@
                             <div class="balance-box">
                                 <div class="subject-row">
                                     <div class="text">
-                                        <h3>Total Income</h3>
-                                        <h1>$70,452<sub>(USD)</sub></h1>
+                                        <h3>Total Income Today</h3>
+                                        <h1 id="counter" data-value="<fmt:formatNumber value="${revenueToday}" type="number" groupingUsed="true" />">
+                                            <sub>(VND)</sub>
+                                        </h1>
                                     </div>
                                     <div class="icon">
-                                        <i class="fa-solid fa-arrow-up"></i>
+                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
                                     </div>
                                 </div>
                                 <div class="progress-row">
-                                    <div class="subject">progress</div>
-                                    <div class="progress-bar">
-                                        <div
-                                            class="progress-line"
-                                            value="91%"
-                                            style="max-width: 91%"
-                                            ></div>
+                                    <div class="subject">
+                                        <fmt:formatDate value="<%= new java.util.Date() %>" pattern="dd/MM/yyyy" />
                                     </div>
                                 </div>
                             </div>
-
                             <div class="balance-box">
                                 <div class="subject-row">
                                     <div class="text">
-                                        <h3>Total Expense</h3>
-                                        <h1>$64,261<sub>(USD)</sub></h1>
+                                        <h3>Total Invoices Today</h3>
+                                        <h1 id="invoiceCounter" data-value="${invoiceCountToday}">
+                                            ${invoiceCountToday} Invoices
+                                        </h1>
                                     </div>
                                     <div class="icon">
-                                        <i class="fa-solid fa-arrow-down"></i>
+                                        <i class="fas fa-file-invoice"></i>
                                     </div>
                                 </div>
                                 <div class="progress-row">
-                                    <div class="subject">progress</div>
-                                    <div class="progress-bar">
-                                        <div
-                                            class="progress-line"
-                                            value="73%"
-                                            style="max-width: 73%"
-                                            ></div>
+                                    <div class="subject">
+                                        <fmt:formatDate value="<%= new java.util.Date() %>" pattern="dd/MM/yyyy" />
                                     </div>
                                 </div>
                             </div>
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    function animateCounter(element, targetValue, unit = "", duration = 2000) {
+                                        let startTime = null;
+
+                                        function easeOutQuad(t) {
+                                            return t * (2 - t); // Hàm easing giúp làm chậm lại về cuối
+                                        }
+
+                                        function updateCounter(timestamp) {
+                                            if (!startTime)
+                                                startTime = timestamp;
+                                            let progress = (timestamp - startTime) / duration;
+                                            if (progress > 1)
+                                                progress = 1;
+
+                                            let currentValue = Math.floor(targetValue * easeOutQuad(progress));
+                                            element.innerHTML = currentValue.toLocaleString() + unit;
+
+                                            if (progress < 1) {
+                                                requestAnimationFrame(updateCounter);
+                                            } else {
+                                                element.innerHTML = targetValue.toLocaleString() + unit; // Đảm bảo hiển thị giá trị chính xác
+                                            }
+                                        }
+
+                                        requestAnimationFrame(updateCounter);
+                                    }
+
+                                    // Total Income
+                                    const counterElement = document.getElementById("counter");
+                                    if (counterElement) {
+                                        let targetValue = parseInt(counterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                                        animateCounter(counterElement, targetValue, ' <sub>(VND)</sub>');
+                                    }
+
+                                    // Total Invoices
+                                    const invoiceCounterElement = document.getElementById("invoiceCounter");
+                                    if (invoiceCounterElement) {
+                                        let targetInvoices = parseInt(invoiceCounterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                                        animateCounter(invoiceCounterElement, targetInvoices, " Invoices");
+                                    }
+                                });
+
+                            </script>
                         </div>
                         <!--   === Boxes Row Ends ===   -->
                         <!--   === Analytics Chart Starts ===   -->
                         <div class="chart">
                             <div class="chart-header">
                                 <h2>Revenue Analytics</h2>
-                                <input type="month" class="date" value="2023-12" />
+                                <form method="GET" action="dashboard" id="revenueForm">
+                                    <label for="period">Select Period:</label>
+                                    <select id="period" name="period" onchange="document.getElementById('revenueForm').submit();">
+                                        <option value="today" <%= "today".equals(selectedPeriod) ? "selected" : "" %>>Today</option>
+                                        <option value="yesterday" <%= "yesterday".equals(selectedPeriod) ? "selected" : "" %>>Yesterday</option>
+                                        <option value="last7days" <%= "last7days".equals(selectedPeriod) ? "selected" : "" %>>Last 7 Days</option>
+                                        <option value="thismonth" <%= "thismonth".equals(selectedPeriod) ? "selected" : "" %>>This Month</option>
+                                        <option value="lastmonth" <%= "lastmonth".equals(selectedPeriod) ? "selected" : "" %>>Last Month</option>
+                                    </select>
+                                </form>
                             </div>
                             <div class="chart-contents">
-                                <section class="chart-grid">
-                                    <div class="grid-line" value="100%"></div>
-                                    <div class="grid-line" value="80%"></div>
-                                    <div class="grid-line" value="60%"></div>
-                                    <div class="grid-line" value="40%"></div>
-                                    <div class="grid-line" value="20%"></div>
-                                    <div class="grid-line" value="0%"></div>
-                                </section>
-                                <section class="chart-value-wrapper">
-                                    <div class="chart-value" style="max-height: 62%"></div>
-                                    <div class="chart-value" style="max-height: 76%"></div>
-                                    <div class="chart-value" style="max-height: 70%"></div>
-                                    <div class="chart-value" style="max-height: 82%"></div>
-                                    <div class="chart-value" style="max-height: 78%"></div>
-                                    <div class="chart-value" style="max-height: 94%"></div>
-                                </section>
-                                <section class="chart-labels">
-                                    <div>Jul</div>
-                                    <div>Aug</div>
-                                    <div>Sep</div>
-                                    <div>Oct</div>
-                                    <div>Nov</div>
-                                    <div>Dec</div>
-                                </section>
+                                <canvas id="revenueChart" ></canvas>
+
+                                <script>
+                                    let chartData = JSON.parse('<%= request.getAttribute("revenueData") %>');
+                                    let labels = [];
+                                    let values = [];
+
+                                    if (typeof chartData === "number") {
+                                        labels.push("Revenue");
+                                        values.push(chartData);
+                                    } else {
+                                        chartData.forEach(item => {
+                                            labels.push(item.saleDate);
+                                            values.push(item.revenue);
+                                        });
+                                    }
+
+                                    let ctx = document.getElementById("revenueChart").getContext("2d");
+                                    new Chart(ctx, {
+                                        type: "bar",
+                                        data: {
+                                            labels: labels,
+                                            datasets: [{
+                                                    label: "Revenue",
+                                                    data: values,
+                                                    backgroundColor: "blue",
+                                                    borderColor: "darkblue",
+                                                    borderWidth: 1
+                                                }]
+                                        },
+                                        options: {
+                                            responsive: true,
+                                            scales: {
+                                                y: {beginAtZero: true}
+                                            }
+                                        }
+                                    });
+                                </script>
                             </div>
                         </div>
+
                         <!--   === Analytics Chart Ends ===   -->
                     </div>
                     <!--   === Column 1 Ends ===   -->
@@ -268,7 +340,7 @@
                                             <h2><%= product[0] %></h2> <!-- Tên sản phẩm -->
                                         </div>
                                         <div class="product-row-2">
-                                            <p>Đã bán: <%= product[1] %> đơn</p> <!-- Số lượng bán -->
+                                            <p>Sold: <span class="count-up" data-count="<%= product[1] %>">0</span> products</p> <!-- Hiệu ứng đếm số -->
                                         </div>
                                     </div>
                                 </div>
@@ -278,38 +350,61 @@
                                 <% } %>
                             </div>
                         </div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                function animateCountUp(element, start, end, duration) {
+                                    let startTime = null;
+                                    const step = (timestamp) => {
+                                        if (!startTime)
+                                            startTime = timestamp;
+                                        const progress = Math.min((timestamp - startTime) / duration, 1);
+                                        element.textContent = Math.floor(progress * (end - start) + start);
+                                        if (progress < 1) {
+                                            requestAnimationFrame(step);
+                                        }
+                                    };
+                                    requestAnimationFrame(step);
+                                }
+
+                                document.querySelectorAll(".count-up").forEach(el => {
+                                    const targetNumber = parseInt(el.getAttribute("data-count"), 10);
+                                    animateCountUp(el, 0, targetNumber, 2000); // Thời gian chạy 2 giây
+                                });
+                            });
+                        </script>
+
                         <!--   === Top Products Ends ===   -->
-                        <!--   === Total Balance Card Starts ===   -->
-                        <div class="balance-card">
-                            <div class="balance-card-top">
-                                <div class="text">
-                                    <h3>Total Income</h3>
-                                    <h1>$70,452<sub>(USD)</sub></h1>
-                                </div>
-                                <div class="icon">
-                                    <i class="fa-solid fa-arrow-up"></i>
-                                </div>
-                            </div>
-                            <div class="balance-card-middle">
-                                <div class="subject">Progress</div>
-                                <div class="progress-bar">
-                                    <div
-                                        class="progress-line"
-                                        value="93%"
-                                        style="max-width: 93%"
-                                        ></div>
-                                </div>
-                            </div>
-                            <div class="balance-card-bottom">
-                                <button class="btn-top-up">
-                                    Top Up<i class="fa-solid fa-arrow-up"></i>
-                                </button>
-                                <button class="btn-transfer">
-                                    Transfer<i class="fa-solid fa-arrow-up"></i>
-                                </button>
+                        <!--   === Low Stock Products Starts ===   -->
+                        <div class="top-products">
+                            <header class="products-header">
+                                <h1>Low Stock Products</h1>
+                            </header>
+                            <div class="products-wrapper">
+                                <c:choose>
+                                    <c:when test="${not empty lowStockProducts}">
+                                        <c:forEach var="product" items="${lowStockProducts}">
+                                            <div class="product">
+                                                <div class="product-img">
+                                                    <img src="/ISP392_Project/views/dashboard/images/products/product-1.jpg" /> <!-- Thay bằng đường dẫn ảnh thực tế nếu có -->
+                                                </div>
+                                                <div class="product-desc">
+                                                    <div class="product-row-1">
+                                                        <h2>${product.name}</h2>
+                                                    </div>
+                                                    <div class="product-row-2">
+                                                        <p>Stock left: <span class="count-up" data-count="${product.quantity}">${product.quantity}</span> units</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <p>Hooray! There is no low stock products.</p>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
-                        <!--   === Total Balance Card Ends ===   -->
+                        <!--   === Low Stock Products Ends ===   -->
                     </div>
                     <!--   === Column 2 Ends ===   -->
                 </div>
