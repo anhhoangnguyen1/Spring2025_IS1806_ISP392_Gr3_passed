@@ -13,7 +13,7 @@
         <title>Customer List</title>
     </head>
     <body>
-        <h1>Customers</h1>
+        <h1>Customers List</h1>
 
         <form action="${pageContext.request.contextPath}/Customers" method="GET">
             <div class="search-box">

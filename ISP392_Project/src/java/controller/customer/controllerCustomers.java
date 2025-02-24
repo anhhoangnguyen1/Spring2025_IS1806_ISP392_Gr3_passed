@@ -31,7 +31,7 @@ public class controllerCustomers extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-         String service = request.getParameter("service");
+        String service = request.getParameter("service");
         if (service == null) {
             service = "customers";
         }
@@ -46,7 +46,8 @@ public class controllerCustomers extends HttpServlet {
                 int index = 1;
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
-                } catch (NumberFormatException ignored) { }
+                } catch (NumberFormatException ignored) {
+                }
 
                 int total = customerDAO.countCustomers(keyword);
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
@@ -61,7 +62,7 @@ public class controllerCustomers extends HttpServlet {
                 request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
                 break;
             }
-            case "getCustomerById":{
+            case "getCustomerById": {
 
                 int id = Integer.parseInt(request.getParameter("customer_id"));
                 Customers customer = customerDAO.getCustomerById(id);
@@ -69,14 +70,14 @@ public class controllerCustomers extends HttpServlet {
                 request.getRequestDispatcher("views/customer/detailCustomer.jsp").forward(request, response);
                 break;
             }
-            case "addCustomer":{
+            case "addCustomer": {
                 String createdBy = (String) session.getAttribute("username");
                 request.setAttribute("userName", createdBy);
                 request.getRequestDispatcher("views/customer/addCustomer.jsp").forward(request, response);
-                break;}
+                break;
+            }
 
-            case "editCustomer":
-            {
+            case "editCustomer": {
                 int customerId = Integer.parseInt(request.getParameter("customer_id"));
                 Customers customerForEdit = customerDAO.getCustomerById(customerId);
                 request.setAttribute("customer", customerForEdit);
@@ -108,14 +109,34 @@ public class controllerCustomers extends HttpServlet {
         }
 
         if ("editCustomer".equals(service)) {
+
+            int customerId = Integer.parseInt(request.getParameter("customer_id"));
+            String name = request.getParameter("name");
+            String phone = request.getParameter("phone");
+            String address = request.getParameter("address");
+            String status = request.getParameter("status");
+            double balance = Double.parseDouble(request.getParameter("balance"));  
+            String updatedBy = request.getParameter("updatedBy");  
+
+            if (status == null || status.isEmpty()) {
+                status = "Active"; 
+            }
+            boolean phoneExists = customerDAO.checkPhoneExists(phone, customerId);
+
+            if (phoneExists) {
+                request.setAttribute("phoneError", "Phone number already exists.");
+                request.setAttribute("customer", getCustomerFromRequest(request));
+                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
+                return;
+            }
             Customers customer = Customers.builder()
                     .id(Integer.parseInt(request.getParameter("customer_id")))
                     .name(request.getParameter("name"))
                     .phone(request.getParameter("phone"))
                     .address(request.getParameter("address"))
-                    .balance(Double.parseDouble(request.getParameter("balance")))
-                    .updatedBy(request.getParameter("updatedBy"))
-                    .status(request.getParameter("status"))
+                    .balance(balance)  
+                    .updatedBy(updatedBy) 
+                    .status(status)
                     .build();
             customerDAO.editCustomer(customer);
             response.sendRedirect("Customers?service=customers");
@@ -136,6 +157,18 @@ public class controllerCustomers extends HttpServlet {
 //        }
     }
 
+    private Customers getCustomerFromRequest(HttpServletRequest request) {
+        Customers customer = new Customers();
+        customer.setId(Integer.parseInt(request.getParameter("customer_id")));
+        customer.setName(request.getParameter("name"));
+        customer.setPhone(request.getParameter("phone"));
+        customer.setAddress(request.getParameter("address"));
+        customer.setUpdatedBy(request.getParameter("updateBy"));
+        customer.setStatus(request.getParameter("status"));
+
+        return customer;
+    }
+
     /**
      * Returns a short description of the servlet.
      *
@@ -147,4 +180,3 @@ public class controllerCustomers extends HttpServlet {
     }// </editor-fold>
 
 }
-

@@ -150,35 +150,28 @@
 
                         <div class="form-group">
                             <label for="phone">Phone</label>
-                            <input type="text" class="form-control" name="phone" value="${customer.phone}" required>
+                            <input type="text" class="form-control" name="phone" pattern="\d{10}" minlength="10" maxlength="10" 
+                                   title="Please enter a valid 10-digit phone number." value="${customer.phone}" required>
+                            <c:if test="${not empty phoneError}">
+                                <span style="color: red;">${phoneError}</span>
+                            </c:if>
                         </div>
 
                         <div class="form-group">
                             <label for="address">Address</label>
                             <input type="text" class="form-control" name="address" value="${customer.address}" required>
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="balance">Balance</label>
-                                <input type="number" class="form-control" name="balance" value="${customer.balance}" readonly>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="updatedBy">Updated By</label>
-                                <input type="text" class="form-control" name="updatedBy" value="${userName}" readonly>
-                            </div>
-                        </div>
-
-
+                        <input type="hidden" name="balance" value="${customer.balance}" />
+                        <input type="hidden" name="updateBy" value="${userName}" />
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>          
                             <a href="${pageContext.request.contextPath}/Customers?service=customers" class="btn btn-secondary">
                                 Back to Customers List
                             </a>
                         </div>           
-                    </form>
                 </div>
             </div>
+
 
             <script>
                 function confirmSave() {
