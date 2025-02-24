@@ -7,6 +7,7 @@ package dal;
 import dal.debtDAO;
 import entity.Customers;
 import entity.DebtNote;
+import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -203,6 +204,21 @@ public class customerDAO extends DBContext {
         }
     }
 
+    public boolean checkPhoneExists(String phone, int customerId) {
+        String sql = "SELECT COUNT(*) FROM customers WHERE phone = ? AND id != ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, phone);
+            st.setInt(2, customerId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private Customers mapResultSetToCustomer(ResultSet rs) throws SQLException {
         return Customers.builder()
                 .id(rs.getInt("id"))
@@ -218,6 +234,7 @@ public class customerDAO extends DBContext {
                 .status(rs.getString("status"))
                 .build();
     }
+
 
     public static void main(String[] args) {
         customerDAO dao = new customerDAO();
