@@ -8,6 +8,8 @@ import java.io.IOException;
 import jakarta.servlet.annotation.WebServlet;
 import entity.Users;
 import dal.AccountDAO;
+import jakarta.servlet.http.HttpSession;
+import utils.GlobalUtils;
 
 @WebServlet(urlPatterns = { "/change-password" })
 public class ChangePasswordController extends HttpServlet {
@@ -45,9 +47,14 @@ public class ChangePasswordController extends HttpServlet {
 
     private void changePassword(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        String email = (String) session.getAttribute("email");
         String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
+        String hashedCurrentPassword = GlobalUtils.getMd5(currentPassword);
+        String hashedNewPassword = GlobalUtils.getMd5(newPassword);
+        String hashedConfirmPassword = GlobalUtils.getMd5(confirmPassword);
 
         // check if the fields are empty
         if (currentPassword == null || newPassword == null || confirmPassword == null) {
@@ -72,7 +79,7 @@ public class ChangePasswordController extends HttpServlet {
         // check if the current password is correct
         Users user = Users.builder().email("phanngocmai2411@gmail.com").build();
         Users user1 = accountDAO.findByEmail(user);
-        if (user1 == null || !user1.getPassword().equals(currentPassword) ) {
+        if (user1 == null || !user1.getPassword().equals(hashedCurrentPassword) ) {
             request.setAttribute("error", "Current password is incorrect");
             request.getRequestDispatcher(CHANGE_PASSWORD_SUCCESS_URL).forward(request, response);
             return;
@@ -80,7 +87,7 @@ public class ChangePasswordController extends HttpServlet {
 
         // change the password
         // Users user = (Users) request.getSession().getAttribute("user");
-        user.setPassword(newPassword);
+        user.setPassword(hashedNewPassword);
 
         accountDAO.updatePassword(user);
 
