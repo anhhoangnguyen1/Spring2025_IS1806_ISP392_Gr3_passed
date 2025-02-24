@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import utils.EmailUtils;
+import utils.GlobalUtils;
 
 @WebServlet(name = "AuthenController", urlPatterns = {"/authen", "/forgotpw", "/verifyOTP", "/newPassword"})
 public class AuthenController extends HttpServlet {
@@ -174,15 +175,17 @@ public class AuthenController extends HttpServlet {
             return RESET_PASSWORD_JSP_PAGE;
         }
 
+        String hashedPassword = GlobalUtils.getMd5(newPassword);
+
         Users account = Users.builder()
                 .email(email)
-                .password(newPassword) //TODO: them encrypt password
+                .password(hashedPassword)
                 .build();
 
         boolean updated = accDAO.updatePassword(account);
         if (updated) {
             request.setAttribute("message", "Your password has been successfully reset.");
-            return "/views/loginServlet";
+            return "/views/login.html";
         } else {
             request.setAttribute("error", "Failed to reset password. Please try again.");
             return RESET_PASSWORD_JSP_PAGE;
