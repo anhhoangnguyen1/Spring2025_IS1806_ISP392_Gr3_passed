@@ -4,8 +4,7 @@
 <!DOCTYPE html>
 <html>
     <body>
-
-        <div id="addDebtModal" class="modal fade show" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div id="addDebtModal" class="modal fade show" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <form action="${pageContext.request.contextPath}/Debts" method="POST" enctype="multipart/form-data">
@@ -20,8 +19,8 @@
                             <div class="form-group">
                                 <label>Debt Type</label>
                                 <select class="form-control" name="type">
-                                    <option value="+">+</option>
-                                    <option value="-">-</option>
+                                    <option value="+">Debt</option> <!-- + người ta nợ mik -->
+                                    <option value="-">Repay</option><!-- - Mik nợ người ta -->
                                 </select>
                             </div>
 

@@ -4,6 +4,8 @@
  */
 package dal;
 
+import java.sql.Connection;
+import java.sql.Statement;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -15,10 +17,8 @@ import java.util.List;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import javax.lang.model.util.Types;
 
 /**
  *
@@ -26,29 +26,28 @@ import javax.lang.model.util.Types;
  */
 public class debtDAO extends DBContext {
 
-    public List<DebtNote> viewAllDebtInCustomer(String command, int customerId, int index) {
+    public List<DebtNote> getComponent(int customerId) {
         List<DebtNote> list = new ArrayList<>();
 
-        String sqlDebt = "SELECT id, type, amount, image, description, created_at, updated_at, created_by, status "
-                + "FROM Debt_note "
-                + "WHERE customers_id = ? "
-                + "ORDER BY " + command + " DESC "
-                + "LIMIT 10 OFFSET ?";
+        String sqlDebt = "SELECT id, debt_note_id, type, amount, image, description, created_at, updated_at, created_by, status "
+                + "FROM Debt_note_history "
+                + "WHERE customers_id = ? AND change_type = 'UPDATE' "
+                + "ORDER BY id DESC";  // Sắp xếp theo ID mới nhất
 
         try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
             st.setInt(1, customerId);
-            st.setInt(2, (index - 1) * 10);
 
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     BigDecimal amount = rs.getBigDecimal("amount");
                     String type = rs.getString("type");
                     if ("-".equals(type)) {
-                        amount = amount.negate();  // Thêm dấu âm
+                        amount = amount.negate();  // Đảo dấu nếu là khoản trừ
                     }
 
                     DebtNote debt = new DebtNote(
                             rs.getInt("id"),
+                            rs.getInt("debt_note_id"), // Nếu cần lưu debt_note_id
                             rs.getString("type"),
                             amount,
                             rs.getString("image"),
@@ -70,90 +69,141 @@ public class debtDAO extends DBContext {
         return list;
     }
 
-    public List<DebtNote> viewAllDebt(String command, int index) {
+    public List<DebtNote> viewAllDebtInCustomer(String command, int customerId, int index) {
         List<DebtNote> list = new ArrayList<>();
-        Map<Integer, String[]> customerMap = new HashMap<>();
+        String sqlDebt = "SELECT debt_note_id, id, type, amount, image, description, created_at, updated_at, created_by, status "
+                + "FROM Debt_note_history "
+                + "WHERE customers_id = ? AND change_type = 'UPDATE' " // Lấy cả khách hàng và người ngoài
+                + "ORDER BY " + command + " DESC "
+                + "LIMIT ?";
+
+        // Initialize connection (depending on your context, connection might be fetched from a connection pool)
+        try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
+            st.setInt(1, customerId);
+            int limitValue = Math.max(10, (index - 1) * 10); // Đảm bảo limit >= 10
+            st.setInt(2, limitValue);
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    BigDecimal amount = rs.getBigDecimal("amount");
+                    String type = rs.getString("type");
+                    if ("-".equals(type)) {
+                        amount = amount.negate();  // Thêm dấu âm
+                    }
+
+                    DebtNote debt = new DebtNote(
+                            rs.getInt("debt_note_id"), // debt_note_id lên đầu
+                            rs.getInt("id"),
+                            rs.getString("type"),
+                            amount,
+                            rs.getString("image"),
+                            rs.getString("description"),
+                            customerId,
+                            rs.getObject("created_at", LocalDateTime.class),
+                            rs.getObject("updated_at", LocalDateTime.class),
+                            rs.getString("created_by"),
+                            rs.getString("status")
+                    );
+                    list.add(debt);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching debts: " + e.getMessage());
+            e.printStackTrace();
+        }
+        // Always close connection outside try-with-resources to avoid leaking resources
+
+        return list;
+    }
+
+    public List<DebtNote> viewDebtHistory(int customerId, int index) {
+        List<DebtNote> list = new ArrayList<>();
+
+        String sqlDebtHistory = "SELECT id, debt_note_id, type, amount, image, description, created_at, updated_at, created_by, status "
+                + "FROM Debt_note_history "
+                + "WHERE (customers_id = ? OR customers_id IS NULL) AND change_type = 'UPDATE' " // Lấy cả khách hàng và người ngoài
+                + "ORDER BY created_at DESC "
+                + "LIMIT 10 OFFSET ?";
+
+        try (PreparedStatement st = connection.prepareStatement(sqlDebtHistory)) {
+            st.setInt(1, customerId);
+            st.setInt(2, Math.max(0, (index - 1) * 10));  // Đảm bảo OFFSET >= 0
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    BigDecimal amount = rs.getBigDecimal("amount");
+                    String type = rs.getString("type");
+                    if ("-".equals(type)) {
+                        amount = amount.negate();  // Đảm bảo số âm nếu là khoản nợ
+                    }
+
+                    DebtNote debt = new DebtNote(
+                            rs.getInt("id"), // ID thực của bản ghi lịch sử
+                            rs.getString("type"),
+                            amount,
+                            rs.getString("image"),
+                            rs.getString("description"),
+                            customerId,
+                            rs.getObject("created_at", LocalDateTime.class),
+                            rs.getObject("updated_at", LocalDateTime.class),
+                            rs.getString("created_by"),
+                            rs.getString("status")
+                    );
+                    list.add(debt);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching debt history: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<DebtNote> viewAllDebt(int index, int pageSize) {
+        List<DebtNote> list = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper(); // Xử lý JSON
+
+        // Truy vấn lấy danh sách công nợ mới nhất của mỗi khách hàng
+        String sqlDebt = """
+        SELECT id, customers_id, debtor_info, type, amount, image, description, created_at, updated_at, created_by, status FROM Debt_note 
+        WHERE (customers_id IS NOT NULL AND id = (SELECT MAX(id) FROM Debt_note dn WHERE dn.customers_id = Debt_note.customers_id)) 
+        OR customers_id IS NULL 
+        ORDER BY id DESC""";
 
         // Truy vấn lấy thông tin khách hàng
         String sqlCustomers = "SELECT id, name, phone, address FROM Customers";
 
-        // Truy vấn lấy thông tin công nợ
-        String sqlDebt = "SELECT id, customers_id, debtor_info, type, amount, image, description, created_at, updated_at, created_by, status "
-                + "FROM Debt_note "
-                + "ORDER BY " + command + " "
-                + "LIMIT 10 OFFSET ?";
+        try (PreparedStatement stDebt = connection.prepareStatement(sqlDebt); PreparedStatement stCustomers = connection.prepareStatement(sqlCustomers)) {
 
-        try {
             // Lấy thông tin khách hàng vào HashMap
-            try (PreparedStatement stCustomers = connection.prepareStatement(sqlCustomers); ResultSet rs = stCustomers.executeQuery()) {
-                while (rs.next()) {
-                    customerMap.put(rs.getInt("id"), new String[]{
-                        rs.getString("name"),
-                        rs.getString("phone"),
-                        rs.getString("address")
+            Map<Integer, String[]> customerMap = new HashMap<>();
+            try (ResultSet rsCustomers = stCustomers.executeQuery()) {
+                while (rsCustomers.next()) {
+                    customerMap.put(rsCustomers.getInt("id"), new String[]{
+                        rsCustomers.getString("name"),
+                        rsCustomers.getString("phone"),
+                        rsCustomers.getString("address")
                     });
                 }
             }
 
-            // Truy vấn danh sách công nợ
-            try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
-                st.setInt(1, (index - 1) * 10);  // Phân trang
-
-                try (ResultSet rs = st.executeQuery()) {
-                    while (rs.next()) {
-                        // Xử lý debtor_info JSON
-                        String debtorInfoJson = rs.getString("debtor_info");
-                        String debtorName = "", debtorAddress = "", debtorPhone = "";
-
-                        if (debtorInfoJson != null && !debtorInfoJson.isEmpty()) {
-                            try {
-                                JsonNode debtorInfoNode = objectMapper.readTree(debtorInfoJson);
-                                if (debtorInfoNode.has("name")) {
-                                    debtorName = debtorInfoNode.get("name").asText();
-                                }
-                                if (debtorInfoNode.has("address")) {
-                                    debtorAddress = debtorInfoNode.get("address").asText();
-                                }
-                                if (debtorInfoNode.has("phone")) {
-                                    debtorPhone = debtorInfoNode.get("phone").asText();
-                                }
-                            } catch (Exception e) {
-                                System.err.println("Error processing debtor_info JSON: " + e.getMessage());
-                            }
-                        }
-
-                        // Lấy thông tin khách hàng từ HashMap
-                        int customerId = rs.getInt("customers_id");
-                        String[] customerData = customerMap.getOrDefault(customerId, new String[]{"", "", ""});
-                        String customerName = customerData[0];
-                        String customerPhone = customerData[1];
-                        String customerAddress = customerData[2];
-
-                        // Tạo đối tượng DebtNote
-                        DebtNote debt = new DebtNote(
-                                rs.getInt("id"),
-                                rs.getString("type"),
-                                rs.getBigDecimal("amount"),
-                                rs.getString("image"),
-                                rs.getString("description"),
-                                customerId,
-                                customerName, // Tên khách hàng
-                                customerPhone, // Số điện thoại khách hàng
-                                customerAddress, // Địa chỉ khách hàng
-                                debtorName, // Tên con nợ
-                                debtorAddress, // Địa chỉ con nợ
-                                debtorPhone, // Số điện thoại con nợ
-                                rs.getObject("created_at", LocalDateTime.class),
-                                rs.getObject("updated_at", LocalDateTime.class),
-                                rs.getString("created_by"),
-                                rs.getString("status")
-                        );
-
-                        list.add(debt);
-                    }
-                }
+            // Lưu danh sách công nợ đầy đủ trước khi phân trang
+            List<DebtNote> fullDebtList = new ArrayList<>();
+            ResultSet rsDebt = stDebt.executeQuery();
+            while (rsDebt.next()) {
+                int customerId = rsDebt.getInt("customers_id");
+                String[] customerData = customerMap.getOrDefault(customerId, new String[]{"", "", ""});
+                fullDebtList.add(parseDebtNote(rsDebt, objectMapper, customerData[0], customerData[1], customerData[2]));
             }
+
+            // Áp dụng phân trang thủ công trong Java
+            int start = (index - 1) * pageSize;
+            int end = Math.min(start + pageSize, fullDebtList.size());
+            if (start < fullDebtList.size()) {
+                list = fullDebtList.subList(start, end);
+            }
+
         } catch (SQLException e) {
             System.err.println("Error fetching debts: " + e.getMessage());
             e.printStackTrace();
@@ -163,6 +213,45 @@ public class debtDAO extends DBContext {
         }
 
         return list;
+    }
+
+    /**
+     * Hàm hỗ trợ xử lý JSON và tạo đối tượng DebtNote
+     */
+    private DebtNote parseDebtNote(ResultSet rsDebt, ObjectMapper objectMapper,
+            String customerName, String customerPhone, String customerAddress) throws SQLException {
+        String debtorInfoJson = rsDebt.getString("debtor_info");
+        String debtorName = "", debtorAddress = "", debtorPhone = "";
+
+        if (debtorInfoJson != null && !debtorInfoJson.isEmpty()) {
+            try {
+                JsonNode debtorInfoNode = objectMapper.readTree(debtorInfoJson);
+                debtorName = debtorInfoNode.has("name") ? debtorInfoNode.get("name").asText() : "";
+                debtorAddress = debtorInfoNode.has("address") ? debtorInfoNode.get("address").asText() : "";
+                debtorPhone = debtorInfoNode.has("phone") ? debtorInfoNode.get("phone").asText() : "";
+            } catch (Exception e) {
+                System.err.println("Error processing debtor_info JSON: " + e.getMessage());
+            }
+        }
+
+        return new DebtNote(
+                rsDebt.getInt("id"),
+                rsDebt.getString("type"),
+                rsDebt.getBigDecimal("amount"),
+                rsDebt.getString("image"),
+                rsDebt.getString("description"),
+                rsDebt.getInt("customers_id"),
+                customerName, // Tên khách hàng
+                customerPhone, // Số điện thoại khách hàng
+                customerAddress, // Địa chỉ khách hàng
+                debtorName, // Tên con nợ
+                debtorAddress, // Địa chỉ con nợ
+                debtorPhone, // Số điện thoại con nợ
+                rsDebt.getObject("created_at", LocalDateTime.class),
+                rsDebt.getObject("updated_at", LocalDateTime.class),
+                rsDebt.getString("created_by"),
+                rsDebt.getString("status")
+        );
     }
 
     public int countDebts() {
@@ -223,7 +312,11 @@ public class debtDAO extends DBContext {
     public void insertDebtInCustomer(DebtNote debts) {
         String insertQuery = "INSERT INTO Debt_note (type, amount, image, description, customers_id, created_at, updated_at, created_by, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(insertQuery)) {
+
+        String updateQuery = "UPDATE Debt_note SET status = ? WHERE id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
+            // Set dữ liệu cho INSERT
             ps.setString(1, debts.getType());
             ps.setBigDecimal(2, debts.getAmount());
             ps.setString(3, debts.getImage());
@@ -234,28 +327,46 @@ public class debtDAO extends DBContext {
             ps.setString(8, debts.getCreatedBy());
             ps.setString(9, debts.getStatus());
 
-            int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Insert successful.");
+            int rowsInserted = ps.executeUpdate();
+
+            if (rowsInserted > 0) {
+                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int insertedId = generatedKeys.getInt(1); // Lấy ID vừa insert
+
+                        // Cập nhật trạng thái sang "Updated"
+                        try (PreparedStatement updatePs = connection.prepareStatement(updateQuery)) {
+                            updatePs.setString(1, "Updated");
+                            updatePs.setInt(2, insertedId);
+
+                            int updateRows = updatePs.executeUpdate();
+                            if (updateRows > 0) {
+                                System.out.println("✅ Insert & Update successful for ID: " + insertedId);
+                            } else {
+                                System.out.println("⚠ Update failed.");
+                            }
+                        }
+                    }
+                }
             } else {
-                System.out.println("No rows affected.");
+                System.out.println("⚠ Insert failed.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
-    public void insertDebt(DebtNote debts) {
-        // Update the SQL query to exclude the customer_id column
+    public void insertAndUpdateDebt(DebtNote debts) {
         String insertDebtSQL = "INSERT INTO Debt_note (type, amount, image, description, created_at, updated_at, created_by, status, debtor_info) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement stInsertDebt = connection.prepareStatement(insertDebtSQL)) {
-            // Set values from the DebtNote object
+        String updateDebtSQL = "UPDATE Debt_note SET updated_at = ? WHERE id = ?";
+
+        try (PreparedStatement stInsertDebt = connection.prepareStatement(insertDebtSQL, Statement.RETURN_GENERATED_KEYS)) {
+            // Set values for insert query
             stInsertDebt.setString(1, debts.getType());
             stInsertDebt.setBigDecimal(2, debts.getAmount());
-            stInsertDebt.setString(3, debts.getImage()); // No customer_id here anymore
+            stInsertDebt.setString(3, debts.getImage());
             stInsertDebt.setString(4, debts.getDescription());
             stInsertDebt.setObject(5, debts.getCreatedAt());
             stInsertDebt.setObject(6, debts.getUpdatedAt());
@@ -263,11 +374,8 @@ public class debtDAO extends DBContext {
             stInsertDebt.setString(8, debts.getStatus());
 
             String debtorInfoJson = null;
-
-            // Construct debtorInfo JSON if debtorName, debtorAddress, or debtorPhone are set
             if (debts.getDebtorName() != null || debts.getDebtorAddress() != null || debts.getDebtorPhone() != null) {
                 ObjectMapper objectMapper = new ObjectMapper();
-                // Create an object to represent the debtor details
                 ObjectNode debtorNode = objectMapper.createObjectNode();
                 if (debts.getDebtorName() != null) {
                     debtorNode.put("name", debts.getDebtorName());
@@ -278,47 +386,154 @@ public class debtDAO extends DBContext {
                 if (debts.getDebtorPhone() != null) {
                     debtorNode.put("phone", debts.getDebtorPhone());
                 }
-
-                // Convert the object to a JSON string
                 debtorInfoJson = debtorNode.toString();
             }
 
-            // Set debtor_info as a JSON string or NULL
             if (debtorInfoJson != null && !debtorInfoJson.isEmpty()) {
-                stInsertDebt.setString(9, debtorInfoJson);  // Set as JSON string
+                stInsertDebt.setString(9, debtorInfoJson);
             } else {
-                stInsertDebt.setNull(9, java.sql.Types.NULL);  // Set as NULL if no debtor info is provided
+                stInsertDebt.setNull(9, java.sql.Types.NULL);
             }
 
-            // Execute the insert statement
-            int rowsAffected = stInsertDebt.executeUpdate();
-            System.out.println("Debt inserted successfully! Rows affected: " + rowsAffected);
+            // Thực hiện INSERT
+            int rowsInserted = stInsertDebt.executeUpdate();
+            if (rowsInserted == 0) {
+                System.out.println("Insert failed!");
+                return;
+            }
+
+            // Lấy ID của bản ghi vừa chèn
+            try (ResultSet generatedKeys = stInsertDebt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int newDebtId = generatedKeys.getInt(1);
+                    System.out.println("Inserted Debt ID: " + newDebtId);
+
+                    // Thực hiện UPDATE ngay sau INSERT
+                    try (PreparedStatement stUpdateDebt = connection.prepareStatement(updateDebtSQL)) {
+                        stUpdateDebt.setObject(1, LocalDateTime.now());  // Cập nhật thời gian hiện tại
+                        stUpdateDebt.setInt(2, newDebtId);
+
+                        int rowsUpdated = stUpdateDebt.executeUpdate();
+                        if (rowsUpdated > 0) {
+                            System.out.println("Debt updated successfully!");
+                        } else {
+                            System.out.println("Debt update failed!");
+                        }
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean updateDebtInCustomer(DebtNote debt) {
+        String sql = "UPDATE Debt_note SET type = ?, amount = ?, image = ?, description = ?, customers_id = ? WHERE id = ?";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, debt.getType());
+            st.setBigDecimal(2, debt.getAmount());
+            st.setString(3, debt.getImage());
+            st.setString(4, debt.getDescription());
+            st.setInt(5, debt.getCustomer_id());
+            st.setInt(6, debt.getId()); // ID để xác định khoản nợ cần cập nhật
+
+            System.out.println("Executing SQL: " + st.toString()); // Debug SQL statement
+
+            int affectedRows = st.executeUpdate(); // Thực hiện update
+            return affectedRows > 0; // Kiểm tra xem có bản ghi nào được cập nhật không
+        } catch (SQLException e) {
+            System.err.println("Error updating debt: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateDebt(DebtNote debt) {
+        String sqlUpdate = "UPDATE Debt_note "
+                + "SET type = ?, amount = ?, image = ?, description = ?, created_at = ?, updated_at = ?, created_by = ?, status = ? "
+                + "WHERE id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sqlUpdate)) {
+            ps.setString(1, debt.getType());
+            ps.setBigDecimal(2, debt.getAmount());
+            ps.setString(3, debt.getImage());
+            ps.setString(4, debt.getDescription());
+            ps.setObject(5, debt.getCreatedAt());
+            ps.setObject(6, LocalDateTime.now()); // Cập nhật thời gian hiện tại
+            ps.setString(7, debt.getCreatedBy());
+            ps.setString(8, debt.getStatus());
+
+            ps.setInt(9, debt.getId()); // WHERE id = ?
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating debt: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Map<Integer, BigDecimal> getTotalAmountByDebtNoteId() {
+        Map<Integer, BigDecimal> totalAmountMap = new HashMap<>();
+        String sql = "SELECT \n"
+                + "debt_note_id, \n"
+                + "SUM(CASE WHEN type = '-' THEN -ABS(amount) ELSE ABS(amount) END) AS total_amount \n"
+                + "FROM Debt_note_history \n"
+                + "WHERE change_type = 'UPDATE' \n"
+                + "GROUP BY debt_note_id;";
+
+        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                int debtNoteId = rs.getInt("debt_note_id");
+                BigDecimal totalAmount = rs.getBigDecimal("total_amount");
+
+                // Lưu tổng amount cho debt_note_id vào Map
+                totalAmountMap.put(debtNoteId, totalAmount);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return totalAmountMap;
     }
 
     public List<DebtNote> getDebtById(int id) {
         List<DebtNote> debts = new ArrayList<>();
         Map<Integer, String> customerMap = new HashMap<>();
         try {
+            // Câu lệnh SQL để lấy thông tin khách hàng
             String sqlCustomers = "SELECT id, name FROM Customers";
-            String sql = "SELECT * FROM Debt_note WHERE id = ?";
+
+            // Câu lệnh SQL để lấy thông tin công nợ từ Debt_note_history
+            // Chúng ta thay đổi điều kiện để truy vấn khi không có customer_id hoặc debt_note_id
+            String sql = "SELECT * \n"
+                    + "FROM Debt_note_history \n"
+                    + "WHERE debt_note_id = ? AND change_type = 'UPDATE';";
+
+            // Lấy thông tin khách hàng và lưu vào HashMap
             try (PreparedStatement stCustomers = connection.prepareStatement(sqlCustomers); ResultSet rs = stCustomers.executeQuery()) {
                 while (rs.next()) {
                     customerMap.put(rs.getInt("id"), rs.getString("name"));
                 }
             }
 
+            // Thực thi câu lệnh SQL để lấy công nợ
             try (PreparedStatement st = connection.prepareStatement(sql)) {
-                st.setInt(1, id);
-                try (ResultSet rs = st.executeQuery()) {
+                // Đặt tham số customerId và debtNoteId
+                st.setInt(1, id); // Nếu không có id hợp lệ, sử dụng 0
 
+                try (ResultSet rs = st.executeQuery()) {
                     while (rs.next()) {
                         int customerId = rs.getInt("customers_id");
                         String customerName = customerMap.getOrDefault(customerId, "Unknown");
+
+                        // Tạo đối tượng DebtNote và thêm vào danh sách
                         DebtNote debt = new DebtNote(
                                 rs.getInt("id"),
+                                rs.getInt("debt_note_id"),
                                 rs.getString("type"),
                                 rs.getBigDecimal("amount"),
                                 rs.getString("image"),
@@ -361,30 +576,20 @@ public class debtDAO extends DBContext {
 
     public static void main(String[] args) {
         // Initialize the DAO (Data Access Object)
+        String command = "created_at";
+        int index = 1;
+        int pageSize = 10;
         debtDAO dao = new debtDAO();
-
-        // Create a DebtNote object with sample data
-        DebtNote debtNote = new DebtNote(
-            0, // ID (Sẽ tự động tạo bởi cơ sở dữ liệu)
-            "+", // Type: Debt (Giả sử đây là khoản nợ)
-            new BigDecimal("1000.00"), // Amount: 1000 VND
-            "debt_image.jpg", // Image (Tên ảnh liên quan đến khoản nợ)
-            "Test debt description", // Description
-            1, // customer_id: ID của khách hàng liên quan
-            LocalDateTime.now(), // Created at
-            LocalDateTime.now(), // Updated at
-            "admin", // Created by
-            "Pending" // Status
-        );
-        dao.insertDebt(debtNote);
+        List<DebtNote> debts = dao.viewAllDebtInCustomer(command, 1, index);
+        Map<Integer, BigDecimal> totalAmountByDebtNoteId = dao.getTotalAmountByDebtNoteId();
+        for (Map.Entry<Integer, BigDecimal> entry : totalAmountByDebtNoteId.entrySet()) {
+            System.out.println("debt_note_id: " + entry.getKey() + " - Total Amount: " + entry.getValue());
+        }
+        // 4️⃣ Gọi hàm cập nhật
+        // Gọi phương thức updateDebtInCustomer
         // Insert debt into the database
         // Example: Use a sorting command for the query
-        String command = "id";
-
         // Fetch the debts from the database
-        List<DebtNote> debts = dao.viewAllDebt(command, 1);
-
-        // Print out each DebtNote object
         for (DebtNote debtObj : debts) {
             System.out.println(debtObj);
         }
