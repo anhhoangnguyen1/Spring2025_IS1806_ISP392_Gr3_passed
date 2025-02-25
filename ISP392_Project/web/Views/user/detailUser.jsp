@@ -5,7 +5,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Detail Staff</title>
+        <title>Edit Staff</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
@@ -177,24 +177,8 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="status">Status</label>
-                                <select class="form-control" name="status" required>
-                                    <option value="Active" ${user.status == 'Active' ? 'selected' : ''}>Active</option>
-                                    <option value="Deactive" ${user.status == 'Deactive' ? 'selected' : ''}>Deactive</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="role">Role</label>
-                                <input type="text" class="form-control" name="role" value="${user.role}" readonly>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="updatedBy">Updated By</label>
-                            <input type="text" class="form-control" name="updatedBy" value="${username}" readonly>
-                        </div>
+                        <input type="hidden" name="role" value="${user.role}"/>
+                        <input type="hidden" name="updatedBy" value="${username}"/>
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>

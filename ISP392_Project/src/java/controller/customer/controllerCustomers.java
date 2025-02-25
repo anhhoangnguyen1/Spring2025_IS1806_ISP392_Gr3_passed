@@ -139,6 +139,8 @@ public class controllerCustomers extends HttpServlet {
                     .status(status)
                     .build();
             customerDAO.editCustomer(customer);
+            HttpSession session = request.getSession();
+            session.setAttribute("successMessage", "Customer details updated successfully.");
             response.sendRedirect("Customers?service=customers");
         }
 //        if ("search".equals(service)) {

@@ -82,7 +82,7 @@
                                     <td>${user.status}</td>
                                     <td class="sticky-col">
                                         <a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=${user.id}" class="btn btn-outline-primary">
-                                            View
+                                            Edit
                                         </a>
                                         <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#">
                                             Ban
