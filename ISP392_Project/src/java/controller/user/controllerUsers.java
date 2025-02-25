@@ -25,44 +25,72 @@ public class controllerUsers extends HttpServlet {
     userDAO userDAO = new userDAO();
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        String service = request.getParameter("service");
-        if (service == null) {
-            service = "users";
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    HttpSession session = request.getSession();
+    String service = request.getParameter("service");
+    if (service == null) {
+        service = "users";
+    }
+
+    switch (service) {
+        case "users":{
+            String keyword = request.getParameter("searchUser");
+            if (keyword == null) {
+                keyword = "";
+            }
+
+            int index = 1;
+            try {
+                index = Integer.parseInt(request.getParameter("index"));
+            } catch (NumberFormatException ignored) {
+            }
+
+            int total = userDAO.countUsers(keyword);
+            int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
+
+            List<Users> list = userDAO.searchUsers(keyword, index, 5);
+
+            request.setAttribute("list", list);
+            request.setAttribute("endPage", endPage);
+            request.setAttribute("index", index);
+            request.setAttribute("searchUser", keyword);
+
+            request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
+            break;
         }
 
-        switch (service) {
-            case "users":
-                int index = 1;
-                try {
-                    index = Integer.parseInt(request.getParameter("index"));
-                } catch (NumberFormatException ignored) {
-                }
 
-                List<Users> list = userDAO.viewAllUsers(index);
-
-                int total = userDAO.countUsers();
-                int endPage = (total % 10 == 0) ? total / 10 : (total / 10) + 1;
-
-                request.setAttribute("userList", list);
-                request.setAttribute("endPage", endPage);
-                request.setAttribute("index", index);
-
-                request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
-                break;
+            
+//                int index = 1;
+//                try {
+//                    index = Integer.parseInt(request.getParameter("index"));
+//                } catch (NumberFormatException ignored) {
+//                }
+//
+//                List<Users> list = userDAO.viewAllUsers(index);
+//
+//                int total = userDAO.countUsers();
+//                int endPage = (total % 10 == 0) ? total / 10 : (total / 10) + 1;
+//
+//                request.setAttribute("userList", list);
+//                request.setAttribute("endPage", endPage);
+//                request.setAttribute("index", index);
+//
+//                request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
+//                break;
 
             case "getUserById":
+            {
                 int id = Integer.parseInt(request.getParameter("user_id"));
                 Users user = userDAO.getUserById(id);
                 request.setAttribute("user", user);
 
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 break;
-
-            case "editUser":
-                // Lấy thông tin người dùng cần chỉnh sửa
+            }
+            case "editUser":{
+          
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users userForEdit = userDAO.getUserById(userId);
                 request.setAttribute("user", userForEdit);
@@ -73,6 +101,7 @@ public class controllerUsers extends HttpServlet {
 
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 break;
+            }
         }
     }
 
@@ -82,7 +111,7 @@ public class controllerUsers extends HttpServlet {
         String service = request.getParameter("service");
 
         if ("editUser".equals(service)) {
-            // Lấy thông tin người dùng từ form
+
             int userId = Integer.parseInt(request.getParameter("user_id"));
             String name = request.getParameter("name");
             String email = request.getParameter("email");
@@ -110,7 +139,7 @@ public class controllerUsers extends HttpServlet {
                 return;
             }
 
-            // Chỉnh sửa thông tin người dùng
+
             Users user = Users.builder()
                     .id(Integer.parseInt(request.getParameter("user_id")))
                     .name(request.getParameter("name"))
@@ -128,20 +157,20 @@ public class controllerUsers extends HttpServlet {
             session.setAttribute("successMessage", "User details updated successfully.");
             response.sendRedirect("Users?service=users");
         }
-        if ("search".equals(service)) {
-            String searchStaff = request.getParameter("searchStaff"); // Lấy giá trị tìm kiếm từ form
-            List<Users> list;
-
-            // Kiểm tra nếu có từ khóa tìm kiếm
-            if (searchStaff != null && !searchStaff.isEmpty()) {
-                list = userDAO.searchUsers(searchStaff);  // Gọi phương thức tìm kiếm
-            } else {
-                list = userDAO.viewAllUsers(1);  // Hiển thị tất cả người dùng nếu không có tìm kiếm
-            }
-
-            request.setAttribute("userList", list);
-            request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
-        }
+//        if ("search".equals(service)) {
+//            String searchStaff = request.getParameter("searchStaff"); // Lấy giá trị tìm kiếm từ form
+//            List<Users> list;
+//
+//            // Kiểm tra nếu có từ khóa tìm kiếm
+//            if (searchStaff != null && !searchStaff.isEmpty()) {
+//                list = userDAO.searchUsers(searchStaff);  // Gọi phương thức tìm kiếm
+//            } else {
+//                list = userDAO.viewAllUsers(1);  // Hiển thị tất cả người dùng nếu không có tìm kiếm
+//            }
+//
+//            request.setAttribute("userList", list);
+//            request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
+//        }
     }
 
     private Users getUserFromRequest(HttpServletRequest request) {
