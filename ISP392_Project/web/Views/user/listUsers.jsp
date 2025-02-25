@@ -27,13 +27,26 @@
                 <c:remove var="successMessage" />
             </c:if>
             <!-- Search Box -->
-            <form action="${pageContext.request.contextPath}/Users" method="POST">
+
+
+            <form action="${pageContext.request.contextPath}/Users" method="GET">
                 <div class="search-box">
-                    <input type="hidden" name="service" value="search" />
-                    <input type="text" id="myInput" class="input-box" name="searchStaff" placeholder="Search for a user..." autocomplete="off" />
+
+                    <input type="hidden" name="service" value="users" />
+                    <input type="text" id="myInput" class="input-box" name="searchUser"
+                           placeholder="Search for information."
+                           value="${searchUser}" autocomplete="off" />
+
+                    <button type="button" class="clear-btn"
+                            onclick="window.location.href = '${pageContext.request.contextPath}/Users?service=users'">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+
                     <button type="submit" class="search-btn">
                         <i class="fa-solid fa-search"></i>
                     </button>
+
+
                 </div>
             </form>
 
@@ -56,7 +69,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <c:forEach var="user" items="${userList}">
+                            <c:forEach var="user" items="${list}">
                                 <tr>
                                     <td>${user.id}</td>
                                     <td>${user.role}</td>
@@ -88,8 +101,9 @@
             <ul class="pagination">
                 <c:if test="${index > 1}">
                     <li class="page-item">
-                        <form action="Users" method="POST" style="display: inline;">
+                        <form action="Users" method="GET" style="display: inline;">
                             <input type="hidden" name="service" value="users" />
+                            <input type="hidden" name="searchUser" value="${searchUser}" />
                             <input type="hidden" name="index" value="${index - 1}" />
                             <button type="submit" class="page-link"><<</button>
                         </form>
@@ -98,8 +112,9 @@
 
                 <c:forEach begin="1" end="${endPage}" var="page">
                     <li class="page-item ${index == page ? 'active' : ''}">
-                        <form action="Users" method="POST" style="display: inline;">
+                        <form action="Users" method="GET" style="display: inline;">
                             <input type="hidden" name="service" value="users" />
+                            <input type="hidden" name="searchUser" value="${searchUser}" />
                             <input type="hidden" name="index" value="${page}" />
                             <button type="submit" class="page-link">${page}</button>
                         </form>
@@ -108,8 +123,9 @@
 
                 <c:if test="${index < endPage}">
                     <li class="page-item">
-                        <form action="Users" method="POST" style="display: inline;">
+                        <form action="Users" method="GET" style="display: inline;">
                             <input type="hidden" name="service" value="users" />
+                            <input type="hidden" name="searchUser" value="${searchUser}" />
                             <input type="hidden" name="index" value="${index + 1}" />
                             <button type="submit" class="page-link">>></button>
                         </form>
@@ -117,7 +133,6 @@
                 </c:if>
             </ul>
         </div>
-
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <!-- Bootstrap JS -->

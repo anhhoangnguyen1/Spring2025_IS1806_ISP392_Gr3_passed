@@ -37,23 +37,74 @@ public class userDAO extends DBContext {
         return usersList;
     }
 
-    public int countUsers() {
-        String sql = "SELECT COUNT(*) FROM users";
-        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
+//    public int countUsers() {
+//        String sql = "SELECT COUNT(*) FROM users";
+//        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+//            if (rs.next()) {
+//                return rs.getInt(1);
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return 0;
+//    }
+    public int countUsers(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            String sql = "SELECT COUNT(*) FROM users";
+            try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+
+            String sql = "SELECT COUNT(*) FROM users WHERE name LIKE ? OR phone LIKE ?";
+            try (PreparedStatement st = connection.prepareStatement(sql)) {
+                String param = "%" + keyword + "%";
+                st.setString(1, param);
+                st.setString(2, param);
+          
+                try (ResultSet rs = st.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return 0;
     }
 
-    public List<Users> searchUsers(String keyword) {
-        List<Users> list = new ArrayList<>();
-        String sql = "SELECT * FROM users WHERE name LIKE ?";
+//    public List<Users> searchUsers(String keyword) {
+//        List<Users> list = new ArrayList<>();
+//        String sql = "SELECT * FROM users WHERE name LIKE ?";
+//        try (PreparedStatement st = connection.prepareStatement(sql)) {
+//            st.setString(1, "%" + keyword + "%");
+//            try (ResultSet rs = st.executeQuery()) {
+//                while (rs.next()) {
+//                    list.add(mapResultSetToUser(rs));
+//                }
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return list;
+//    }
+
+    public List<Users> searchUsers(String keyword, int pageIndex, int pageSize) {
+    List<Users> list = new ArrayList<>();
+    String sql;
+    if (keyword == null || keyword.trim().isEmpty()) {
+        sql = "SELECT *"
+            + "FROM users "
+            + "ORDER BY id "
+            + "LIMIT ? OFFSET ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setString(1, "%" + keyword + "%");
+            st.setInt(1, pageSize);
+            st.setInt(2, (pageIndex - 1) * pageSize);
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapResultSetToUser(rs));
@@ -62,9 +113,34 @@ public class userDAO extends DBContext {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return list;
+    } else {
+        sql = "SELECT * "
+            + "FROM users "
+            + "WHERE name LIKE ? OR phone LIKE ? "
+            + "ORDER BY id "
+            + "LIMIT ? OFFSET ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            String param = "%" + keyword + "%";
+            st.setString(1, param);
+            st.setString(2, param);
+            st.setInt(3, pageSize);
+            st.setInt(4, (pageIndex - 1) * pageSize);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
+    return list;
+}
+
+    
+    
+    
     public Users getUserById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
@@ -80,7 +156,7 @@ public class userDAO extends DBContext {
         return null;
     }
 
-    // Thêm người dùng mới vào cơ sở dữ liệu
+
     public boolean insertUsers(Users user) {
         String sql = "INSERT INTO users (username, password, name, phone, address, gender, dob, role, email, created_at, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
@@ -102,7 +178,7 @@ public class userDAO extends DBContext {
         return false;
     }
 
-    // Chỉnh sửa thông tin người dùng
+
     public boolean editUser(Users user) {
         String sql = "UPDATE users SET name = ?, phone = ?, address = ?, gender = ?, dob = ?, role = ?, email = ?, updated_at = NOW(), status = ? "
                 + "WHERE id = ?";
@@ -175,7 +251,8 @@ public class userDAO extends DBContext {
         userDAO dao = new userDAO();
 
         int pageIndex = 1;
-        List<Users> users = dao.viewAllUsers(pageIndex);
+        String keyword = null;
+        List<Users> users = dao.searchUsers(keyword, pageIndex, pageIndex);
 
         if (users.isEmpty()) {
             System.out.println("Không có người dùng nào được tìm thấy!");
@@ -184,7 +261,7 @@ public class userDAO extends DBContext {
             for (Users user : users) {
                 System.out.println("------------------------------------------------------");
                 System.out.println("User ID: " + user.getId());
-                System.out.println("Username: " + user.getUsername());
+              
                 System.out.println("Name: " + user.getName());
                 System.out.println("Phone: " + user.getPhone());
                 System.out.println("Address: " + user.getAddress());

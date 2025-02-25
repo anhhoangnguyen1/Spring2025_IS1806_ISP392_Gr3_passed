@@ -9,12 +9,22 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Customer List</title>
     </head>
     <body>
         <h1>Customers List</h1>
 
+        <c:if test="${not empty sessionScope.successMessage}">
+            <div class="alert alert-success">
+                <strong>Success!</strong> ${sessionScope.successMessage}
+            </div>
+            <c:set var="successMessage" value="${sessionScope.successMessage}" />
+            <c:remove var="successMessage" />
+        </c:if>
         <form action="${pageContext.request.contextPath}/Customers" method="GET">
             <div class="search-box">
 
@@ -126,5 +136,9 @@
                 </c:if>
             </ul>
         </div>
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Bootstrap JS -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

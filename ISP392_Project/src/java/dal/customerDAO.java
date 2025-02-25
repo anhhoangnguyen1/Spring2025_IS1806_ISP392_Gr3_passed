@@ -81,12 +81,12 @@ public class customerDAO extends DBContext {
             }
         } else {
 
-            String sql = "SELECT COUNT(*) FROM customers WHERE name LIKE ? OR phone LIKE ? OR address LIKE ?";
+            String sql = "SELECT COUNT(*) FROM customers WHERE name LIKE ? OR phone LIKE ?";
             try (PreparedStatement st = connection.prepareStatement(sql)) {
                 String param = "%" + keyword + "%";
                 st.setString(1, param);
                 st.setString(2, param);
-                st.setString(3, param);
+            
                 try (ResultSet rs = st.executeQuery()) {
                     if (rs.next()) {
                         return rs.getInt(1);
@@ -121,16 +121,16 @@ public class customerDAO extends DBContext {
         } else {
             sql = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, status "
                     + "FROM customers "
-                    + "WHERE name LIKE ? OR phone LIKE ? OR address LIKE ? "
+                    + "WHERE name LIKE ? OR phone LIKE ? "
                     + "ORDER BY id "
                     + "LIMIT ? OFFSET ?";
             try (PreparedStatement st = connection.prepareStatement(sql)) {
                 String param = "%" + keyword + "%";
                 st.setString(1, param);
                 st.setString(2, param);
-                st.setString(3, param);
-                st.setInt(4, pageSize);
-                st.setInt(5, (pageIndex - 1) * pageSize);
+   
+                st.setInt(3, pageSize);
+                st.setInt(4, (pageIndex - 1) * pageSize);
                 try (ResultSet rs = st.executeQuery()) {
                     while (rs.next()) {
                         list.add(mapResultSetToCustomer(rs));
