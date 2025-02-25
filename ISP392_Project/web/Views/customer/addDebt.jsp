@@ -22,8 +22,8 @@
                     <div class="form-group">
                         <label>Debt Type</label>
                         <select class="form-control" name="type">
-                            <option value="+">Debt</option>
-                            <option value="-">Repay</option>
+                            <option value="+">+</option>
+                            <option value="-">-</option>
                         </select>
                     </div>
 

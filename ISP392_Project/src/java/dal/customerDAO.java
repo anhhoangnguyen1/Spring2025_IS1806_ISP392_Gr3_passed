@@ -86,7 +86,7 @@ public class customerDAO extends DBContext {
                 String param = "%" + keyword + "%";
                 st.setString(1, param);
                 st.setString(2, param);
-            
+
                 try (ResultSet rs = st.executeQuery()) {
                     if (rs.next()) {
                         return rs.getInt(1);
@@ -112,7 +112,13 @@ public class customerDAO extends DBContext {
                 st.setInt(2, (pageIndex - 1) * pageSize);
                 try (ResultSet rs = st.executeQuery()) {
                     while (rs.next()) {
-                        list.add(mapResultSetToCustomer(rs));
+                        Customers customer = mapResultSetToCustomer(rs);
+
+                        // Lấy danh sách nợ của khách hàng
+                        List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1);
+                        customer.setDebtNotes(debts); // Gán danh sách nợ vào khách hàng
+
+                        list.add(customer);
                     }
                 }
             } catch (SQLException e) {
@@ -128,12 +134,18 @@ public class customerDAO extends DBContext {
                 String param = "%" + keyword + "%";
                 st.setString(1, param);
                 st.setString(2, param);
-   
+
                 st.setInt(3, pageSize);
                 st.setInt(4, (pageIndex - 1) * pageSize);
                 try (ResultSet rs = st.executeQuery()) {
                     while (rs.next()) {
-                        list.add(mapResultSetToCustomer(rs));
+                        Customers customer = mapResultSetToCustomer(rs);
+
+                        // Lấy danh sách nợ của khách hàng
+                        List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1);
+                        customer.setDebtNotes(debts); // Gán danh sách nợ vào khách hàng
+
+                        list.add(customer);
                     }
                 }
             } catch (SQLException e) {
@@ -234,7 +246,6 @@ public class customerDAO extends DBContext {
                 .status(rs.getString("status"))
                 .build();
     }
-
 
     public static void main(String[] args) {
         customerDAO dao = new customerDAO();

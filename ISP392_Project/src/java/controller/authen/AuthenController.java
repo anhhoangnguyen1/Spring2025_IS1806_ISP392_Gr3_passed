@@ -80,9 +80,8 @@ public class AuthenController extends HttpServlet {
                 url = forgotPassword(request, response);
                 break;
             case "/newPassword":
-                //TODO:...
-                url = resetPassword(request, response);
-                break;
+                resetPassword(request, response);
+                return; // Kết thúc luôn để tránh lỗi forward
             default:
                 url = "home";
         }
@@ -158,8 +157,7 @@ public class AuthenController extends HttpServlet {
         // Redirect to password reset page
         return RESET_PASSWORD_JSP_PAGE;
     }
-
-    private String resetPassword(HttpServletRequest request, HttpServletResponse response) {
+    private void resetPassword(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String email = (String) session.getAttribute("email");
         String newPassword = request.getParameter("new_password");
@@ -167,28 +165,26 @@ public class AuthenController extends HttpServlet {
 
         if (newPassword == null || newPassword.length() < 6) {
             request.setAttribute("error", "Password must be at least 6 characters long.");
-            return RESET_PASSWORD_JSP_PAGE; // Stop execution
+            request.getRequestDispatcher(RESET_PASSWORD_JSP_PAGE).forward(request, response);
+            return;
         }
-
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "Passwords do not match.");
-            return RESET_PASSWORD_JSP_PAGE;
+            request.getRequestDispatcher(RESET_PASSWORD_JSP_PAGE).forward(request, response);
+            return;
         }
-
         String hashedPassword = GlobalUtils.getMd5(newPassword);
-
         Users account = Users.builder()
                 .email(email)
                 .password(hashedPassword)
                 .build();
-
         boolean updated = accDAO.updatePassword(account);
         if (updated) {
             request.setAttribute("message", "Your password has been successfully reset.");
-            return "/views/login.html";
+            response.sendRedirect("/ISP392_Project/views/login.html");
         } else {
             request.setAttribute("error", "Failed to reset password. Please try again.");
-            return RESET_PASSWORD_JSP_PAGE;
+            request.getRequestDispatcher(RESET_PASSWORD_JSP_PAGE).forward(request, response);
         }
     }
 }
