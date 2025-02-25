@@ -25,63 +25,42 @@ public class controllerUsers extends HttpServlet {
     userDAO userDAO = new userDAO();
 
     @Override
-protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    HttpSession session = request.getSession();
-    String service = request.getParameter("service");
-    if (service == null) {
-        service = "users";
-    }
-
-    switch (service) {
-        case "users":{
-            String keyword = request.getParameter("searchUser");
-            if (keyword == null) {
-                keyword = "";
-            }
-
-            int index = 1;
-            try {
-                index = Integer.parseInt(request.getParameter("index"));
-            } catch (NumberFormatException ignored) {
-            }
-
-            int total = userDAO.countUsers(keyword);
-            int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
-
-            List<Users> list = userDAO.searchUsers(keyword, index, 5);
-
-            request.setAttribute("list", list);
-            request.setAttribute("endPage", endPage);
-            request.setAttribute("index", index);
-            request.setAttribute("searchUser", keyword);
-
-            request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
-            break;
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        String service = request.getParameter("service");
+        if (service == null) {
+            service = "users";
         }
 
+        switch (service) {
+            case "users": {
+                String keyword = request.getParameter("searchUser");
+                if (keyword == null) {
+                    keyword = "";
+                }
 
-            
-//                int index = 1;
-//                try {
-//                    index = Integer.parseInt(request.getParameter("index"));
-//                } catch (NumberFormatException ignored) {
-//                }
-//
-//                List<Users> list = userDAO.viewAllUsers(index);
-//
-//                int total = userDAO.countUsers();
-//                int endPage = (total % 10 == 0) ? total / 10 : (total / 10) + 1;
-//
-//                request.setAttribute("userList", list);
-//                request.setAttribute("endPage", endPage);
-//                request.setAttribute("index", index);
-//
-//                request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
-//                break;
+                int index = 1;
+                try {
+                    index = Integer.parseInt(request.getParameter("index"));
+                } catch (NumberFormatException ignored) {
+                }
 
-            case "getUserById":
-            {
+                int total = userDAO.countUsers(keyword);
+                int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
+
+                List<Users> list = userDAO.searchUsers(keyword, index, 5);
+
+                request.setAttribute("list", list);
+                request.setAttribute("endPage", endPage);
+                request.setAttribute("index", index);
+                request.setAttribute("searchUser", keyword);
+
+                request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
+                break;
+            }
+
+            case "getUserById": {
                 int id = Integer.parseInt(request.getParameter("user_id"));
                 Users user = userDAO.getUserById(id);
                 request.setAttribute("user", user);
@@ -89,15 +68,14 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response)
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 break;
             }
-            case "editUser":{
-          
+            case "editUser": {
+
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users userForEdit = userDAO.getUserById(userId);
                 request.setAttribute("user", userForEdit);
 
-                // Lấy tên người dùng từ session
-                String userName = (String) session.getAttribute("username"); // Lấy username từ session
-                request.setAttribute("userName", userName); // Đưa username vào request
+                String userName = (String) session.getAttribute("username");
+                request.setAttribute("userName", userName);
 
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 break;
@@ -123,22 +101,24 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response)
             String updatedBy = request.getParameter("updatedBy");
             java.sql.Date dob = java.sql.Date.valueOf(request.getParameter("dob"));
 
+            if (status == null || status.isEmpty()) {
+                status = "Active";
+            }
             boolean emailExists = userDAO.checkEmailExists(email, userId);
             boolean phoneExists = userDAO.checkPhoneExists(phone, userId);
 
             if (emailExists) {
-                request.setAttribute("emailError", "Email is existed.");
+                request.setAttribute("emailError", "Email already exists.");
                 request.setAttribute("user", getUserFromRequest(request));
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 return;
             }
             if (phoneExists) {
-                request.setAttribute("phoneError", "Phone is existed.");
+                request.setAttribute("phoneError", "Phone number already exists.");
                 request.setAttribute("user", getUserFromRequest(request));
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 return;
             }
-
 
             Users user = Users.builder()
                     .id(Integer.parseInt(request.getParameter("user_id")))
@@ -146,13 +126,13 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response)
                     .phone(request.getParameter("phone"))
                     .address(request.getParameter("address"))
                     .gender(request.getParameter("gender"))
-                    .dob(java.sql.Date.valueOf(request.getParameter("dob"))) // chuyển đổi từ String thành Date
-                    .role(request.getParameter("role"))
+                    .dob(java.sql.Date.valueOf(request.getParameter("dob")))
+                    .role(role)
                     .email(request.getParameter("email"))
-                    .status(request.getParameter("status"))
+                    .status(status)
                     .build();
             userDAO.editUser(user);
-            
+
             HttpSession session = request.getSession();
             session.setAttribute("successMessage", "User details updated successfully.");
             response.sendRedirect("Users?service=users");

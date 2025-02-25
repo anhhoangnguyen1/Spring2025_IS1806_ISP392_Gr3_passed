@@ -37,17 +37,6 @@ public class userDAO extends DBContext {
         return usersList;
     }
 
-//    public int countUsers() {
-//        String sql = "SELECT COUNT(*) FROM users";
-//        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
-//            if (rs.next()) {
-//                return rs.getInt(1);
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return 0;
-//    }
     public int countUsers(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             String sql = "SELECT COUNT(*) FROM users";
@@ -78,21 +67,7 @@ public class userDAO extends DBContext {
         return 0;
     }
 
-//    public List<Users> searchUsers(String keyword) {
-//        List<Users> list = new ArrayList<>();
-//        String sql = "SELECT * FROM users WHERE name LIKE ?";
-//        try (PreparedStatement st = connection.prepareStatement(sql)) {
-//            st.setString(1, "%" + keyword + "%");
-//            try (ResultSet rs = st.executeQuery()) {
-//                while (rs.next()) {
-//                    list.add(mapResultSetToUser(rs));
-//                }
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return list;
-//    }
+
 
     public List<Users> searchUsers(String keyword, int pageIndex, int pageSize) {
     List<Users> list = new ArrayList<>();
