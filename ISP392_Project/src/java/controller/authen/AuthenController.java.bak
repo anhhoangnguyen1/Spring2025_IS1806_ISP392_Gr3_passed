@@ -12,11 +12,13 @@ import java.io.IOException;
 import utils.EmailUtils;
 import utils.GlobalUtils;
 
-@WebServlet(name = "AuthenController", urlPatterns = {"/authen", "/forgotpw", "/verifyOTP", "/newPassword", "/resendOTP", "/remove-toast"})
+@WebServlet(name = "AuthenController", urlPatterns = {"/authen", "/forgotpw", "/verifyOTP", "/newPassword"})
 public class AuthenController extends HttpServlet {
 
     private AccountDAO accDAO;
     private final String FORGOT_PASSWORD_JSP_PAGE = "views/authen/forgotPassword.jsp";
+    private final String RESET_PASSWORD_JSP_PAGE = "views/authen/newPassword.jsp";
+    private final String VERIFY_OTP_JSP_PAGE = "views/authen/verifyOTP.jsp";
 
     @Override
     public void init() throws ServletException {
@@ -44,12 +46,6 @@ public class AuthenController extends HttpServlet {
             case "/forgotpw":
                 url = FORGOT_PASSWORD_JSP_PAGE;
                 break;
-            case "/verifyOTP":
-                url = "views/authen/verifyOTP.jsp";
-                break;
-            case "/newPassword":
-                url = "views/authen/newPassword.jsp";
-                break;
             default:
                 url = "view/authen/login.jsp";
         }
@@ -76,18 +72,16 @@ public class AuthenController extends HttpServlet {
                 //TODO:...
                 url = "";
                 break;
-            case "/resendOTP":
-                url = resendOTP(request, response);
-                break;
             case "/verifyOTP":
+                //TODO:...
                 url = verifyOTP(request, response);
                 break;
             case "/forgotpw":
                 url = forgotPassword(request, response);
                 break;
             case "/newPassword":
-                url = resetPassword(request, response);
-                break;
+                resetPassword(request, response);
+                return; // Kết thúc luôn để tránh lỗi forward
             default:
                 url = "home";
         }
@@ -124,7 +118,7 @@ public class AuthenController extends HttpServlet {
         // Đặt thời gian hết hạn cho session (ví dụ: 15 phút)
         session.setMaxInactiveInterval(15 * 60);
 
-        url = "views/authen/verifyOTP.jsp";
+        url = VERIFY_OTP_JSP_PAGE;
         return url;
     }
 
@@ -134,32 +128,10 @@ public class AuthenController extends HttpServlet {
         String email = (String) session.getAttribute("email");
         String enteredOTP = request.getParameter("otp");
         String purpose = (String) session.getAttribute("otp_purpose");
-        
-        // Get attempt count from session, initialize to 1 if not present
-        Integer attemptCount = (Integer) session.getAttribute("otp_attempts");
-        if (attemptCount == null) {
-            attemptCount = 1;
-        } else {
-            attemptCount++;
-        }
-        
-        // Update attempt count in session
-        session.setAttribute("otp_attempts", attemptCount);
-        
-        // Check if max attempts reached
-        if (attemptCount > 5) {
-            // Clear OTP related data from session
-            session.removeAttribute("otp");
-            session.removeAttribute("otp_attempts");
-            
-            request.setAttribute("error", "Maximum attempts reached. Please request a new OTP.");
-            return "views/authen/verifyOTP.jsp";
-        }
-        
+
         if (storedOTP != null && storedOTP.equals(enteredOTP)) {
             // OTP is correct
             session.removeAttribute("otp");
-            session.removeAttribute("otp_attempts");
 
             if ("activation".equals(purpose)) {
                 return handleAccountActivation(request, session);
@@ -167,89 +139,52 @@ public class AuthenController extends HttpServlet {
                 return handlePasswordReset(request, session);
             } else {
                 request.setAttribute("error", "Invalid OTP purpose.");
-                return "view/authen/otp-verification.jsp";
+                return VERIFY_OTP_JSP_PAGE;
             }
         } else {
             // Incorrect OTP
-            request.setAttribute("error", "Incorrect OTP. Attempts remaining: " + (5 - attemptCount));
-            return "views/authen/verifyOTP.jsp";
+            request.setAttribute("error", "Incorrect OTP. Please try again.");
+            return VERIFY_OTP_JSP_PAGE;
         }
     }
-    
+
     private String handleAccountActivation(HttpServletRequest request, HttpSession session) {
         //Todo
         return null;
     }
-    
+
     private String handlePasswordReset(HttpServletRequest request, HttpSession session) {
         // Redirect to password reset page
-        return "views/authen/newPassword.jsp";
+        return RESET_PASSWORD_JSP_PAGE;
     }
-    
-    private String resetPassword(HttpServletRequest request, HttpServletResponse response) {
+    private void resetPassword(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String email = (String) session.getAttribute("email");
         String newPassword = request.getParameter("new_password");
         String confirmPassword = request.getParameter("confirm_password");
 
+        if (newPassword == null || newPassword.length() < 6) {
+            request.setAttribute("error", "Password must be at least 6 characters long.");
+            request.getRequestDispatcher(RESET_PASSWORD_JSP_PAGE).forward(request, response);
+            return;
+        }
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "Passwords do not match.");
-            return "views/authen/newPassword.jsp";
+            request.getRequestDispatcher(RESET_PASSWORD_JSP_PAGE).forward(request, response);
+            return;
         }
         String hashedPassword = GlobalUtils.getMd5(newPassword);
         Users account = Users.builder()
                 .email(email)
                 .password(hashedPassword)
                 .build();
-
         boolean updated = accDAO.updatePassword(account);
         if (updated) {
-            // Set success message for the success page
-            request.setAttribute("successMessage", "Your password has been successfully reset!");
-            // Clear sensitive session data
-            session.removeAttribute("email");
-            session.removeAttribute("otp_purpose");
-            session.removeAttribute("account_id");
-            
-            return "views/authen/resetSuccess.jsp";
+            request.setAttribute("message", "Your password has been successfully reset.");
+            response.sendRedirect("/ISP392_Project/views/login.html");
         } else {
-            // Set toast message for error
-            session.setAttribute("toastMessage", "Failed to reset password. Please try again.");
-            session.setAttribute("toastType", "error");
-            return "views/authen/newPassword.jsp";
+            request.setAttribute("error", "Failed to reset password. Please try again.");
+            request.getRequestDispatcher(RESET_PASSWORD_JSP_PAGE).forward(request, response);
         }
-    }
-
-    private String resendOTP(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("email");
-        String purpose = (String) session.getAttribute("otp_purpose");
-        
-        if (email == null || email.isEmpty()) {
-            email = request.getParameter("email");
-            if (email == null || email.isEmpty()) {
-                request.setAttribute("error", "Email not found. Please try again.");
-                return FORGOT_PASSWORD_JSP_PAGE;
-            }
-        }
-        
-        // Generate and send new OTP
-        String newOTP = EmailUtils.sendOTPMail(email);
-        
-        // Update session with new OTP and reset attempt counter
-        session.setAttribute("otp", newOTP);
-        session.setAttribute("email", email);
-        session.setAttribute("otp_attempts", 0);
-        
-        // If purpose is not set, default to password reset
-        if (purpose == null) {
-            session.setAttribute("otp_purpose", "password_reset");
-        }
-        
-        // Reset session timeout
-        session.setMaxInactiveInterval(15 * 60);
-        
-        request.setAttribute("message", "A new OTP has been sent to your email.");
-        return "views/authen/verifyOTP.jsp";
     }
 }

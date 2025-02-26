@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,6 +29,10 @@
                 color: red;
                 margin-bottom: 15px;
             }
+            .success {
+                color: green;
+                margin-bottom: 15px;
+            }
             input[type="text"] {
                 width: 100%;
                 padding: 12px;
@@ -37,7 +41,6 @@
                 border-radius: 6px;
                 font-size: 16px;
                 box-sizing: border-box;
-                text-align: center;
             }
             button {
                 width: 100%;
@@ -49,29 +52,89 @@
                 cursor: pointer;
                 font-size: 16px;
                 transition: background 0.3s;
+                margin-bottom: 10px;
             }
             button:hover {
                 background: #0056b3;
+            }
+            button:disabled {
+                background: #cccccc;
+                cursor: not-allowed;
+            }
+            .timer {
+                margin-top: 10px;
+                font-size: 14px;
+                color: #666;
+            }
+            #resendBtn {
+                background-color: #6c757d;
+            }
+            #resendBtn:hover {
+                background-color: #5a6268;
             }
         </style>
     </head>
     <body>
         <div class="container">
             <h2>Verify OTP</h2>
-            <p>Enter the OTP sent to your email to proceed.</p>
-
-
+            <p>Enter the verification code sent to your email.</p>
+            
             <c:if test="${not empty error}">
                 <p class="error">${error}</p>
             </c:if>
+            
+            <c:if test="${not empty message}">
+                <p class="success">${message}</p>
+            </c:if>
 
             <form action="verifyOTP" method="post">
-                <input type="text" name="otp" placeholder="Enter OTP" required>
-                <button type="submit">Verify OTP</button>
+                <input type="text" name="otp" id="otpInput" placeholder="Enter OTP" required>
+                <div class="timer">Time remaining: <span id="countdown">60</span> seconds</div>
+                <button type="submit" id="submitBtn">Verify OTP</button>
             </form>
-            <div style="text-align: right;">
-                <p><a href="/ISP392_Project/views/loginServlet" class="btn">Un-Forgot password?</a></p>
-            </div>
+            
+            <form action="resendOTP" method="post">
+                <input type="hidden" name="email" value="${email}">
+                <button type="submit" id="resendBtn" disabled>Resend OTP</button>
+            </form>
+            
+            <script>
+                // Timer functionality
+                let timeLeft = 60;
+                const countdownEl = document.getElementById('countdown');
+                const resendBtn = document.getElementById('resendBtn');
+                const otpInput = document.getElementById('otpInput');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                function updateTimer() {
+                    countdownEl.textContent = timeLeft;
+                    
+                    if (timeLeft <= 0) {
+                        // Disable OTP input and submit when time expires
+                        otpInput.disabled = true;
+                        submitBtn.disabled = true;
+                        
+                        // Enable resend button
+                        resendBtn.disabled = false;
+                        
+                        // Clear the interval
+                        clearInterval(timerInterval);
+                        countdownEl.textContent = "Expired";
+                    }
+                    timeLeft--;
+                }
+                
+                // Start the countdown
+                updateTimer();
+                const timerInterval = setInterval(updateTimer, 1000);
+                
+                // If there's an error message about maximum attempts, disable verify button and enable resend button
+                <c:if test="${error != null && error.contains('Maximum attempts reached')}">
+                    otpInput.disabled = true;
+                    submitBtn.disabled = true;
+                    resendBtn.disabled = false;
+                </c:if>
+            </script>
         </div>
     </body>
 </html>
