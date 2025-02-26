@@ -45,7 +45,7 @@ public class controllerDebts extends HttpServlet {
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request servlet request
+     * @param request servlet request   
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
@@ -239,14 +239,17 @@ public class controllerDebts extends HttpServlet {
                 debtToUpdate.setDescription(description);
                 debtToUpdate.setCustomer_id(customer_id);
                 debtToUpdate.setCreatedBy(createdBy);
+                debtToUpdate.setCreatedAt(createdAt);
                 debtToUpdate.setStatus(status);
 
                 // Gọi phương thức cập nhật
                 boolean isUpdated = debts.updateDebtInCustomer(debtToUpdate);
                 if (isUpdated) {
-                    request.setAttribute("Notification", "Debt updated successfully.");
+                    request.setAttribute("Notification", "Debt added successfully.");
+                    
                 } else {
-                    request.setAttribute("Notification", "Debt updated failed.");
+                    request.setAttribute("Notification", "Debt added failed.");
+                    
                 }
                 // Cộng lại khoản nợ mới vào tổng nợ
                 totalDebtAmount = totalDebtAmount.add(amount);
@@ -266,6 +269,7 @@ public class controllerDebts extends HttpServlet {
 
 // Chỉ chuyển hướng sau khi hoàn tất cập nhật
             response.sendRedirect("Customers?service=customers");
+            
 
         }
 

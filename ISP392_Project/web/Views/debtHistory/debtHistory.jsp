@@ -33,14 +33,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:set var="totalAmount" value="0" />
                         <c:forEach var="debt" items="${list}">
                             <tr>
                                 <td>${debt.id}</td>
-                                <td class="${debt.type == '-' ? 'text-danger' : ''}">
+                                <td class="amount ${debt.type == '-' ? 'text-danger' : ''}">
                                     <fmt:formatNumber value="${debt.amount}" pattern="###,##0.00"/>
                                 </td>
-
 
                                 <td>
                                     <img src="images/${debt.image}" class="myImg" style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;" alt="Debt evidence"/>
@@ -50,27 +48,25 @@
                                 <td>${debt.updatedAt}</td>
                                 <td>${debt.createdBy}</td>
                                 <td>${debt.status}</td>
-                                <td class="sticky-col1">
-
-                                </td>
+                                <td class="sticky-col1"></td>
                             </tr>
-                            <c:set var="totalAmount" value="${totalAmount + (debt.type == '-' ? -debt.amount : debt.amount)}" />
                         </c:forEach>
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="7" class="text-right "></td>
-                            <td class="sticky-col1"><strong>Total Amount: <fmt:formatNumber value="${totalAmount}" /></strong></td>
+                            <td colspan="7" class="sticky-col1 text-right font-weight-bold" id="totalAmountCell">
+                                Total Amount: <span id="totalAmount">0.00</span>
+                            </td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
+
             <div id="DebtModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
-                        <form action="${pageContext.request.contextPath}/Debts" method="POST" enctype="multipart/form-data">
+                        <form action="${pageContext.request.contextPath}/Debts" method="POST" enctype="multipart/form-data" onsubmit="adjustAmountBeforeSubmit(event)">
                             <input type="hidden" name="service" value="updateDebt" />
-
                             <input type="hidden" name="createdBy" value="${sessionScope.username}" />
                             <c:forEach var="debt" items="${list}">
                                 <input type="hidden" name="customer_id" value="${debt.customer_id}" />
@@ -79,51 +75,42 @@
                             <div class="modal-header">
                                 <h5 class="modal-title" id="DebtModalLabel">Add Debt</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
+                                    <span aria-hidden="true">×</span>
                                 </button>
                             </div>
-
-
-
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Debt Type</label>
-                                    <select class="form-control" name="type"  required>
+                                    <select class="form-control" name="type" id="debtType" required>
                                         <option value="+">+</option>
                                         <option value="-">-</option>
                                     </select>
                                 </div>
-
                                 <div class="form-group">
                                     <label>Amount</label>
-                                    <input type="text" oninput="formatNumber(event)" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="amount"  required />
+                                    <input type="text" oninput="formatNumber(event); this.value = this.value.replace('-', '');" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="amount" id="debtAmount" required />
                                 </div>
-
                                 <div class="form-group">
                                     <label>Image</label>
-                                    <input type="file" class="form-control-file" name="image"  />
+                                    <input type="file" class="form-control-file" name="image" />
                                 </div>
-
                                 <div class="form-group">
                                     <label>Created at</label>
-                                    <input type="datetime-local" class="form-control" name="created_at"  required />
+                                    <input type="datetime-local" class="form-control" name="created_at" required />
                                 </div>
-
                                 <div class="form-group">
                                     <label>Description</label>
-                                    <textarea class="form-control" name="description"  rows="3"></textarea>
+                                    <textarea class="form-control" name="description" rows="3"></textarea>
                                 </div>
-
                                 <div class="form-group">
                                     <label>Status</label>
-                                    <select class="form-control" name="status" id="status_${debt.id}" required>
+                                    <select class="form-control" name="status" required>
                                         <option value="Pending">Pending</option>
                                         <option value="Paid">Paid</option>
                                         <option value="Overdue">Overdue</option>
                                     </select>
                                 </div>
                             </div>
-
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
                                 <button type="submit" class="btn btn-primary">Add Debt</button>
@@ -134,7 +121,29 @@
             </div>
         </div>                            
     </body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let totalAmount = 0;
+
+            // Lấy tất cả các ô có class 'amount'
+            document.querySelectorAll(".amount").forEach(function (cell) {
+                let amountText = cell.innerText.replace(/,/g, "").trim(); // Xóa dấu phẩy, khoảng trắng
+
+                // Kiểm tra nếu có dấu '-' thì chuyển thành số âm
+                let amount = amountText.startsWith("-") ? -parseFloat(amountText.substring(1)) : parseFloat(amountText);
+
+                if (!isNaN(amount)) {
+                    totalAmount += amount;
+                }
+            });
+
+            // Hiển thị tổng số tiền, định dạng lại
+            document.getElementById("totalAmount").innerText = totalAmount.toLocaleString("en-US", {minimumFractionDigits: 2});
+        });
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+
 </html>
