@@ -110,9 +110,10 @@ CREATE TABLE Invoice_detail (
 -- Table Debt note
 CREATE TABLE Debt_note (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    type ENUM('debt', 'repay') NOT NULL,
+    type ENUM('+', '-') NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     customers_id INT,
+    debtor_info JSON,
     FOREIGN KEY (customers_id) REFERENCES Customers(id) ON DELETE CASCADE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -120,6 +121,22 @@ CREATE TABLE Debt_note (
     status VARCHAR(255),
     description TEXT,
     image VARCHAR(255) NOT NULL
+);
+CREATE TABLE Debt_note_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    debt_note_id INT NOT NULL,
+    type ENUM('+', '-') NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    customers_id INT,
+    debtor_info JSON,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    status VARCHAR(255),
+    description TEXT,
+    image VARCHAR(255),
+    change_type ENUM('CREATE', 'UPDATE', 'DELETE') NOT NULL, -- Loại thay đổi
+    FOREIGN KEY (debt_note_id) REFERENCES Debt_note(id) ON DELETE CASCADE
 );
 
 -- Insert into Stores
@@ -161,10 +178,10 @@ VALUES
 -- Insert into Customers
 INSERT INTO Customers (name, phone, address, balance, created_by, status)
 VALUES 
-('Nguyễn Văn Minh', '0912345678', '123 Nguyễn Huệ, Hà Nội', -22000000, 'Phan Ngọc Mai', 'Active'),
+('Nguyễn Văn Minh', '0912345678', '123 Nguyễn Huệ, Hà Nội', 0, 'Phan Ngọc Mai', 'Active'),
 ('Trần Thị Lan', '0912345679', '456 Quang Trung, Hà Nội', 0, 'Lê Phương Linh', 'Active'),
 ('Lê Hoàng Nam', '0912345680', '789 Lê Lợi, Hà Nội', 0, 'Phan Ngọc Mai', 'Active'),
-('Phạm Văn Hùng', '0912345681', '101 Trần Hưng Đạo, Hải Dương', -10000000, 'Lê Phương Linh', 'Active'),
+('Phạm Văn Hùng', '0912345681', '101 Trần Hưng Đạo, Hải Dương', 0, 'Lê Phương Linh', 'Active'),
 ('Hoàng Thị Hạnh', '0912345682', '222 Hai Bà Trưng, Hà Nội', 0, 'Lê Phương Linh', 'Active');
 
 -- Insert into Invoice
@@ -185,10 +202,32 @@ VALUES
 (4, 4, 600, 32000, 'Gạo Nàng Hoa, 12 bao 50kg'),
 (5, 1, 500, 30000, 'Nhập khẩu Gạo ST25, 10 bao 50kg');
 
--- Insert into Debt_note
-INSERT INTO Debt_note (type, amount, customers_id, created_by, status, description, image)
-VALUES 
-('debt', 22000000, 1, 'Lê Phương Linh', 'Pending', 'Khách hàng nợ', 'debt1.jpg'),
-('debt', 10000000, 4, 'Phan Ngọc Mai', 'Pending', 'Khách hàng trả nợ một phần', 'debt2.jpg');
+DELIMITER //
 
-select * from customers;
+CREATE TRIGGER after_debt_note_insert
+AFTER INSERT ON Debt_note
+FOR EACH ROW
+BEGIN
+    INSERT INTO Debt_note_history (debt_note_id, type, amount, customers_id, debtor_info, created_at, updated_at, created_by, status, description, image, change_type)
+    VALUES (NEW.id, NEW.type, NEW.amount, NEW.customers_id, NEW.debtor_info, NEW.created_at, NEW.updated_at, NEW.created_by, NEW.status, NEW.description, NEW.image, 'CREATE');
+END;
+//
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER after_debt_note_update
+AFTER UPDATE ON Debt_note
+FOR EACH ROW
+BEGIN
+    INSERT INTO Debt_note_history (debt_note_id, type, amount, customers_id, debtor_info, created_at, updated_at, created_by, status, description, image, change_type)
+    VALUES (NEW.id, NEW.type, NEW.amount, NEW.customers_id, NEW.debtor_info, NEW.created_at, NEW.updated_at, NEW.created_by, NEW.status, NEW.description, NEW.image, 'UPDATE');
+END;
+//
+
+DELIMITER ;
+
+
+
+
