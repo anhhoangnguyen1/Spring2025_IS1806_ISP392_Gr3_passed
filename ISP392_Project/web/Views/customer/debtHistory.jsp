@@ -12,7 +12,7 @@
         <title>JSP Page</title>
     </head>
     <body>
-        
+
         <c:forEach var="customer" items="${list}">
             <div id="debtListModal${customer.id}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="debtListLabel${customer.id}" aria-hidden="true">
                 <div class="modal-dialog modal-xl" role="document">
@@ -21,6 +21,8 @@
                             <h4 class="modal-title">Debt List - record ${customer.debtNotes.size()}</h4>
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         </div>
+                            <h3 class="font-weight-bold">${customer.name} - ${customer.phone}</h3>
+                            
                         <button type="button" class="btn btn-outline-success ml-auto mr-5" data-toggle="modal" data-target="#DebtModal${customer.id}">
                             <i class="fas fa-plus"></i> Add
                         </button>
@@ -47,10 +49,11 @@
 
                                         <c:forEach var="debt" items="${customer.debtNotes}">
                                             <tr>
-                                                <td>${debt.id}</td>
+                                                <td>${debt.debt_note_id}</td>
                                                 <td class="${debt.type == '-' ? 'text-danger' : ''}">
-                                                    <fmt:formatNumber value="${debt.amount}" />
+                                                    <fmt:formatNumber value="${debt.type == '-' ? -debt.amount : debt.amount}" pattern="###,##0.00"/>
                                                 </td>
+
                                                 <td>
                                                     <img src="images/${debt.image}" class="myImg" style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;" alt="Debt evidence"/>
                                                 </td>
@@ -72,25 +75,23 @@
                                                         <i class="fas fa-info-circle"></i>
                                                     </button>
 
-                                                    <!-- Xóa nợ -->
-                                                    <a class="btn btn-outline-danger" href="Debts?service=deleteDebtCustomers&id=${debt.id}" onclick="return confirm('Are you sure?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                                  
                                                 </td>
                                             </tr>
-                                            
+
                                             <!-- Modal hiển thị chi tiết nợ -->
 
 
                                         </c:forEach>
-                                           
+
                                         <c:forEach begin="1" end="${10 - customer.debtNotes.size()}" varStatus="loop">
                                             <tr>
-                                                <td colspan="9" style="height: 80px;">&nbsp;</td> <!-- Dòng trống -->
+                                                <td colspan="9" style="height: 40px;">&nbsp;</td> <!-- Dòng trống -->
                                             </tr>
                                         </c:forEach>
                                     </tbody>
                                 </table>
+                                <h4>Total Amount: <fmt:formatNumber value="${customer.balance}"/></h4>
                             </div>
                         </div>
                         <div class="modal-footer">

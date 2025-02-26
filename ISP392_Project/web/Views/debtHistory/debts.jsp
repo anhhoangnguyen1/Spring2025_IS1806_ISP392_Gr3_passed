@@ -140,13 +140,14 @@
             </aside>
 
             <div class="contents">
-                <div class="panel-bar1">
-                    <c:if test="${not empty requestScope.Notification}">
+                <c:if test="${not empty requestScope.Notification}">
                         <div class="alert alert-warning alert-dismissible">
                             <button type="button" class="close" data-dismiss="alert">&times;</button>
                             <strong>${requestScope.Notification}</strong> 
                         </div>
                     </c:if>
+                <div class="panel-bar1">
+                    
                     <c:import url="listDebts.jsp" />
                 </div>
             </div>
@@ -167,5 +168,3 @@
 
     </body>
 </html>
-
-

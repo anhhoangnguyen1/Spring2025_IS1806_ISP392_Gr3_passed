@@ -55,15 +55,14 @@
                                 <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" />
                             </th>
                             <th class="resizable" onclick="sortTable(1)">ID</th>
-                            <th class="resizable" onclick="sortTable(2)">Amount</th>
-                            <th class="resizable">Image</th>
-                            <th class="resizable" onclick="sortTable(4)">Description</th>
-                            <th class="resizable" onclick="sortTable(5)">name</th>
-                            <th class="resizable" onclick="sortTable(6)">Address</th>
-                            <th class="resizable" onclick="sortTable(7)">Phone</th>
-                            <th class="resizable" onclick="sortTable(8)">Created At</th>
-                            <th class="resizable" onclick="sortTable(9)">Updated At</th>
-                            <th class="resizable" onclick="sortTable(10)">Created By</th>
+                            <th class="resizable" onclick="sortTable(2)">Total amount</th>
+                            <th class="resizable" onclick="sortTable(3)">Description</th>
+                            <th class="resizable" onclick="sortTable(4)">name</th>
+                            <th class="resizable" onclick="sortTable(5)">Address</th>
+                            <th class="resizable" onclick="sortTable(6)">Phone</th>
+                            <th class="resizable" onclick="sortTable(7)">Created At</th>
+                            <th class="resizable" onclick="sortTable(8)">Updated At</th>
+                            <th class="resizable" onclick="sortTable(9)">Created By</th>
                             <th class="resizable">Status</th>
                             <th class="sticky-col1">Action</th>
                         </tr>
@@ -75,11 +74,11 @@
                                     <input type="checkbox" name="selectedProducts" value="${debt.getId()}" class="product-checkbox" />
                                 </td>
                                 <td>${debt.getId()}</td>
-                                <td class="${debt.type == '-' ? 'text-danger' : ''}">
-                                     <fmt:formatNumber value="${debt.amount}" />
+                                <td>
+                                    <c:if test="${not empty totalAmountMap[debt.id]}">
+                                        <fmt:formatNumber value="${totalAmountMap[debt.id]}" pattern="###,##0.00"/>
+                                    </c:if>
                                 </td>
-
-                                <td><img src="images/${debt.getImage()}" class="myImg" style="width: 100px; height: 100px; object-fit: cover;" alt="Debt evidence"/></td>
                                 <td>${debt.getDescription()}</td>
                                 <td>${empty debt.customers_name ? debt.debtorName : debt.customers_name}</td>
                                 <td>${empty debt.address ? debt.debtorAddress : debt.address}</td>

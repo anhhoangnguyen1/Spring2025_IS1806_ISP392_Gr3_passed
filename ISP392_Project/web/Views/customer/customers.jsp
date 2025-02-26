@@ -102,7 +102,7 @@
                 <span class="menu-label">OWNER ZONE</span>
                 <ul class="navbar-links navbar-links-2">
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Users">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user-tie"></i>
                             </span>

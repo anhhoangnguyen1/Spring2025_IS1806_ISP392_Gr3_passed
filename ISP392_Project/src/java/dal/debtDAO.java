@@ -428,7 +428,7 @@ public class debtDAO extends DBContext {
     }
 
     public boolean updateDebtInCustomer(DebtNote debt) {
-        String sql = "UPDATE Debt_note SET type = ?, amount = ?, image = ?, description = ?, customers_id = ? WHERE id = ?";
+        String sql = "UPDATE Debt_note SET type = ?, amount = ?, image = ?, description = ?, customers_id = ?,created_at = ?, status = ? WHERE id = ?";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, debt.getType());
@@ -436,8 +436,9 @@ public class debtDAO extends DBContext {
             st.setString(3, debt.getImage());
             st.setString(4, debt.getDescription());
             st.setInt(5, debt.getCustomer_id());
-            st.setInt(6, debt.getId()); // ID để xác định khoản nợ cần cập nhật
-
+            st.setObject(6, debt.getCreatedAt()); 
+            st.setString(7, debt.getStatus()); 
+            st.setInt(8, debt.getId());
             System.out.println("Executing SQL: " + st.toString()); // Debug SQL statement
 
             int affectedRows = st.executeUpdate(); // Thực hiện update
