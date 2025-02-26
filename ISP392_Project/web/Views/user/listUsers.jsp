@@ -50,6 +50,13 @@
                 </div>
             </form>
 
+                          <div class="action-bar d-flex align-items-center">
+
+                <a href="#" class="btn btn-outline-primary mr-lg-auto">
+                    Add Staff
+                </a>
+
+            </div>
             <!-- Table Container -->
             <div class="table-container mt-4">
                 <form action="Users" method="POST">

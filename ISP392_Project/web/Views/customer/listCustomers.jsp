@@ -57,7 +57,7 @@
             </div>
 
             <!-- Table Container -->
-            <div class="table-container">
+            <div class="table-container mt-4">
                 <form action="Customers" method="POST">
                     <table class="table table-striped table-hover table-bordered" id="myTable">
                         <thead>
