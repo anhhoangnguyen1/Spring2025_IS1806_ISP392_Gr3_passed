@@ -68,52 +68,49 @@ public class userDAO extends DBContext {
     }
 
     public List<Users> searchUsers(String keyword, int pageIndex, int pageSize) {
-    List<Users> list = new ArrayList<>();
-    String sql;
-    if (keyword == null || keyword.trim().isEmpty()) {
-        sql = "SELECT *"
-            + "FROM users "
-            + "ORDER BY id "
-            + "LIMIT ? OFFSET ?";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setInt(1, pageSize);
-            st.setInt(2, (pageIndex - 1) * pageSize);
-            try (ResultSet rs = st.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapResultSetToUser(rs));
+        List<Users> list = new ArrayList<>();
+        String sql;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            sql = "SELECT *"
+                    + "FROM users "
+                    + "ORDER BY id "
+                    + "LIMIT ? OFFSET ?";
+            try (PreparedStatement st = connection.prepareStatement(sql)) {
+                st.setInt(1, pageSize);
+                st.setInt(2, (pageIndex - 1) * pageSize);
+                try (ResultSet rs = st.executeQuery()) {
+                    while (rs.next()) {
+                        list.add(mapResultSetToUser(rs));
+                    }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    } else {
-        sql = "SELECT * "
-            + "FROM users "
-            + "WHERE name LIKE ? OR phone LIKE ? "
-            + "ORDER BY id "
-            + "LIMIT ? OFFSET ?";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            String param = "%" + keyword + "%";
-            st.setString(1, param);
-            st.setString(2, param);
-            st.setInt(3, pageSize);
-            st.setInt(4, (pageIndex - 1) * pageSize);
-            try (ResultSet rs = st.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapResultSetToUser(rs));
+        } else {
+            sql = "SELECT * "
+                    + "FROM users "
+                    + "WHERE name LIKE ? OR phone LIKE ? "
+                    + "ORDER BY id "
+                    + "LIMIT ? OFFSET ?";
+            try (PreparedStatement st = connection.prepareStatement(sql)) {
+                String param = "%" + keyword + "%";
+                st.setString(1, param);
+                st.setString(2, param);
+                st.setInt(3, pageSize);
+                st.setInt(4, (pageIndex - 1) * pageSize);
+                try (ResultSet rs = st.executeQuery()) {
+                    while (rs.next()) {
+                        list.add(mapResultSetToUser(rs));
+                    }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+
+        return list;
     }
 
-    return list;
-}
-
-    
-    
-    
     public Users getUserById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
@@ -129,6 +126,19 @@ public class userDAO extends DBContext {
         return null;
     }
 
+    public Users getUserByUsername(String username) {
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, username);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return mapResultSetToUser(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public boolean insertUsers(Users user) {
         String sql = "INSERT INTO users (username, password, image, name, phone, address, gender, dob, role, email, created_at, status) "
@@ -141,7 +151,11 @@ public class userDAO extends DBContext {
             st.setString(5, user.getPhone());
             st.setString(6, user.getAddress());
             st.setString(7, user.getGender());
-            st.setDate(8, new java.sql.Date(user.getDob().getTime())); // Chuyển đổi từ java.util.Date sang java.sql.Date
+            if (user.getDob() != null) {
+                st.setDate(8, new java.sql.Date(user.getDob().getTime()));
+            } else {
+                st.setNull(8, java.sql.Types.DATE);
+            }
             st.setString(9, user.getRole());
             st.setString(10, user.getEmail());
             st.setString(11, user.getStatus());
@@ -152,7 +166,6 @@ public class userDAO extends DBContext {
         }
         return false;
     }
-
 
     public boolean editUser(Users user) {
         String sql = "UPDATE users SET name = ?, phone = ?, address = ?, gender = ?, dob = ?, role = ?, email = ?, updated_at = NOW(), status = ? "
@@ -226,6 +239,25 @@ public class userDAO extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next(); // Nếu có kết quả trả về thì email đã tồn tại
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateUserInfo(Users user) {
+        String sql = "UPDATE users SET name = ?, phone = ?, address = ?, gender = ?, dob = ?, image = ? WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, user.getName());
+            st.setString(2, user.getPhone());
+            st.setString(3, user.getAddress());
+            st.setString(4, user.getGender());
+            st.setDate(5, new java.sql.Date(user.getDob().getTime())); // Chuyển đổi từ java.util.Date sang java.sql.Date
+            st.setString(6, user.getImage());
+            st.setInt(7, user.getId());
+
+            int rowAffected = st.executeUpdate();
+            return rowAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }

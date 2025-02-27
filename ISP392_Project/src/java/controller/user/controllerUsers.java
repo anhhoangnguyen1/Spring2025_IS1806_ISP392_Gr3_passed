@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.regex.Pattern;
 import utils.GlobalUtils;
 
 /**
@@ -28,7 +29,10 @@ import utils.GlobalUtils;
  */
 @WebServlet(name = "controllerUsers", urlPatterns = {"/Users"})
 @MultipartConfig
+
 public class controllerUsers extends HttpServlet {
+
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$");
 
     userDAO userDAO = new userDAO();
 
@@ -90,6 +94,12 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
                 break;
             }
+
+            case "addInfor": {
+                request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
+                break;
+
+            }
         }
     }
 
@@ -150,55 +160,17 @@ public class controllerUsers extends HttpServlet {
         if ("createAccount".equals(service)) {
             // Lấy dữ liệu từ form
             String username = request.getParameter("username");
-            String password = GlobalUtils.getMd5(request.getParameter("password"));
+            String password = request.getParameter("password");
             String email = request.getParameter("email");
-            String name = request.getParameter("name");
-            String phone = request.getParameter("phone");
-            String address = request.getParameter("address");
-            String gender = request.getParameter("gender");
-            java.sql.Date dob = java.sql.Date.valueOf(request.getParameter("dob"));
-
-            // Kiểm tra phần tệp tin ảnh (image upload)
-            Part file = request.getPart("image");
-            String imageFileName = null;
-            if (file != null && file.getSize() > 0) {
-                String fileType = file.getContentType();
-                List<String> ALLOWED_MIME_TYPES = List.of("image/jpeg", "image/png", "image/gif"); // Định nghĩa các loại mime cho phép
-                if (!ALLOWED_MIME_TYPES.contains(fileType)) {
-                    request.setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
-                    request.getRequestDispatcher("Debts?service=debts").forward(request, response);
-                    return;
-                }
-
-                // Lấy tên file từ đối tượng Part
-                imageFileName = getSubmittedFileName(file);
-
-                // Đường dẫn để lưu tệp
-                String uploadDirectory = getServletContext().getRealPath("/") + "images";
-                File uploadDir = new File(uploadDirectory);
-                if (!uploadDir.exists()) {
-                    uploadDir.mkdirs();
-                }
-
-                // Đường dẫn lưu tệp
-                String uploadPath = uploadDirectory + File.separator + imageFileName;
-                try (FileOutputStream fos = new FileOutputStream(uploadPath); InputStream is = file.getInputStream()) {
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = is.read(buffer)) != -1) {
-                        fos.write(buffer, 0, bytesRead);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    request.setAttribute("Notification", "File upload failed.");
-                    request.getRequestDispatcher("Users?service=users").forward(request, response);
-                    return;
-                }
+            if (!PASSWORD_PATTERN.matcher(password).matches()) {
+                request.setAttribute("passwordError", "Password must be at least 6 characters long, including at least one letter and one number.");
+                request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
+                return;
             }
-
+            password = GlobalUtils.getMd5(password);
             // Kiểm tra xem tên người dùng và email đã tồn tại chưa
             if (userDAO.checkUsernameExists(username)) {
-                request.setAttribute("usernameError", "Username already exists.");
+                request.setAttribute("usernameError", "Username already exists.");                
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
                 return;
             }
@@ -210,26 +182,75 @@ public class controllerUsers extends HttpServlet {
             // Nếu không có lỗi, tạo tài khoản mới
             Users user = new Users();
             user.setUsername(username);
-            user.setPassword(password);  
-            user.setImage(imageFileName);  // Lưu tên ảnh
+            user.setPassword(password);
+            user.setImage("default.png");  // Lưu tên ảnh
             user.setEmail(email);
+            user.setName("Pending");
+            user.setPhone("Pending");
+            user.setAddress("Pending");
+            user.setGender("Pending");
+            user.setDob(null);
+            user.setStatus("Active");  // Mặc định người dùng mới là Active
+            user.setRole("staff"); // Mặc định là User, bạn có thể thay đổi theo nhu cầu
+
+            boolean isInserted = userDAO.insertUsers(user);
+            if (isInserted) {
+                HttpSession session = request.getSession();
+                session.setAttribute("successMessage", "Account created successfully.");
+                session.setAttribute("userId", userDAO.getUserByUsername(username).getId());
+                request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
+            } else {
+                request.setAttribute("errorMessage", "An error occurred while creating the account.");
+                request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
+            }
+        }
+
+        if ("addInfo".equals(service)) {
+            HttpSession session = request.getSession();
+            int userId = (int) session.getAttribute("userId");
+
+            String name = request.getParameter("name");
+            String phone = request.getParameter("phone");
+            String address = request.getParameter("address");
+            String gender = request.getParameter("gender");
+            java.sql.Date dob = java.sql.Date.valueOf(request.getParameter("dob"));
+            Part file = request.getPart("image");
+            String imageFileName = null;
+
+            if (userDAO.checkPhoneExists(phone, userId)) {
+                request.setAttribute("phoneError", "Phone already exists.");
+                request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
+                return;
+            }
+
+            if (file != null && file.getSize() > 0) {
+                imageFileName = getSubmittedFileName(file);
+                String uploadDirectory = getServletContext().getRealPath("/") + "images";
+                File uploadDir = new File(uploadDirectory);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+                String uploadPath = uploadDirectory + File.separator + imageFileName;
+                try (FileOutputStream fos = new FileOutputStream(uploadPath); InputStream is = file.getInputStream()) {
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = is.read(buffer)) != -1) {
+                        fos.write(buffer, 0, bytesRead);
+                    }
+                }
+            }
+
+            Users user = userDAO.getUserById(userId);
             user.setName(name);
             user.setPhone(phone);
             user.setAddress(address);
             user.setGender(gender);
             user.setDob(dob);
-            user.setStatus("Active");  // Mặc định người dùng mới là Active
-            user.setRole("staff"); // Mặc định là User, bạn có thể thay đổi theo nhu cầu
+            user.setImage(imageFileName);
 
-            boolean isSuccess = userDAO.insertUsers(user); // Gọi hàm insertUsers để thêm người dùng vào CSDL
-            if (isSuccess) {
-                HttpSession session = request.getSession();
-                session.setAttribute("successMessage", "Account created successfully.");
-                response.sendRedirect("Users?service=users");
-            } else {
-                request.setAttribute("errorMessage", "An error occurred while creating the account.");
-                request.getRequestDispatcher("/views/user/addUser.jsp").forward(request, response);
-            }
+            userDAO.updateUserInfo(user);
+            session.removeAttribute("userId");
+            response.sendRedirect("Users?service=users");
         }
     }
 
