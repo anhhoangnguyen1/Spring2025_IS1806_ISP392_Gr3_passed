@@ -140,6 +140,8 @@
                     <form id="customerForm" action="${pageContext.request.contextPath}/Customers"  method="POST" onsubmit="confirmSave(event)">
                         <input type="hidden" name="service" value="editCustomer" />
                         <input type="hidden" name="customer_id" value="${customer.id}" />
+                        <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
+                        <input type="hidden" name="index" value="${param.index}" />
 
                         <div class="form-group">
                             <label for="name">Name</label>
@@ -162,10 +164,12 @@
                         <input type="hidden" name="balance" value="${customer.balance}" />
                         <input type="hidden" name="updateBy" value="${userName}" />
                         <div class="form-group">
+                            <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>          
-                            <a href="${pageContext.request.contextPath}/Customers?service=customers" class="btn btn-secondary">
+                            <a href="${pageContext.request.contextPath}/Customers?service=customers&sortOrder=${param.sortOrder}" class="btn btn-secondary">
                                 Back to Customers List
                             </a>
+
                         </div>           
                 </div>
             </div>
@@ -195,17 +199,17 @@
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
             <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
             <script type="text/javascript">
-                        // Hàm xử lý khi bấm "Save" trong Modal
+
                         document.getElementById('saveChangesBtn').onclick = function () {
-                            document.getElementById('customerForm').submit(); // Gửi form khi người dùng xác nhận
+                            document.getElementById('customerForm').submit();
                         }
 
-                        // Hàm gọi Modal để xác nhận
+
                         function confirmSave(event) {
-                            event.preventDefault(); // Ngừng gửi form
-                            $('#confirmModal').modal('show'); // Hiển thị Modal xác nhận
+                            event.preventDefault();
+                            $('#confirmModal').modal('show');
                         }
             </script>
         </div>
     </body>
-</html>
+</html> 

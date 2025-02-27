@@ -35,17 +35,25 @@ public class controllerCustomers extends HttpServlet {
         if (service == null) {
             service = "customers";
         }
+        String sortBy = request.getParameter("sortBy");
+        if (sortBy == null || !sortBy.equals("balance")) {
+            sortBy = "id"; 
+        }
+
+        String sortOrder = request.getParameter("sortOrder");
+        if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
+            sortOrder = "ASC"; 
+        }
 
         switch (service) {
             case "customers": {
-                // Check if there's a debt action that requires a notification
+               
                 String debtAction = request.getParameter("debtAction");
                 if (debtAction != null && !debtAction.trim().isEmpty()) {
-                    // Assuming debt handling logic is executed and successful debt addition
+                
                     request.setAttribute("Notification", "Debt added successfully.");
                 }
 
-                // Process customer search and pagination
                 String keyword = request.getParameter("searchCustomer");
                 if (keyword == null) {
                     keyword = "";
@@ -60,7 +68,7 @@ public class controllerCustomers extends HttpServlet {
                 int total = customerDAO.countCustomers(keyword);
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
-                List<Customers> list = customerDAO.searchCustomers(keyword, index, 5);
+                List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder);
                 String notification = (String) request.getSession().getAttribute("Notification");
                 if (notification != null) {
                     request.setAttribute("Notification", notification);
@@ -70,8 +78,9 @@ public class controllerCustomers extends HttpServlet {
                 request.setAttribute("endPage", endPage);
                 request.setAttribute("index", index);
                 request.setAttribute("searchCustomer", keyword);
+                request.setAttribute("sortBy", sortBy);
+                request.setAttribute("sortOrder", sortOrder);
 
-                // Forward to the customers.jsp page
                 request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
                 break;
             }
@@ -96,6 +105,8 @@ public class controllerCustomers extends HttpServlet {
                 request.setAttribute("customer", customerForEdit);
                 String userName = (String) session.getAttribute("username");
                 request.setAttribute("userName", userName);
+                request.setAttribute("sortOrder", sortOrder);
+
                 request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
                 break;
             }
@@ -154,7 +165,7 @@ public class controllerCustomers extends HttpServlet {
             customerDAO.editCustomer(customer);
             HttpSession session = request.getSession();
             session.setAttribute("successMessage", "Customer details updated successfully.");
-            response.sendRedirect("Customers?service=customers");
+            response.sendRedirect("Customers?service=customers&sortOrder=" + request.getParameter("sortOrder"));
         }
 //        if ("search".equals(service)) {
 //            String searchCustomer = request.getParameter("searchCustomer"); 
