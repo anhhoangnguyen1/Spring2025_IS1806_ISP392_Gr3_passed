@@ -12,7 +12,6 @@
         <title>JSP Page</title>
     </head>
     <body>
-
         <c:forEach var="customer" items="${list}">
             <div id="debtListModal${customer.id}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="debtListLabel${customer.id}" aria-hidden="true">
                 <div class="modal-dialog modal-xl" role="document">
@@ -21,8 +20,8 @@
                             <h4 class="modal-title">Debt List - record ${customer.debtNotes.size()}</h4>
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         </div>
-                            <h3 class="font-weight-bold">${customer.name} - ${customer.phone}</h3>
-                            
+                        <h3 class="font-weight-bold">${customer.name} - ${customer.phone}</h3>
+
                         <button type="button" class="btn btn-outline-success ml-auto mr-5" data-toggle="modal" data-target="#DebtModal${customer.id}">
                             <i class="fas fa-plus"></i> Add
                         </button>
@@ -51,7 +50,7 @@
                                             <tr>
                                                 <td>${debt.debt_note_id}</td>
                                                 <td class="${debt.type == '-' ? 'text-danger' : ''}">
-                                                    <fmt:formatNumber value="${debt.type == '-' ? -debt.amount : debt.amount}" pattern="###,##0.00"/>
+                                                    <fmt:formatNumber value="${debt.type == '-' ? -debt.amount : debt.amount}" pattern="###,##0"/>
                                                 </td>
 
                                                 <td>
@@ -75,7 +74,7 @@
                                                         <i class="fas fa-info-circle"></i>
                                                     </button>
 
-                                                  
+
                                                 </td>
                                             </tr>
 
@@ -152,6 +151,7 @@
             <div id="caption"></div>
         </div>
         <script>
+
             function myFunction(customerId) {
                 var input, filter, table, tr, td, i, txtValue;
                 input = document.getElementById("myInput");
@@ -177,32 +177,46 @@
                     }
                 }
             }
-            document.addEventListener("DOMContentLoaded", function () {
-                document.querySelectorAll(".openDebtModal").forEach(button => {
-                    button.addEventListener("click", function () {
-                        // Lấy dữ liệu từ data-attribute của nút được click
-                        const debtId = this.getAttribute("data-id");
-                        const amount = this.getAttribute("data-amount");
-                        const type = this.getAttribute("data-type");
-                        const createdAt = this.getAttribute("data-createdat");
-                        const description = this.getAttribute("data-description");
-                        const status = this.getAttribute("data-status");
-                        const image = this.getAttribute("data-image");
+            $(document).ready(function () {
+                $(".openDebtModal").on("click", function () {
+                    try {
+                        console.log("Opening modal...");
+                        let debtId = $(this).data("id");
+                        let amount = $(this).data("amount");
+                        let type = $(this).data("type");
+                        let createdAt = $(this).data("createdat");
+                        let description = $(this).data("description");
+                        let status = $(this).data("status");
+                        let imageSrc = $(this).data("image");
 
-                        // Gán dữ liệu vào input readonly
-                        document.getElementById("modalDebtId").textContent = debtId;
-                        document.getElementById("modalDebtAmount").value = amount;
-                        document.getElementById("modalDebtType").value = type;
-                        document.getElementById("modalDebtCreatedAt").value = createdAt;
-                        document.getElementById("modalDebtDescription").value = description;
-                        document.getElementById("modalDebtStatus").value = status;
-                        document.getElementById("modalDebtImage").src = image;
+                        console.log("Debt Data:", {debtId, amount, type, createdAt, description, status, imageSrc});
 
-                        // Hiển thị modal
+                        $("#modalDebtId").text(debtId);
+                        $("#modalDebtAmount").val(amount);
+                        $("#modalDebtType").val(type);
+                        $("#modalDebtCreatedAt").val(createdAt);
+                        $("#modalDebtDescription").val(description);
+                        $("#modalDebtStatus").val(status);
+
+                        if (imageSrc && imageSrc !== "images/null") {
+                            console.log("Loading image:", imageSrc);
+                            $("#modalDebtImage").attr("src", imageSrc).show();
+                        } else {
+                            $("#modalDebtImage").hide();
+                        }
+
                         $("#debtDetailModal").modal("show");
-                    });
+                        console.log("Modal shown successfully");
+                    } catch (error) {
+                        console.error("Error opening modal:", error);
+                    }
+                });
+
+                $(".close, .btn-secondary").on("click", function () {
+                    $("#debtDetailModal").modal("hide");
                 });
             });
+
 
 // Get the modal
             var modal = document.getElementById("myModal");
@@ -223,16 +237,11 @@
 
 
 // Get the <span> element that closes the modal
-            document.querySelectorAll(".close").forEach(closeBtn => {
-                closeBtn.addEventListener("click", function () {
-                    modal.style.display = "none";
-                });
-            });
-
 
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+
     </body>
 </html>

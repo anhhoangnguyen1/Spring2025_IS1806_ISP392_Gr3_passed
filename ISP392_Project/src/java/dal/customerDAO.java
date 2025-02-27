@@ -15,10 +15,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author phamh
- */
 public class customerDAO extends DBContext {
 
     debtDAO debtDao = new debtDAO();
@@ -114,9 +110,9 @@ public class customerDAO extends DBContext {
                     while (rs.next()) {
                         Customers customer = mapResultSetToCustomer(rs);
 
-                        // Lấy danh sách nợ của khách hàng
+                 
                         List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1);
-                        customer.setDebtNotes(debts); // Gán danh sách nợ vào khách hàng
+                        customer.setDebtNotes(debts); 
 
                         list.add(customer);
                     }
@@ -141,9 +137,8 @@ public class customerDAO extends DBContext {
                     while (rs.next()) {
                         Customers customer = mapResultSetToCustomer(rs);
 
-                        // Lấy danh sách nợ của khách hàng
                         List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1);
-                        customer.setDebtNotes(debts); // Gán danh sách nợ vào khách hàng
+                        customer.setDebtNotes(debts); 
 
                         list.add(customer);
                     }
