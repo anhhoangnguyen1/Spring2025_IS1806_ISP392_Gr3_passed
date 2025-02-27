@@ -48,22 +48,22 @@
         <br>
         <div class="table-container">
             <form action="Debts" method="POST">
-                <table class="table-bordered" style="color: var(--heading-clr);">
+                <table class="table table-striped table-hover table-bordered" style="color: var(--heading-clr);">
                     <thead>
                         <tr>
                             <th class="checkbox-column" style="display: none;" >
                                 <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" />
                             </th>
-                            <th class="resizable" onclick="sortTable(1)">ID</th>
-                            <th class="resizable" onclick="sortTable(2)">Total amount</th>
-                            <th class="resizable" onclick="sortTable(3)">Description</th>
-                            <th class="resizable" onclick="sortTable(4)">name</th>
-                            <th class="resizable" onclick="sortTable(5)">Address</th>
-                            <th class="resizable" onclick="sortTable(6)">Phone</th>
-                            <th class="resizable" onclick="sortTable(7)">Created At</th>
-                            <th class="resizable" onclick="sortTable(8)">Updated At</th>
-                            <th class="resizable" onclick="sortTable(9)">Created By</th>
-                            <th class="resizable">Status</th>
+                            <th style="width: 50px;" class="resizable" onclick="sortTable(0)">ID</th>
+                            <th style="width: 150px;" class="resizable" onclick="sortTable(1)">Total amount</th>
+                            <th style="width: 150px;" class="resizable" onclick="sortTable(2)">Description</th>
+                            <th style="width: 250px;" class="resizable" onclick="sortTable(3)">name</th>
+                            <th style="width: 180px;" class="resizable" onclick="sortTable(4)">Address</th>
+                            <th style="width: 120px;" class="resizable" onclick="sortTable(5)">Phone</th>
+                            <th style="width: 150px;" class="resizable" onclick="sortTable(6)">Created At</th>
+                            <th style="width: 150px;" class="resizable" onclick="sortTable(7)">Updated At</th>
+                            <th style="width: 120px;" class="resizable" onclick="sortTable(8)">Created By</th>
+                            <th style="width: 120px;" class="resizable">Status</th>
                             <th class="sticky-col1">Action</th>
                         </tr>
                     </thead>
@@ -76,10 +76,12 @@
                                 <td>${debt.getId()}</td>
                                 <td>
                                     <c:if test="${not empty totalAmountMap[debt.id]}">
-                                        <fmt:formatNumber value="${totalAmountMap[debt.id]}" pattern="###,##0.00"/>
+                                        <fmt:formatNumber value="${totalAmountMap[debt.id]}" pattern="###,##0"/>
                                     </c:if>
                                 </td>
-                                <td>${debt.getDescription()}</td>
+                                <td style="white-space: normal; word-wrap: break-word; max-width: 200px;">
+                                    ${debt.description}
+                                </td>
                                 <td>${empty debt.customers_name ? debt.debtorName : debt.customers_name}</td>
                                 <td>${empty debt.address ? debt.debtorAddress : debt.address}</td>
                                 <td>${empty debt.phone ? debt.debtorPhone : debt.phone}</td>
@@ -90,9 +92,13 @@
                                 <td>${debt.getStatus()}</td>
                                 <td class="sticky-col1">
                                     <div class="btn-group">
-                                        <a class="btn btn-outline-info" href="Debts?service=debtHistory&id=${debt.getId()}">
+                                        <a class="btn btn-outline-info"
+                                           href="Debts?service=debtHistory&id=${debt.getId()}&name=${empty debt.customers_name ? debt.debtorName : debt.customers_name}
+                                           &address=${empty debt.address ? debt.debtorAddress : debt.address}
+                                           &phone=${empty debt.phone ? debt.debtorPhone : debt.phone}">
                                             <i class="fas fa-info-circle"></i>
                                         </a>
+
                                     </div>
                                 </td>
                             </tr>
@@ -102,43 +108,31 @@
             </form>
         </div>
 
-        <div class="container d-flex justify-content-center mt-4" >
-            <ul class="pagination" >
-                <!-- Previous Page -->
+        <div class="container d-flex justify-content-center mt-4">
+            <ul class="pagination">
+                <!-- Nút Previous -->
                 <c:if test="${index > 1}">
                     <li class="page-item">
-                        <form action="Debts" method="POST" style="display: inline;">
-                            <input type="hidden" name="service" value="debts" />
-                            <input type="hidden" name="index" value="${index - 1}" />
-                            <button type="submit" class="page-link" ><<</button>
-                        </form>
+                        <a class="page-link" href="Debts?service=debts&index=${index - 1}&pageSize=${pageSize}">&laquo;</a>
                     </li>
                 </c:if>
 
-                <!-- Page Numbers -->
-
-                <c:forEach begin="1" end="${endPage}" var="page">
-                    <li class="page-item ${index == page ? 'active' : ''}">
-                        <form action="Debts" method="POST" style="display: inline;">
-                            <input type="hidden" name="service" value="debts" />
-                            <input type="hidden" name="index" value="${page}" />
-                            <button type="submit" class="page-link">${page}</button>
-                        </form>
+                <!-- Các trang -->
+                <c:forEach var="i" begin="1" end="${endPage}">
+                    <li class="page-item ${i == index ? 'active' : ''}">
+                        <a class="page-link" href="Debts?service=debts&index=${i}&pageSize=${pageSize}">${i}</a>
                     </li>
                 </c:forEach>
 
-                <!-- Next Page -->
+                <!-- Nút Next -->
                 <c:if test="${index < endPage}">
                     <li class="page-item">
-                        <form action="Debts" method="POST" style="display: inline;">
-                            <input type="hidden" name="service" value="debtts" />
-                            <input type="hidden" name="index" value="${index + 1}" />
-                            <button type="submit" class="page-link">>></button>
-                        </form>
+                        <a class="page-link" href="Debts?service=debts&index=${index + 1}&pageSize=${pageSize}">&raquo;</a>
                     </li>
                 </c:if>
             </ul>
         </div>
+
 
     </body>
 </html>

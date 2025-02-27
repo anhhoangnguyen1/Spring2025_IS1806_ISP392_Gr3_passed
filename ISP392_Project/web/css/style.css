@@ -40,8 +40,7 @@ body {
 .table-bordered td {
     width: auto;
     text-align: center;
-    word-wrap: break-word;
-    white-space: nowrap; /* Ngăn xuống dòng */
+    word-wrap: break-word; 
     overflow: hidden; /* Ẩn nội dung tràn */
     text-overflow: ellipsis;
     cursor: pointer;
@@ -67,7 +66,6 @@ body {
 
 /* Cấu hình bảng */
 .table-bordered {
-    table-layout: fixed; /* Cố định kích thước cột */
     width: 150%;
     border-collapse: collapse;
     word-wrap: break-word;

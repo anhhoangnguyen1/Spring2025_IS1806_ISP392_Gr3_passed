@@ -255,22 +255,23 @@ public class debtDAO extends DBContext {
     }
 
     public int countDebts() {
-        String sql = "SELECT COUNT(*) FROM (\n"
-                + "    SELECT customers_id, MAX(created_at)\n"
-                + "    FROM Debt_note\n"
-                + "    GROUP BY customers_id\n"
-                + ") AS latest_debts;";
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            ResultSet rs = st.executeQuery();
-            while (rs.next()) {
-                return rs.getInt(1);
-            }
+        int count = 0;
+        String sqlCount = """
+        SELECT COUNT(*) FROM Debt_note 
+        WHERE (customers_id IS NOT NULL AND id = (SELECT MAX(id) FROM Debt_note dn WHERE dn.customers_id = Debt_note.customers_id)) 
+        OR customers_id IS NULL
+    """;
 
+        try (PreparedStatement stCount = connection.prepareStatement(sqlCount); ResultSet rsCount = stCount.executeQuery()) {
+            if (rsCount.next()) {
+                count = rsCount.getInt(1);
+            }
         } catch (SQLException e) {
+            System.err.println("Error counting debts: " + e.getMessage());
             e.printStackTrace();
         }
-        return 0;
+
+        return count;
     }
 
     public List<DebtNote> searchDebts(int customerId) {
@@ -309,7 +310,7 @@ public class debtDAO extends DBContext {
         return list;
     }
 
-    public void insertDebtInCustomer(DebtNote debts) {
+    public boolean insertDebtInCustomer(DebtNote debts) {
         String insertQuery = "INSERT INTO Debt_note (type, amount, image, description, customers_id, created_at, updated_at, created_by, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -334,14 +335,15 @@ public class debtDAO extends DBContext {
                     if (generatedKeys.next()) {
                         int insertedId = generatedKeys.getInt(1); // Lấy ID vừa insert
 
-                        // Cập nhật trạng thái sang "Updated"
+                        // Cập nhật trạng thái
                         try (PreparedStatement updatePs = connection.prepareStatement(updateQuery)) {
-                            updatePs.setString(1, "Updated");
+                            updatePs.setString(1, debts.getStatus());
                             updatePs.setInt(2, insertedId);
 
                             int updateRows = updatePs.executeUpdate();
                             if (updateRows > 0) {
                                 System.out.println("✅ Insert & Update successful for ID: " + insertedId);
+                                return true;  // 🔥 Trả về true khi cả INSERT và UPDATE thành công
                             } else {
                                 System.out.println("⚠ Update failed.");
                             }
@@ -354,16 +356,16 @@ public class debtDAO extends DBContext {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false; // Nếu có lỗi hoặc không insert/update thành công thì trả về false
     }
 
-    public void insertAndUpdateDebt(DebtNote debts) {
+    public boolean insertAndUpdateDebt(DebtNote debts) {
         String insertDebtSQL = "INSERT INTO Debt_note (type, amount, image, description, created_at, updated_at, created_by, status, debtor_info) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
         String updateDebtSQL = "UPDATE Debt_note SET updated_at = ? WHERE id = ?";
 
         try (PreparedStatement stInsertDebt = connection.prepareStatement(insertDebtSQL, Statement.RETURN_GENERATED_KEYS)) {
-            // Set values for insert query
+            // Set values for INSERT query
             stInsertDebt.setString(1, debts.getType());
             stInsertDebt.setBigDecimal(2, debts.getAmount());
             stInsertDebt.setString(3, debts.getImage());
@@ -373,6 +375,7 @@ public class debtDAO extends DBContext {
             stInsertDebt.setString(7, debts.getCreatedBy());
             stInsertDebt.setString(8, debts.getStatus());
 
+            // Xử lý debtor_info JSON
             String debtorInfoJson = null;
             if (debts.getDebtorName() != null || debts.getDebtorAddress() != null || debts.getDebtorPhone() != null) {
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -398,33 +401,28 @@ public class debtDAO extends DBContext {
             // Thực hiện INSERT
             int rowsInserted = stInsertDebt.executeUpdate();
             if (rowsInserted == 0) {
-                System.out.println("Insert failed!");
-                return;
+                return false;
             }
 
             // Lấy ID của bản ghi vừa chèn
             try (ResultSet generatedKeys = stInsertDebt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int newDebtId = generatedKeys.getInt(1);
-                    System.out.println("Inserted Debt ID: " + newDebtId);
 
                     // Thực hiện UPDATE ngay sau INSERT
                     try (PreparedStatement stUpdateDebt = connection.prepareStatement(updateDebtSQL)) {
-                        stUpdateDebt.setObject(1, LocalDateTime.now());  // Cập nhật thời gian hiện tại
+                        stUpdateDebt.setObject(1, LocalDateTime.now());
                         stUpdateDebt.setInt(2, newDebtId);
 
                         int rowsUpdated = stUpdateDebt.executeUpdate();
-                        if (rowsUpdated > 0) {
-                            System.out.println("Debt updated successfully!");
-                        } else {
-                            System.out.println("Debt update failed!");
-                        }
+                        return rowsUpdated > 0;
                     }
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false; // Trả về false nếu có lỗi
     }
 
     public boolean updateDebtInCustomer(DebtNote debt) {
@@ -436,8 +434,8 @@ public class debtDAO extends DBContext {
             st.setString(3, debt.getImage());
             st.setString(4, debt.getDescription());
             st.setInt(5, debt.getCustomer_id());
-            st.setObject(6, debt.getCreatedAt()); 
-            st.setString(7, debt.getStatus()); 
+            st.setObject(6, debt.getCreatedAt());
+            st.setString(7, debt.getStatus());
             st.setInt(8, debt.getId());
             System.out.println("Executing SQL: " + st.toString()); // Debug SQL statement
 
@@ -578,10 +576,10 @@ public class debtDAO extends DBContext {
     public static void main(String[] args) {
         // Initialize the DAO (Data Access Object)
         String command = "created_at";
-        int index = 1;
+        int index = 3;
         int pageSize = 10;
         debtDAO dao = new debtDAO();
-        List<DebtNote> debts = dao.viewAllDebtInCustomer(command, 1, index);
+        List<DebtNote> debts = dao.viewAllDebt(index, 5);
         Map<Integer, BigDecimal> totalAmountByDebtNoteId = dao.getTotalAmountByDebtNoteId();
         for (Map.Entry<Integer, BigDecimal> entry : totalAmountByDebtNoteId.entrySet()) {
             System.out.println("debt_note_id: " + entry.getKey() + " - Total Amount: " + entry.getValue());

@@ -38,6 +38,14 @@ public class controllerCustomers extends HttpServlet {
 
         switch (service) {
             case "customers": {
+                // Check if there's a debt action that requires a notification
+                String debtAction = request.getParameter("debtAction");
+                if (debtAction != null && !debtAction.trim().isEmpty()) {
+                    // Assuming debt handling logic is executed and successful debt addition
+                    request.setAttribute("Notification", "Debt added successfully.");
+                }
+
+                // Process customer search and pagination
                 String keyword = request.getParameter("searchCustomer");
                 if (keyword == null) {
                     keyword = "";
@@ -53,12 +61,17 @@ public class controllerCustomers extends HttpServlet {
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
                 List<Customers> list = customerDAO.searchCustomers(keyword, index, 5);
+                String notification = (String) request.getSession().getAttribute("Notification");
+                if (notification != null) {
+                    request.setAttribute("Notification", notification);
+                }
 
                 request.setAttribute("list", list);
                 request.setAttribute("endPage", endPage);
                 request.setAttribute("index", index);
                 request.setAttribute("searchCustomer", keyword);
 
+                // Forward to the customers.jsp page
                 request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
                 break;
             }
@@ -115,11 +128,11 @@ public class controllerCustomers extends HttpServlet {
             String phone = request.getParameter("phone");
             String address = request.getParameter("address");
             String status = request.getParameter("status");
-            double balance = Double.parseDouble(request.getParameter("balance"));  
-            String updatedBy = request.getParameter("updatedBy");  
+            double balance = Double.parseDouble(request.getParameter("balance"));
+            String updatedBy = request.getParameter("updatedBy");
 
             if (status == null || status.isEmpty()) {
-                status = "Active"; 
+                status = "Active";
             }
             boolean phoneExists = customerDAO.checkPhoneExists(phone, customerId);
 
@@ -134,8 +147,8 @@ public class controllerCustomers extends HttpServlet {
                     .name(request.getParameter("name"))
                     .phone(request.getParameter("phone"))
                     .address(request.getParameter("address"))
-                    .balance(balance)  
-                    .updatedBy(updatedBy) 
+                    .balance(balance)
+                    .updatedBy(updatedBy)
                     .status(status)
                     .build();
             customerDAO.editCustomer(customer);
