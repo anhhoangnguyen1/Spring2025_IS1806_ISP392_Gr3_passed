@@ -57,7 +57,7 @@
             </div>
             <h2>Password Reset Successful</h2>
             <p>${successMessage}</p>
-            <p class="redirect-text">You will be redirected to the login page in <span class="countdown" id="countdown">3</span> seconds...</p>
+            <p class="redirect-text">You will be redirected to the login page in <span class="countdown" id="countdown">3</span> seconds....</p>
         </div>
 
         <script>
