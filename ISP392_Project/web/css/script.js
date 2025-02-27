@@ -1,5 +1,3 @@
-
-
 var hamburgerBtn = document.querySelector(".hamburger-btn");
 var sideBar = document.querySelector(".side-bar");
 var modeSwitcher = document.querySelector(".mode-switch i");
@@ -40,8 +38,6 @@ $(document).ready(function () {
         colReorder: true,
     });
 });
-
-// Set menu profile
 document.addEventListener("DOMContentLoaded", function () {
     var profileImg = document.getElementById("profile-img");
     var profileMenu = document.querySelector(".profile-menu");
@@ -287,29 +283,26 @@ function sortTable(n) {
     var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     table = document.getElementById("myTable");
     switching = true;
-    dir = "asc";
+    dir = "asc"; // Mặc định sắp xếp tăng dần
 
+    // Lặp đến khi không còn phần tử cần hoán đổi
     while (switching) {
         switching = false;
         rows = table.rows;
 
-        for (i = 1; i < (rows.length - 1); i++) {
+        // Lặp qua tất cả các hàng trừ hàng tiêu đề
+        for (i = 0; i < rows.length - 1; i++) {
             shouldSwitch = false;
 
-            x = rows[i].getElementsByTagName("TD")[n];
-            y = rows[i + 1].getElementsByTagName("TD")[n];
+            // Lấy dữ liệu của hai ô cần so sánh, bỏ qua cột đầu tiên (checkbox)
+            x = rows[i].getElementsByTagName("TD")[columnIndex];
+            y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
 
-            // Xử lý giá trị trống thành "\uFFFF" để luôn ở cuối khi sắp xếp
-            let xVal = x.innerHTML.trim() || "\uFFFF";
-            let yVal = y.innerHTML.trim() || "\uFFFF";
-
-            if (dir == "asc") {
-                if (xVal > yVal) {
+            if (x && y) {
+                if (dir === "asc" && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
                     shouldSwitch = true;
                     break;
-                }
-            } else if (dir == "desc") {
-                if (xVal < yVal) {
+                } else if (dir === "desc" && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
                     shouldSwitch = true;
                     break;
                 }
@@ -317,20 +310,19 @@ function sortTable(n) {
         }
 
         if (shouldSwitch) {
+            // Đổi chỗ hai hàng
             rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
             switching = true;
             switchcount++;
         } else {
-            if (switchcount == 0 && dir == "asc") {
+            if (switchcount === 0 && dir === "asc") {
                 dir = "desc";
                 switching = true;
             }
         }
     }
-
-    // Gọi lại hàm tìm kiếm sau khi sắp xếp
-    searchTable();
 }
+
 
 
 function sortTable1(customerId, columnIndex) {
@@ -425,4 +417,45 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+var modal = document.getElementById("myModal");
 
+// Get all images with class "myImg"
+var imgs = document.getElementsByClassName("myImg");
+var modalImg = document.getElementById("img01");
+var captionText = document.getElementById("caption");
+
+// Loop through all images and add event listener to each
+document.querySelectorAll(".myImg").forEach(img => {
+    img.addEventListener("click", function () {
+        modal.style.display = "block";
+        modalImg.src = this.src;
+        captionText.innerHTML = this.alt;
+    });
+});
+
+
+// Get the <span> element that closes the modal
+document.querySelectorAll(".close").forEach(closeBtn => {
+    closeBtn.addEventListener("click", function () {
+        modal.style.display = "none";
+    });
+});
+// Function to format numbers with commas as thousand separators
+// Function to format numbers with commas as thousand separators
+function formatNumber(event) {
+    var input = event.target;
+    var value = input.value.replace(/\D/g, ''); // Remove non-digit characters
+
+    // Format the number as 1,000,000
+    value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+    // Update the input field with the formatted value
+    input.value = value;
+}
+
+// Function to clean the formatted number before submitting to servlet
+function cleanInputBeforeSubmit(event) {
+    var input = event.target;
+    // Remove the thousand separators before sending the value
+    input.value = input.value.replace(/\./g, '');
+}

@@ -25,8 +25,6 @@
                         <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
-
-
                 <div class="top-bar-right">
                     <div class="mode-switch">
                         <i class="fa-solid fa-moon"></i>
@@ -45,7 +43,6 @@
                     </div>
                 </div>
             </div>
-
             <aside class="side-bar">
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
@@ -127,68 +124,74 @@
                 </div>
                 <!--   === Side Bar Footer Ends ===   -->
             </aside>
-
             <div class="contents">
                 <div class="panel-bar1">
-                    <h2>Staff Details</h2>
+                    <h2>Create Account</h2>
+                    <!-- Show error messages if any -->
+                    <c:if test="${not empty usernameError}">
+                        <div class="alert alert-danger">${usernameError}</div>
+                    </c:if>
+                    <c:if test="${not empty emailError}">
+                        <div class="alert alert-danger">${emailError}</div>
+                    </c:if>
 
-                    <form action="${pageContext.request.contextPath}/Users" method="POST" onsubmit="return confirmSave()">
-                        <input type="hidden" name="service" value="editUser" />
-                        <input type="hidden" name="user_id" value="${user.id}" />
+                    <form action="${pageContext.request.contextPath}/Users" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="service" value="createAccount"/>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
 
                         <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control" name="name" value="${user.name}" required>
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" name="password" required>
                         </div>
 
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" class="form-control" name="email" value="${user.email}" required>
-                            <c:if test="${not empty emailError}">
-                                <span style="color: red;">${emailError}</span>
-                            </c:if>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="text" class="form-control" name="phone" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="image">Profile Image</label>
+                            <input type="file" class="form-control" name="image" required>
                         </div>
 
                         <div class="form-group">
                             <label for="address">Address</label>
-                            <input type="text" class="form-control" name="address" value="${user.address}" required>
+                            <input type="text" class="form-control" name="address" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select class="form-control" name="gender" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
                             <label for="dob">Date of Birth</label>
-                            <input type="date" class="form-control" name="dob" value="${user.dob}" required>
+                            <input type="date" class="form-control" name="dob" required>
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="phone">Phone</label>
-                                <input type="text" class="form-control" name="phone" pattern="\d{10}" minlength="10" maxlength="10" 
-                                       title="Please enter a valid 10-digit phone number." value="${user.phone}" required>
-                                <c:if test="${not empty phoneError}">
-                                    <span style="color: red;">${phoneError}</span>
-                                </c:if>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="gender">Gender</label>
-                                <select class="form-control" name="gender" required>
-                                    <option value="Male" ${user.gender == 'Male' ? 'selected' : ''}>Male</option>
-                                    <option value="Female" ${user.gender == 'Female' ? 'selected' : ''}>Female</option>
-                                    <option value="Other" ${user.gender == 'Other' ? 'selected' : ''}>Other</option>
-                                </select>
-                            </div>
-                        </div>
-                        <input type="hidden" name="role" value="${user.role}"/>
-                        <input type="hidden" name="updatedBy" value="${username}"/>
 
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>
-                            <a href="${pageContext.request.contextPath}/Users?service=users" class="btn btn-secondary">Back to Staffs list</a>
+                            <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Register</button>
+                            <a href="${pageContext.request.contextPath}/Users?service=users" class="btn btn-secondary">Back to Users list</a>
                         </div>
                     </form>
                 </div>
             </div>
-
-
             <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

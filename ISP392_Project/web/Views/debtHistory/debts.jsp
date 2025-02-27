@@ -140,14 +140,17 @@
             </aside>
 
             <div class="contents">
-                <c:if test="${not empty requestScope.Notification}">
-                        <div class="alert alert-warning alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            <strong>${requestScope.Notification}</strong> 
-                        </div>
-                    </c:if>
+                <c:if test="${not empty sessionScope.Notification}">
+                    <div class="alert alert-warning alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert">
+                            &times;
+                        </button>
+                        <strong>${sessionScope.Notification}</strong>
+                    </div>
+                    <c:remove var="Notification" scope="session" />
+                </c:if>
                 <div class="panel-bar1">
-                    
+
                     <c:import url="listDebts.jsp" />
                 </div>
             </div>

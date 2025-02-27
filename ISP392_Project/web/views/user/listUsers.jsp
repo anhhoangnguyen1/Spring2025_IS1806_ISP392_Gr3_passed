@@ -52,7 +52,7 @@
 
                           <div class="action-bar d-flex align-items-center">
 
-                <a href="#" class="btn btn-outline-primary mr-lg-auto">
+                <a href="${pageContext.request.contextPath}/Users?service=createAccount" class="btn btn-outline-primary mr-lg-auto">
                     Add Staff
                 </a>
 
