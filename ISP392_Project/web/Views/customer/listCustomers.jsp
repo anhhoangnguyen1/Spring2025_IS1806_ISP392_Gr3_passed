@@ -18,7 +18,15 @@
     <body>
         <div class="container mt-4">
             <h1>Customers List</h1>
-
+            <c:if test="${not empty sessionScope.Notification}">
+                <div class="alert alert-warning alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert">
+                        &times;
+                    </button>
+                    <strong>${sessionScope.Notification}</strong>
+                </div>
+                <c:remove var="Notification" scope="session" />
+            </c:if>
             <c:if test="${not empty sessionScope.successMessage}">
                 <div class="alert alert-success">
                     <strong>Success!</strong> ${sessionScope.successMessage}
