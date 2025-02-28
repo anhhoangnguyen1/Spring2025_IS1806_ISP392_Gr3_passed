@@ -173,20 +173,6 @@ public class controllerCustomers extends HttpServlet {
             session.setAttribute("successMessage", "Customer details updated successfully.");
             response.sendRedirect("Customers?service=customers&sortOrder=" + request.getParameter("sortOrder"));
         }
-//        if ("search".equals(service)) {
-//            String searchCustomer = request.getParameter("searchCustomer"); 
-//            List<Customers> list;
-//
-//           
-//            if (searchCustomer != null && !searchCustomer.isEmpty()) {
-//                list = customerDAO.searchCustomers(searchCustomer);  
-//            } else {
-//                list = customerDAO.viewAllCustomersWithDebts("name",1); 
-//            }
-//
-//            request.setAttribute("list", list);
-//            request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
-//        }
     }
 
     private Customers getCustomerFromRequest(HttpServletRequest request) {
