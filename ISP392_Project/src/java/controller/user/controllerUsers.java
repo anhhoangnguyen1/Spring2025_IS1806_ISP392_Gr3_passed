@@ -172,7 +172,7 @@ public class controllerUsers extends HttpServlet {
             response.sendRedirect("Users?service=users");
         }
         if ("createAccount".equals(service)) {
-            // Lấy dữ liệu từ form
+
             String username = request.getParameter("username");
             String password = request.getParameter("password");
             String email = request.getParameter("email");
@@ -186,7 +186,7 @@ public class controllerUsers extends HttpServlet {
                 return;
             }
             password = GlobalUtils.getMd5(password);
-            // Kiểm tra xem tên người dùng và email đã tồn tại chưa
+
             if (userDAO.checkUsernameExists(username)) {
                 request.setAttribute("usernameError", "Username already exists.");
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
@@ -197,19 +197,19 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
                 return;
             }
-            // Nếu không có lỗi, tạo tài khoản mới
+
             Users user = new Users();
             user.setUsername(username);
             user.setPassword(password);
-            user.setImage("default.png");  // Lưu tên ảnh
+            user.setImage("default.png"); 
             user.setEmail(email);
             user.setName("Pending");
             user.setPhone("Pending");
             user.setAddress("Pending");
             user.setGender("Pending");
             user.setDob(null);
-            user.setStatus("Active");  // Mặc định người dùng mới là Active
-            user.setRole("staff"); // Mặc định là User, bạn có thể thay đổi theo nhu cầu
+            user.setStatus("Active"); 
+            user.setRole("staff"); 
 
             boolean isInserted = userDAO.insertUsers(user);
             if (isInserted) {
@@ -281,7 +281,7 @@ public class controllerUsers extends HttpServlet {
         for (String cd : part.getHeader("content-disposition").split(";")) {
             if (cd.trim().startsWith("filename")) {
                 String fileName = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
-                return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1); // MSIE fix.
+                return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1); 
             }
         }
         return null;
