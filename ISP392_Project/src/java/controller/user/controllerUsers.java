@@ -175,6 +175,7 @@ public class controllerUsers extends HttpServlet {
 
             String username = request.getParameter("username");
             String password = request.getParameter("password");
+            String confirmPassword = request.getParameter("confirmPassword");
             String email = request.getParameter("email");
 
             request.setAttribute("username", username);
@@ -185,6 +186,13 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
                 return;
             }
+
+            if (!password.equals(confirmPassword)) {
+                request.setAttribute("passwordError", "Confirm password is fail.");
+                request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
+                return;
+            }
+
             password = GlobalUtils.getMd5(password);
 
             if (userDAO.checkUsernameExists(username)) {
@@ -201,15 +209,15 @@ public class controllerUsers extends HttpServlet {
             Users user = new Users();
             user.setUsername(username);
             user.setPassword(password);
-            user.setImage("default.png"); 
+            user.setImage("default.png");
             user.setEmail(email);
             user.setName("Pending");
             user.setPhone("Pending");
             user.setAddress("Pending");
             user.setGender("Pending");
             user.setDob(null);
-            user.setStatus("Active"); 
-            user.setRole("staff"); 
+            user.setStatus("Active");
+            user.setRole("staff");
 
             boolean isInserted = userDAO.insertUsers(user);
             if (isInserted) {
@@ -281,7 +289,7 @@ public class controllerUsers extends HttpServlet {
         for (String cd : part.getHeader("content-disposition").split(";")) {
             if (cd.trim().startsWith("filename")) {
                 String fileName = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
-                return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1); 
+                return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1);
             }
         }
         return null;
