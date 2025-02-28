@@ -13,12 +13,21 @@
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>User List</title>
+        <title>Users List</title>
     </head>
     <body>
         <div class="container mt-4">
-            <h1>Staffs List</h1>
+            <h1>Users List</h1>
 
+           <c:if test="${not empty sessionScope.Notification}">
+                <div class="alert alert-warning alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert">
+                        &times;
+                    </button>
+                    <strong>${sessionScope.Notification}</strong>
+                </div>
+                <c:remove var="Notification" scope="session" />
+            </c:if>
             <c:if test="${not empty sessionScope.successMessage}">
                 <div class="alert alert-success">
                     <strong>Success!</strong> ${sessionScope.successMessage}
@@ -26,7 +35,6 @@
                 <c:set var="successMessage" value="${sessionScope.successMessage}" />
                 <c:remove var="successMessage" />
             </c:if>
-            <!-- Search Box -->
 
 
             <form action="${pageContext.request.contextPath}/Users" method="GET">
@@ -63,7 +71,11 @@
                     <table class="table table-striped table-hover table-bordered" id="myTable">
                         <thead>
                             <tr>
-                                <th class="resizable" onclick="sortTable(0)">ID</th>
+                                <th class="resizable">
+                                    <a href="Users?service=users&searchUser=${searchUser}&index=${index}&sortBy=id&sortOrder=${sortBy == 'id' && sortOrder == 'ASC' ? 'DESC' : 'ASC'}">
+                                        ID <i class="fa ${sortBy == 'id' && sortOrder == 'ASC' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
+                                    </a>
+                                </th>
                                 <th class="resizable">Role</th>
                                 <th class="resizable" onclick="sortTable(2)">Name</th>
                                 <th class="resizable">Phone</th>
@@ -103,39 +115,59 @@
             </div>
         </div>
 
-        <!-- Pagination -->
         <div class="container d-flex justify-content-center mt-4">
             <ul class="pagination">
+        
                 <c:if test="${index > 1}">
                     <li class="page-item">
-                        <form action="Users" method="GET" style="display: inline;">
-                            <input type="hidden" name="service" value="users" />
-                            <input type="hidden" name="searchUser" value="${searchUser}" />
-                            <input type="hidden" name="index" value="${index - 1}" />
-                            <button type="submit" class="page-link"><<</button>
-                        </form>
+                        <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                            <i class="fa fa-angle-left"></i>
+                        </a>
+                    </li>
+                </c:if>
+               
+                <li class="page-item ${index == 1 ? 'active' : ''}">
+                    <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}">1</a>
+                </li>
+        
+                <c:if test="${index > 3}">
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                </c:if>
+               
+                <c:forEach begin="${index - 1}" end="${index + 1}" var="page">
+                    <c:if test="${page > 1 && page < endPage}">
+                        <li class="page-item ${index == page ? 'active' : ''}">
+                            <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                ${page}
+                            </a>
+                        </li>
+                    </c:if>
+                </c:forEach>
+
+               
+                <c:if test="${index < endPage - 2}">
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
                     </li>
                 </c:if>
 
-                <c:forEach begin="1" end="${endPage}" var="page">
-                    <li class="page-item ${index == page ? 'active' : ''}">
-                        <form action="Users" method="GET" style="display: inline;">
-                            <input type="hidden" name="service" value="users" />
-                            <input type="hidden" name="searchUser" value="${searchUser}" />
-                            <input type="hidden" name="index" value="${page}" />
-                            <button type="submit" class="page-link">${page}</button>
-                        </form>
+              
+                <c:if test="${endPage > 1}">
+                    <li class="page-item ${index == endPage ? 'active' : ''}">
+                        <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                            ${endPage}
+                        </a>
                     </li>
-                </c:forEach>
+                </c:if>
 
+               
                 <c:if test="${index < endPage}">
                     <li class="page-item">
-                        <form action="Users" method="GET" style="display: inline;">
-                            <input type="hidden" name="service" value="users" />
-                            <input type="hidden" name="searchUser" value="${searchUser}" />
-                            <input type="hidden" name="index" value="${index + 1}" />
-                            <button type="submit" class="page-link">>></button>
-                        </form>
+                        <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                            <i class="fa fa-angle-right"></i>
+                        </a>
                     </li>
                 </c:if>
             </ul>

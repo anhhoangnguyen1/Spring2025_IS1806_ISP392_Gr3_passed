@@ -67,13 +67,20 @@ public class userDAO extends DBContext {
         return 0;
     }
 
-    public List<Users> searchUsers(String keyword, int pageIndex, int pageSize) {
+    public List<Users> searchUsers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
         List<Users> list = new ArrayList<>();
+        if (sortBy == null || !sortBy.equals("balance")) {
+            sortBy = "id"; 
+        }
+
+        if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
+            sortOrder = "ASC"; 
+        }
         String sql;
         if (keyword == null || keyword.trim().isEmpty()) {
             sql = "SELECT *"
                     + "FROM users "
-                    + "ORDER BY id "
+                    + "ORDER BY " + sortBy + " " + sortOrder + " "
                     + "LIMIT ? OFFSET ?";
             try (PreparedStatement st = connection.prepareStatement(sql)) {
                 st.setInt(1, pageSize);
@@ -90,7 +97,7 @@ public class userDAO extends DBContext {
             sql = "SELECT * "
                     + "FROM users "
                     + "WHERE name LIKE ? OR phone LIKE ? "
-                    + "ORDER BY id "
+                    + "ORDER BY " + sortBy + " " + sortOrder + " "
                     + "LIMIT ? OFFSET ?";
             try (PreparedStatement st = connection.prepareStatement(sql)) {
                 String param = "%" + keyword + "%";
@@ -283,28 +290,28 @@ public class userDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-        userDAO dao = new userDAO();
-
-        int pageIndex = 1;
-        String keyword = null;
-        List<Users> users = dao.searchUsers(keyword, pageIndex, pageIndex);
-
-        if (users.isEmpty()) {
-            System.out.println("Không có người dùng nào được tìm thấy!");
-        } else {
-            System.out.println("Danh sách người dùng:");
-            for (Users user : users) {
-                System.out.println("------------------------------------------------------");
-                System.out.println("User ID: " + user.getId());
-
-                System.out.println("Name: " + user.getName());
-                System.out.println("Phone: " + user.getPhone());
-                System.out.println("Address: " + user.getAddress());
-                System.out.println("Email: " + user.getEmail());
-                System.out.println("Role: " + user.getRole());
-                System.out.println("Status: " + user.getStatus());
-                System.out.println("Created At: " + user.getCreatedAt());
-            }
-        }
+//        userDAO dao = new userDAO();
+//
+//        int pageIndex = 1;
+//        String keyword = null;
+//        List<Users> users = dao.searchUsers(keyword, pageIndex, pageIndex);
+//
+//        if (users.isEmpty()) {
+//            System.out.println("Không có người dùng nào được tìm thấy!");
+//        } else {
+//            System.out.println("Danh sách người dùng:");
+//            for (Users user : users) {
+//                System.out.println("------------------------------------------------------");
+//                System.out.println("User ID: " + user.getId());
+//
+//                System.out.println("Name: " + user.getName());
+//                System.out.println("Phone: " + user.getPhone());
+//                System.out.println("Address: " + user.getAddress());
+//                System.out.println("Email: " + user.getEmail());
+//                System.out.println("Role: " + user.getRole());
+//                System.out.println("Status: " + user.getStatus());
+//                System.out.println("Created At: " + user.getCreatedAt());
+//            }
+//        }
     }
 }

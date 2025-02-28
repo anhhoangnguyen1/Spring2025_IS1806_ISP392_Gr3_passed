@@ -150,8 +150,7 @@
 
                         <div class="form-group">
                             <label for="phone">Phone</label>
-                            <input type="text" class="form-control" name="phone" pattern="\d{10}" minlength="10" maxlength="10" 
-                                   title="Please enter a valid 10-digit phone number." value="${customer.phone}" required>
+                            <input type="text" class="form-control" name="phone" value="${customer.phone}" required>
                             <c:if test="${not empty phoneError}">
                                 <span style="color: red;">${phoneError}</span>
                             </c:if>
