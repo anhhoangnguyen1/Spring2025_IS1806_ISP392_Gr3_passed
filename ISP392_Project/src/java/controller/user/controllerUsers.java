@@ -162,6 +162,10 @@ public class controllerUsers extends HttpServlet {
             String username = request.getParameter("username");
             String password = request.getParameter("password");
             String email = request.getParameter("email");
+            
+            request.setAttribute("username", username);
+            request.setAttribute("email", email);
+            
             if (!PASSWORD_PATTERN.matcher(password).matches()) {
                 request.setAttribute("passwordError", "Password must be at least 6 characters long, including at least one letter and one number.");
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
@@ -219,6 +223,11 @@ public class controllerUsers extends HttpServlet {
 
             if (userDAO.checkPhoneExists(phone, userId)) {
                 request.setAttribute("phoneError", "Phone already exists.");
+                request.setAttribute("name", name);
+                request.setAttribute("phone", phone);
+                request.setAttribute("address", address);
+                request.setAttribute("gender", gender);
+                request.setAttribute("dob", dob);
                 request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
                 return;
             }
