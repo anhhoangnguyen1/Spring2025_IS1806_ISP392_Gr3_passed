@@ -51,19 +51,14 @@
                         <i class="fa-solid fa-search"></i>
                     </button>
 
-
                 </div>
             </form>
 
-
             <div class="action-bar d-flex align-items-center">
-
                 <a href="${pageContext.request.contextPath}/Customers?service=addCustomer" class="btn btn-outline-primary mr-lg-auto">
                     Add Customer
                 </a>
-
             </div>
-
             <!-- Table Container -->
             <div class="table-container mt-4">
                 <form action="Customers" method="POST">
@@ -75,21 +70,15 @@
                                         ID <i class="fa ${sortBy == 'id' && sortOrder == 'ASC' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
                                     </a>
                                 </th>
-
-
                                 <th class="resizable">Name</th>
                                 <th class="resizable">Phone</th>
                                 <th class="resizable">Address</th>
-
                                 <th class="resizable">
                                     <a href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${index}&sortBy=balance&sortOrder=${sortBy == 'balance' && sortOrder == 'ASC' ? 'DESC' : 'ASC'}">
                                         Balance <i class="fa ${sortBy == 'balance' && sortOrder == 'ASC' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
                                     </a>
                                 </th>
-
                                 <th class="resizable">Created At</th>
-
-
                                 <th class="sticky-col">Actions</th>
                             </tr>
                         </thead>
@@ -131,19 +120,16 @@
                         </a>
                     </li>
                 </c:if>
-
                
                 <li class="page-item ${index == 1 ? 'active' : ''}">
                     <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}">1</a>
                 </li>
-
         
                 <c:if test="${index > 3}">
                     <li class="page-item disabled">
                         <span class="page-link">...</span>
                     </li>
                 </c:if>
-
                
                 <c:forEach begin="${index - 1}" end="${index + 1}" var="page">
                     <c:if test="${page > 1 && page < endPage}">
@@ -182,11 +168,7 @@
             </ul>
         </div>
 
-
-
-  
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-   
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

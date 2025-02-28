@@ -37,20 +37,20 @@ public class controllerCustomers extends HttpServlet {
         }
         String sortBy = request.getParameter("sortBy");
         if (sortBy == null || !sortBy.equals("balance")) {
-            sortBy = "id"; 
+            sortBy = "id";
         }
 
         String sortOrder = request.getParameter("sortOrder");
         if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
-            sortOrder = "ASC"; 
+            sortOrder = "ASC";
         }
 
         switch (service) {
             case "customers": {
-               
+
                 String debtAction = request.getParameter("debtAction");
                 if (debtAction != null && !debtAction.trim().isEmpty()) {
-                
+
                     request.setAttribute("Notification", "Debt added successfully.");
                 }
 
@@ -149,6 +149,12 @@ public class controllerCustomers extends HttpServlet {
 
             if (phoneExists) {
                 request.setAttribute("phoneError", "Phone number already exists.");
+                request.setAttribute("customer", getCustomerFromRequest(request));
+                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
+                return;
+            }
+            if (!phone.matches("^0\\d{9}$")) {
+                request.setAttribute("phoneError", "Invalid phone number format.");
                 request.setAttribute("customer", getCustomerFromRequest(request));
                 request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
                 return;

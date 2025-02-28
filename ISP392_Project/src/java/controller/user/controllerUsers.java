@@ -44,6 +44,15 @@ public class controllerUsers extends HttpServlet {
         if (service == null) {
             service = "users";
         }
+        String sortBy = request.getParameter("sortBy");
+        if (sortBy == null) {
+            sortBy = "id";
+        }
+
+        String sortOrder = request.getParameter("sortOrder");
+        if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
+            sortOrder = "ASC";
+        }
 
         switch (service) {
             case "users": {
@@ -59,13 +68,14 @@ public class controllerUsers extends HttpServlet {
                 int total = userDAO.countUsers(keyword);
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
-                List<Users> list = userDAO.searchUsers(keyword, index, 5);
+                List<Users> list = userDAO.searchUsers(keyword, index, 5, sortBy, sortOrder);
 
                 request.setAttribute("list", list);
                 request.setAttribute("endPage", endPage);
                 request.setAttribute("index", index);
                 request.setAttribute("searchUser", keyword);
-
+                request.setAttribute("sortBy", sortBy);
+                request.setAttribute("sortOrder", sortOrder);
                 request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
                 break;
             }
@@ -83,7 +93,6 @@ public class controllerUsers extends HttpServlet {
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users userForEdit = userDAO.getUserById(userId);
                 request.setAttribute("user", userForEdit);
-
                 String userName = (String) session.getAttribute("username");
                 request.setAttribute("userName", userName);
 
@@ -139,7 +148,12 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 return;
             }
-
+            if (!phone.matches("^0\\d{9}$")) {
+                request.setAttribute("phoneError", "Invalid phone number format.");
+                request.setAttribute("customer", getUserFromRequest(request));
+                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
+                return;
+            }
             Users user = Users.builder()
                     .id(Integer.parseInt(request.getParameter("user_id")))
                     .name(request.getParameter("name"))
@@ -162,10 +176,10 @@ public class controllerUsers extends HttpServlet {
             String username = request.getParameter("username");
             String password = request.getParameter("password");
             String email = request.getParameter("email");
-            
+
             request.setAttribute("username", username);
             request.setAttribute("email", email);
-            
+
             if (!PASSWORD_PATTERN.matcher(password).matches()) {
                 request.setAttribute("passwordError", "Password must be at least 6 characters long, including at least one letter and one number.");
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
@@ -174,7 +188,7 @@ public class controllerUsers extends HttpServlet {
             password = GlobalUtils.getMd5(password);
             // Kiểm tra xem tên người dùng và email đã tồn tại chưa
             if (userDAO.checkUsernameExists(username)) {
-                request.setAttribute("usernameError", "Username already exists.");                
+                request.setAttribute("usernameError", "Username already exists.");
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
                 return;
             }
