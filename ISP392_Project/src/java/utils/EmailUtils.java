@@ -17,7 +17,7 @@ public class EmailUtils {
 
     public static boolean sendMail(String to, String subject, String content) throws AddressException, MessagingException {
         Properties props = new Properties();
-         // Thiết lập các thuộc tính cho phiên gửi mail
+        // Thiết lập các thuộc tính cho phiên gửi mail
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.port", "587");
         props.put("mail.smtp.auth", "true");
@@ -36,7 +36,17 @@ public class EmailUtils {
         message.setSubject(subject);
         message.setContent(content, "text/html; charset=UTF-8");
 
-        Transport.send(message);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Transport.send(message);
+                } catch (MessagingException ex) {
+                    Logger.getLogger(EmailUtils.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }).start();
+
         return true;
     }
 
@@ -53,7 +63,7 @@ public class EmailUtils {
 
         return String.valueOf(otp);
     }
-    
+
     public static void main(String[] args) {
         sendOTPMail("");
     }
