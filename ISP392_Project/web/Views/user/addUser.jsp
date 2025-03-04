@@ -5,7 +5,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Edit Staff</title>
+        <title>Add Staff</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
@@ -134,7 +134,9 @@
                     <c:if test="${not empty emailError}">
                         <div class="alert alert-danger">${emailError}</div>
                     </c:if>
-
+                    <c:if test="${not empty passwordError}">
+                        <div class="alert alert-danger">${passwordError}</div>
+                    </c:if>
                     <form action="${pageContext.request.contextPath}/Users" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="service" value="createAccount"/>
                         <div class="form-group">
@@ -146,44 +148,17 @@
                             <label for="password">Password</label>
                             <input type="password" class="form-control" name="password" required>
                         </div>
-
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm password</label>
+                            <input type="password" class="form-control" name="confirmPassword" required>
+                        </div>
+                        
                         <div class="form-group">
                             <label for="email">Email</label>
                             <input type="email" class="form-control" name="email" required>
                         </div>
 
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control" name="name" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="phone">Phone Number</label>
-                            <input type="text" class="form-control" name="phone" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="image">Profile Image</label>
-                            <input type="file" class="form-control" name="image" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="address">Address</label>
-                            <input type="text" class="form-control" name="address" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="gender">Gender</label>
-                            <select class="form-control" name="gender" required>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="dob">Date of Birth</label>
-                            <input type="date" class="form-control" name="dob" required>
-                        </div>
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Register</button>
