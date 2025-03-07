@@ -26,11 +26,14 @@ public class Users {
     private Date dob;
     private String role;
     private String email;
-    private Date createdAt;
+    private Stores storeId;
+    private Date createdAt;    
+    private String createdBy;
+    private Date deleteAt;
+    private String deleteBy;
+    private boolean isDeleted;    
     private Date updatedAt;
-    private boolean isDelete;
     private String status;
-    private Date deletedAt;
     private List<Invoice> invoices;
     
 }

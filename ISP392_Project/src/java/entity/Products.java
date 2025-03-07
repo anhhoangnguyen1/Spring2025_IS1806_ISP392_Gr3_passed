@@ -1,6 +1,7 @@
 package entity;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,15 +22,14 @@ public class Products {
     private BigDecimal price;
     private int quantity;
     private int zone_id;
+    private Stores storeId;
     private String description;
-    private java.util.Date createdAt;
-    private java.util.Date updatedAt;
-    private boolean isDelete;
+    private Date createdAt;
+    private String createdBy;
+    private Date deleteAt;
+    private String deleteBy;
+    private boolean isDeleted;
+    private Date updatedAt;
     private String status;
     
-    public Products(int productId, String name, int quantity) {
-        this.productId = productId;
-        this.name = name;
-        this.quantity = quantity;
-    }
 }

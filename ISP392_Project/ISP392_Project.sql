@@ -9,9 +9,11 @@ CREATE TABLE Stores (
     phone VARCHAR(20) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,   
-    is_deleted BOOLEAN DEFAULT FALSE,
+    created_by VARCHAR(255),
+    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
     deletedAt DATETIME,
+    deleteBy VARCHAR(255),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status VARCHAR(255)
 );
 
@@ -29,11 +31,13 @@ CREATE TABLE Users (
     role ENUM('admin', 'staff', 'owner') NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     store_id INT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
-    status VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
     deletedAt DATETIME,
+    deleteBy VARCHAR(255),
+    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status VARCHAR(255),
     FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
 );
 
@@ -42,12 +46,12 @@ CREATE TABLE Users (
 CREATE TABLE Zones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    capacity INT NOT NULL,
-    remain_capacity INT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
     deletedAt DATETIME,
+    deleteBy VARCHAR(255),
+    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     store_id INT,
     status VARCHAR(255),
 	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
@@ -63,9 +67,12 @@ CREATE TABLE Products (
     zone_id INT,
     store_id INT,
     description TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    deletedAt DATETIME,
+    deleteBy VARCHAR(255),
     isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status VARCHAR(255),
     FOREIGN KEY (zone_id) REFERENCES Zones(id),
 	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
@@ -78,12 +85,14 @@ CREATE TABLE Customers (
     phone VARCHAR(15) NOT NULL UNIQUE,
     address TEXT NOT NULL,
     balance DECIMAL(18,2) NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    deletedAt DATETIME,
+    deleteBy VARCHAR(255),
+    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by VARCHAR(255),
-    created_by VARCHAR(255),
     store_id INT,
-    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
     status VARCHAR(255),
 	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
 );
@@ -91,13 +100,16 @@ CREATE TABLE Customers (
 -- Table Invoice
 CREATE TABLE Invoice (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     type ENUM('import', 'export') NOT NULL,
     total DECIMAL(18,2) NOT NULL,
     payment DECIMAL(18,2) NOT NULL,
     customers_id INT,
     store_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255),
+    deletedAt DATETIME,
+    deleteBy VARCHAR(255),
+    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
     FOREIGN KEY (customers_id) REFERENCES Customers(id),
     FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
 );
@@ -110,9 +122,12 @@ CREATE TABLE Debt_note (
     customers_id INT,
     store_id INT,
     FOREIGN KEY (customers_id) REFERENCES Customers(id) ON DELETE CASCADE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255),
+    deletedAt DATETIME,
+    deleteBy VARCHAR(255),
+    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status VARCHAR(255),
     description TEXT,
     image VARCHAR(255),
@@ -133,11 +148,11 @@ VALUES
 ('staff2', '482c811da5d5b4bc6d497ffa98491e38', 'staff2.jpg', 'Phạm Hoàng Anh', '0987654324', '101 Đường Hai Bà Trưng, Hà Nội', 'Male', '1999-04-04', 'staff', 'anhhoangyh3@gmail.com', 1, 'Active');
 
 -- Insert into Zones
-INSERT INTO Zones (name, capacity, remain_capacity, store_id, status)
+INSERT INTO Zones (name, store_id, status)
 VALUES 
-('Gạo ST25, Gạo Lài Sữa, Gạo Hương Lài, Gạo ST24', 30000, 2000, 1, 'Active'), -- 28.000
-('Gạo Tám Thơm, Gạo Nàng Hoa, Gạo Tài Nguyên', 30000, 14800, 1, 'Active'), -- 15.200
-('Gạo Japonica, Gạo Đài Loan, Gạo Hương Sen', 30000, 6500, 1, 'Active'); -- 23.500
+('Gạo ST25, Gạo Lài Sữa, Gạo Hương Lài, Gạo ST24', 1, 'Active'), 
+('Gạo Tám Thơm, Gạo Nàng Hoa, Gạo Tài Nguyên', 1, 'Active'), 
+('Gạo Japonica, Gạo Đài Loan, Gạo Hương Sen', 1, 'Active'); 
 
 -- Insert into Products
 INSERT INTO Products (name, image, price, quantity, zone_id, store_id, description, status)

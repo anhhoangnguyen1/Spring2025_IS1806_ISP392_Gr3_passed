@@ -15,19 +15,22 @@ import lombok.ToString;
 @NoArgsConstructor
 
 public class Customers {
+
     private int id;
     private String name;
     private String phone;
     private String address;
     private double balance;
     private Date createdAt;
-    private Date updatedAt;
-    private String updatedBy;
     private String createdBy;
+    private Date deleteAt;
+    private String deleteBy;
     private boolean isDeleted;
+    private Date updatedAt;
+    private String updateBy;
+    private Stores storeId;
     private String status;
     private List<Invoice> invoices;
     private List<DebtNote> debtNotes;
-
 
 }
