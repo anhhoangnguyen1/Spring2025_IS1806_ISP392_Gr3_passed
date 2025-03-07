@@ -16,16 +16,17 @@ import lombok.ToString;
 @NoArgsConstructor
 
 public class Zone {
+
     private int id;
     private String name;
-    private int capacity;
-    private int remainCapacity;
     private Date createdAt;
-    private Date updatedAt;
+    private String createdBy;
+    private Date deleteAt;
+    private String deleteBy;
     private boolean isDeleted;
-    private Date deletedAt;
+    private Date updatedAt;
+    private Stores storeId;
     private String status;
     private List<Products> products;
 
-    
 }

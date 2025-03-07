@@ -1,6 +1,5 @@
 package entity;
 
-
 import java.sql.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -16,14 +15,18 @@ import lombok.ToString;
 @NoArgsConstructor
 
 public class Invoice {
+
     private int id;
-    private Date createdAt;
     private String type;
     private double total;
     private double payment;
     private Customers customer;
     private Users user;
-    private List<InvoiceDetail> invoiceDetails;
+    private Stores storeId;
+    private Date createdAt;
+    private String createdBy;
+    private Date deleteAt;
+    private String deleteBy;
+    private boolean isDeleted;
 
- 
 }

@@ -24,10 +24,12 @@ public class Stores {
     private String address;
     private String phone;
     private String email;
-    private Date createdAt;
+    private Date createdAt;  
+    private String createdBy;
     private Date updatedAt;
-    private boolean isDelete;
-    private Date deletedAt;
+    private Date deleteAt;
+    private String deleteBy;
+    private boolean isDeleted;
     private String status;
 
 }
