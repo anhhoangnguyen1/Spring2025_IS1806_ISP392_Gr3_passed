@@ -25,7 +25,7 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
 
     // get username, password for authenticate
     public Users getUser(String username, String password) {
-        String sql = "SELECT id, username, password, image, name, phone, address, gender, dob, role, email, created_at, updated_at, isDeleted, status, deletedAt "
+        String sql = "SELECT id, username, password, image, name, phone, address, gender, dob, role, email, store_id, created_at, created_by, updated_at, isDeleted, status, deletedAt, deleteBy "
                 + "FROM Users "
                 + "WHERE Users.username = ? AND Users.password = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -168,11 +168,11 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
     public static void main(String[] args) {
         AccountDAO dao = new AccountDAO();
 
-        Users user1 = dao.getUser("admin", "123456");
+        Users user1 = dao.getUser("admin", "482c811da5d5b4bc6d497ffa98491e38");
         if (user1 != null) {
             System.out.println("Đăng nhập thành công: " + user1.getUsername() + " - Role: " + user1.getRole());
         } else {
-            System.out.println("Đăng nhập thất bại (admin, 123456)");
+            System.out.println("Đăng nhập thất bại (admin, password123)");
         }
 
     }
