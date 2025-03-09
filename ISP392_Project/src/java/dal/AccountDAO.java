@@ -85,26 +85,56 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+//    @Override
+//    public Users getFromResultSet(ResultSet resultSet) throws SQLException {
+//        return new Users(
+//                resultSet.getInt("id"),
+//                resultSet.getString("username"),
+//                resultSet.getString("password"),
+//                resultSet.getString("image"),
+//                resultSet.getString("name"),
+//                resultSet.getString("phone"),
+//                resultSet.getString("address"),
+//                resultSet.getString("gender"),
+//                resultSet.getDate("dob"),
+//                resultSet.getString("role"),
+//                resultSet.getString("email"),
+//                resultSet.getDate("created_at"),
+//                resultSet.getDate("updated_at"),
+//                resultSet.getBoolean("isDeleted"),
+//                resultSet.getString("status"),
+//                resultSet.getDate("deletedAt"),
+//                null // Invoices list needs to be populated separately
+//        );
+//    }
     @Override
-    public Users getFromResultSet(ResultSet resultSet) throws SQLException {
+    public Users getFromResultSet(ResultSet rs) throws SQLException {
+        Stores store = null;
+        if (rs.getObject("store_id") != null) {
+            store = new Stores();
+            store.setId(rs.getInt("store_id"));
+        }
         return new Users(
-                resultSet.getInt("id"),
-                resultSet.getString("username"),
-                resultSet.getString("password"),
-                resultSet.getString("image"),
-                resultSet.getString("name"),
-                resultSet.getString("phone"),
-                resultSet.getString("address"),
-                resultSet.getString("gender"),
-                resultSet.getDate("dob"),
-                resultSet.getString("role"),
-                resultSet.getString("email"),
-                resultSet.getDate("created_at"),
-                resultSet.getDate("updated_at"),
-                resultSet.getBoolean("isDeleted"),
-                resultSet.getString("status"),
-                resultSet.getDate("deletedAt"),
-                null // Invoices list needs to be populated separately
+                rs.getInt("id"),
+                rs.getString("username"),
+                rs.getString("password"),
+                rs.getString("image"),
+                rs.getString("name"),
+                rs.getString("phone"),
+                rs.getString("address"),
+                rs.getString("gender"),
+                rs.getDate("dob"),
+                rs.getString("role"),
+                rs.getString("email"),
+                store,
+                rs.getDate("created_at"),
+                rs.getString("created_by"),
+                rs.getDate("deletedAt"),
+                rs.getString("deleteBy"),
+                rs.getBoolean("isDeleted"),
+                rs.getDate("updated_at"),
+                rs.getString("status"),
+                new ArrayList<>() // invoices cần load riêng
         );
     }
 
@@ -138,7 +168,7 @@ public class AccountDAO extends DBContext implements I_DAO<Users> {
     public static void main(String[] args) {
         AccountDAO dao = new AccountDAO();
 
-        Users user1 = dao.getUser("admin", "password123");
+        Users user1 = dao.getUser("admin", "123456");
         if (user1 != null) {
             System.out.println("Đăng nhập thành công: " + user1.getUsername() + " - Role: " + user1.getRole());
         } else {
