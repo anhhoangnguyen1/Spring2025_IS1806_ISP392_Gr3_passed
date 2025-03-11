@@ -68,6 +68,6 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>controllerZones</servlet-name>
-        <url-pattern>/Zones</url-pattern>
+        <url-pattern>/zones</url-pattern>
     </servlet-mapping>
 </web-app>
