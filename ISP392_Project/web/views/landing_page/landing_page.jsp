@@ -39,7 +39,7 @@
                     <li><a href="#faq">FAQ</a></li>
                 </ul>
                 <div class="nav__btns">
-                    <a href="/ISP392_Project/views/login.html">
+                    <a href="/ISP392_Project/views/login.jsp">
                         <button class="btn">Sign In</button>
                     </a>
                 </div>
@@ -101,7 +101,7 @@
             </div>
         </section>
 
-        <a href="/ISP392_Project/views/login.html">
+        <a href="/ISP392_Project/views/login.jsp">
             <button class="subscribe-btn">Sign In</button>
         </a>
 
@@ -163,7 +163,7 @@
                     </p>
                 </div>
                 <div class="banner__form">
-                    <a href="/ISP392_Project/views/login.html">
+                    <a href="/ISP392_Project/views/login.jsp">
                         <button class="subscribe-btn">Sign In</button>
                     </a>
                 </div>

@@ -35,7 +35,7 @@ public class loginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/views/login.html").forward(request, response);
+        request.getRequestDispatcher("/views/login.jsp").forward(request, response);
     }
 
     @Override
@@ -62,10 +62,9 @@ public class loginServlet extends HttpServlet {
 
             response.sendRedirect(request.getContextPath() + "/dashboard");
         } else {// if authenticate fail
-            RequestDispatcher rd = getServletContext().getRequestDispatcher("/views/login.html");
-            PrintWriter out = response.getWriter();
-            out.println("<font color='red'>Your username or password is wrong.</font>");//print error
-            rd.include(request, response);
+            RequestDispatcher rd = getServletContext().getRequestDispatcher("/views/login.jsp");
+                request.setAttribute("error", "Your username or password is wrong");
+                request.getRequestDispatcher("/views/login.jsp").forward(request, response);
         }
     }
 
