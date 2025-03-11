@@ -4,8 +4,7 @@
  */
 package controller.customer;
 
-import dal.customerDAO;
-import dal.debtDAO;
+import dal.*;
 import entity.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -29,6 +28,7 @@ public class controllerCustomers extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
+        String role = (String) session.getAttribute("role");
 
         String service = request.getParameter("service");
         if (service == null) {
@@ -68,9 +68,19 @@ public class controllerCustomers extends HttpServlet {
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
                 List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder);
+                if ("staff".equals(role)) {
+                    for (Customers customer : list) {
+                        String phone = customer.getPhone();
+                        if (phone != null && phone.length() > 6) {
+                            customer.setPhone(phone.substring(0, 3) + "xxxxx" + phone.substring(phone.length() - 2));
+                        }
+                    }
+                }
+
                 String notification = (String) request.getSession().getAttribute("Notification");
                 if (notification != null) {
                     request.setAttribute("Notification", notification);
+                    request.getSession().removeAttribute("Notification");
                 }
 
                 request.setAttribute("list", list);
@@ -87,6 +97,14 @@ public class controllerCustomers extends HttpServlet {
 
                 int id = Integer.parseInt(request.getParameter("customer_id"));
                 Customers customer = customerDAO.getCustomerById(id);
+
+                if ("staff".equals(role)) {
+                    String phone = customer.getPhone();
+                    if (phone != null && phone.length() > 6) {
+                        customer.setPhone(phone.substring(0, 3) + "xxxxx" + phone.substring(phone.length() - 2));
+                    }
+                }
+
                 request.setAttribute("customer", customer);
                 request.getRequestDispatcher("views/customer/detailCustomer.jsp").forward(request, response);
                 break;
@@ -100,16 +118,25 @@ public class controllerCustomers extends HttpServlet {
             }
 
             case "editCustomer": {
-                int customerId = Integer.parseInt(request.getParameter("customer_id"));
-                request.setAttribute("customer", customerDAO.getCustomerById(customerId));
+                 int customerId = Integer.parseInt(request.getParameter("customer_id"));
+            Customers customer = customerDAO.getCustomerById(customerId);
 
-                String fullName = (String) session.getAttribute("fullName");
-                request.setAttribute("fullName", fullName);
-                request.setAttribute("sortOrder", sortOrder);
-
-                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
-                break;
+            // Phân quyền hiển thị thông tin khách hàng
+            if ("staff".equals(role)) {
+                String phone = customer.getPhone();
+                if (phone != null && phone.length() > 6) {
+                    customer.setPhone(phone.substring(0, 3) + "xxxxx" + phone.substring(phone.length() - 2));
+                }
             }
+
+            request.setAttribute("customer", customer);
+            String fullName = (String) session.getAttribute("fullName");
+            request.setAttribute("fullName", fullName);
+            request.setAttribute("sortOrder", sortOrder);
+
+            request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
+            break;
+        }
         }
     }
 
@@ -128,17 +155,20 @@ public class controllerCustomers extends HttpServlet {
                 return;
             }
 
-            if (!phone.matches("^0\\d{9}$")) {
+            if (phone == null || !phone.matches("^0\\d{9}$")) {
                 request.setAttribute("phoneError", "Invalid phone number format.");
                 request.setAttribute("customer", getCustomerFromRequest(request, true));
                 request.getRequestDispatcher("views/customer/addCustomer.jsp").forward(request, response);
                 return;
             }
-
+            HttpSession session = request.getSession();
+            String fullName = (String) session.getAttribute("fullName");
             Customers customer = getCustomerFromRequest(request, true);
+            customer.setCreatedBy(fullName);
             customer.setBalance(0.0);
             customerDAO.insertCustomer(customer);
 
+            session.setAttribute("successMessage", "Customer added successfully.");
             response.sendRedirect("Customers?service=customers");
             return;
         }
@@ -154,7 +184,7 @@ public class controllerCustomers extends HttpServlet {
                 return;
             }
 
-            if (!phone.matches("^0\\d{9}$")) {
+            if (phone == null || !phone.matches("^0\\d{9}$")) {
                 request.setAttribute("phoneError", "Invalid phone number format.");
                 request.setAttribute("customer", getCustomerFromRequest(request, false));
                 request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);

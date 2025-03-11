@@ -153,20 +153,17 @@
                             </c:if>
                         </div>
 
+
                         <div class="form-group">
                             <label for="address">Address</label>
                             <input type="text" class="form-control" name="address" value="${customer.address}" required>
                         </div>
 
                         <input type="hidden" name="balance" value="0.0"/>
-
-                        <div class="form-group">
+                        <div class="form-group ">
                             <label for="createdBy">Created By</label>
-                            <input type="text" class="form-control" name="createdBy" value="${fullName}" readonly>
+                            <span class="form-control" id="createdBy">${fullName}</span>
                         </div>
-
-
-
                         <div class="form-group">
                             <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Add Customer</button>        

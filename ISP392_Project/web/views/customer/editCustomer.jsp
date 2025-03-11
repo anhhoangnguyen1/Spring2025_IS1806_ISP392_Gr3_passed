@@ -156,15 +156,14 @@
                             </c:if>
                         </div>
 
+
                         <div class="form-group">
                             <label for="address">Address</label>
                             <input type="text" class="form-control" name="address" value="${customer.address}" required>
                         </div>
                         <input type="hidden" name="balance" value="${customer.balance}" />
-                        <div class="form-group">
-                            <label for="updatedBy">Updated By</label>
-                            <input type="text" class="form-control" name="updatedBy" value="${fullName}" readonly>
-                        </div>
+                        <input type="hidden" name="updatedBy" value="${fullName}" />
+
                         <div class="form-group">
                             <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>          
