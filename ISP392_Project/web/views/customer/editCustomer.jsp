@@ -161,15 +161,15 @@
                             <input type="text" class="form-control" name="address" value="${customer.address}" required>
                         </div>
                         <input type="hidden" name="balance" value="${customer.balance}" />
-                        <input type="hidden" name="updateBy" value="${userName}" />
+                        <input type="hidden" name="updateBy" value="${username}" />
                         <div class="form-group">
                             <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>          
                             <a href="${pageContext.request.contextPath}/Customers?service=customers&sortOrder=${param.sortOrder}" class="btn btn-secondary">
                                 Back to Customers List
                             </a>
-
-                        </div>           
+                        </div>   
+                    </form>
                 </div>
             </div>
             <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
