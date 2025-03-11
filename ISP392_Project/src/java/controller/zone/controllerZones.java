@@ -155,16 +155,20 @@ public class controllerZones extends HttpServlet {
 
             // Kiểm tra trùng tên
             if (zoneDAO.checkNameExists(name, -1, storeId)) {
+                
                 request.setAttribute("nameError", "Zone name already exists.");
                 request.setAttribute("userName", session.getAttribute("username"));
+                request.setAttribute("name", name);
+                request.setAttribute("store_id", storeId);
+                
                 request.getRequestDispatcher("views/zone/addZone.jsp").forward(request, response);
                 return;
             }
-
+            
             Zone zone = getZoneFromRequest(request, true);
             zoneDAO.insertZone(zone);
             session.setAttribute("Notification", "Zone added successfully.");
-            response.sendRedirect("Zones?service=zones");
+            response.sendRedirect("zones?service=zones");
             return;
         }
 
@@ -188,7 +192,7 @@ public class controllerZones extends HttpServlet {
             Zone zone = getZoneFromRequest(request, false);
             zoneDAO.updateZone(zone);
             session.setAttribute("Notification", "Zone details updated successfully.");
-            response.sendRedirect("Zones?service=zones&sortOrder=" + request.getParameter("sortOrder"));
+            response.sendRedirect("zones?service=zones&sortOrder=" + request.getParameter("sortOrder"));
         }
     }
     
