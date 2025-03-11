@@ -176,10 +176,8 @@ public class controllerUsers extends HttpServlet {
             String username = request.getParameter("username");
             String password = request.getParameter("password");
             String confirmPassword = request.getParameter("confirmPassword");
-            String email = request.getParameter("email");
 
             request.setAttribute("username", username);
-            request.setAttribute("email", email);
 
             if (!PASSWORD_PATTERN.matcher(password).matches()) {
                 request.setAttribute("passwordError", "Password must be at least 6 characters long, including at least one letter and one number.");
@@ -200,17 +198,12 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
                 return;
             }
-            if (userDAO.checkEmailExists(email)) {
-                request.setAttribute("emailError", "Email already exists.");
-                request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
-                return;
-            }
 
             Users user = new Users();
             user.setUsername(username);
             user.setPassword(password);
             user.setImage("default.png");
-            user.setEmail(email);
+            user.setEmail("Pending");
             user.setName("Pending");
             user.setPhone("Pending");
             user.setAddress("Pending");
@@ -237,6 +230,7 @@ public class controllerUsers extends HttpServlet {
 
             String name = request.getParameter("name");
             String phone = request.getParameter("phone");
+            String email = request.getParameter("email");
             String address = request.getParameter("address");
             String gender = request.getParameter("gender");
             java.sql.Date dob = java.sql.Date.valueOf(request.getParameter("dob"));
@@ -247,6 +241,19 @@ public class controllerUsers extends HttpServlet {
                 request.setAttribute("phoneError", "Phone already exists.");
                 request.setAttribute("name", name);
                 request.setAttribute("phone", phone);
+                request.setAttribute("email", email);
+                request.setAttribute("address", address);
+                request.setAttribute("gender", gender);
+                request.setAttribute("dob", dob);
+                request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
+                return;
+            }
+            
+            if (userDAO.checkEmailExists(email, userId)) {
+                request.setAttribute("emailError", "Email already exists.");
+                request.setAttribute("name", name);
+                request.setAttribute("phone", phone);
+                request.setAttribute("email", email);
                 request.setAttribute("address", address);
                 request.setAttribute("gender", gender);
                 request.setAttribute("dob", dob);
@@ -274,6 +281,7 @@ public class controllerUsers extends HttpServlet {
             Users user = userDAO.getUserById(userId);
             user.setName(name);
             user.setPhone(phone);
+            user.setEmail(email);
             user.setAddress(address);
             user.setGender(gender);
             user.setDob(dob);
