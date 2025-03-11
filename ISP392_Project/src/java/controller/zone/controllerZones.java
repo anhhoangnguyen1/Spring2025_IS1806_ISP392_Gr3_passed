@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package controller.zone;
 
 import dao.zoneDAO;
@@ -22,44 +21,47 @@ import java.util.List;
  * @author bsd12418
  */
 public class controllerZones extends HttpServlet {
-   
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet controllerZones</title>");  
+            out.println("<title>Servlet controllerZones</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet controllerZones at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet controllerZones at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
-    } 
+    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
+    /**
      * Handles the HTTP <code>GET</code> method.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
     zoneDAO zoneDAO = new zoneDAO();
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         HttpSession session = request.getSession();
         String service = request.getParameter("service");
         if (service == null) {
@@ -132,11 +134,33 @@ public class controllerZones extends HttpServlet {
                 request.getRequestDispatcher("views/zone/editZone.jsp").forward(request, response);
                 break;
             }
-        }
-    } 
+            case "deleteZone": { // Thêm case mới để xử lý xóa zone
+                int zoneId;
+                try {
+                    zoneId = Integer.parseInt(request.getParameter("zone_id"));
+                } catch (NumberFormatException e) {
+                    session.setAttribute("Notification", "Invalid zone ID!");
+                    response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder);
+                    return;
+                }
 
-    /** 
+                Zone zone = zoneDAO.getZoneById(zoneId);
+                if (zone == null) {
+                    session.setAttribute("Notification", "Zone not found or already deleted!");
+                } else {
+                    zoneDAO.deleteZone(zoneId); // Gọi phương thức soft delete từ zoneDAO
+                    session.setAttribute("Notification", "Zone deleted successfully!");
+                }
+                response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + request.getParameter("index"));
+                break;
+            }
+
+        }
+    }
+
+    /**
      * Handles the HTTP <code>POST</code> method.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -144,7 +168,7 @@ public class controllerZones extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         String service = request.getParameter("service");
         HttpSession session = request.getSession();
 
@@ -155,16 +179,16 @@ public class controllerZones extends HttpServlet {
 
             // Kiểm tra trùng tên
             if (zoneDAO.checkNameExists(name, -1, storeId)) {
-                
+
                 request.setAttribute("nameError", "Zone name already exists.");
                 request.setAttribute("userName", session.getAttribute("username"));
                 request.setAttribute("name", name);
                 request.setAttribute("store_id", storeId);
-                
+
                 request.getRequestDispatcher("views/zone/addZone.jsp").forward(request, response);
                 return;
             }
-            
+
             Zone zone = getZoneFromRequest(request, true);
             zoneDAO.insertZone(zone);
             session.setAttribute("Notification", "Zone added successfully.");
@@ -195,7 +219,7 @@ public class controllerZones extends HttpServlet {
             response.sendRedirect("zones?service=zones&sortOrder=" + request.getParameter("sortOrder"));
         }
     }
-    
+
     private Zone getZoneFromRequest(HttpServletRequest request, boolean isNew) {
         Zone.ZoneBuilder zoneBuilder = Zone.builder();
 
@@ -217,13 +241,13 @@ public class controllerZones extends HttpServlet {
                 .build();
     }
 
-    /** 
+    /**
      * Returns a short description of the servlet.
+     *
      * @return a String containing servlet description
      */
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
-
+    }
 }
