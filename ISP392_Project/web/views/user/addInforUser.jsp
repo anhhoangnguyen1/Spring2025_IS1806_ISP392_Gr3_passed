@@ -131,7 +131,9 @@
                     <c:if test="${not empty phoneError}">
                         <div class="alert alert-danger">${phoneError}</div>
                     </c:if>
-   
+                    <c:if test="${not empty emailError}">
+                        <div class="alert alert-danger">${emailError}</div>
+                    </c:if>
 
                     <form id="userForm" action="${pageContext.request.contextPath}/Users" method="POST" enctype="multipart/form-data" onsubmit="confirmSave(event)">
                         <input type="hidden" name="service" value="addInfo"/>
@@ -144,6 +146,11 @@
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
                             <input type="text" class="form-control" name="phone" value="${param.phone}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" name="email" value="${param.email}" required>
                         </div>
 
                         <div class="form-group">
@@ -171,12 +178,12 @@
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save</button>
-                          
+
                         </div>
                     </form>
                 </div>
             </div>
-             <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">

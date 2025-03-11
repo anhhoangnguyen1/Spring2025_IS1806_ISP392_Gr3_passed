@@ -131,12 +131,10 @@
                     <c:if test="${not empty usernameError}">
                         <div class="alert alert-danger">${usernameError}</div>
                     </c:if>
-                    <c:if test="${not empty emailError}">
-                        <div class="alert alert-danger">${emailError}</div>
-                    </c:if>
                     <c:if test="${not empty passwordError}">
                         <div class="alert alert-danger">${passwordError}</div>
                     </c:if>
+                        
                     <form action="${pageContext.request.contextPath}/Users" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="service" value="createAccount"/>
                         <div class="form-group">
@@ -153,12 +151,6 @@
                             <label for="confirmPassword">Confirm password</label>
                             <input type="password" class="form-control" name="confirmPassword" required>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" name="email" required>
-                        </div>
-
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Register</button>
