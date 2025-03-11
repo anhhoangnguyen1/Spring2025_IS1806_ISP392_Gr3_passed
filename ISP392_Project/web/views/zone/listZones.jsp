@@ -17,6 +17,21 @@
                 width: 100%;
                 border-collapse: collapse;
             }
+            .btn-danger {
+                background-color: transparent;
+                color: red;
+                border: 1px solid red;
+                padding: 8px 16px; /* Optional: Adjust padding for button size */
+                text-align: center;
+            }
+
+            .btn-danger:hover {
+                background-color: red;
+                color: white;
+                border: 1px solid red;
+            }
+
+
             /*            .table th, .table td {
                             padding: 8px;
                             text-align: left;
@@ -119,7 +134,8 @@
                                     <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}" class="btn btn-outline-primary">
                                         Edit
                                     </a>
-                                    <a style="color: red" href="${pageContext.request.contextPath}/zones?service=deleteZone&zone_id=${zone.id}" class="btn btn-outline-primary">
+                                    <a href="${pageContext.request.contextPath}/zones?service=deleteZone&zone_id=${zone.id}" 
+                                       class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this zone?');">
                                         Ban
                                     </a>
                                 </td>

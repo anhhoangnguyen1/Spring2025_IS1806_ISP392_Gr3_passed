@@ -32,7 +32,6 @@
                 text-align: right;
             }
         </style>
-        <a href="zones?service=zones" class="btn btn-outline-secondary">Exit</a>
         <div class="container">
             <div class="zone-container">
                 <h2>Zone Details</h2>
@@ -44,6 +43,7 @@
                 <div style="display: flex; gap: 20px;">
                     <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}" class="btn btn-outline-warning">Edit Zone</a>
                 </div>
+                <a href="zones?service=zones" class="btn btn-outline-secondary">Exit</a>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
