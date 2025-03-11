@@ -6,9 +6,7 @@ package controller.customer;
 
 import dal.customerDAO;
 import dal.debtDAO;
-import entity.Customers;
-import entity.DebtNote;
-import entity.Stores;
+import entity.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,7 +14,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -32,6 +29,7 @@ public class controllerCustomers extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
+
         String service = request.getParameter("service");
         if (service == null) {
             service = "customers";
@@ -94,8 +92,8 @@ public class controllerCustomers extends HttpServlet {
                 break;
             }
             case "addCustomer": {
-                String username = (String) session.getAttribute("username");
-                request.setAttribute("username", username);
+                String fullName = (String) session.getAttribute("fullName");
+                request.setAttribute("fullName", fullName);
                 request.setAttribute("sortOrder", sortOrder);
                 request.getRequestDispatcher("views/customer/addCustomer.jsp").forward(request, response);
                 break;
@@ -103,10 +101,10 @@ public class controllerCustomers extends HttpServlet {
 
             case "editCustomer": {
                 int customerId = Integer.parseInt(request.getParameter("customer_id"));
-                Customers customerForEdit = customerDAO.getCustomerById(customerId);
-                request.setAttribute("customer", customerForEdit);
-                String username = (String) session.getAttribute("username");
-                request.setAttribute("username", username);
+                request.setAttribute("customer", customerDAO.getCustomerById(customerId));
+
+                String fullName = (String) session.getAttribute("fullName");
+                request.setAttribute("fullName", fullName);
                 request.setAttribute("sortOrder", sortOrder);
 
                 request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
@@ -123,7 +121,6 @@ public class controllerCustomers extends HttpServlet {
         if ("addCustomer".equals(service)) {
             String phone = request.getParameter("phone");
 
-            // Kiểm tra số điện thoại đã tồn tại chưa (id không cần truyền vì là thêm mới)
             if (customerDAO.checkPhoneExists(phone, 0)) {
                 request.setAttribute("phoneError", "Phone number already exists.");
                 request.setAttribute("customer", getCustomerFromRequest(request, true));
@@ -131,7 +128,6 @@ public class controllerCustomers extends HttpServlet {
                 return;
             }
 
-            // Kiểm tra số điện thoại có đúng định dạng không
             if (!phone.matches("^0\\d{9}$")) {
                 request.setAttribute("phoneError", "Invalid phone number format.");
                 request.setAttribute("customer", getCustomerFromRequest(request, true));
@@ -139,8 +135,8 @@ public class controllerCustomers extends HttpServlet {
                 return;
             }
 
-            // Lấy thông tin từ request và thêm khách hàng vào database
             Customers customer = getCustomerFromRequest(request, true);
+            customer.setBalance(0.0);
             customerDAO.insertCustomer(customer);
 
             response.sendRedirect("Customers?service=customers");
@@ -151,7 +147,6 @@ public class controllerCustomers extends HttpServlet {
             int customerId = Integer.parseInt(request.getParameter("customer_id"));
             String phone = request.getParameter("phone");
 
-            // Kiểm tra số điện thoại đã tồn tại chưa
             if (customerDAO.checkPhoneExists(phone, customerId)) {
                 request.setAttribute("phoneError", "Phone number already exists.");
                 request.setAttribute("customer", getCustomerFromRequest(request, false));
@@ -159,7 +154,6 @@ public class controllerCustomers extends HttpServlet {
                 return;
             }
 
-            // Kiểm tra số điện thoại có đúng định dạng không
             if (!phone.matches("^0\\d{9}$")) {
                 request.setAttribute("phoneError", "Invalid phone number format.");
                 request.setAttribute("customer", getCustomerFromRequest(request, false));
@@ -167,17 +161,14 @@ public class controllerCustomers extends HttpServlet {
                 return;
             }
 
-            // Lấy thông tin từ request
             Customers customer = getCustomerFromRequest(request, false);
             customerDAO.editCustomer(customer);
 
-            // Thông báo cập nhật thành công
             HttpSession session = request.getSession();
             session.setAttribute("successMessage", "Customer details updated successfully.");
             response.sendRedirect("Customers?service=customers&sortOrder=" + request.getParameter("sortOrder"));
         }
     }
-
 
     private Customers getCustomerFromRequest(HttpServletRequest request, boolean isNew) {
         Customers.CustomersBuilder customerBuilder = Customers.builder();
@@ -192,12 +183,15 @@ public class controllerCustomers extends HttpServlet {
             store.setId(Integer.parseInt(request.getParameter("store_id")));
         }
 
+        HttpSession session = request.getSession();
+        String fullName = (String) session.getAttribute("fullName");
+
         return customerBuilder
                 .name(request.getParameter("name"))
                 .phone(request.getParameter("phone"))
                 .address(request.getParameter("address"))
-                .balance(Double.parseDouble(request.getParameter("balance")))
-                .createdBy(isNew ? request.getParameter("createdBy") : null)
+                .balance(isNew ? 0.0 : Double.parseDouble(request.getParameter("balance")))
+                .createdBy(isNew ? fullName : null)
                 .updateBy(request.getParameter("updatedBy"))
                 .status(request.getParameter("status") != null ? request.getParameter("status") : "Active")
                 .storeId(store)

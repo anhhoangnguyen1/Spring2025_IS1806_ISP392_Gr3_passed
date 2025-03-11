@@ -142,7 +142,7 @@
 
                         <div class="form-group">
                             <label for="name">Name</label>
-                            <input type="text" class="form-control" name="name" required>
+                            <input type="text" class="form-control" name="name" value="${customer.name}" required>
                         </div>
 
                         <div class="form-group">
@@ -155,21 +155,18 @@
 
                         <div class="form-group">
                             <label for="address">Address</label>
-                            <input type="text" class="form-control" name="address" required>
+                            <input type="text" class="form-control" name="address" value="${customer.address}" required>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="balance">Balance</label>
-                                <input type="number" step="0.01" class="form-control" name="balance" required>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="createdBy">Created By</label>
-                                <input type="text" class="form-control" name="createdBy" value="${username}" readonly>
-                            </div>
+                        <input type="hidden" name="balance" value="0.0"/>
+
+                        <div class="form-group">
+                            <label for="createdBy">Created By</label>
+                            <input type="text" class="form-control" name="createdBy" value="${fullName}" readonly>
                         </div>
-                            
-                            
+
+
+
                         <div class="form-group">
                             <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Add Customer</button>        

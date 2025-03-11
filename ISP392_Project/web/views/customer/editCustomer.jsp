@@ -161,7 +161,10 @@
                             <input type="text" class="form-control" name="address" value="${customer.address}" required>
                         </div>
                         <input type="hidden" name="balance" value="${customer.balance}" />
-                        <input type="hidden" name="updateBy" value="${username}" />
+                        <div class="form-group">
+                            <label for="updatedBy">Updated By</label>
+                            <input type="text" class="form-control" name="updatedBy" value="${fullName}" readonly>
+                        </div>
                         <div class="form-group">
                             <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>          
