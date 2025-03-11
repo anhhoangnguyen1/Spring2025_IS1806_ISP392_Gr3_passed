@@ -79,6 +79,7 @@
                                     </a>
                                 </th>
                                 <th class="resizable">Created At</th>
+                                <th class="resizable">Created By</th>
                                 <th class="sticky-col">Actions</th>
                             </tr>
                         </thead>
@@ -87,11 +88,18 @@
                                 <tr>
                                     <td>${customer.id}</td>
                                     <td>${customer.name}</td>
-                                    <td>${customer.phone}</td>
+                                    <td>
+                                        <c:if test="${sessionScope.role == 'owner'}">
+                                            ${customer.phone} 
+                                        </c:if>
+                                        <c:if test="${sessionScope.role == 'staff'}">
+                                            ${customer.phone.substring(0, 3)}xxxxx${customer.phone.substring(customer.phone.length() - 2)} <!-- Hiển thị số điện thoại ẩn nếu là staff -->
+                                        </c:if>
+                                    </td>
                                     <td>${customer.address}</td>
                                     <td><fmt:formatNumber value="${customer.balance}" type="number" pattern="#,###" /></td>
                                     <td>${customer.createdAt}</td>
-                                   
+                                    <td>${customer.createdBy}</td>
                                     <td class="sticky-col" >
                                         <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#">
                                             View
@@ -112,7 +120,7 @@
         </div>
         <div class="container d-flex justify-content-center mt-4">
             <ul class="pagination">
-        
+
                 <c:if test="${index > 1}">
                     <li class="page-item">
                         <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
@@ -120,17 +128,17 @@
                         </a>
                     </li>
                 </c:if>
-               
+
                 <li class="page-item ${index == 1 ? 'active' : ''}">
                     <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}">1</a>
                 </li>
-        
+
                 <c:if test="${index > 3}">
                     <li class="page-item disabled">
                         <span class="page-link">...</span>
                     </li>
                 </c:if>
-               
+
                 <c:forEach begin="${index - 1}" end="${index + 1}" var="page">
                     <c:if test="${page > 1 && page < endPage}">
                         <li class="page-item ${index == page ? 'active' : ''}">
@@ -141,14 +149,14 @@
                     </c:if>
                 </c:forEach>
 
-               
+
                 <c:if test="${index < endPage - 2}">
                     <li class="page-item disabled">
                         <span class="page-link">...</span>
                     </li>
                 </c:if>
 
-              
+
                 <c:if test="${endPage > 1}">
                     <li class="page-item ${index == endPage ? 'active' : ''}">
                         <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
@@ -157,7 +165,7 @@
                     </li>
                 </c:if>
 
-               
+
                 <c:if test="${index < endPage}">
                     <li class="page-item">
                         <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
