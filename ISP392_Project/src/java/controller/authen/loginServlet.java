@@ -51,7 +51,8 @@ public class loginServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("userId", login.getId());
             session.setAttribute("user", login);
-            session.setAttribute("username", login.getUsername()); 
+            session.setAttribute("username", login.getUsername());
+            session.setAttribute("fullName", login.getName());
 
             session.setAttribute("role", login.getRole());
             session.setMaxInactiveInterval(30 * 60);
@@ -63,8 +64,8 @@ public class loginServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/dashboard");
         } else {// if authenticate fail
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/views/login.jsp");
-                request.setAttribute("error", "Your username or password is wrong");
-                request.getRequestDispatcher("/views/login.jsp").forward(request, response);
+            request.setAttribute("error", "Your username or password is wrong");
+            request.getRequestDispatcher("/views/login.jsp").forward(request, response);
         }
     }
 
