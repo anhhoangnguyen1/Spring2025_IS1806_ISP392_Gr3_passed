@@ -124,37 +124,40 @@
                 </div>
                 <!--   === Side Bar Footer Ends ===   -->
             </aside>
-            <div class="contents">
-                <div class="panel-bar1">
-                    <h2>Edit Zone</h2>
-                    <c:if test="${not empty requestScope.nameError}">
-                        <div class="alert alert-danger">${requestScope.nameError}</div>
-                    </c:if>
-                    <form id="zoneForm" action="${pageContext.request.contextPath}/zones" method="POST" onsubmit="confirmSave(event)">
-                        <input type="hidden" name="service" value="editZone" />
-                        <input type="hidden" name="zone_id" value="${zone.id}" />
-                        <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control" name="name" value="${zone.name}" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="store_id">Store ID</label>
-                            <input type="number" class="form-control" name="store_id" value="${zone.storeId != null ? zone.storeId.id : ''}">
-                        </div>
-                        <div class="form-group">
-                            <label for="status">Status</label>
-                            <select class="form-control" name="status" required>
-                                <option value="Active" ${zone.status == 'Active' ? 'selected' : ''}>Active</option>
-                                <option value="Inactive" ${zone.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
-                            </select>
-                        </div>
-                        <input type="hidden" name="updateBy" value="${userName}" />
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary" style="background-color: #007bff">Save Changes</button>
-                            <a href="${pageContext.request.contextPath}/zones?service=zones&sortOrder=${param.sortOrder}" class="btn btn-secondary">Back to Zones List</a>
-                        </div>
-                    </form>
+            <div class="page-wrapper">
+                <!-- Top Bar and Sidebar omitted for brevity; they seem fine -->
+                <div class="contents">
+                    <div class="panel-bar1">
+                        <h2>Edit Zone</h2>
+                        <c:if test="${not empty requestScope.nameError}">
+                            <div class="alert alert-danger">${requestScope.nameError}</div>
+                        </c:if>
+                        <form id="zoneForm" action="${pageContext.request.contextPath}/zones" method="POST" onsubmit="confirmSave(event)">
+                            <input type="hidden" name="service" value="editZone" />
+                            <input type="hidden" name="zone_id" value="${zone.id}" />
+                            <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control" name="name" value="${zone.name}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="store_id">Store ID</label>
+                                <input type="number" class="form-control" name="store_id" value="${zone.storeId != null ? zone.storeId.id : ''}">
+                            </div>
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select class="form-control" name="status" required>
+                                    <option value="Active" ${zone.status == 'Active' ? 'selected' : ''}>Active</option>
+                                    <option value="Inactive" ${zone.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                </select>
+                            </div>
+                            <input type="hidden" name="updateBy" value="${userName}" />
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary" style="background-color: #007bff">Save Changes</button>
+                                <a href="${pageContext.request.contextPath}/zones?service=zones&sortOrder=${param.sortOrder}" class="btn btn-secondary">Back to Zones List</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -166,28 +169,30 @@
                                 </button>
                             </div>
                             <div class="modal-body">
-                                Are you sure to save the changes to this zone?
+                                Are you sure to save the changes to this staff?
                             </div>
                             <div class="modal-footer">
+
                                 <button type="button" class="btn btn-primary" style="background-color: #007bff" id="saveChangesBtn">Save</button>
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-            <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
-            <script>
-                        document.getElementById('saveChangesBtn').onclick = function () {
-                            document.getElementById('zoneForm').submit();
-                        }
-                        function confirmSave(event) {
-                            event.preventDefault();
-                            $('#confirmModal').modal('show');
-                        }
-            </script>
-    </body>
-</html>
+                <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script> <!-- Updated to a stable version -->
+                <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+                <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+                <script type="text/javascript">
+                            // Hàm xử lý khi bấm "Save" trong Modal
+                            document.getElementById('saveChangesBtn').onclick = function () {
+                                document.getElementById('zoneForm').submit(); // Gửi form khi người dùng xác nhận
+                            }
+
+                            // Hàm gọi Modal để xác nhận
+                            function confirmSave(event) {
+                                event.preventDefault(); // Ngừng gửi form
+                                $('#confirmModal').modal('show'); // Hiển thị Modal xác nhận
+                            }
+
+                </script>

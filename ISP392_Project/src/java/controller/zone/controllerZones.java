@@ -111,6 +111,47 @@ public class controllerZones extends HttpServlet {
                 request.getRequestDispatcher("views/zone/zones.jsp").forward(request, response);
                 break;
             }
+            case "searchZonesAjax": {
+                String keyword = request.getParameter("keyword");
+                if (keyword == null) {
+                    keyword = "";
+                }
+                int index = 1;
+                try {
+                    index = Integer.parseInt(request.getParameter("index"));
+                } catch (NumberFormatException ignored) {
+                }
+
+                int pageSize = 5; // Giữ nguyên kích thước trang như hiện tại
+                int total = zoneDAO.countZones(keyword);
+                int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
+                List<Zone> zones = zoneDAO.searchZones(keyword, index, pageSize, sortBy, sortOrder);
+
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                PrintWriter out = response.getWriter();
+                out.print("{");
+                out.print("\"zones\": [");
+                for (int i = 0; i < zones.size(); i++) {
+                    Zone zone = zones.get(i);
+                    out.print("{");
+                    out.print("\"id\": " + zone.getId() + ",");
+                    out.print("\"name\": \"" + zone.getName() + "\",");
+                    out.print("\"storeId\": " + (zone.getStoreId() != null ? "{\"id\": " + zone.getStoreId().getId() + "}" : "null") + ",");
+                    out.print("\"createdBy\": \"" + zone.getCreatedBy() + "\",");
+                    out.print("\"status\": \"" + zone.getStatus() + "\"");
+                    out.print("}");
+                    if (i < zones.size() - 1) {
+                        out.print(",");
+                    }
+                }
+                out.print("],");
+                out.print("\"endPage\": " + endPage + ",");
+                out.print("\"index\": " + index);
+                out.print("}");
+                out.flush();
+                break;
+            }
             case "getZoneById": {
                 int id = Integer.parseInt(request.getParameter("zone_id"));
                 Zone zone = zoneDAO.getZoneById(id);
@@ -179,12 +220,10 @@ public class controllerZones extends HttpServlet {
 
             // Kiểm tra trùng tên
             if (zoneDAO.checkNameExists(name, -1, storeId)) {
-
                 request.setAttribute("nameError", "Zone name already exists.");
                 request.setAttribute("userName", session.getAttribute("username"));
                 request.setAttribute("name", name);
                 request.setAttribute("store_id", storeId);
-
                 request.getRequestDispatcher("views/zone/addZone.jsp").forward(request, response);
                 return;
             }
@@ -192,7 +231,13 @@ public class controllerZones extends HttpServlet {
             Zone zone = getZoneFromRequest(request, true);
             zoneDAO.insertZone(zone);
             session.setAttribute("Notification", "Zone added successfully.");
-            response.sendRedirect("zones?service=zones");
+
+            // Retain sorting parameters in the redirection URL
+            String sortBy = request.getParameter("sortBy");
+            String sortOrder = request.getParameter("sortOrder");
+            String index = request.getParameter("index");
+
+            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + index);
             return;
         }
 
@@ -216,8 +261,15 @@ public class controllerZones extends HttpServlet {
             Zone zone = getZoneFromRequest(request, false);
             zoneDAO.updateZone(zone);
             session.setAttribute("Notification", "Zone details updated successfully.");
-            response.sendRedirect("zones?service=zones&sortOrder=" + request.getParameter("sortOrder"));
+
+            // Retain sorting parameters in the redirection URL
+            String sortBy = request.getParameter("sortBy");
+            String sortOrder = request.getParameter("sortOrder");
+            String index = request.getParameter("index");
+
+            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + index);
         }
+
     }
 
     private Zone getZoneFromRequest(HttpServletRequest request, boolean isNew) {
