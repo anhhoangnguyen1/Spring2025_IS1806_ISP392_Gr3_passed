@@ -32,6 +32,25 @@
             .sortable {
                 cursor: pointer;
             }
+            .container.mt-4 {
+                position: relative; /* Đảm bảo container là phần tử cha để cố định search-box */
+                padding-top: 15px; /* Tạo khoảng trống cho search-box */
+            }
+
+            .search-box {
+                position: absolute;
+                top: 20px; /* Đặt cố định ở trên cùng của container */
+                left: 50%;
+                transform: translateX(-50%);
+                width: 400px;
+                height: 37px;
+                background-color: var(--bg-ternary);
+                border-radius: 50px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                z-index: 10; /* Đảm bảo search-box nằm trên các phần tử khác */
+            }
         </style>
     </head>
     <body>
@@ -105,9 +124,9 @@
                     </li>
                     <c:if test="${index > 3}">
                         <li class="page-item disabled"><span class="page-link">...</span></li>
-                    </c:if>
-                    <c:forEach begin="${index - 1}" end="${index + 1}" var="page">
-                        <c:if test="${page > 1 && page < endPage}">
+                        </c:if>
+                        <c:forEach begin="${index - 1}" end="${index + 1}" var="page">
+                            <c:if test="${page > 1 && page < endPage}">
                             <li class="page-item ${index == page ? 'active' : ''}">
                                 <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}">
                                     ${page}
@@ -117,8 +136,8 @@
                     </c:forEach>
                     <c:if test="${index < endPage - 2}">
                         <li class="page-item disabled"><span class="page-link">...</span></li>
-                    </c:if>
-                    <c:if test="${endPage > 1}">
+                        </c:if>
+                        <c:if test="${endPage > 1}">
                         <li class="page-item ${index == endPage ? 'active' : ''}">
                             <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
                                 ${endPage}
@@ -140,175 +159,175 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
         <script>
-            $(document).ready(function() {
-                let timeout = null;
-                let currentSortBy = '${sortBy}'; // Lưu giá trị sortBy hiện tại
-                let currentSortOrder = '${sortOrder}'; // Lưu giá trị sortOrder hiện tại
+                                           $(document).ready(function () {
+                                               let timeout = null;
+                                               let currentSortBy = '${sortBy}'; // Lưu giá trị sortBy hiện tại
+                                               let currentSortOrder = '${sortOrder}'; // Lưu giá trị sortOrder hiện tại
 
-                // Xử lý tìm kiếm tự động bằng AJAX
-                $('#searchInput').on('keyup', function() {
-                    clearTimeout(timeout);
-                    const keyword = $(this).val().trim();
+                                               // Xử lý tìm kiếm tự động bằng AJAX
+                                               $('#searchInput').on('keyup', function () {
+                                                   clearTimeout(timeout);
+                                                   const keyword = $(this).val().trim();
 
-                    timeout = setTimeout(function() {
-                        searchZones(keyword, 1, currentSortBy, currentSortOrder);
-                    }, 300);
-                });
+                                                   timeout = setTimeout(function () {
+                                                       searchZones(keyword, 1, currentSortBy, currentSortOrder);
+                                                   }, 300);
+                                               });
 
-                // Xử lý sắp xếp khi nhấp vào cột
-                $('.sortable').on('click', function() {
-                    const sortBy = $(this).data('sort');
-                    const keyword = $('#searchInput').val().trim();
+                                               // Xử lý sắp xếp khi nhấp vào cột
+                                               $('.sortable').on('click', function () {
+                                                   const sortBy = $(this).data('sort');
+                                                   const keyword = $('#searchInput').val().trim();
 
-                    // Đảo ngược sortOrder nếu nhấp lại vào cùng cột
-                    if (currentSortBy === sortBy) {
-                        currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
-                    } else {
-                        currentSortBy = sortBy;
-                        currentSortOrder = 'ASC'; // Mặc định ASC khi chọn cột mới
-                    }
+                                                   // Đảo ngược sortOrder nếu nhấp lại vào cùng cột
+                                                   if (currentSortBy === sortBy) {
+                                                       currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
+                                                   } else {
+                                                       currentSortBy = sortBy;
+                                                       currentSortOrder = 'ASC'; // Mặc định ASC khi chọn cột mới
+                                                   }
 
-                    // Cập nhật biểu tượng sắp xếp
-                    updateSortIcons();
+                                                   // Cập nhật biểu tượng sắp xếp
+                                                   updateSortIcons();
 
-                    // Tải lại dữ liệu với sắp xếp mới
-                    searchZones(keyword, 1, currentSortBy, currentSortOrder);
-                });
+                                                   // Tải lại dữ liệu với sắp xếp mới
+                                                   searchZones(keyword, 1, currentSortBy, currentSortOrder);
+                                               });
 
-                // Hàm tìm kiếm Zone
-                function searchZones(keyword, page, sortBy, sortOrder) {
-                    $.ajax({
-                        url: '<%= request.getContextPath() %>/zones',
-                        type: 'GET',
-                        data: {
-                            service: 'searchZonesAjax',
-                            keyword: keyword,
-                            index: page,
-                            sortBy: sortBy,
-                            sortOrder: sortOrder
-                        },
-                        success: function(response) {
-                            updateTable(response.zones, response.endPage, response.index, keyword);
-                        },
-                        error: function() {
-                            $('#zoneTableBody').html('<tr><td colspan="6">Error fetching zones</td></tr>');
-                        }
-                    });
-                }
+                                               // Hàm tìm kiếm Zone
+                                               function searchZones(keyword, page, sortBy, sortOrder) {
+                                                   $.ajax({
+                                                       url: '<%= request.getContextPath() %>/zones',
+                                                       type: 'GET',
+                                                       data: {
+                                                           service: 'searchZonesAjax',
+                                                           keyword: keyword,
+                                                           index: page,
+                                                           sortBy: sortBy,
+                                                           sortOrder: sortOrder
+                                                       },
+                                                       success: function (response) {
+                                                           updateTable(response.zones, response.endPage, response.index, keyword);
+                                                       },
+                                                       error: function () {
+                                                           $('#zoneTableBody').html('<tr><td colspan="6">Error fetching zones</td></tr>');
+                                                       }
+                                                   });
+                                               }
 
-                // Hàm tải danh sách mặc định
-                function loadDefaultZones() {
-                    searchZones('', 1, currentSortBy, currentSortOrder);
-                }
+                                               // Hàm tải danh sách mặc định
+                                               function loadDefaultZones() {
+                                                   searchZones('', 1, currentSortBy, currentSortOrder);
+                                               }
 
-                // Hàm cập nhật bảng
-                function updateTable(zones, endPage, currentIndex, keyword) {
-                    const tbody = $('#zoneTableBody');
-                    tbody.empty();
+                                               // Hàm cập nhật bảng
+                                               function updateTable(zones, endPage, currentIndex, keyword) {
+                                                   const tbody = $('#zoneTableBody');
+                                                   tbody.empty();
 
-                    if (zones.length === 0) {
-                        tbody.append('<tr><td colspan="6">No zones found</td></tr>');
-                    } else {
-                        zones.forEach(function(zone) {
-                            tbody.append(
-                                '<tr>' +
-                                    '<td>' + zone.id + '</td>' +
-                                    '<td style="text-align: left;">' + zone.name + '</td>' +
-                                    '<td>' + (zone.storeId ? zone.storeId.id : 'N/A') + '</td>' +
-                                    '<td>' + zone.createdBy + '</td>' +
-                                    '<td>' + zone.status + '</td>' +
-                                    '<td>' +
-                                        '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '" class="btn btn-outline-primary">View</a> ' +
-                                        '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '" class="btn btn-outline-primary">Edit</a> ' +
-                                        '<a href="<%= request.getContextPath() %>/zones?service=deleteZone&zone_id=' + zone.id + '" ' +
-                                           'class="btn btn-danger" onclick="return confirm(\'Are you sure you want to delete this zone?\');">Ban</a>' +
-                                    '</td>' +
-                                '</tr>'
-                            );
-                        });
-                    }
+                                                   if (zones.length === 0) {
+                                                       tbody.append('<tr><td colspan="6">No zones found</td></tr>');
+                                                   } else {
+                                                       zones.forEach(function (zone) {
+                                                           tbody.append(
+                                                                   '<tr>' +
+                                                                   '<td>' + zone.id + '</td>' +
+                                                                   '<td style="text-align: left;">' + zone.name + '</td>' +
+                                                                   '<td>' + (zone.storeId ? zone.storeId.id : 'N/A') + '</td>' +
+                                                                   '<td>' + zone.createdBy + '</td>' +
+                                                                   '<td>' + zone.status + '</td>' +
+                                                                   '<td>' +
+                                                                   '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '" class="btn btn-outline-primary">View</a> ' +
+                                                                   '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '" class="btn btn-outline-primary">Edit</a> ' +
+                                                                   '<a href="<%= request.getContextPath() %>/zones?service=deleteZone&zone_id=' + zone.id + '" ' +
+                                                                   'class="btn btn-danger" onclick="return confirm(\'Are you sure you want to delete this zone?\');">Ban</a>' +
+                                                                   '</td>' +
+                                                                   '</tr>'
+                                                                   );
+                                                       });
+                                                   }
 
-                    updatePagination(endPage, currentIndex, keyword);
-                }
+                                                   updatePagination(endPage, currentIndex, keyword);
+                                               }
 
-                // Hàm cập nhật phân trang
-                function updatePagination(endPage, currentIndex, keyword) {
-                    const pagination = $('#pagination ul');
-                    pagination.empty();
+                                               // Hàm cập nhật phân trang
+                                               function updatePagination(endPage, currentIndex, keyword) {
+                                                   const pagination = $('#pagination ul');
+                                                   pagination.empty();
 
-                    if (currentIndex > 1) {
-                        pagination.append(
-                            '<li class="page-item">' +
-                                '<a class="page-link" href="#" onclick="searchZones(\'' + keyword + '\', ' + (currentIndex - 1) + ', \'' + currentSortBy + '\', \'' + currentSortOrder + '\')"><i class="fa fa-angle-left"></i></a>' +
-                            '</li>'
-                        );
-                    }
+                                                   if (currentIndex > 1) {
+                                                       pagination.append(
+                                                               '<li class="page-item">' +
+                                                               '<a class="page-link" href="#" onclick="searchZones(\'' + keyword + '\', ' + (currentIndex - 1) + ', \'' + currentSortBy + '\', \'' + currentSortOrder + '\')"><i class="fa fa-angle-left"></i></a>' +
+                                                               '</li>'
+                                                               );
+                                                   }
 
-                    pagination.append(
-                        '<li class="page-item ' + (currentIndex === 1 ? 'active' : '') + '">' +
-                            '<a class="page-link" href="#" onclick="searchZones(\'' + keyword + '\', 1, \'' + currentSortBy + '\', \'' + currentSortOrder + '\')">1</a>' +
-                        '</li>'
-                    );
+                                                   pagination.append(
+                                                           '<li class="page-item ' + (currentIndex === 1 ? 'active' : '') + '">' +
+                                                           '<a class="page-link" href="#" onclick="searchZones(\'' + keyword + '\', 1, \'' + currentSortBy + '\', \'' + currentSortOrder + '\')">1</a>' +
+                                                           '</li>'
+                                                           );
 
-                    if (currentIndex > 3) {
-                        pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                    }
+                                                   if (currentIndex > 3) {
+                                                       pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                                                   }
 
-                    for (let page = currentIndex - 1; page <= currentIndex + 1; page++) {
-                        if (page > 1 && page < endPage) {
-                            pagination.append(
-                                '<li class="page-item ' + (currentIndex === page ? 'active' : '') + '">' +
-                                    '<a class="page-link" href="#" onclick="searchZones(\'' + keyword + '\', ' + page + ', \'' + currentSortBy + '\', \'' + currentSortOrder + '\')">' + page + '</a>' +
-                                '</li>'
-                            );
-                        }
-                    }
+                                                   for (let page = currentIndex - 1; page <= currentIndex + 1; page++) {
+                                                       if (page > 1 && page < endPage) {
+                                                           pagination.append(
+                                                                   '<li class="page-item ' + (currentIndex === page ? 'active' : '') + '">' +
+                                                                   '<a class="page-link" href="#" onclick="searchZones(\'' + keyword + '\', ' + page + ', \'' + currentSortBy + '\', \'' + currentSortOrder + '\')">' + page + '</a>' +
+                                                                   '</li>'
+                                                                   );
+                                                       }
+                                                   }
 
-                    if (currentIndex < endPage - 2) {
-                        pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                    }
+                                                   if (currentIndex < endPage - 2) {
+                                                       pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                                                   }
 
-                    if (endPage > 1) {
-                        pagination.append(
-                            '<li class="page-item ' + (currentIndex === endPage ? 'active' : '') + '">' +
-                                '<a class="page-link" href="#" onclick="searchZones(\'' + keyword + '\', ' + endPage + ', \'' + currentSortBy + '\', \'' + currentSortOrder + '\')">' + endPage + '</a>' +
-                            '</li>'
-                        );
-                    }
+                                                   if (endPage > 1) {
+                                                       pagination.append(
+                                                               '<li class="page-item ' + (currentIndex === endPage ? 'active' : '') + '">' +
+                                                               '<a class="page-link" href="#" onclick="searchZones(\'' + keyword + '\', ' + endPage + ', \'' + currentSortBy + '\', \'' + currentSortOrder + '\')">' + endPage + '</a>' +
+                                                               '</li>'
+                                                               );
+                                                   }
 
-                    if (currentIndex < endPage) {
-                        pagination.append(
-                            '<li class="page-item">' +
-                                '<a class="page-link" href="#" onclick="searchZones(\'' + keyword + '\', ' + (currentIndex + 1) + ', \'' + currentSortBy + '\', \'' + currentSortOrder + '\')"><i class="fa fa-angle-right"></i></a>' +
-                            '</li>'
-                        );
-                    }
-                }
+                                                   if (currentIndex < endPage) {
+                                                       pagination.append(
+                                                               '<li class="page-item">' +
+                                                               '<a class="page-link" href="#" onclick="searchZones(\'' + keyword + '\', ' + (currentIndex + 1) + ', \'' + currentSortBy + '\', \'' + currentSortOrder + '\')"><i class="fa fa-angle-right"></i></a>' +
+                                                               '</li>'
+                                                               );
+                                                   }
+                                               }
 
-                // Hàm cập nhật biểu tượng sắp xếp
-                function updateSortIcons() {
-                    $('.sortable').each(function() {
-                        const sortBy = $(this).data('sort');
-                        const icon = $(this).find('i');
-                        if (sortBy === currentSortBy) {
-                            icon.removeClass('fa-sort-up fa-sort-down');
-                            icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
-                        } else {
-                            icon.removeClass('fa-sort-up fa-sort-down');
-                            icon.addClass('fa-sort-down'); // Mặc định là mũi tên xuống
-                        }
-                    });
-                }
+                                               // Hàm cập nhật biểu tượng sắp xếp
+                                               function updateSortIcons() {
+                                                   $('.sortable').each(function () {
+                                                       const sortBy = $(this).data('sort');
+                                                       const icon = $(this).find('i');
+                                                       if (sortBy === currentSortBy) {
+                                                           icon.removeClass('fa-sort-up fa-sort-down');
+                                                           icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
+                                                       } else {
+                                                           icon.removeClass('fa-sort-up fa-sort-down');
+                                                           icon.addClass('fa-sort-down'); // Mặc định là mũi tên xuống
+                                                       }
+                                                   });
+                                               }
 
-                // Xử lý nút Clear
-                $('#clearBtn').on('click', function() {
-                    $('#searchInput').val('');
-                    loadDefaultZones();
-                });
+                                               // Xử lý nút Clear
+                                               $('#clearBtn').on('click', function () {
+                                                   $('#searchInput').val('');
+                                                   loadDefaultZones();
+                                               });
 
-                // Khởi tạo biểu tượng sắp xếp ban đầu
-                updateSortIcons();
-            });
+                                               // Khởi tạo biểu tượng sắp xếp ban đầu
+                                               updateSortIcons();
+                                           });
         </script>
     </body>
 </html>
