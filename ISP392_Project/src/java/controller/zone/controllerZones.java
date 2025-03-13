@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller.zone;
 
 import dao.zoneDAO;
@@ -22,20 +18,10 @@ import java.util.List;
  */
 public class controllerZones extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -48,21 +34,20 @@ public class controllerZones extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     zoneDAO zoneDAO = new zoneDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
+        
+        // Kiểm tra đăng nhập
+        String username = (String) session.getAttribute("username");
+//        if (username == null) {
+//            response.sendRedirect("login");
+//            return;
+//        }
+
         String service = request.getParameter("service");
         if (service == null) {
             service = "zones";
@@ -70,12 +55,12 @@ public class controllerZones extends HttpServlet {
 
         String sortBy = request.getParameter("sortBy");
         if (sortBy == null || !sortBy.equals("name")) {
-            sortBy = "id"; // Mặc định sắp xếp theo id
+            sortBy = "id";
         }
 
         String sortOrder = request.getParameter("sortOrder");
         if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
-            sortOrder = "ASC"; // Mặc định tăng dần
+            sortOrder = "ASC";
         }
 
         switch (service) {
@@ -98,7 +83,7 @@ public class controllerZones extends HttpServlet {
                 String notification = (String) session.getAttribute("Notification");
                 if (notification != null) {
                     request.setAttribute("Notification", notification);
-                    session.removeAttribute("Notification"); // Xóa thông báo sau khi hiển thị
+                    session.removeAttribute("Notification");
                 }
 
                 request.setAttribute("list", list);
@@ -122,7 +107,7 @@ public class controllerZones extends HttpServlet {
                 } catch (NumberFormatException ignored) {
                 }
 
-                int pageSize = 5; // Giữ nguyên kích thước trang như hiện tại
+                int pageSize = 5;
                 int total = zoneDAO.countZones(keyword);
                 int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
                 List<Zone> zones = zoneDAO.searchZones(keyword, index, pageSize, sortBy, sortOrder);
@@ -160,8 +145,7 @@ public class controllerZones extends HttpServlet {
                 break;
             }
             case "addZone": {
-                String createdBy = (String) session.getAttribute("username");
-                request.setAttribute("userName", createdBy);
+                // Không cần set userName nữa vì đã bỏ hiển thị Created By
                 request.getRequestDispatcher("views/zone/addZone.jsp").forward(request, response);
                 break;
             }
@@ -169,13 +153,12 @@ public class controllerZones extends HttpServlet {
                 int zoneId = Integer.parseInt(request.getParameter("zone_id"));
                 Zone zoneForEdit = zoneDAO.getZoneById(zoneId);
                 request.setAttribute("zone", zoneForEdit);
-                String userName = (String) session.getAttribute("username");
-                request.setAttribute("userName", userName);
+                request.setAttribute("userName", username);
                 request.setAttribute("sortOrder", sortOrder);
                 request.getRequestDispatcher("views/zone/editZone.jsp").forward(request, response);
                 break;
             }
-            case "deleteZone": { // Thêm case mới để xử lý xóa zone
+            case "deleteZone": {
                 int zoneId;
                 try {
                     zoneId = Integer.parseInt(request.getParameter("zone_id"));
@@ -189,29 +172,27 @@ public class controllerZones extends HttpServlet {
                 if (zone == null) {
                     session.setAttribute("Notification", "Zone not found or already deleted!");
                 } else {
-                    zoneDAO.deleteZone(zoneId); // Gọi phương thức soft delete từ zoneDAO
+                    zoneDAO.deleteZone(zoneId);
                     session.setAttribute("Notification", "Zone deleted successfully!");
                 }
                 response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + request.getParameter("index"));
                 break;
             }
-
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String service = request.getParameter("service");
         HttpSession session = request.getSession();
+
+        // Kiểm tra đăng nhập
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            response.sendRedirect("login");
+            return;
+        }
 
         if ("addZone".equals(service)) {
             String name = request.getParameter("name");
@@ -221,18 +202,28 @@ public class controllerZones extends HttpServlet {
             // Kiểm tra trùng tên
             if (zoneDAO.checkNameExists(name, -1, storeId)) {
                 request.setAttribute("nameError", "Zone name already exists.");
-                request.setAttribute("userName", session.getAttribute("username"));
                 request.setAttribute("name", name);
                 request.setAttribute("store_id", storeId);
                 request.getRequestDispatcher("views/zone/addZone.jsp").forward(request, response);
                 return;
             }
 
-            Zone zone = getZoneFromRequest(request, true);
+            Stores store = null;
+            if (storeId != null) {
+                store = new Stores();
+                store.setId(storeId);
+            }
+
+            Zone zone = Zone.builder()
+                    .name(name)
+                    .createdBy(username) // Lấy username từ session
+                    .storeId(store)
+                    .status(request.getParameter("status") != null ? request.getParameter("status") : "Active")
+                    .build();
+
             zoneDAO.insertZone(zone);
             session.setAttribute("Notification", "Zone added successfully.");
 
-            // Retain sorting parameters in the redirection URL
             String sortBy = request.getParameter("sortBy");
             String sortOrder = request.getParameter("sortOrder");
             String index = request.getParameter("index");
@@ -247,12 +238,11 @@ public class controllerZones extends HttpServlet {
             Integer storeId = (request.getParameter("store_id") != null && !request.getParameter("store_id").isEmpty())
                     ? Integer.parseInt(request.getParameter("store_id")) : null;
 
-            // Kiểm tra trùng tên
             if (zoneDAO.checkNameExists(name, zoneId, storeId)) {
                 request.setAttribute("nameError", "Zone name already exists.");
                 Zone zoneForEdit = zoneDAO.getZoneById(zoneId);
                 request.setAttribute("zone", zoneForEdit);
-                request.setAttribute("userName", session.getAttribute("username"));
+                request.setAttribute("userName", username);
                 request.setAttribute("sortOrder", request.getParameter("sortOrder"));
                 request.getRequestDispatcher("views/zone/editZone.jsp").forward(request, response);
                 return;
@@ -262,14 +252,12 @@ public class controllerZones extends HttpServlet {
             zoneDAO.updateZone(zone);
             session.setAttribute("Notification", "Zone details updated successfully.");
 
-            // Retain sorting parameters in the redirection URL
             String sortBy = request.getParameter("sortBy");
             String sortOrder = request.getParameter("sortOrder");
             String index = request.getParameter("index");
 
             response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + index);
         }
-
     }
 
     private Zone getZoneFromRequest(HttpServletRequest request, boolean isNew) {
@@ -287,17 +275,11 @@ public class controllerZones extends HttpServlet {
 
         return zoneBuilder
                 .name(request.getParameter("name"))
-                .createdBy(isNew ? request.getParameter("createdBy") : null)
                 .storeId(store)
                 .status(request.getParameter("status") != null ? request.getParameter("status") : "Active")
                 .build();
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
         return "Short description";
