@@ -47,13 +47,17 @@ public class loginServlet extends HttpServlet {
         Users login = AccountDAO.INSTANCE.getUser(username, password);
 
         //if authenticate success 
-        if (login != null) {
+         if (login != null) {
+              Stores store = login.getStoreId();  // Lấy đối tượng Stores
+            String storeID = store != null ? String.valueOf(store.getId()) : null;  // Lấy storeID từ đối tượng Stores
+
+            
             HttpSession session = request.getSession();
             session.setAttribute("userId", login.getId());
             session.setAttribute("user", login);
             session.setAttribute("username", login.getUsername());
             session.setAttribute("fullName", login.getName());
-
+            session.setAttribute("storeID", storeID);
             session.setAttribute("role", login.getRole());
             session.setMaxInactiveInterval(30 * 60);
 
