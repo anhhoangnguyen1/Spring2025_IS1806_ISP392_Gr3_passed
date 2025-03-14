@@ -11,6 +11,19 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
+    <style>
+        .password-match {
+                font-size: 14px;
+                margin-top: 5px;
+                display: none;
+            }
+            .match-success {
+                color: green;
+            }
+            .match-error {
+                color: red;
+            }
+    </style>
     <body>
         <div class="page-wrapper">
             <!--   *** Top Bar Starts ***   -->
@@ -131,12 +144,10 @@
                     <c:if test="${not empty usernameError}">
                         <div class="alert alert-danger">${usernameError}</div>
                     </c:if>
-                    <c:if test="${not empty emailError}">
-                        <div class="alert alert-danger">${emailError}</div>
-                    </c:if>
                     <c:if test="${not empty passwordError}">
                         <div class="alert alert-danger">${passwordError}</div>
                     </c:if>
+
                     <form action="${pageContext.request.contextPath}/Users" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="service" value="createAccount"/>
                         <div class="form-group">
@@ -146,25 +157,65 @@
 
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input type="password" class="form-control" name="password" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="confirmPassword">Confirm password</label>
-                            <input type="password" class="form-control" name="confirmPassword" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" name="email" required>
+                            <input type="password" class="form-control" name="password"  id="password" required>
                         </div>
 
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm password</label>
+                            <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" required>
+                            <div class="password-match" id="passwordMatch"></div>
+                        </div>
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Register</button>
                             <a href="${pageContext.request.contextPath}/Users?service=users" class="btn btn-secondary">Back to Users list</a>
                         </div>
                     </form>
+                        
+                    <script>
+                        const passwordInput = document.getElementById('password');
+                        const confirmPasswordInput = document.getElementById('confirmPassword');
+                        const passwordMatchDiv = document.getElementById('passwordMatch');
+                        const submitBtn = document.getElementById('submitBtn');
+                        const form = document.getElementById('resetPasswordForm');
+
+                        // Check if passwords match
+                        function checkPasswordsMatch() {
+                            const password = passwordInput.value;
+                            const confirmPassword = confirmPasswordInput.value;
+
+                            if (confirmPassword.length > 0) {
+                                passwordMatchDiv.style.display = 'block';
+
+                                if (password === confirmPassword) {
+                                    passwordMatchDiv.textContent = 'Passwords match';
+                                    passwordMatchDiv.className = 'password-match match-success';
+                                } else {
+                                    passwordMatchDiv.textContent = 'Passwords do not match';
+                                    passwordMatchDiv.className = 'password-match match-error';
+                                }
+                            } else {
+                                passwordMatchDiv.style.display = 'none';
+                            }
+                        }
+
+                        // Check passwords match when confirm password changes
+                        confirmPasswordInput.addEventListener('input', checkPasswordsMatch);
+                        passwordInput.addEventListener('input', checkPasswordsMatch);
+
+                        // Form submission validation - only check if passwords match
+                        form.addEventListener('submit', function (event) {
+                            const password = passwordInput.value;
+                            const confirmPassword = confirmPasswordInput.value;
+
+                            // Only check if passwords match
+                            if (password !== confirmPassword) {
+                                event.preventDefault();
+                                alert('Passwords do not match. Please try again.');
+                            }
+                        });
+                    </script>
+                    
                 </div>
             </div>
             <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
