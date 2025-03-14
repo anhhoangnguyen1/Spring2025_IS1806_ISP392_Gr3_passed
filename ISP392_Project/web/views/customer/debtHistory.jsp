@@ -48,7 +48,7 @@
 
                                         <c:forEach var="debt" items="${customer.debtNotes}">
                                             <tr>
-                                                <td>${debt.debt_note_id}</td>
+                                                <td>${debt.id}</td>
                                                 <td class="${debt.type == '-' ? 'text-danger' : ''}">
                                                     <fmt:formatNumber value="${debt.type == '-' ? -debt.amount : debt.amount}" pattern="###,##0"/>
                                                 </td>

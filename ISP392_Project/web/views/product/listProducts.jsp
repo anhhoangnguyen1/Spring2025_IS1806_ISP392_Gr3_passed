@@ -14,6 +14,25 @@
     </head>
     <body>
         <h1>Products</h1>
+        <form action="${pageContext.request.contextPath}/Products" method="POST">
+            <div class="search-box">
+
+                <input type="hidden" name="service" value="searchProducts" />
+                <input type="text" class="input-box" name="browser"
+                       placeholder="Search for products."
+                       value="${name}" autocomplete="off" />
+
+                <button type="button" class="clear-btn"
+                        onclick="window.location.href = '${pageContext.request.contextPath}/Products'">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                <button type="submit" class="search-btn">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+
+            </div>
+        </form>
         <div class="action-bar d-flex align-items-center">
             <div class="dropdown">
                 <button type="button" class="btn btn-outline-primary dropdown-toggle mr-2" color: var(--heading-clr); data-toggle="dropdown">
