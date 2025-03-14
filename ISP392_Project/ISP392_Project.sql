@@ -75,7 +75,8 @@ CREATE TABLE Products (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status VARCHAR(255),
     FOREIGN KEY (zone_id) REFERENCES Zones(id),
-	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
+	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL,
+    FULLTEXT(name,description)
 );
 
 -- Table Customers
@@ -186,4 +187,3 @@ VALUES
 ('export', 11200000, 11200000, 3, 1),
 ('export', 19200000, 19200000, 4, 1), 
 ('import', 15000000, 15000000, 5, 1);
-
