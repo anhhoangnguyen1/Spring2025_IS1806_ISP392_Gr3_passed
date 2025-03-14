@@ -4,11 +4,8 @@
  */
 package controller.customer;
 
-import dal.customerDAO;
-import dal.debtDAO;
-import entity.Customers;
-import entity.DebtNote;
-import entity.Stores;
+import dal.*;
+import entity.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -32,6 +28,8 @@ public class controllerCustomers extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
+        String role = (String) session.getAttribute("role");
+
         String service = request.getParameter("service");
         if (service == null) {
             service = "customers";
@@ -70,9 +68,19 @@ public class controllerCustomers extends HttpServlet {
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
                 List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder);
+                if ("staff".equals(role)) {
+                    for (Customers customer : list) {
+                        String phone = customer.getPhone();
+                        if (phone != null && phone.length() > 6) {
+                            customer.setPhone(phone.substring(0, 3) + "xxxxx" + phone.substring(phone.length() - 2));
+                        }
+                    }
+                }
+
                 String notification = (String) request.getSession().getAttribute("Notification");
                 if (notification != null) {
                     request.setAttribute("Notification", notification);
+                    request.getSession().removeAttribute("Notification");
                 }
 
                 request.setAttribute("list", list);
@@ -89,101 +97,78 @@ public class controllerCustomers extends HttpServlet {
 
                 int id = Integer.parseInt(request.getParameter("customer_id"));
                 Customers customer = customerDAO.getCustomerById(id);
+
+                if ("staff".equals(role)) {
+                    String phone = customer.getPhone();
+                    if (phone != null && phone.length() > 6) {
+                        customer.setPhone(phone.substring(0, 3) + "xxxxx" + phone.substring(phone.length() - 2));
+                    }
+                }
+
                 request.setAttribute("customer", customer);
                 request.getRequestDispatcher("views/customer/detailCustomer.jsp").forward(request, response);
                 break;
             }
             case "addCustomer": {
-                String createdBy = (String) session.getAttribute("username");
-                request.setAttribute("userName", createdBy);
+                String fullName = (String) session.getAttribute("fullName");
+                request.setAttribute("fullName", fullName);
+                request.setAttribute("sortOrder", sortOrder);
                 request.getRequestDispatcher("views/customer/addCustomer.jsp").forward(request, response);
                 break;
             }
 
             case "editCustomer": {
-                int customerId = Integer.parseInt(request.getParameter("customer_id"));
-                Customers customerForEdit = customerDAO.getCustomerById(customerId);
-                request.setAttribute("customer", customerForEdit);
-                String userName = (String) session.getAttribute("username");
-                request.setAttribute("userName", userName);
-                request.setAttribute("sortOrder", sortOrder);
+                 int customerId = Integer.parseInt(request.getParameter("customer_id"));
+            Customers customer = customerDAO.getCustomerById(customerId);
 
-                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
-                break;
+            // Phân quyền hiển thị thông tin khách hàng
+            if ("staff".equals(role)) {
+                String phone = customer.getPhone();
+                if (phone != null && phone.length() > 6) {
+                    customer.setPhone(phone.substring(0, 3) + "xxxxx" + phone.substring(phone.length() - 2));
+                }
             }
+
+            request.setAttribute("customer", customer);
+            String fullName = (String) session.getAttribute("fullName");
+            request.setAttribute("fullName", fullName);
+            request.setAttribute("sortOrder", sortOrder);
+
+            request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
+            break;
+        }
         }
     }
 
-//    @Override
-//    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-//            throws ServletException, IOException {
-//        String service = request.getParameter("service");
-//
-//        if ("addCustomer".equals(service)) {
-//            Customers customer = Customers.builder()
-//                    .name(request.getParameter("name"))
-//                    .phone(request.getParameter("phone"))
-//                    .address(request.getParameter("address"))
-//                    .balance(Double.parseDouble(request.getParameter("balance")))
-//                    .createdBy(request.getParameter("createdBy"))
-//                    .updatedBy(request.getParameter("createdBy"))
-//                    .status(request.getParameter("status"))
-//                    .build();
-//            customerDAO.insertCustomer(customer);
-//            response.sendRedirect("Customers?service=customers");
-//        }
-//
-//        if ("editCustomer".equals(service)) {
-//
-//            int customerId = Integer.parseInt(request.getParameter("customer_id"));
-//            String name = request.getParameter("name");
-//            String phone = request.getParameter("phone");
-//            String address = request.getParameter("address");
-//            String status = request.getParameter("status");
-//            double balance = Double.parseDouble(request.getParameter("balance"));
-//            String updatedBy = request.getParameter("updatedBy");
-//
-//            if (status == null || status.isEmpty()) {
-//                status = "Active";
-//            }
-//            boolean phoneExists = customerDAO.checkPhoneExists(phone, customerId);
-//
-//            if (phoneExists) {
-//                request.setAttribute("phoneError", "Phone number already exists.");
-//                request.setAttribute("customer", getCustomerFromRequest(request));
-//                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
-//                return;
-//            }
-//            if (!phone.matches("^0\\d{9}$")) {
-//                request.setAttribute("phoneError", "Invalid phone number format.");
-//                request.setAttribute("customer", getCustomerFromRequest(request));
-//                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
-//                return;
-//            }
-//            Customers customer = Customers.builder()
-//                    .id(Integer.parseInt(request.getParameter("customer_id")))
-//                    .name(request.getParameter("name"))
-//                    .phone(request.getParameter("phone"))
-//                    .address(request.getParameter("address"))
-//                    .balance(balance)
-//                    .updatedBy(updatedBy)
-//                    .status(status)
-//                    .build();
-//            customerDAO.editCustomer(customer);
-//            HttpSession session = request.getSession();
-//            session.setAttribute("successMessage", "Customer details updated successfully.");
-//            response.sendRedirect("Customers?service=customers&sortOrder=" + request.getParameter("sortOrder"));
-//        }
-//    }
-    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String service = request.getParameter("service");
 
         if ("addCustomer".equals(service)) {
+            String phone = request.getParameter("phone");
+
+            if (customerDAO.checkPhoneExists(phone, 0)) {
+                request.setAttribute("phoneError", "Phone number already exists.");
+                request.setAttribute("customer", getCustomerFromRequest(request, true));
+                request.getRequestDispatcher("views/customer/addCustomer.jsp").forward(request, response);
+                return;
+            }
+
+            if (phone == null || !phone.matches("^0\\d{9}$")) {
+                request.setAttribute("phoneError", "Invalid phone number format.");
+                request.setAttribute("customer", getCustomerFromRequest(request, true));
+                request.getRequestDispatcher("views/customer/addCustomer.jsp").forward(request, response);
+                return;
+            }
+            HttpSession session = request.getSession();
+            String fullName = (String) session.getAttribute("fullName");
             Customers customer = getCustomerFromRequest(request, true);
+            customer.setCreatedBy(fullName);
+            customer.setBalance(0.0);
             customerDAO.insertCustomer(customer);
+
+            session.setAttribute("successMessage", "Customer added successfully.");
             response.sendRedirect("Customers?service=customers");
             return;
         }
@@ -192,7 +177,6 @@ public class controllerCustomers extends HttpServlet {
             int customerId = Integer.parseInt(request.getParameter("customer_id"));
             String phone = request.getParameter("phone");
 
-            // Kiểm tra số điện thoại đã tồn tại chưa
             if (customerDAO.checkPhoneExists(phone, customerId)) {
                 request.setAttribute("phoneError", "Phone number already exists.");
                 request.setAttribute("customer", getCustomerFromRequest(request, false));
@@ -200,37 +184,22 @@ public class controllerCustomers extends HttpServlet {
                 return;
             }
 
-            // Kiểm tra số điện thoại có đúng định dạng không
-            if (!phone.matches("^0\\d{9}$")) {
+            if (phone == null || !phone.matches("^0\\d{9}$")) {
                 request.setAttribute("phoneError", "Invalid phone number format.");
                 request.setAttribute("customer", getCustomerFromRequest(request, false));
                 request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
                 return;
             }
 
-            // Lấy thông tin từ request
             Customers customer = getCustomerFromRequest(request, false);
             customerDAO.editCustomer(customer);
 
-            // Thông báo cập nhật thành công
             HttpSession session = request.getSession();
             session.setAttribute("successMessage", "Customer details updated successfully.");
             response.sendRedirect("Customers?service=customers&sortOrder=" + request.getParameter("sortOrder"));
         }
     }
 
-//    private Customers getCustomerFromRequest(HttpServletRequest request) {
-//        Customers customer = new Customers();
-//        customer.setId(Integer.parseInt(request.getParameter("customer_id")));
-//        customer.setName(request.getParameter("name"));
-//        customer.setPhone(request.getParameter("phone"));
-//        customer.setAddress(request.getParameter("address"));
-//        customer.setUpdatedBy(request.getParameter("updateBy"));
-//        customer.setStatus(request.getParameter("status"));
-//
-//        return customer;
-//    }
-    
     private Customers getCustomerFromRequest(HttpServletRequest request, boolean isNew) {
         Customers.CustomersBuilder customerBuilder = Customers.builder();
 
@@ -244,12 +213,15 @@ public class controllerCustomers extends HttpServlet {
             store.setId(Integer.parseInt(request.getParameter("store_id")));
         }
 
+        HttpSession session = request.getSession();
+        String fullName = (String) session.getAttribute("fullName");
+
         return customerBuilder
                 .name(request.getParameter("name"))
                 .phone(request.getParameter("phone"))
                 .address(request.getParameter("address"))
-                .balance(Double.parseDouble(request.getParameter("balance")))
-                .createdBy(isNew ? request.getParameter("createdBy") : null)
+                .balance(isNew ? 0.0 : Double.parseDouble(request.getParameter("balance")))
+                .createdBy(isNew ? fullName : null)
                 .updateBy(request.getParameter("updatedBy"))
                 .status(request.getParameter("status") != null ? request.getParameter("status") : "Active")
                 .storeId(store)

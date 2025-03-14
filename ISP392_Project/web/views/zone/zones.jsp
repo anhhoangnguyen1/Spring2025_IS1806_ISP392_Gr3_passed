@@ -1,24 +1,22 @@
 <%-- 
-    Document   : editCustomer
-    Created on : Feb 14, 2025, 5:03:29 PM
-    Author     : THC
+    Document   : zones
+    Created on : Mar 12, 2025, [Current Time]
+    Author     : [Your Name]
 --%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <!DOCTYPE html>
-<html lang="en">
+<html>
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Edit Customer</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Zones Dashboard</title>
     </head>
     <body>
-
+        <!--   *** Page Wrapper Starts ***   -->
         <div class="page-wrapper">
             <!--   *** Top Bar Starts ***   -->
             <div class="top-bar">
@@ -28,11 +26,10 @@
                         <span></span>
                         <span></span>
                     </div>
-                    <div class="logo">
-                        <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
+                    <div class="logo mr-5">
+                        <img src="/ISP392_Project/views/customer/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
-
 
                 <div class="top-bar-right">
                     <div class="mode-switch">
@@ -42,7 +39,7 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
+                        <img src="/ISP392_Project/views/customer/images/profile-img.jpg" id="profile-img" />
                         <div class="profile-menu">
                             <ul>
                                 <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
@@ -52,8 +49,11 @@
                     </div>
                 </div>
             </div>
+            <!--   *** Top Bar Ends ***   -->
 
+            <!--   === Side Bar Starts ===   -->
             <aside class="side-bar">
+                <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
                     <li>
@@ -64,7 +64,7 @@
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="#">
+                    <li>
                         <a href="/ISP392_Project/Products">
                             <span class="nav-icon">
                                 <i class="fas fa-box"></i>
@@ -72,8 +72,8 @@
                             <span class="nav-text">Products</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="#">
+                    <li class="active">
+                        <a href="/ISP392_Project/zones">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-table"></i>
                             </span>
@@ -81,7 +81,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Customers">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user"></i>
                             </span>
@@ -89,7 +89,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Invoices">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
@@ -108,7 +108,7 @@
                 <span class="menu-label">OWNER ZONE</span>
                 <ul class="navbar-links navbar-links-2">
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Users">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user-tie"></i>
                             </span>
@@ -116,6 +116,7 @@
                         </a>
                     </li>
                 </ul>
+                <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
                     <div class="settings">
@@ -130,87 +131,25 @@
                                 <i class="fa-solid fa-right-from-bracket"></i>
                             </span>
                             <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
+                        </a>
                     </div>
                 </div>
                 <!--   === Side Bar Footer Ends ===   -->
             </aside>
+            <!--   === Side Bar Ends ===   -->
+
+            <!--   === Contents Starts ===   -->
             <div class="contents">
                 <div class="panel-bar1">
-                    <h2>Edit Customer</h2>
-                    <form id="customerForm" action="${pageContext.request.contextPath}/Customers"  method="POST" onsubmit="confirmSave(event)">
-                        <input type="hidden" name="service" value="editCustomer" />
-                        <input type="hidden" name="customer_id" value="${customer.id}" />
-                        <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
-                        <input type="hidden" name="index" value="${param.index}" />
-
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control" name="name" value="${customer.name}" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="phone">Phone</label>
-                            <input type="text" class="form-control" name="phone" value="${customer.phone}" required>
-                            <c:if test="${not empty phoneError}">
-                                <span style="color: red;">${phoneError}</span>
-                            </c:if>
-                        </div>
-
-
-                        <div class="form-group">
-                            <label for="address">Address</label>
-                            <input type="text" class="form-control" name="address" value="${customer.address}" required>
-                        </div>
-                        <input type="hidden" name="balance" value="${customer.balance}" />
-                        <input type="hidden" name="updatedBy" value="${fullName}" />
-
-                        <div class="form-group">
-                            <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
-                            <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>          
-                            <a href="${pageContext.request.contextPath}/Customers?service=customers&sortOrder=${param.sortOrder}" class="btn btn-secondary">
-                                Back to Customers List
-                            </a>
-                        </div>   
-                    </form>
+                    <c:import url="listZones.jsp" />
                 </div>
             </div>
-            <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="confirmModalLabel">Confirm Changes</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            Are you sure to save the changes to this customer?
-                        </div>
-                        <div class="modal-footer">
-
-                            <button type="button" class="btn btn-primary" style="background-color: #007bff" id="saveChangesBtn">Save</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-            <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
-            <script type="text/javascript">
-
-                        document.getElementById('saveChangesBtn').onclick = function () {
-                            document.getElementById('customerForm').submit();
-                        }
-
-
-                        function confirmSave(event) {
-                            event.preventDefault();
-                            $('#confirmModal').modal('show');
-                        }
-            </script>
+            <!--   === Contents Ends ===   -->
         </div>
+        <!--   *** Page Wrapper Ends ***   -->
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
     </body>
-</html> 
+</html>

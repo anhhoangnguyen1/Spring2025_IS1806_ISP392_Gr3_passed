@@ -70,11 +70,11 @@ public class userDAO extends DBContext {
     public List<Users> searchUsers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
         List<Users> list = new ArrayList<>();
         if (sortBy == null || !sortBy.equals("balance")) {
-            sortBy = "id"; 
+            sortBy = "id";
         }
 
         if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
-            sortOrder = "ASC"; 
+            sortOrder = "ASC";
         }
         String sql;
         if (keyword == null || keyword.trim().isEmpty()) {
@@ -253,15 +253,16 @@ public class userDAO extends DBContext {
     }
 
     public boolean updateUserInfo(Users user) {
-        String sql = "UPDATE users SET name = ?, phone = ?, address = ?, gender = ?, dob = ?, image = ? WHERE id = ?";
+        String sql = "UPDATE users SET name = ?, phone = ?, email = ?, address = ?, gender = ?, dob = ?, image = ? WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, user.getName());
             st.setString(2, user.getPhone());
-            st.setString(3, user.getAddress());
-            st.setString(4, user.getGender());
-            st.setDate(5, new java.sql.Date(user.getDob().getTime())); // Chuyển đổi từ java.util.Date sang java.sql.Date
-            st.setString(6, user.getImage());
-            st.setInt(7, user.getId());
+            st.setString(3, user.getEmail());
+            st.setString(4, user.getAddress());
+            st.setString(5, user.getGender());
+            st.setDate(6, new java.sql.Date(user.getDob().getTime())); // Chuyển đổi từ java.util.Date sang java.sql.Date
+            st.setString(7, user.getImage()); // Lưu tên ảnh nếu có
+            st.setInt(8, user.getId());
 
             int rowAffected = st.executeUpdate();
             return rowAffected > 0;
