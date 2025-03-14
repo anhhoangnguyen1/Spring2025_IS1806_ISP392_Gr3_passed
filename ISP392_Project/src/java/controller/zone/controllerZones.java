@@ -40,13 +40,13 @@ public class controllerZones extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        
+
         // Kiểm tra đăng nhập
         String username = (String) session.getAttribute("username");
-//        if (username == null) {
-//            response.sendRedirect("login");
-//            return;
-//        }
+        if (username == null) {
+            response.sendRedirect("login");
+            return;
+        }
 
         String service = request.getParameter("service");
         if (service == null) {
@@ -72,12 +72,21 @@ public class controllerZones extends HttpServlet {
 
                 int index = 1;
                 try {
-                    index = Integer.parseInt(request.getParameter("index"));
+                    index = Integer.parseInt(request.getParameter("index")); // Lấy index từ URL
+                    if (index < 1) {
+                        index = 1; // Đảm bảo index không âm
+                    }
                 } catch (NumberFormatException ignored) {
+                    // Nếu không parse được, giữ mặc định index = 1
                 }
 
                 int total = zoneDAO.countZones(keyword);
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
+
+                // Đảm bảo index không vượt quá endPage
+                if (index > endPage) {
+                    index = endPage;
+                }
 
                 List<Zone> list = zoneDAO.searchZones(keyword, index, 5, sortBy, sortOrder);
                 String notification = (String) session.getAttribute("Notification");
@@ -88,7 +97,7 @@ public class controllerZones extends HttpServlet {
 
                 request.setAttribute("list", list);
                 request.setAttribute("endPage", endPage);
-                request.setAttribute("index", index);
+                request.setAttribute("index", index); // Đảm bảo index được truyền vào JSP
                 request.setAttribute("searchZone", keyword);
                 request.setAttribute("sortBy", sortBy);
                 request.setAttribute("sortOrder", sortOrder);
@@ -175,7 +184,36 @@ public class controllerZones extends HttpServlet {
                     zoneDAO.deleteZone(zoneId);
                     session.setAttribute("Notification", "Zone deleted successfully!");
                 }
-                response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + request.getParameter("index"));
+
+                // Tính lại tổng số Zone và số trang sau khi xóa
+                String keyword = request.getParameter("searchZone");
+                if (keyword == null) {
+                    keyword = "";
+                }
+                int total = zoneDAO.countZones(keyword);
+                int pageSize = 5;
+                int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
+
+                // Lấy index hiện tại từ request
+                int currentIndex = 1;
+                try {
+                    currentIndex = Integer.parseInt(request.getParameter("index")); // Lấy từ URL
+                    System.out.println("Current index from request: " + currentIndex); // Debug
+                } catch (NumberFormatException ignored) {
+                    System.out.println("Index not found in request, defaulting to 1");
+                }
+
+                // Điều chỉnh index sau khi xóa
+                if (currentIndex > endPage || (total > 0 && total % pageSize == 0 && currentIndex == endPage)) {
+                    currentIndex = Math.max(1, currentIndex - 1); // Quay về trang trước nếu trang hiện tại rỗng
+                } else if (currentIndex < 1) {
+                    currentIndex = 1; // Đảm bảo index không âm
+                }
+
+                System.out.println("Adjusted index: " + currentIndex + ", endPage: " + endPage); // Debug
+
+                // Chuyển hướng với index đã điều chỉnh
+                response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + currentIndex + "&searchZone=" + java.net.URLEncoder.encode(keyword, "UTF-8"));
                 break;
             }
         }
@@ -222,13 +260,25 @@ public class controllerZones extends HttpServlet {
                     .build();
 
             zoneDAO.insertZone(zone);
+
+            // Tính lại tổng số Zone và số trang cuối
+            int total = zoneDAO.countZones(""); // Đếm tất cả Zone không có từ khóa tìm kiếm
+            int pageSize = 5; // Kích thước trang cố định
+            int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
+            System.out.println("Calculated endPage: " + endPage);
+
             session.setAttribute("Notification", "Zone added successfully.");
 
             String sortBy = request.getParameter("sortBy");
+            if (sortBy == null) {
+                sortBy = "id"; // Mặc định nếu không có
+            }
             String sortOrder = request.getParameter("sortOrder");
-            String index = request.getParameter("index");
-
-            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + index);
+            if (sortOrder == null) {
+                sortOrder = "ASC"; // Mặc định nếu không có
+            }
+            // Chuyển hướng đến trang cuối cùng (nơi Zone mới xuất hiện)
+            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage);
             return;
         }
 
