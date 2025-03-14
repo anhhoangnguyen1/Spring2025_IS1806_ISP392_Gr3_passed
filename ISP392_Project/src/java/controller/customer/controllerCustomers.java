@@ -118,25 +118,24 @@ public class controllerCustomers extends HttpServlet {
             }
 
             case "editCustomer": {
-                 int customerId = Integer.parseInt(request.getParameter("customer_id"));
-            Customers customer = customerDAO.getCustomerById(customerId);
+                int customerId = Integer.parseInt(request.getParameter("customer_id"));
+                Customers customer = customerDAO.getCustomerById(customerId);
 
-            // Phân quyền hiển thị thông tin khách hàng
-            if ("staff".equals(role)) {
-                String phone = customer.getPhone();
-                if (phone != null && phone.length() > 6) {
-                    customer.setPhone(phone.substring(0, 3) + "xxxxx" + phone.substring(phone.length() - 2));
+                if ("staff".equals(role)) {
+                    String phone = customer.getPhone();
+                    if (phone != null && phone.length() > 6) {
+                        customer.setPhone(phone);
+                    }
                 }
+
+                request.setAttribute("customer", customer);
+                String fullName = (String) session.getAttribute("fullName");
+                request.setAttribute("fullName", fullName);
+                request.setAttribute("sortOrder", sortOrder);
+
+                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
+                break;
             }
-
-            request.setAttribute("customer", customer);
-            String fullName = (String) session.getAttribute("fullName");
-            request.setAttribute("fullName", fullName);
-            request.setAttribute("sortOrder", sortOrder);
-
-            request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
-            break;
-        }
         }
     }
 
@@ -207,13 +206,15 @@ public class controllerCustomers extends HttpServlet {
             customerBuilder.id(Integer.parseInt(request.getParameter("customer_id")));
         }
 
-        Stores store = null;
-        if (request.getParameter("store_id") != null && !request.getParameter("store_id").isEmpty()) {
-            store = new Stores();
-            store.setId(Integer.parseInt(request.getParameter("store_id")));
-        }
 
         HttpSession session = request.getSession();
+        String storeID = (String) session.getAttribute("storeID");
+        Stores store = null;
+        if (storeID != null && !storeID.isEmpty()) {
+            store = new Stores();
+            store.setId(Integer.parseInt(storeID));
+        }
+
         String fullName = (String) session.getAttribute("fullName");
 
         return customerBuilder

@@ -4,7 +4,7 @@
  */
 package controller.authen;
 
-import dal.AccountDAO;
+import dal.*;
 import entity.*;
 import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
@@ -46,13 +46,16 @@ public class loginServlet extends HttpServlet {
 
         Users login = AccountDAO.INSTANCE.getUser(username, password);
 
-        //if authenticate success 
         if (login != null) {
+            Stores store = login.getStoreId();  
+            String storeID = store != null ? String.valueOf(store.getId()) : null;  
+
             HttpSession session = request.getSession();
             session.setAttribute("userId", login.getId());
             session.setAttribute("user", login);
             session.setAttribute("username", login.getUsername());
             session.setAttribute("fullName", login.getName());
+            session.setAttribute("storeID", storeID);
 
             session.setAttribute("role", login.getRole());
             session.setMaxInactiveInterval(30 * 60);
@@ -62,7 +65,7 @@ public class loginServlet extends HttpServlet {
             response.addCookie(userCookie);
 
             response.sendRedirect(request.getContextPath() + "/dashboard");
-        } else {// if authenticate fail
+        } else {
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/views/login.jsp");
             request.setAttribute("error", "Your username or password is wrong");
             request.getRequestDispatcher("/views/login.jsp").forward(request, response);

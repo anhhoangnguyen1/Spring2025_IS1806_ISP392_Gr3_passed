@@ -91,22 +91,7 @@
             background-color: #5a6268;
         }
     </style>
-    <script>
-        function confirmSave() {
-            return confirm("Are you sure you want to save the changes?");
-        }
-        function previewImage(event) {
-            var reader = new FileReader();
-            reader.onload = function() {
-                var avatar = document.getElementById("avatar-preview");
-                avatar.style.backgroundImage = "url(" + reader.result + ")";
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-        function goBack() {
-            window.history.back();
-        }
-    </script>
+
 </head>
 <body>
     <div class="profile-container">
