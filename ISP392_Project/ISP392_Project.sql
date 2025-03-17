@@ -41,22 +41,6 @@ CREATE TABLE Users (
     FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
 );
 
-
--- Table Zones
-CREATE TABLE Zones (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(255),
-    deletedAt DATETIME,
-    deleteBy VARCHAR(255),
-    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    store_id INT,
-    status VARCHAR(255),
-	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
-);
-
 -- Table Products
 CREATE TABLE Products (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -64,7 +48,6 @@ CREATE TABLE Products (
     image VARCHAR(255) NOT NULL,
     price DECIMAL(18,2) NOT NULL,
     quantity INT NOT NULL,
-    zone_id INT,
     store_id INT,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -74,7 +57,24 @@ CREATE TABLE Products (
     isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status VARCHAR(255),
-    FOREIGN KEY (zone_id) REFERENCES Zones(id),
+	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
+);
+
+-- Table Zones
+CREATE TABLE Zones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    product_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    deletedAt DATETIME,
+    deleteBy VARCHAR(255),
+    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    store_id INT,
+    status VARCHAR(255),
+    FOREIGN KEY (product_id) REFERENCES Products(id) ON DELETE SET NULL,
 	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
 );
 
@@ -147,27 +147,26 @@ VALUES
 ('staff1', '482c811da5d5b4bc6d497ffa98491e38', 'staff1.jpg', 'Lê Phương Linh', '0987654323', '789 Đường Trần Hưng Đạo, Hà Nội', 'Female', '2000-03-03', 'staff', 'phuonglinh2611.cv@gmail.com', 1, 'Active'),
 ('staff2', '482c811da5d5b4bc6d497ffa98491e38', 'staff2.jpg', 'Phạm Hoàng Anh', '0987654324', '101 Đường Hai Bà Trưng, Hà Nội', 'Male', '1999-04-04', 'staff', 'anhhoangyh3@gmail.com', 1, 'Active');
 
--- Insert into Zones
-INSERT INTO Zones (name, store_id, status)
+INSERT INTO Products (name, image, price, quantity, store_id, description, created_by, status)
 VALUES 
-('Gạo ST25, Gạo Lài Sữa, Gạo Hương Lài, Gạo ST24', 1, 'Active'), 
-('Gạo Tám Thơm, Gạo Nàng Hoa, Gạo Tài Nguyên', 1, 'Active'), 
-('Gạo Japonica, Gạo Đài Loan, Gạo Hương Sen', 1, 'Active'); 
+('Gạo ST25', 'gao_st25.jpg', 25000.00, 100, 1, 'Gạo thơm chất lượng cao, đặc sản Sóc Trăng', 'Phan Ngọc Mai', 'Active'),
+('Gạo Tám Thơm Điện Biên', 'gao_tam_thom.jpg', 22000.00, 150, 1, 'Gạo dẻo thơm, đặc sản Điện Biên', 'Lê Phương Linh', 'Active'),
+('Gạo Nếp Cái Hoa Vàng', 'gao_nep_cai_hoa_vang.jpg', 30000.00, 80, 1, 'Gạo nếp thơm ngon, dùng làm bánh chưng', 'Phạm Hoàng Anh', 'Active'),
+('Gạo Lứt Huyết Rồng', 'gao_lut_huet_rong.jpg', 28000.00, 120, 1, 'Gạo lứt giàu dinh dưỡng, tốt cho sức khỏe', 'Phan Ngọc Mai', 'Active'),
+('Gạo Bắc Hương', 'gao_bac_huong.jpg', 20000.00, 200, 1, 'Gạo trắng thơm, giá phổ thông', 'Lê Phương Linh', 'Active'),
+('Gạo Hương Lài', 'gao_huong_lai.jpg', 23000.00, 90, 1, 'Gạo thơm nhẹ, hạt dài, mềm cơm', 'Phan Ngọc Mai', 'Active'),
+('Gạo Nàng Hương', 'gao_nang_huong.jpg', 26000.00, 110, 1, 'Gạo đặc sản Chợ Đào, thơm đậm', 'Lê Phương Linh', 'Active'),
+('Gạo Nếp Tú Lệ', 'gao_nep_tu_le.jpg', 32000.00, 70, 1, 'Gạo nếp dẻo thơm, đặc sản Yên Bái', 'Phạm Hoàng Anh', 'Active'),
+('Gạo Tấm Thơm', 'gao_tam_thom.jpg', 18000.00, 150, 1, 'Gạo tấm mềm, dùng nấu cháo hoặc cơm tấm', 'Phan Ngọc Mai', 'Active'),
+('Gạo Japonica', 'gao_japonica.jpg', 27000.00, 100, 1, 'Gạo Nhật tròn hạt, dẻo cơm', 'Lê Phương Linh', 'Active');
 
--- Insert into Products
-INSERT INTO Products (name, image, price, quantity, zone_id, store_id, description, status)
+INSERT INTO Zones (name, description, product_id, store_id, created_by, status)
 VALUES 
-('Gạo ST25', 'st25.jpg', 44000, 10000, 1, 1, 'Gạo đặc sản Việt Nam, thơm nhẹ, dẻo vừa. Phù hợp nấu cơm thường, cơm chiên, sushi.', 'Available'),
-('Gạo Lài Sữa', 'laisua.jpg', 30000, 8000, 1, 1, 'Dẻo mềm, thơm sữa tự nhiên, xuất xứ từ An Giang. Phù hợp nấu cơm trắng, cháo.', 'Available'),
-('Gạo Tám Thơm', 'tamthom.jpg', 28000, 1200, 2, 1, 'Gạo thơm nồng, dẻo vừa, đặc sản Nam Định. Phù hợp nấu cơm trắng, cơm niêu.', 'Available'),
-('Gạo Nàng Hoa', 'nanghoa.jpg', 32000, 5000, 2, 1, 'Gạo dẻo, thơm nhẹ, không bạc bụng, giữ cơm lâu. Phù hợp nấu cơm tấm, cơm chiên.', 'Available'),
-('Gạo Japonica', 'japonica.jpg', 50000, 6000, 3, 1, 'Gạo hạt tròn, dẻo nhiều, thơm nhẹ, nhập khẩu từ Nhật Bản. Phù hợp nấu cơm cuộn, sushi.', 'Available'),
-('Gạo Hương Lài', 'huonglai.jpg', 28000, 5000, 1, 1, 'Gạo thơm đặc trưng như hoa lài, dẻo vừa, đặc sản Sóc Trăng. Phù hợp nấu cơm trắng, cơm chiên.', 'Available'),
-('Gạo Tài Nguyên', 'tainguyen.jpg', 24000, 9000, 2, 1, 'Hạt to, xốp, ít dẻo. Phù hợp nấu cơm quán ăn, nhà hàng.', 'Available'),
-('Gạo Đài Loan', 'dailoan.jpg', 35000, 7500, 3, 1, 'Gạo ngon, dẻo nhiều, nhập khẩu Đài Loan. Phù hợp làm sushi, nấu xôi.', 'Available'),
-('Gạo ST24', 'st24.jpg', 33000, 5000, 1, 1, 'Gạo thơm ngon, giữ cơm lâu mềm. Phù hợp nấu cơm thường, làm cơm cuộn.', 'Available'),
-('Gạo Hương Sen', 'huongsen.jpg', 30000, 10000, 3, 1, 'Gạo thơm tự nhiên mùi sen, dẻo vừa. Phù hợp nấu cơm trắng, cháo', 'Available');
-
+('T1', 'Trái 1', 6, 1, 'Phan Ngọc Mai', 'Active'),
+('T2', 'Trái 2', 7, 1, 'Lê Phương Linh', 'Active'),
+('P1', 'Phải 1', 8, 1, 'Phạm Hoàng Anh', 'Active'),
+('P2', 'Phải 2', 9, 1, 'Phan Ngọc Mai', 'Active'),
+('P3', 'Phải 3', 10, 1, 'Lê Phương Linh', 'Active');
 
 -- Insert into Customers
 INSERT INTO Customers (name, phone, address, balance, created_by, store_id, status)
