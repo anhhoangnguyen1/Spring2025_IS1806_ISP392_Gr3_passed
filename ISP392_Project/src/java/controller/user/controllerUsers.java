@@ -5,6 +5,7 @@
 package controller.user;
 
 import dal.userDAO;
+import entity.Stores;
 import entity.Users;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -172,13 +173,36 @@ public class controllerUsers extends HttpServlet {
             response.sendRedirect("Users?service=users");
         }
         if ("createAccount".equals(service)) {
-
             String username = request.getParameter("username");
             String password = request.getParameter("password");
             String confirmPassword = request.getParameter("confirmPassword");
 
-            request.setAttribute("username", username);
+            // Lấy store_id từ session
+            HttpSession session = request.getSession();
+            String storeIdString = (String) session.getAttribute("storeID"); // Lấy store_id dưới dạng String
 
+            Integer storeId = null;
+
+            if (storeIdString != null) {
+                // Nếu store_id không null, chuyển storeIdString thành Integer
+                try {
+                    storeId = Integer.parseInt(storeIdString); // Chuyển đổi String thành Integer
+                } catch (NumberFormatException e) {
+                    request.setAttribute("storeError", "Invalid Store ID format.");
+                    request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
+                    return;
+                }
+            } else {
+                // Nếu store_id là null, gán store_id của người mới là null
+                storeId = null;
+            }
+            userDAO dao = new userDAO();
+            if (storeId != null && !dao.isStoreIdValid(storeId)) {
+                request.setAttribute("storeError", "Invalid Store ID.");
+                request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
+                return;
+            }
+            // Kiểm tra mật khẩu hợp lệ
             if (!PASSWORD_PATTERN.matcher(password).matches()) {
                 request.setAttribute("passwordError", "Password must be at least 6 characters long, including at least one letter and one number.");
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
@@ -186,19 +210,34 @@ public class controllerUsers extends HttpServlet {
             }
 
             if (!password.equals(confirmPassword)) {
-                request.setAttribute("passwordError", "Confirm password is fail.");
+                request.setAttribute("passwordError", "Confirm password does not match.");
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
                 return;
             }
 
-            password = GlobalUtils.getMd5(password);
+            password = GlobalUtils.getMd5(password);  // Mã hóa mật khẩu
 
+            // Kiểm tra xem tên người dùng đã tồn tại chưa
             if (userDAO.checkUsernameExists(username)) {
                 request.setAttribute("usernameError", "Username already exists.");
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
                 return;
             }
-
+            String role = "staff"; // Mặc định là "staff"
+            if ("admin".equals(session.getAttribute("role"))) {  // Kiểm tra nếu người dùng là admin
+                role = "owner";  // Nếu là admin, gán role là owner
+            }
+            // Lấy thông tin cửa hàng từ storeId (store_id đã lấy từ session)
+            Stores store = null;
+            if (storeId != null) {
+                store = dao.getStoreById(storeId);
+                if (store == null) {
+                    request.setAttribute("storeError", "Invalid store ID.");
+                    request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
+                    return;
+                }
+            }
+            // Tạo đối tượng User với thông tin từ form và thông tin cửa hàng
             Users user = new Users();
             user.setUsername(username);
             user.setPassword(password);
@@ -210,20 +249,25 @@ public class controllerUsers extends HttpServlet {
             user.setGender("Pending");
             user.setDob(null);
             user.setStatus("Active");
-            user.setRole("staff");
+            user.setRole(role);
 
-            boolean isInserted = userDAO.insertUsers(user);
+            // Nếu store_id không null thì gán store_id của người tạo tài khoản cho người mới
+            if (storeId != null) {
+                user.setStoreId(store);  // Gán store_id của người tạo tài khoản cho người mới
+            } else {
+                user.setStoreId(null); // Nếu store_id là null, người mới sẽ không có store_id
+            }
+            
+            boolean isInserted = dao.insertUsers(user);
             if (isInserted) {
-                HttpSession session = request.getSession();
                 session.setAttribute("successMessage", "Account created successfully.");
-                session.setAttribute("userId", userDAO.getUserByUsername(username).getId());
+                session.setAttribute("userId", dao.getUserByUsername(username).getId());
                 request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
             } else {
                 request.setAttribute("errorMessage", "An error occurred while creating the account.");
                 request.getRequestDispatcher("views/user/addUser.jsp").forward(request, response);
             }
         }
-
         if ("addInfo".equals(service)) {
             HttpSession session = request.getSession();
             int userId = (int) session.getAttribute("userId");
@@ -248,7 +292,7 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
                 return;
             }
-            
+
             if (userDAO.checkEmailExists(email, userId)) {
                 request.setAttribute("emailError", "Email already exists.");
                 request.setAttribute("name", name);

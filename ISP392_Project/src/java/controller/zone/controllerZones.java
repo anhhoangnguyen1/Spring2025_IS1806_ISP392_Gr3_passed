@@ -185,32 +185,41 @@ public class controllerZones extends HttpServlet {
                     session.setAttribute("Notification", "Zone deleted successfully!");
                 }
 
-                // Tính lại tổng số Zone và số trang sau khi xóa
+                // Lấy thông tin tìm kiếm và phân trang hiện tại
                 String keyword = request.getParameter("searchZone");
                 if (keyword == null) {
                     keyword = "";
                 }
+
+                // Lấy index hiện tại từ request, mặc định là 1 nếu không có hoặc lỗi
+                int currentIndex = 1;
+                String indexParam = request.getParameter("index");
+                if (indexParam != null) {
+                    try {
+                        currentIndex = Integer.parseInt(indexParam);
+                        if (currentIndex < 1) {
+                            currentIndex = 1;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid index parameter: " + indexParam + ". Defaulting to 1.");
+                    }
+                } else {
+                    System.out.println("Index parameter not found in request. Defaulting to 1.");
+                }
+
+                // Tính lại tổng số Zone và số trang sau khi xóa
                 int total = zoneDAO.countZones(keyword);
                 int pageSize = 5;
                 int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
 
-                // Lấy index hiện tại từ request
-                int currentIndex = 1;
-                try {
-                    currentIndex = Integer.parseInt(request.getParameter("index")); // Lấy từ URL
-                    System.out.println("Current index from request: " + currentIndex); // Debug
-                } catch (NumberFormatException ignored) {
-                    System.out.println("Index not found in request, defaulting to 1");
+                // Điều chỉnh index nếu cần
+                if (total == 0) {
+                    currentIndex = 1; // Nếu không còn Zone nào, quay về trang 1
+                } else if (currentIndex > endPage) {
+                    currentIndex = endPage; // Nếu index vượt quá endPage, đặt về trang cuối
+                } else if ((total % pageSize == 0) && (currentIndex == endPage + 1)) {
+                    currentIndex = endPage; // Nếu trang hiện tại vừa bị xóa hết dữ liệu, quay về trang cuối mới
                 }
-
-                // Điều chỉnh index sau khi xóa
-                if (currentIndex > endPage || (total > 0 && total % pageSize == 0 && currentIndex == endPage)) {
-                    currentIndex = Math.max(1, currentIndex - 1); // Quay về trang trước nếu trang hiện tại rỗng
-                } else if (currentIndex < 1) {
-                    currentIndex = 1; // Đảm bảo index không âm
-                }
-
-                System.out.println("Adjusted index: " + currentIndex + ", endPage: " + endPage); // Debug
 
                 // Chuyển hướng với index đã điều chỉnh
                 response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + currentIndex + "&searchZone=" + java.net.URLEncoder.encode(keyword, "UTF-8"));
