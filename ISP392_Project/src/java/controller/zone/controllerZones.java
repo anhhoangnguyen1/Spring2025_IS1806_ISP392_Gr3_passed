@@ -145,6 +145,8 @@ public class controllerZones extends HttpServlet {
                 out.print("}");
                 out.flush();
                 break;
+                
+                
             }
             case "getZoneById": {
                 int id = Integer.parseInt(request.getParameter("zone_id"));

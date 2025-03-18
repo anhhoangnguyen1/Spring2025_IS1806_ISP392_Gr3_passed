@@ -170,19 +170,6 @@ $(document).ready(function () {
     });
 });
 
-function previewImage(event) {
-    var input = event.target;
-    var reader = new FileReader();
-
-    reader.onload = function () {
-        var imagePreview = document.getElementById("imagePreview");
-        imagePreview.src = reader.result; // Cập nhật src của ảnh
-    }
-
-    if (input.files && input.files[0]) {
-        reader.readAsDataURL(input.files[0]); // Đọc dữ liệu ảnh
-    }
-}
 function myFunction() {
     document.getElementById("myDropdown").classList.toggle("show");
 }
@@ -459,3 +446,4 @@ function cleanInputBeforeSubmit(event) {
     // Remove the thousand separators before sending the value
     input.value = input.value.replace(/\./g, '');
 }
+

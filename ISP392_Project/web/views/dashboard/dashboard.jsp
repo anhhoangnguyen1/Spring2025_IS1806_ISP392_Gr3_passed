@@ -129,7 +129,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Stores">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-store"></i>
                             </span>
@@ -137,7 +137,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Users">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user-tie"></i>
                             </span>

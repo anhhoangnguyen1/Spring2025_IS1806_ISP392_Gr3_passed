@@ -334,6 +334,9 @@
            // [NOTE: Sửa tại đây] Tải danh sách mặc định khi trang load
            loadDefaultZones();
        });
+       
+       
+       
         </script>
     </body>
 </html>

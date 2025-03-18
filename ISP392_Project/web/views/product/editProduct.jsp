@@ -6,6 +6,7 @@
         <title>Edit Product</title>
     </head>
     <body>
+
         <c:forEach var="product" items="${list}">
             <!-- Modal Edit Product -->
             <div id="editProductModal${product.getProductId()}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel${product.getProductId()}" aria-hidden="true">
@@ -31,25 +32,23 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Product Image</label>
-                                    <img src="images/${product.getImage()}" alt="Current Product Image" style="width: 150px; height: 150px; object-fit: cover; margin-bottom: 10px;">
+                                    <img id="productImage${product.getProductId()}" src="/ISP392_Project/views/product/images/${product.getImage()}" alt="Current Product Image" style="width: 150px; height: 150px; object-fit: cover; margin-bottom: 10px;">
                                     <input type="hidden" name="current_image" value="${product.getImage()}" />
-                                    <input type="file" class="form-control" name="image" accept="image/*">
+                                    <input type="file" class="form-control" name="image" accept="image/*" onchange="previewImage(event, ${product.getProductId()})">
                                 </div>
+
                                 <div class="form-row">
-                                    <div class="form-group col-md-3">
+                                    <div class="form-group col-md-4">
                                         <label>Price</label>
                                         <input type="number" step="0.01" class="form-control" name="price" value="${product.getPrice()}" required>
                                     </div>
-                                    <div class="form-group col-md-3">
-                                    <label>Quantity (kg)</label>
-                                    <input type="number" class="form-control" name="quantity" value="${product.getQuantity()}" required>
+                                    <div class="form-group col-md-4">
+                                        <label>Quantity (kg)</label>
+                                        <input type="number" class="form-control" name="quantity" value="${product.getQuantity()}" required>
+                                    </div>
+  
                                 </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Zone id</label>
-                                    <input type="text" class="form-control" name="zone_id" value="${product.getZone_id()}" required>
-                                </div>
+
                                 <div class="form-group">
                                     <label>Description</label>
                                     <textarea class="form-control" name="description" rows="4" >${product.getDescription()}</textarea>
@@ -73,5 +72,24 @@
                 </div>
             </div>
         </c:forEach>
+
+        <script>
+            function previewImage(event, productId) {
+                var file = event.target.files[0];  // Lấy tệp người dùng chọn
+                var reader = new FileReader();     // Tạo đối tượng FileReader
+
+                // Kiểm tra xem tệp có hợp lệ không
+                if (file) {
+                    reader.onload = function (e) {
+                        // Cập nhật thẻ <img> với ảnh mới
+                        console.log('Image selected: ', e.target.result); // Kiểm tra đầu ra
+                        document.getElementById('productImage' + productId).src = e.target.result;
+                    }
+                    // Đọc tệp dưới dạng URL (Data URL)
+                    reader.readAsDataURL(file);
+                }
+            }
+
+        </script>
     </body>
 </html>

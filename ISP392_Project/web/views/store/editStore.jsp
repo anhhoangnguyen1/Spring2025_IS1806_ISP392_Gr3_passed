@@ -1,4 +1,3 @@
-
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -6,49 +5,15 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Store</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css?v=1.0" />
+        <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
-        <title>Product Details</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                padding: 20px;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            th, td {
-                border: 1px solid #ddd;
-                padding: 10px;
-                text-align: left;
-            }
-            th {
-                background-color: #f4f4f4;
-            }
-            .product-image {
-                max-width: 100px;
-            }
-            .action-buttons a {
-                margin-right: 10px;
-                text-decoration: none;
-                padding: 5px 10px;
-                border-radius: 5px;
-            }
-            .edit {
-                background-color: #ffc107;
-                color: black;
-            }
-            .delete {
-                background-color: #dc3545;
-                color: white;
-            }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
     <body>
         <div class="page-wrapper">
+            <!--   *** Top Bar Starts ***   -->
             <div class="top-bar">
                 <div class="top-bar-left">
                     <div class="hamburger-btn">
@@ -109,7 +74,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/ISP392_Project/Customers">
+                        <a href="#">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user"></i>
                             </span>
@@ -162,65 +127,89 @@
                 </div>
                 <!--   === Side Bar Footer Ends ===   -->
             </aside>
+
             <div class="contents">
                 <div class="panel-bar1">
-                    <h2>Product Details</h2>
-                    <c:forEach var="product" items="${list}">
+                    <h2>Edit Store Information</h2>
+                    
+                    <form id="storeForm" action="${pageContext.request.contextPath}/Stores" method="POST" onsubmit="confirmSave(event)">
+                        <input type="hidden" name="service" value="editStore">
+                        <input type="hidden" name="store_id" value="${store.id}">
 
-                        <table>
-                            <tr>
-                                <th style="width: 50px">ID</th>
-                                <td>${product.productId}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Name</th>
-                                <td>${product.name}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Image</th>
-                                <td>
-                                    <img src="/ISP392_Project/views/product/images/${product.image}" class="product-image" alt="Product Image">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="width: 70px">Price</th>
-                                <td>${product.price}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 85px">Weight</th>
-                                <td>${product.quantity} Kg</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 400px">Description</th>
-                                <td>${product.description}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Created At</th>
-                                <td>${product.createdAt}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Updated At</th>
-                                <td>${product.updatedAt}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Status</th>
-                                <td>${product.status}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Action</th>
-                                <td class="action-buttons">
-                                    <a href="editProduct.jsp?id=<%= request.getAttribute("id") %>" class="edit">Edit</a>
-                                    <a href="deleteProduct?id=<%= request.getAttribute("id") %>" class="delete" onclick="return confirm('Are you sure?')">Delete</a>
-                                </td>
-                            </tr>
-                        </table>
-                    </c:forEach>
+                        <!-- Store Name -->
+                        <div class="form-group">
+                            <label for="name">Store Name</label>
+                            <input type="text" class="form-control" name="name" value="${store.name}" required>
+                            <c:if test="${not empty nameError}">
+                                <div class="text-danger">${nameError}</div>
+                            </c:if>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <input type="text" class="form-control" name="address" value="${store.address}" required>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="text" class="form-control" name="phone" value="${store.phone}" required>
+                            <c:if test="${not empty phoneError}">
+                                <div class="text-danger">${phoneError}</div>
+                            </c:if>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" name="email" value="${store.email}" required>
+                            <c:if test="${not empty emailError}">
+                                <div class="text-danger">${emailError}</div>
+                            </c:if>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>
+                            <a href="${pageContext.request.contextPath}/Stores?service=storeInfo" class="btn btn-secondary">Back</a>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </div>
+            <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmModalLabel">Confirm Changes</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure to save the changes to this information?
+                        </div>
+                        <div class="modal-footer">
 
-    </body>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
-</html>
+                            <button type="button" class="btn btn-primary" style="background-color: #007bff" id="saveChangesBtn">Save</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+            <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+            <script type="text/javascript">
+                // Hàm xử lý khi bấm "Save" trong Modal
+                document.getElementById('saveChangesBtn').onclick = function () {
+                    document.getElementById('storeForm').submit(); // Gửi form khi người dùng xác nhận
+                }
+
+                // Hàm gọi Modal để xác nhận
+                function confirmSave(event) {
+                    event.preventDefault(); // Ngừng gửi form
+                    $('#confirmModal').modal('show'); // Hiển thị Modal xác nhận
+                }
+            </script>

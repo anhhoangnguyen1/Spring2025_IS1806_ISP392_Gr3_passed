@@ -48,7 +48,7 @@
 
                                         <c:forEach var="debt" items="${customer.debtNotes}">
                                             <tr>
-                                                <td>${debt.debt_note_id}</td>
+                                                <td>${debt.id}</td>
                                                 <td class="${debt.type == '-' ? 'text-danger' : ''}">
                                                     <fmt:formatNumber value="${debt.type == '-' ? -debt.amount : debt.amount}" pattern="###,##0"/>
                                                 </td>
@@ -151,92 +151,100 @@
             <div id="caption"></div>
         </div>
         <script>
+ function myFunction(customerId) {
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById("myInput");
+    filter = input.value.toUpperCase();
 
-            function myFunction(customerId) {
-                var input, filter, table, tr, td, i, txtValue;
-                input = document.getElementById("myInput");
-                filter = input.value.toUpperCase();
+    // Tạo ID động dựa trên customerId
+    table = document.getElementById(`myTable1-${customerId}`);
 
-                // Tạo ID động dựa trên customerId
-                table = document.getElementById(`myTable1-${customer.id}`);
+    if (!table) return; // Tránh lỗi nếu bảng không tồn tại
 
-                if (!table)
-                    return; // Tránh lỗi nếu bảng không tồn tại
+    tr = table.getElementsByTagName("tr");
 
-                tr = table.getElementsByTagName("tr");
-
-                for (i = 0; i < tr.length; i++) {
-                    td = tr[i].getElementsByTagName("td")[0];
-                    if (td) {
-                        txtValue = td.textContent || td.innerText;
-                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                            tr[i].style.display = "";
-                        } else {
-                            tr[i].style.display = "none";
-                        }
-                    }
-                }
+    for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
             }
-            $(document).ready(function () {
-                $(".openDebtModal").on("click", function () {
-                    try {
-                        console.log("Opening modal...");
-                        let debtId = $(this).data("id");
-                        let amount = $(this).data("amount");
-                        let type = $(this).data("type");
-                        let createdAt = $(this).data("createdat");
-                        let description = $(this).data("description");
-                        let status = $(this).data("status");
-                        let imageSrc = $(this).data("image");
+        }
+    }
+}
 
-                        console.log("Debt Data:", {debtId, amount, type, createdAt, description, status, imageSrc});
+$(document).ready(function () {
+    // Gỡ sự kiện trước khi gắn lại để tránh gọi lặp vô hạn
+    $(document).off("click", ".openDebtModal").on("click", ".openDebtModal", function () {
+        try {
+            console.log("Opening modal...");
+            let debtId = $(this).data("id");
+            let amount = $(this).data("amount");
+            let type = $(this).data("type");
+            let createdAt = $(this).data("createdat");
+            let description = $(this).data("description");
+            let status = $(this).data("status");
+            let imageSrc = $(this).data("image");
 
-                        $("#modalDebtId").text(debtId);
-                        $("#modalDebtAmount").val(amount);
-                        $("#modalDebtType").val(type);
-                        $("#modalDebtCreatedAt").val(createdAt);
-                        $("#modalDebtDescription").val(description);
-                        $("#modalDebtStatus").val(status);
+            console.log("Debt Data:", { debtId, amount, type, createdAt, description, status, imageSrc });
 
-                        if (imageSrc && imageSrc !== "images/null") {
-                            console.log("Loading image:", imageSrc);
-                            $("#modalDebtImage").attr("src", imageSrc).show();
-                        } else {
-                            $("#modalDebtImage").hide();
-                        }
+            $("#modalDebtId").text(debtId);
+            $("#modalDebtAmount").val(amount);
+            $("#modalDebtType").val(type);
+            $("#modalDebtCreatedAt").val(createdAt);
+            $("#modalDebtDescription").val(description);
+            $("#modalDebtStatus").val(status);
 
-                        $("#debtDetailModal").modal("show");
-                        console.log("Modal shown successfully");
-                    } catch (error) {
-                        console.error("Error opening modal:", error);
-                    }
-                });
+            if (imageSrc && imageSrc !== "images/null") {
+                console.log("Loading image:", imageSrc);
+                $("#modalDebtImage").attr("src", imageSrc).show();
+            } else {
+                $("#modalDebtImage").hide();
+            }
 
-                $(".close, .btn-secondary").on("click", function () {
-                    $("#debtDetailModal").modal("hide");
-                });
-            });
+            $("#debtDetailModal").modal("show");
+            console.log("Modal shown successfully");
+        } catch (error) {
+            console.error("Error opening modal:", error);
+        }
+    });
 
+                    
 
-// Get the modal
-            var modal = document.getElementById("myModal");
+    // Chỉ cho phép modal mở một lần
+    $("#myModal").one("show.bs.modal", function () {
+        $(this).addClass("already-open");
+    });
 
-// Get all images with class "myImg"
-            var imgs = document.getElementsByClassName("myImg");
-            var modalImg = document.getElementById("img01");
-            var captionText = document.getElementById("caption");
+    // Modal hình ảnh
+    $(".myImg").on("click", function () {
+        var modal = $("#myModal");
+        var modalImg = $("#img01");
+        var captionText = $("#caption");
 
-// Loop through all images and add event listener to each
-            document.querySelectorAll(".myImg").forEach(img => {
-                img.addEventListener("click", function () {
-                    modal.style.display = "block";
-                    modalImg.src = this.src;
-                    captionText.innerHTML = this.alt;
-                });
-            });
+        modal.show();
+        modalImg.attr("src", this.src);
+        captionText.text(this.alt);
+    });
 
+    // Đóng modal khi bấm vào nền đen
+    $("#myModal").on("click", function (e) {
+        if (e.target === this) {
+            $(this).hide();
+        }
+    });
 
-// Get the <span> element that closes the modal
+    // Gỡ sự kiện cũ trước khi gắn mới
+    $(document).off("click", ".modal-button").on("click", ".modal-button", function () {
+        console.log("Modal button clicked");
+    });
+
+    // Tắt enforceFocus để tránh lỗi focus lặp vô hạn
+    $.fn.modal.Constructor.prototype._enforceFocus = function () {};
+});
 
         </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -1,4 +1,3 @@
-
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -6,49 +5,15 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Store</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css?v=1.0" />
+        <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
-        <title>Product Details</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                padding: 20px;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            th, td {
-                border: 1px solid #ddd;
-                padding: 10px;
-                text-align: left;
-            }
-            th {
-                background-color: #f4f4f4;
-            }
-            .product-image {
-                max-width: 100px;
-            }
-            .action-buttons a {
-                margin-right: 10px;
-                text-decoration: none;
-                padding: 5px 10px;
-                border-radius: 5px;
-            }
-            .edit {
-                background-color: #ffc107;
-                color: black;
-            }
-            .delete {
-                background-color: #dc3545;
-                color: white;
-            }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
     <body>
         <div class="page-wrapper">
+            <!--   *** Top Bar Starts ***   -->
             <div class="top-bar">
                 <div class="top-bar-left">
                     <div class="hamburger-btn">
@@ -109,7 +74,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/ISP392_Project/Customers">
+                        <a href="#">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user"></i>
                             </span>
@@ -162,65 +127,52 @@
                 </div>
                 <!--   === Side Bar Footer Ends ===   -->
             </aside>
+
             <div class="contents">
                 <div class="panel-bar1">
-                    <h2>Product Details</h2>
-                    <c:forEach var="product" items="${list}">
+                    <input type="hidden" name="service" value="storeInfo">
+                    <!-- Check if storeID exists in session -->
+                    <c:choose>
+                        <c:when test="${not empty store}">
+                            <div class="panel-bar1">
+                                <h2>Store Information</h2>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Store Name: ${store.name}</h5>
+                                        <p class="card-text"><strong>Owner:</strong> ${user.name}</p>
+                                        <p class="card-text"><strong>Address:</strong> ${store.address}</p>
+                                        <p class="card-text"><strong>Phone:</strong> ${store.phone}</p>
+                                        <p class="card-text"><strong>Email:</strong> ${store.email}</p>
+                                        <p class="card-text"><strong>Created At:</strong> ${store.createdAt}</p>
+                                        <p class="card-text"><strong>Updated At:</strong> ${store.updatedAt}</p>
+                                        <c:if test="${userRole eq 'owner'}">
+                                            <a href="${pageContext.request.contextPath}/Stores?service=editStore&store_id=${store.id}" class="btn btn-outline-primary">Edit</a>
+                                        </c:if>
+                                        <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-outline-primary">Dashboard</a>
 
-                        <table>
-                            <tr>
-                                <th style="width: 50px">ID</th>
-                                <td>${product.productId}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Name</th>
-                                <td>${product.name}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Image</th>
-                                <td>
-                                    <img src="/ISP392_Project/views/product/images/${product.image}" class="product-image" alt="Product Image">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="width: 70px">Price</th>
-                                <td>${product.price}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 85px">Weight</th>
-                                <td>${product.quantity} Kg</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 400px">Description</th>
-                                <td>${product.description}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Created At</th>
-                                <td>${product.createdAt}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Updated At</th>
-                                <td>${product.updatedAt}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Status</th>
-                                <td>${product.status}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Action</th>
-                                <td class="action-buttons">
-                                    <a href="editProduct.jsp?id=<%= request.getAttribute("id") %>" class="edit">Edit</a>
-                                    <a href="deleteProduct?id=<%= request.getAttribute("id") %>" class="delete" onclick="return confirm('Are you sure?')">Delete</a>
-                                </td>
-                            </tr>
-                        </table>
-                    </c:forEach>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <!-- If no storeID in session, redirect to create store page -->
+                            <div class="d-flex justify-content-center">
+                                <form action="${pageContext.request.contextPath}/Stores" method="POST" enctype="multipart/form-data">
+                                    <input type="hidden" name="service" value="createStore"/>
+                                    <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#createStoreModal" style="background: #007bff">
+                                        Click here to create a store
+                                    </button>
+                                </form>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
-            </div>
-        </div>
 
-    </body>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
-</html>
+            </div>
+
+            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+            <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+

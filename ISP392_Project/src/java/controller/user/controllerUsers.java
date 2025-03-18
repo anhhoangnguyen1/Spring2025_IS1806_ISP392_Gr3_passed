@@ -151,8 +151,8 @@ public class controllerUsers extends HttpServlet {
             }
             if (!phone.matches("^0\\d{9}$")) {
                 request.setAttribute("phoneError", "Invalid phone number format.");
-                request.setAttribute("customer", getUserFromRequest(request));
-                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
+                request.setAttribute("user", getUserFromRequest(request));
+                request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 return;
             }
             Users user = Users.builder()
@@ -257,7 +257,7 @@ public class controllerUsers extends HttpServlet {
             } else {
                 user.setStoreId(null); // Nếu store_id là null, người mới sẽ không có store_id
             }
-            
+
             boolean isInserted = dao.insertUsers(user);
             if (isInserted) {
                 session.setAttribute("successMessage", "Account created successfully.");
@@ -304,7 +304,18 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
                 return;
             }
-
+            
+            if (!phone.matches("^0\\d{9}$")) {
+                request.setAttribute("phoneError", "Invalid phone number format.");
+                request.setAttribute("name", name);
+                request.setAttribute("phone", phone);
+                request.setAttribute("email", email);
+                request.setAttribute("address", address);
+                request.setAttribute("gender", gender);
+                request.setAttribute("dob", dob);
+                request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
+                return;
+            }
             if (file != null && file.getSize() > 0) {
                 imageFileName = getSubmittedFileName(file);
                 String uploadDirectory = getServletContext().getRealPath("/") + "images";

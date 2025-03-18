@@ -80,7 +80,6 @@ public class controllerCustomers extends HttpServlet {
                 String notification = (String) request.getSession().getAttribute("Notification");
                 if (notification != null) {
                     request.setAttribute("Notification", notification);
-                    request.getSession().removeAttribute("Notification");
                 }
 
                 request.setAttribute("list", list);
