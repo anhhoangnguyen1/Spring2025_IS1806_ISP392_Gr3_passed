@@ -140,6 +140,8 @@
                     <form id="customerForm" action="${pageContext.request.contextPath}/Customers"  method="POST" onsubmit="confirmSave(event)">
                         <input type="hidden" name="service" value="editCustomer" />
                         <input type="hidden" name="customer_id" value="${customer.id}" />
+                        <input type="hidden" name="searchCustomer" value="${param.searchCustomer}" />
+                        <input type="hidden" name="sortBy" value="${param.sortBy}" />
                         <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
                         <input type="hidden" name="index" value="${param.index}" />
 
@@ -167,7 +169,7 @@
                         <div class="form-group">
                             <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>          
-                            <a href="${pageContext.request.contextPath}/Customers?service=customers&sortOrder=${param.sortOrder}" class="btn btn-secondary">
+                            <a href="${pageContext.request.contextPath}/Customers?service=customers&searchCustomer=${param.searchCustomer}&index=${param.index}&sortBy=${param.sortBy}&sortOrder=${param.sortOrder}" class="btn btn-secondary">
                                 Back to Customers List
                             </a>
                         </div>   
