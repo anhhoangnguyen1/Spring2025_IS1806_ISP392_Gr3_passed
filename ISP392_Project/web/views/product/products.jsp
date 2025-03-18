@@ -156,7 +156,6 @@
                         </div>
                         <c:remove var="Notification" scope="session" />
                     </c:if>
-
                     <c:import url="listProducts.jsp" />
                 </div>
             </div>

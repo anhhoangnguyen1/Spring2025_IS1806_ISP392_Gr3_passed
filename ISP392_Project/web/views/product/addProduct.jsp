@@ -12,7 +12,7 @@
         <title>JSP Page</title>
     </head>
     <body>
-
+    
         <div id="addProductModal" class="modal fade show">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">

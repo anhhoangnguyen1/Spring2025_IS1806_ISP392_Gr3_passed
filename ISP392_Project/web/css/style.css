@@ -1579,3 +1579,12 @@ input[type="checkbox"]:checked::after {
 #imageModal {
     z-index: 1051 !important; /* Bootstrap modal mặc định 1050 */
 }
+.modal-dialog {
+    max-height: 100vh; /* Giới hạn chiều cao của modal */
+    overflow-y: auto; 
+}
+
+.modal-content {
+    height: 100%;
+    overflow-y: auto;
+}

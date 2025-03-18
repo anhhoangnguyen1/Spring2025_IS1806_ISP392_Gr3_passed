@@ -14,14 +14,13 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 
-
 public class Products {
+
     private int productId;
     private String name;
     private String image;
     private BigDecimal price;
     private int quantity;
-    private int zone_id;
     private Stores storeId;
     private String description;
     private Date createdAt;
@@ -31,5 +30,35 @@ public class Products {
     private boolean isDeleted;
     private Date updatedAt;
     private String status;
-    
+
+    public Products(int productId, String name, String image, BigDecimal price, int quantity, String description, Date createdAt, String createdBy, Date deleteAt, String deleteBy, boolean isDeleted, Date updatedAt, String status) {
+        this.productId = productId;
+        this.name = name;
+        this.image = image;
+        this.price = price;
+        this.quantity = quantity;
+        this.description = description;
+        this.createdAt = createdAt;
+        this.createdBy = createdBy;
+        this.deleteAt = deleteAt;
+        this.deleteBy = deleteBy;
+        this.isDeleted = isDeleted;
+        this.updatedAt = updatedAt;
+        this.status = status;
+    }
+
+    public Products(int productId, String name, int quantity) {
+        this.productId = productId;
+        this.name = name;
+        this.quantity = quantity;
+    }
+
+    public boolean isIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
 }

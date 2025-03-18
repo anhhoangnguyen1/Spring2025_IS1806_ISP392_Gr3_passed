@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import entity.Products;
+import java.math.BigDecimal;
 
 /**
  *
@@ -37,11 +38,13 @@ public class productsDAO extends DBContext {
                             rs.getString("image"),
                             rs.getBigDecimal("price"),
                             rs.getInt("quantity"),
-                            rs.getInt("zone_id"),
                             rs.getString("description"),
                             rs.getDate("created_at"),
-                            rs.getDate("updated_at"),
+                            rs.getString("created_by"),
+                            rs.getDate("deletedAt"),
+                            rs.getString("deleteBy"),
                             rs.getBoolean("isDeleted"),
+                            rs.getDate("updated_at"),
                             rs.getString("status")
                     );
                     list.add(product);
@@ -70,26 +73,29 @@ public class productsDAO extends DBContext {
     }
 
     public List<Products> searchProducts(String name) {
-        String sql = "SELECT * FROM products WHERE name LIKE ?;";
+        String sql = "SELECT * FROM products WHERE MATCH(name, description) AGAINST (? IN NATURAL LANGUAGE MODE) AND isDeleted = FALSE;";
         List<Products> productsList = new ArrayList<>();
+
         try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setString(1, "%" + name + "%");
+            st.setString(1, name);
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
-                    Products products = new Products(
+                    Products product = new Products(
                             rs.getInt("id"),
                             rs.getString("name"),
                             rs.getString("image"),
                             rs.getBigDecimal("price"),
                             rs.getInt("quantity"),
-                            rs.getInt("zone_id"),
                             rs.getString("description"),
                             rs.getDate("created_at"),
+                            rs.getString("created_by"),
+                            rs.getDate("deletedAt"),
+                            rs.getString("deleteBy"),
+                            rs.getBoolean("isDeleted"),
                             rs.getDate("updated_at"),
-                            rs.getBoolean("isDelete"),
                             rs.getString("status")
                     );
-                    productsList.add(products);
+                    productsList.add(product);
                 }
             }
         } catch (SQLException e) {
@@ -111,11 +117,13 @@ public class productsDAO extends DBContext {
                             rs.getString("image"),
                             rs.getBigDecimal("price"),
                             rs.getInt("quantity"),
-                            rs.getInt("zone_id"),
                             rs.getString("description"),
                             rs.getDate("created_at"),
+                            rs.getString("created_by"),
+                            rs.getDate("deletedAt"),
+                            rs.getString("deleteBy"),
+                            rs.getBoolean("isDeleted"),
                             rs.getDate("updated_at"),
-                            rs.getBoolean("isDelete"),
                             rs.getString("status")
                     );
                     products.add(product);
@@ -159,10 +167,9 @@ public class productsDAO extends DBContext {
                 + "`image` = ?, "
                 + "`price` = ?, "
                 + "`quantity` = ?, "
-                + "`zone_id` = ?, "
                 + "`description` = ?, "
-                + "`updated_at` = CURRENT_TIMESTAMP, "
-                + "`isDelete` = ?, "
+                + "`updated_at` = CURRENT_TIMESTAMP, " // ❌ Không có ?
+                + "`isDeleted` = ?, "
                 + "`status` = ? "
                 + "WHERE `id` = ?;";
 
@@ -171,15 +178,10 @@ public class productsDAO extends DBContext {
             st.setString(2, products.getImage());
             st.setBigDecimal(3, products.getPrice());
             st.setInt(4, products.getQuantity());
-            st.setInt(5, products.getZone_id());
-            st.setString(6, products.getDescription());
-
-            // You don't need to set 'created_at' here since it's handled by the database (unless needed explicitly)
-            // st.setDate(9, new java.sql.Date(products.getCreatedAt().getTime())); // Removed
-            st.setBoolean(7, products.isDelete());  // Adjusted index since created_at was removed
-                st.setNull(8, java.sql.Types.DATE);
-            st.setString(9, products.getStatus());
-            st.setInt(10, products.getProductId()); // Adjusted index
+            st.setString(5, products.getDescription());
+            st.setBoolean(6, products.isIsDeleted()); // ✅ Chỉ còn 9 setX()
+            st.setString(7, products.getStatus());
+            st.setInt(8, products.getProductId()); // ✅ Giờ id là tham số thứ 9
 
             st.executeUpdate();
         } catch (SQLException e) {
@@ -187,23 +189,29 @@ public class productsDAO extends DBContext {
         }
     }
 
-    public void insertProduct(Products products) {
-        String sql = "INSERT INTO products (name, image, price, quantity, zone_id, description, created_at, updated_at, status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            st.setString(1, products.getName());
-            st.setString(2, products.getImage());
-            st.setBigDecimal(3, products.getPrice());
-            st.setInt(4, products.getQuantity());
-            st.setInt(5, products.getZone_id());
-            st.setString(6, products.getDescription());
-            st.setDate(7, new java.sql.Date(System.currentTimeMillis()));
-            st.setNull(8, java.sql.Types.DATE);
-            st.setString(9, products.getStatus());
-            st.executeUpdate();
+    public boolean insertProduct(Products product) {
+        String sql = "INSERT INTO products (name, image, price, quantity, zone_id, description, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, product.getName());
+            st.setString(2, product.getImage());
+            st.setBigDecimal(3, product.getPrice());
+            st.setInt(4, product.getQuantity());
+            st.setString(5, product.getDescription());
+            st.setDate(6, new java.sql.Date(product.getCreatedAt().getTime()));
+            st.setString(7, product.getCreatedBy());
+            st.setDate(8, product.getDeleteAt() != null ? new java.sql.Date(product.getDeleteAt().getTime()) : null);
+            st.setString(9, product.getDeleteBy());
+            st.setBoolean(10, product.isIsDeleted());
+            st.setDate(11, new java.sql.Date(product.getUpdatedAt().getTime()));
+            st.setString(12, product.getStatus());
+
+            int rowsInserted = st.executeUpdate();
+            return rowsInserted > 0; // Trả về true nếu có ít nhất 1 dòng được thêm
         } catch (SQLException e) {
-            e.printStackTrace(); // Log the error for debugging
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -233,11 +241,11 @@ public class productsDAO extends DBContext {
             e.printStackTrace();
         }
     }
-    
+
     public List<Products> getLowStockProducts(int threshold) {
         List<Products> products = new ArrayList<>();
         String sql = "SELECT id, name, quantity FROM Products WHERE quantity <= ? ORDER BY quantity ASC";
-        
+
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, threshold);
@@ -253,40 +261,32 @@ public class productsDAO extends DBContext {
 
     public static void main(String[] args) {
         productsDAO productsDAO = new productsDAO();
+        Products newProduct = new Products(
+                1, // ID sẽ tự động tăng
+                "Bóng đá Adidas", // name
+                "adidas-ball.jpg", // image
+                new BigDecimal("499000"), // price
+                20, // quantity
+                "Bóng đá Adidas chính hãng", // description
+                new java.sql.Date(System.currentTimeMillis()), // createdAt
+                "admin", // createdBy
+                null, // deleteAt (chưa bị xóa)
+                null, // deleteBy
+                false, // isDeleted (chưa bị xóa)
+                new java.sql.Date(System.currentTimeMillis()), // updatedAt
+                "available" // status
+        );
 
-//        // Get the list of products with the given ID (for example, 1)
-//        List<Products> products = productsDAO.viewAllProducts("price", 1);
-//
-//        // Print the products to verify the result
-//        for (Products product : products) {
-//            System.out.println(product);  // Ensure Products class has a toString() method
-//        }
-//        try {
-//
-//        } catch (Exception e) {
-//            e.printStackTrace(); // Handle any errors during database connection or insertion
-//        }
+        // Gọi hàm insertProduct để thêm sản phẩm
+        productsDAO.editProduct(newProduct);
 
-
-//        // Lấy top 3 sản phẩm bán chạy trong tháng
-//        List<String[]> topProducts = productsDAO.getTopSellingProductNamesOfMonth();
-//
-//        // In ra danh sách
-//        System.out.println("Top 3 sản phẩm bán chạy trong tháng:");
-//        for (String[] product : topProducts) {
-//            System.out.println("Sản phẩm: " + product[0] + " - Số lượng bán: " + product[1]);
-//        }
-
-
-
+        String name = "id";
         int threshold = 1300; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
-        List<Products> lowStockProducts = productsDAO.getLowStockProducts(threshold);
-        
+        List<String[]> topProducts = productsDAO.getTopSellingProductNamesOfMonth();
+
         System.out.println("Low Stock Products:");
-        for (Products p : lowStockProducts) {
-            System.out.println("ID: " + p.getProductId() + ", Name: " + p.getName() + ", Quantity: " + p.getQuantity());
+        for (String[] p : topProducts) {
+            System.out.println(p);
         }
     }
 }
-
-
