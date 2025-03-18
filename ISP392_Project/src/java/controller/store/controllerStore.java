@@ -116,13 +116,13 @@ public class controllerStore extends HttpServlet {
         String service = request.getParameter("service");
         String role = (String) session.getAttribute("role");
 
-         // Kiểm tra phân quyền - chỉ owner mới có thể thực hiện các thao tác POST
+        // Kiểm tra phân quyền - chỉ owner mới có thể thực hiện các thao tác POST
         if (!"owner".equals(role)) {
             session.setAttribute("errorMessage", "You do not have permission to perform this action.");
             response.sendRedirect("Stores?service=storeInfo");
             return;
         }
-        
+
         if ("editStore".equals(service)) {
             int storeId = Integer.parseInt(request.getParameter("store_id"));
             String name = request.getParameter("name");
@@ -229,24 +229,27 @@ public class controllerStore extends HttpServlet {
 
                     // Cập nhật user với store_id mới
                     boolean isUserUpdated = userDAO.updateUser(user);
+                    session.setAttribute("storeID", String.valueOf(newStoreId));
 
                     if (isUserUpdated) {
                         System.out.println("User with username: " + username + " has been updated with Store ID: " + newStoreId);
+                        // Add the storeID to the session
+                        session.setAttribute("storeID", String.valueOf(newStoreId));
                         session.setAttribute("successMessage", "Store created successfully, and your store ID has been assigned.");
                         response.sendRedirect("Stores?service=storeInfo");
-                    } else {
-                        System.out.println("Error updating user with username: " + username + " and Store ID: " + newStoreId);
-                        session.setAttribute("errorMessage", "Error updating user with store ID.");
-                        response.sendRedirect("Stores?service=createStore");
                     }
                 } else {
-                    session.setAttribute("errorMessage", "User not found.");
+                    System.out.println("Error updating user with username: " + username + " and Store ID: " + newStoreId);
+                    session.setAttribute("errorMessage", "Error updating user with store ID.");
                     response.sendRedirect("Stores?service=createStore");
                 }
             } else {
-                session.setAttribute("errorMessage", "Error creating store.");
+                session.setAttribute("errorMessage", "User not found.");
                 response.sendRedirect("Stores?service=createStore");
             }
+        } else {
+            session.setAttribute("errorMessage", "Error creating store.");
+            response.sendRedirect("Stores?service=createStore");
         }
     }
 
