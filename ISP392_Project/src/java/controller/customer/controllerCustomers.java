@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -61,12 +62,19 @@ public class controllerCustomers extends HttpServlet {
                 int index = 1;
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
+                    if (index < 1) {
+                        index = 1; 
+                    }
                 } catch (NumberFormatException ignored) {
+                    
                 }
 
                 int total = customerDAO.countCustomers(keyword);
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
+                if (index > endPage) {
+                    index = endPage;
+                }
                 List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder);
                 if ("staff".equals(role)) {
                     for (Customers customer : list) {
@@ -91,6 +99,51 @@ public class controllerCustomers extends HttpServlet {
 
                 request.getRequestDispatcher("views/customer/customers.jsp").forward(request, response);
                 break;
+            }
+            case "searchCustomersAjax": {
+                String keyword = request.getParameter("searchCustomer");
+                if (keyword == null) {
+                    keyword = "";
+                }
+                int index = 1;
+                try {
+                    index = Integer.parseInt(request.getParameter("index"));
+                } catch (NumberFormatException ignored) {
+                }
+
+                int pageSize = 5;
+                int total = customerDAO.countCustomers(keyword);
+                int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
+                List<Customers> customers = customerDAO.searchCustomers(keyword, index, pageSize, sortBy, sortOrder);
+
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                PrintWriter out = response.getWriter();
+                out.print("{");
+                out.print("\"customers\": [");
+                for (int i = 0; i < customers.size(); i++) {
+                    Customers customer = customers.get(i);
+                    out.print("{");
+                    out.print("\"id\": " + customer.getId() + ",");
+                    out.print("\"name\": \"" + customer.getName() + "\",");
+                    out.print("\"phone\": \"" + customer.getPhone() + "\",");
+                    out.print("\"address\": \"" + customer.getAddress() + "\",");
+                    out.print("\"balance\": \"" + customer.getBalance() + "\",");
+                    out.print("\"createdAt\": \"" + customer.getCreatedAt() + "\",");
+                    out.print("\"createdBy\": \"" + customer.getCreatedBy() + "\"");
+
+                    out.print("}");
+                    if (i < customers.size() - 1) {
+                        out.print(",");
+                    }
+                }
+                out.print("],");
+                out.print("\"endPage\": " + endPage + ",");
+                out.print("\"index\": " + index);
+                out.print("}");
+                out.flush();
+                break;
+
             }
             case "getCustomerById": {
 
@@ -117,25 +170,27 @@ public class controllerCustomers extends HttpServlet {
             }
 
             case "editCustomer": {
-                 int customerId = Integer.parseInt(request.getParameter("customer_id"));
-            Customers customer = customerDAO.getCustomerById(customerId);
-
-            // Phân quyền hiển thị thông tin khách hàng
-            if ("staff".equals(role)) {
-                String phone = customer.getPhone();
-                if (phone != null && phone.length() > 6) {
-                    customer.setPhone(phone.substring(0, 3) + "xxxxx" + phone.substring(phone.length() - 2));
+                int customerId = Integer.parseInt(request.getParameter("customer_id"));
+                Customers customer = customerDAO.getCustomerById(customerId);
+                if ("staff".equals(role)) {
+                    String phone = customer.getPhone();
+                    if (phone != null && phone.length() > 6) {
+                        customer.setPhone(phone);
+                    }
                 }
+                request.setAttribute("customer", customer);
+                String fullName = (String) session.getAttribute("fullName");
+                request.setAttribute("fullName", fullName);
+
+         
+                request.setAttribute("sortBy", sortBy);
+                request.setAttribute("sortOrder", sortOrder);
+                request.setAttribute("searchCustomer", request.getParameter("searchCustomer"));
+                request.setAttribute("index", request.getParameter("index"));
+
+                request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
+                break;
             }
-
-            request.setAttribute("customer", customer);
-            String fullName = (String) session.getAttribute("fullName");
-            request.setAttribute("fullName", fullName);
-            request.setAttribute("sortOrder", sortOrder);
-
-            request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
-            break;
-        }
         }
     }
 
@@ -167,35 +222,78 @@ public class controllerCustomers extends HttpServlet {
             customer.setBalance(0.0);
             customerDAO.insertCustomer(customer);
 
+            int total = customerDAO.countCustomers("");
+            int pageSize = 5; 
+            int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
+        
+
+            String sortBy = request.getParameter("sortBy");
+            if (sortBy == null) {
+                sortBy = "id";
+            }
+            String sortOrder = request.getParameter("sortOrder");
+            if (sortOrder == null) {
+                sortOrder = "ASC"; 
+            }
+      
             session.setAttribute("successMessage", "Customer added successfully.");
-            response.sendRedirect("Customers?service=customers");
+            response.sendRedirect("Customers?service=customers&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage);
+
             return;
         }
 
         if ("editCustomer".equals(service)) {
             int customerId = Integer.parseInt(request.getParameter("customer_id"));
             String phone = request.getParameter("phone");
-
+            String searchCustomer = request.getParameter("searchCustomer");
+            if (searchCustomer == null) {
+                searchCustomer = ""; 
+            }
             if (customerDAO.checkPhoneExists(phone, customerId)) {
                 request.setAttribute("phoneError", "Phone number already exists.");
                 request.setAttribute("customer", getCustomerFromRequest(request, false));
                 request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
                 return;
             }
-
             if (phone == null || !phone.matches("^0\\d{9}$")) {
                 request.setAttribute("phoneError", "Invalid phone number format.");
                 request.setAttribute("customer", getCustomerFromRequest(request, false));
                 request.getRequestDispatcher("views/customer/editCustomer.jsp").forward(request, response);
                 return;
             }
-
+            HttpSession session = request.getSession();
             Customers customer = getCustomerFromRequest(request, false);
             customerDAO.editCustomer(customer);
 
-            HttpSession session = request.getSession();
-            session.setAttribute("successMessage", "Customer details updated successfully.");
-            response.sendRedirect("Customers?service=customers&sortOrder=" + request.getParameter("sortOrder"));
+         
+            String indexParam = request.getParameter("index");
+            int index = 1; 
+
+            if (indexParam != null && !indexParam.isEmpty()) {
+                try {
+                    index = Integer.parseInt(indexParam);
+                    if (index < 1) {
+                        index = 1; 
+                    }
+                } catch (NumberFormatException ignored) {
+                    
+                }
+            }
+            System.out.println("Index from request: " + request.getParameter("index"));
+            System.out.println("Parsed index: " + index);
+            String sortBy = request.getParameter("sortBy");
+            if (sortBy == null) {
+                sortBy = "id"; 
+            }
+            String sortOrder = request.getParameter("sortOrder");
+            if (sortOrder == null) {
+                sortOrder = "ASC"; 
+            }
+
+            session.setAttribute("successMessage", "Customer updated successfully.");
+
+            response.sendRedirect("Customers?service=customers&searchCustomer=" + searchCustomer
+                    + "&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + index);
         }
     }
 
@@ -206,13 +304,14 @@ public class controllerCustomers extends HttpServlet {
             customerBuilder.id(Integer.parseInt(request.getParameter("customer_id")));
         }
 
+        HttpSession session = request.getSession();
+        String storeID = (String) session.getAttribute("storeID");
         Stores store = null;
-        if (request.getParameter("store_id") != null && !request.getParameter("store_id").isEmpty()) {
+        if (storeID != null && !storeID.isEmpty()) {
             store = new Stores();
-            store.setId(Integer.parseInt(request.getParameter("store_id")));
+            store.setId(Integer.parseInt(storeID));
         }
 
-        HttpSession session = request.getSession();
         String fullName = (String) session.getAttribute("fullName");
 
         return customerBuilder

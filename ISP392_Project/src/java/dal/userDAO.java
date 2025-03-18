@@ -194,6 +194,29 @@ public class userDAO extends DBContext {
         return null;
     }
 
+//    public String getStoreIDByUser(int userId) {
+//        String storeID = null;
+//        String sql = "SELECT store_id FROM users WHERE user_id = ?";
+//
+//        try (PreparedStatement st = connection.prepareStatement(sql)) {
+//
+//            // Set giá trị cho parameter user_id
+//            st.setInt(1, userId);
+//
+//            // Thực thi truy vấn
+//            ResultSet rs = st.executeQuery();
+//
+//            // Nếu có kết quả, lấy storeID
+//            if (rs.next()) {
+//                storeID = rs.getString("store_id");  // Lấy store_id từ kết quả
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();  // Bạn có thể xử lý lỗi theo cách của riêng bạn
+//        }
+//
+//        return storeID;  // Trả về storeID của người dùng
+//    }
+
     public boolean insertUsers(Users user) {
         // Câu lệnh SQL không gán store_id nếu storeId là null
         String sql = "INSERT INTO users (username, password, image, name, phone, address, gender, dob, role, email, created_at, status"
