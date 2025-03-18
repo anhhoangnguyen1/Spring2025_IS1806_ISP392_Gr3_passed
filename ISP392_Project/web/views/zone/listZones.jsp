@@ -102,7 +102,7 @@
                                 <td>
                                     <a href="${pageContext.request.contextPath}/zones?service=getZoneById&zone_id=${zone.id}" class="btn btn-outline-primary">View</a>
                                     <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}" class="btn btn-outline-primary">Edit</a>
-                                    <a href="${pageContext.request.contextPath}/zones?service=deleteZone&zone_id=${zone.id}&index=${index}" 
+                                    <a href="${pageContext.request.contextPath}/zones?service=deleteZone&zone_id=${zone.id}&index=${index}&searchZone=${searchZone}&sortBy=${sortBy}&sortOrder=${sortOrder}" 
                                        class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this zone?');">Ban</a>
                                 </td>
                             </tr>
@@ -160,180 +160,183 @@
         <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
         <script>
 
-                                           let timeout = null;
-                                           let currentSortBy = '${sortBy}'; // Lưu giá trị sortBy hiện tại
-                                           let currentSortOrder = '${sortOrder}'; // Lưu giá trị sortOrder hiện tại
-                                           // [NOTE: Sửa tại đây] Định nghĩa hàm searchZones ngoài phạm vi $(document).ready() để nó trở thành hàm toàn cục
-                                           function searchZones(keyword, page, sortBy, sortOrder) {
-                                               $.ajax({
-                                                   url: '<%= request.getContextPath() %>/zones',
-                                                   type: 'GET',
-                                                   data: {
-                                                       service: 'searchZonesAjax',
-                                                       keyword: keyword,
-                                                       index: page,
-                                                       sortBy: sortBy,
-                                                       sortOrder: sortOrder
-                                                   },
-                                                   success: function (response) {
-                                                       updateTable(response.zones, response.endPage, response.index, keyword);
-                                                       // Cập nhật phân trang với page hiện tại
-                                                       updatePagination(response.endPage, page, keyword);
-                                                   },
-                                                   error: function () {
-                                                       $('#zoneTableBody').html('<tr><td colspan="6">Error fetching zones</td></tr>');
-                                                   }
-                                               });
-                                           }
+       let timeout = null;
+       let currentSortBy = '${sortBy}'; // Lưu giá trị sortBy hiện tại
+       let currentSortOrder = '${sortOrder}'; // Lưu giá trị sortOrder hiện tại
+       // [NOTE: Sửa tại đây] Định nghĩa hàm searchZones ngoài phạm vi $(document).ready() để nó trở thành hàm toàn cục
+       function searchZones(keyword, page, sortBy, sortOrder) {
+           $.ajax({
+               url: '<%= request.getContextPath() %>/zones',
+               type: 'GET',
+               data: {
+                   service: 'searchZonesAjax',
+                   keyword: keyword,
+                   index: page,
+                   sortBy: sortBy,
+                   sortOrder: sortOrder
+               },
+               success: function (response) {
+                   updateTable(response.zones, response.endPage, response.index, keyword);
+                   // Cập nhật phân trang với page hiện tại
+                   updatePagination(response.endPage, page, keyword);
+               },
+               error: function () {
+                   $('#zoneTableBody').html('<tr><td colspan="6">Error fetching zones</td></tr>');
+               }
+           });
+       }
 
-                                           // [NOTE: Sửa tại đây] Định nghĩa hàm loadDefaultZones ngoài phạm vi $(document).ready()
-                                           function loadDefaultZones() {
-                                               const currentIndex = ${index}; // Lấy index từ server
-                                               searchZones('', currentIndex, currentSortBy, currentSortOrder);
-                                           }
+       // [NOTE: Sửa tại đây] Định nghĩa hàm loadDefaultZones ngoài phạm vi $(document).ready()
+       function loadDefaultZones() {
+           const currentIndex = ${index}; // Lấy index từ server
+           searchZones('', currentIndex, currentSortBy, currentSortOrder);
+       }
 
-                                           // Hàm cập nhật bảng
-                                           function updateTable(zones, endPage, currentIndex, keyword) {
-                                               const tbody = $('#zoneTableBody');
-                                               tbody.empty();
+       // Hàm cập nhật bảng
+       function updateTable(zones, endPage, currentIndex, keyword) {
+           const tbody = $('#zoneTableBody');
+           tbody.empty();
 
-                                               if (zones.length === 0) {
-                                                   tbody.append('<tr><td colspan="6">No zones found</td></tr>');
-                                               } else {
-                                                   zones.forEach(function (zone) {
-                                                       tbody.append(
-                                                               '<tr>' +
-                                                               '<td>' + zone.id + '</td>' +
-                                                               '<td style="text-align: left;">' + zone.name + '</td>' +
-                                                               '<td>' + (zone.storeId ? zone.storeId.id : 'N/A') + '</td>' +
-                                                               '<td>' + zone.createdBy + '</td>' +
-                                                               '<td>' + zone.status + '</td>' +
-                                                               '<td>' +
-                                                               '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '" class="btn btn-outline-primary">View</a> ' +
-                                                               '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '" class="btn btn-outline-primary">Edit</a> ' +
-                                                               '<a href="<%= request.getContextPath() %>/zones?service=deleteZone&zone_id=' + zone.id + '" ' +
-                                                               'class="btn btn-danger" onclick="return confirm(\'Are you sure you want to delete this zone?\');">Ban</a>' +
-                                                               '</td>' +
-                                                               '</tr>'
-                                                               );
-                                                   });
-                                               }
+           if (zones.length === 0) {
+               tbody.append('<tr><td colspan="6">No zones found</td></tr>');
+           } else {
+               zones.forEach(function (zone) {
+                   tbody.append(
+                           '<tr>' +
+                           '<td>' + zone.id + '</td>' +
+                           '<td style="text-align: left;">' + zone.name + '</td>' +
+                           '<td>' + (zone.storeId ? zone.storeId.id : 'N/A') + '</td>' +
+                           '<td>' + zone.createdBy + '</td>' +
+                           '<td>' + zone.status + '</td>' +
+                           '<td>' +
+                           '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '" class="btn btn-outline-primary">View</a> ' +
+                           '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '" class="btn btn-outline-primary">Edit</a> ' +
+                           '<a href="<%= request.getContextPath() %>/zones?service=deleteZone&zone_id=' + zone.id + '" ' +
+                           'class="btn btn-danger" onclick="return confirm(\'Are you sure you want to delete this zone?\');">Ban</a>' +
+                           '</td>' +
+                           '</tr>'
+                           );
+               });
+           }
 
-                                               updatePagination(endPage, currentIndex, keyword);
-                                           }
+           updatePagination(endPage, currentIndex, keyword);
+       }
 
-                                           // Hàm cập nhật phân trang
-                                           function updatePagination(endPage, currentIndex, keyword) {
-                                               const pagination = $('#pagination ul');
-                                               pagination.empty();
+       // Hàm cập nhật phân trang
+       function updatePagination(endPage, currentIndex, keyword) {
+           const pagination = $('#pagination ul');
+           pagination.empty();
 
-                                               if (currentIndex > 1) {
-                                                   pagination.append(
-                                                           '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex - 1) + '"><i class="fa fa-angle-left"></i></a></li>'
-                                                           );
-                                               }
+           if (currentIndex > 1) {
+               pagination.append(
+                       '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex - 1) + '"><i class="fa fa-angle-left"></i></a></li>'
+                       );
+           }
 
-                                               pagination.append(
-                                                       '<li class="page-item ' + (currentIndex === 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>'
-                                                       );
+           pagination.append(
+                   '<li class="page-item ' + (currentIndex === 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>'
+                   );
 
-                                               if (currentIndex > 3) {
-                                                   pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                                               }
+           if (currentIndex > 3) {
+               pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+           }
 
-                                               for (let page = currentIndex - 1; page <= currentIndex + 1; page++) {
-                                                   if (page > 1 && page < endPage) {
-                                                       pagination.append(
-                                                               '<li class="page-item ' + (currentIndex === page ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + page + '">' + page + '</a></li>'
-                                                               );
-                                                   }
-                                               }
+           for (let page = currentIndex - 1; page <= currentIndex + 1; page++) {
+               if (page > 1 && page < endPage) {
+                   pagination.append(
+                           '<li class="page-item ' + (currentIndex === page ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + page + '">' + page + '</a></li>'
+                           );
+               }
+           }
 
-                                               if (currentIndex < endPage - 2) {
-                                                   pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                                               }
+           if (currentIndex < endPage - 2) {
+               pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+           }
 
-                                               if (endPage > 1) {
-                                                   pagination.append(
-                                                           '<li class="page-item ' + (currentIndex === endPage ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + endPage + '">' + endPage + '</a></li>'
-                                                           );
-                                               }
+           if (endPage > 1) {
+               pagination.append(
+                       '<li class="page-item ' + (currentIndex === endPage ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + endPage + '">' + endPage + '</a></li>'
+                       );
+           }
 
-                                               if (currentIndex < endPage) {
-                                                   pagination.append(
-                                                           '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex + 1) + '"><i class="fa fa-angle-right"></i></a></li>'
-                                                           );
-                                               }
+           if (currentIndex < endPage) {
+               pagination.append(
+                       '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex + 1) + '"><i class="fa fa-angle-right"></i></a></li>'
+                       );
+           }
 
-                                               // [NOTE: Sửa tại đây] Gắn sự kiện click cho các liên kết phân trang bằng jQuery
-                                               $('.page-nav').on('click', function (e) {
-                                                   e.preventDefault();
-                                                   const page = $(this).data('page');
-                                                   searchZones(keyword, page, currentSortBy, currentSortOrder);
-                                               });
-                                           }
+           // [NOTE: Sửa tại đây] Gắn sự kiện click cho các liên kết phân trang bằng jQuery
+           $('.page-nav').on('click', function (e) {
+               e.preventDefault();
+               const page = $(this).data('page');
+               searchZones(keyword, page, currentSortBy, currentSortOrder);
+           });
+       }
 
-                                           // Hàm cập nhật biểu tượng sắp xếp
-                                           function updateSortIcons() {
-                                               $('.sortable').each(function () {
-                                                   const sortBy = $(this).data('sort');
-                                                   const icon = $(this).find('i');
-                                                   if (sortBy === currentSortBy) {
-                                                       icon.removeClass('fa-sort-up fa-sort-down');
-                                                       icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
-                                                   } else {
-                                                       icon.removeClass('fa-sort-up fa-sort-down');
-                                                       icon.addClass('fa-sort-down'); // Mặc định là mũi tên xuống
-                                                   }
-                                               });
-                                           }
+       // Hàm cập nhật biểu tượng sắp xếp
+       function updateSortIcons() {
+           $('.sortable').each(function () {
+               const sortBy = $(this).data('sort');
+               const icon = $(this).find('i');
+               if (sortBy === currentSortBy) {
+                   icon.removeClass('fa-sort-up fa-sort-down');
+                   icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
+               } else {
+                   icon.removeClass('fa-sort-up fa-sort-down');
+                   icon.addClass('fa-sort-down'); // Mặc định là mũi tên xuống
+               }
+           });
+       }
 
-                                           $(document).ready(function () {
+       $(document).ready(function () {
 
-                                               // Xử lý tìm kiếm tự động bằng AJAX
-                                               $('#searchInput').on('keyup', function () {
-                                                   clearTimeout(timeout);
-                                                   const keyword = $(this).val().trim();
+           // Xử lý tìm kiếm tự động bằng AJAX
+           $('#searchInput').on('keyup', function () {
+               clearTimeout(timeout);
+               const keyword = $(this).val().trim();
 
-                                                   timeout = setTimeout(function () {
-                                                       searchZones(keyword, 1, currentSortBy, currentSortOrder); // Bắt đầu từ trang 1 khi tìm kiếm
-                                                   }, 300);
-                                               });
+               timeout = setTimeout(function () {
+                   searchZones(keyword, 1, currentSortBy, currentSortOrder); // Bắt đầu từ trang 1 khi tìm kiếm
+               }, 300);
+           });
 
-                                               // Xử lý sắp xếp khi nhấp vào cột
-                                               $('.sortable').on('click', function () {
-                                                   const sortBy = $(this).data('sort');
-                                                   const keyword = $('#searchInput').val().trim();
+           // Xử lý sắp xếp khi nhấp vào cột
+           $('.sortable').on('click', function () {
+               const sortBy = $(this).data('sort');
+               const keyword = $('#searchInput').val().trim();
 
-                                                   // Đảo ngược sortOrder nếu nhấp lại vào cùng cột
-                                                   if (currentSortBy === sortBy) {
-                                                       currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
-                                                   } else {
-                                                       currentSortBy = sortBy;
-                                                       currentSortOrder = 'ASC'; // Mặc định ASC khi chọn cột mới
-                                                   }
+               // Đảo ngược sortOrder nếu nhấp lại vào cùng cột
+               if (currentSortBy === sortBy) {
+                   currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
+               } else {
+                   currentSortBy = sortBy;
+                   currentSortOrder = 'ASC'; // Mặc định ASC khi chọn cột mới
+               }
 
-                                                   // Cập nhật biểu tượng sắp xếp
-                                                   updateSortIcons();
+               // Cập nhật biểu tượng sắp xếp
+               updateSortIcons();
 
-                                                   // Tải lại dữ liệu với sắp xếp mới
-                                                   searchZones(keyword, 1, currentSortBy, currentSortOrder);
-                                               });
+               // Tải lại dữ liệu với sắp xếp mới
+               searchZones(keyword, 1, currentSortBy, currentSortOrder);
+           });
 
 
 
-                                               // Xử lý nút Clear
-                                               $('#clearBtn').on('click', function () {
-                                                   $('#searchInput').val(''); // Xóa nội dung ô tìm kiếm
-                                                   loadDefaultZones(); // Gọi loadDefaultZones để làm mới toàn bộ danh sách và phân trang
-                                               });
+           // Xử lý nút Clear
+           $('#clearBtn').on('click', function () {
+               $('#searchInput').val(''); // Xóa nội dung ô tìm kiếm
+               loadDefaultZones(); // Gọi loadDefaultZones để làm mới toàn bộ danh sách và phân trang
+           });
 
-                                               // Khởi tạo biểu tượng sắp xếp ban đầu
-                                               updateSortIcons();
+           // Khởi tạo biểu tượng sắp xếp ban đầu
+           updateSortIcons();
 
-                                               // [NOTE: Sửa tại đây] Tải danh sách mặc định khi trang load
-                                               loadDefaultZones();
-                                           });
+           // [NOTE: Sửa tại đây] Tải danh sách mặc định khi trang load
+           loadDefaultZones();
+       });
+       
+       
+       
         </script>
     </body>
 </html>
