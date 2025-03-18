@@ -13,6 +13,8 @@
         <url-pattern>/Debts</url-pattern>
         <url-pattern>/Users</url-pattern>
         <url-pattern>/Products</url-pattern>
+        <url-pattern>/zones</url-pattern>
+        <url-pattern>/Stores</url-pattern>
     </filter-mapping>
     <servlet>
         <servlet-name>loginServlet</servlet-name>
