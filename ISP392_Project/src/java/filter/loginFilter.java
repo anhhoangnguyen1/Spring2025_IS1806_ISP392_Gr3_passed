@@ -19,7 +19,7 @@ public class loginFilter implements Filter {
         // Kiểm tra session để xác định người dùng đã đăng nhập chưa
         HttpSession session = req.getSession(false); 
         if (session == null || session.getAttribute("user") == null) {
-            res.sendRedirect(req.getContextPath() + "/views/login.html");
+            res.sendRedirect(req.getContextPath() + "/views/login.jsp");
         } else {
             chain.doFilter(request, response);
         }

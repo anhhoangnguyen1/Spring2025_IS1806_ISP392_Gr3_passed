@@ -255,6 +255,24 @@ public class userDAO extends DBContext {
         return false;
     }
 
+    public boolean updateUser(Users user) {
+        String sql = "UPDATE users SET store_id = ? WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            // Kiểm tra nếu storeId có giá trị, nếu không thì gán NULL
+            if (user.getStoreId() != null) {
+                st.setInt(1, user.getStoreId().getId());  // Lấy store ID nếu có
+            } else {
+                st.setNull(1, java.sql.Types.INTEGER);  // Gán NULL nếu không có store
+            }
+            st.setInt(2, user.getId());  // Lấy ID của người dùng
+
+            return st.executeUpdate() > 0;  // Kiểm tra xem có cập nhật thành công không
+        } catch (SQLException e) {
+            e.printStackTrace();  // In lỗi nếu có
+        }
+        return false;  // Nếu có lỗi hoặc không cập nhật thành công
+    }
+
     public boolean isStoreIdValid(int storeId) {
         String sql = "SELECT COUNT(*) FROM stores WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
@@ -399,7 +417,7 @@ public class userDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-//        userDAO dao = new userDAO();
+        userDAO dao = new userDAO();
 //
 //        int pageIndex = 1;
 //        String keyword = null;
@@ -422,5 +440,6 @@ public class userDAO extends DBContext {
 //                System.out.println("Created At: " + user.getCreatedAt());
 //            }
 //        }
+
     }
 }
