@@ -139,10 +139,10 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <h5 class="card-title">Store Name: ${store.name}</h5>
+                                        <p class="card-text"><strong>Owner:</strong> ${user.name}</p>
                                         <p class="card-text"><strong>Address:</strong> ${store.address}</p>
                                         <p class="card-text"><strong>Phone:</strong> ${store.phone}</p>
                                         <p class="card-text"><strong>Email:</strong> ${store.email}</p>
-                                        <p class="card-text"><strong>Status:</strong> ${store.status}</p>
                                         <p class="card-text"><strong>Created At:</strong> ${store.createdAt}</p>
                                         <p class="card-text"><strong>Updated At:</strong> ${store.updatedAt}</p>
                                         <c:if test="${userRole eq 'owner'}">
