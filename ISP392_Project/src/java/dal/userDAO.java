@@ -8,6 +8,7 @@ package dal;
  *
  * @author THC
  */
+import entity.Stores;
 import entity.Users;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -124,13 +125,59 @@ public class userDAO extends DBContext {
             st.setInt(1, id);
             try (ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
-                    return mapResultSetToUser(rs);
+                    Users user = mapResultSetToUser(rs);
+
+                    // Kiểm tra xem storeId có null không trước khi truy cập
+                    if (user.getStoreId() != null) {
+                        // Lấy thông tin cửa hàng từ bảng Stores
+                        Stores store = getStoreById(user.getStoreId().getId());
+                        user.setStoreId(store); // Gán thông tin cửa hàng vào người dùng
+                    } else {
+                        System.out.println("Store ID is null for the user.");
+                        // Xử lý khi không có storeId, ví dụ: trả về lỗi hoặc thông báo cho người dùng
+                    }
+
+                    return user;
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public Stores getStoreById(int storeId) {
+        String sql = "SELECT * FROM stores WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeId);
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToStore(rs);  // Trả về đối tượng Store đầy đủ
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Stores getStoreIDByUser(int userId) {
+        Stores store = null;
+        String sql = "SELECT store_id FROM users WHERE user_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            // Set giá trị cho parameter user_id
+            st.setInt(1, userId);
+            // Thực thi truy vấn
+            ResultSet rs = st.executeQuery();
+            // Nếu có kết quả, lấy store_id và tìm thông tin cửa hàng
+            if (rs.next()) {
+                int storeId = rs.getInt("store_id");
+                store = getStoreById(storeId);  // Lấy thông tin cửa hàng đầy đủ
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return store;  // Trả về đối tượng cửa hàng đầy đủ
     }
 
     public Users getUserByUsername(String username) {
@@ -171,8 +218,12 @@ public class userDAO extends DBContext {
     }
 
     public boolean insertUsers(Users user) {
-        String sql = "INSERT INTO users (username, password, image, name, phone, address, gender, dob, role, email, created_at, status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
+        // Câu lệnh SQL không gán store_id nếu storeId là null
+        String sql = "INSERT INTO users (username, password, image, name, phone, address, gender, dob, role, email, created_at, status"
+                + (user.getStoreId() != null ? ", store_id" : "") + ") "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?"
+                + (user.getStoreId() != null ? ", ?" : "") + ")";  // Chỉ thêm store_id vào VALUES khi storeId không phải null
+
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, user.getUsername());
             st.setString(2, user.getPassword());
@@ -189,12 +240,34 @@ public class userDAO extends DBContext {
             st.setString(9, user.getRole());
             st.setString(10, user.getEmail());
             st.setString(11, user.getStatus());
+
+            // Gán store_id nếu storeId không phải null
+            if (user.getStoreId() != null) {
+                st.setInt(12, user.getStoreId().getId());  // Gọi getId() của storeId nếu nó không phải null
+            }
+
+            // Thực thi câu lệnh SQL
             int rowAffected = st.executeUpdate();
             return rowAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public boolean isStoreIdValid(int storeId) {
+        String sql = "SELECT COUNT(*) FROM stores WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeId);
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    return true; // Nếu có kết quả trả về, tức là store_id hợp lệ
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false; // Nếu không có kết quả, tức là store_id không hợp lệ
     }
 
     public boolean editUser(Users user) {
@@ -276,15 +349,16 @@ public class userDAO extends DBContext {
     }
 
     public boolean updateUserInfo(Users user) {
-        String sql = "UPDATE users SET name = ?, phone = ?, address = ?, gender = ?, dob = ?, image = ? WHERE id = ?";
+        String sql = "UPDATE users SET name = ?, phone = ?, email = ?, address = ?, gender = ?, dob = ?, image = ? WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, user.getName());
             st.setString(2, user.getPhone());
-            st.setString(3, user.getAddress());
-            st.setString(4, user.getGender());
-            st.setDate(5, new java.sql.Date(user.getDob().getTime())); // Chuyển đổi từ java.util.Date sang java.sql.Date
-            st.setString(6, user.getImage());
-            st.setInt(7, user.getId());
+            st.setString(3, user.getEmail());
+            st.setString(4, user.getAddress());
+            st.setString(5, user.getGender());
+            st.setDate(6, new java.sql.Date(user.getDob().getTime())); // Chuyển đổi từ java.util.Date sang java.sql.Date
+            st.setString(7, user.getImage()); // Lưu tên ảnh nếu có
+            st.setInt(8, user.getId());
 
             int rowAffected = st.executeUpdate();
             return rowAffected > 0;
@@ -306,6 +380,18 @@ public class userDAO extends DBContext {
                 .dob(rs.getDate("dob"))
                 .role(rs.getString("role"))
                 .email(rs.getString("email"))
+                .createdAt(rs.getDate("created_at"))
+                .updatedAt(rs.getDate("updated_at"))
+                .status(rs.getString("status"))
+                .build();
+    }
+
+    // Phương thức ánh xạ ResultSet thành đối tượng Store
+    private Stores mapResultSetToStore(ResultSet rs) throws SQLException {
+        return Stores.builder()
+                .id(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .address(rs.getString("address"))
                 .createdAt(rs.getDate("created_at"))
                 .updatedAt(rs.getDate("updated_at"))
                 .status(rs.getString("status"))

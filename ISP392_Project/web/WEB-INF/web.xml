@@ -38,6 +38,10 @@
         <servlet-name>logoutServlet</servlet-name>
         <servlet-class>controller.authen.logoutServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>controllerZones</servlet-name>
+        <servlet-class>controller.zone.controllerZones</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>loginServlet</servlet-name>
         <url-pattern>/views/loginServlet</url-pattern>
@@ -61,5 +65,9 @@
     <servlet-mapping>
         <servlet-name>logoutServlet</servlet-name>
         <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>controllerZones</servlet-name>
+        <url-pattern>/zones</url-pattern>
     </servlet-mapping>
 </web-app>

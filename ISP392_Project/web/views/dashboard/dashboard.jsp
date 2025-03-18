@@ -128,11 +128,16 @@
                             <span class="nav-text">Debts History</span>
                         </a>
                     </li>
-                </ul>
-                <span class="menu-label">OWNER ZONE</span>
-                <ul class="navbar-links navbar-links-2">
                     <li>
-                        <a href="/ISP392_Project/Users">
+                        <a href="#">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user-tie"></i>
                             </span>

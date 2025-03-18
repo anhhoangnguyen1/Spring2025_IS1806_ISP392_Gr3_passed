@@ -11,19 +11,6 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
-    <style>
-        .password-match {
-                font-size: 14px;
-                margin-top: 5px;
-                display: none;
-            }
-            .match-success {
-                color: green;
-            }
-            .match-error {
-                color: red;
-            }
-    </style>
     <body>
         <div class="page-wrapper">
             <!--   *** Top Bar Starts ***   -->
@@ -137,90 +124,75 @@
                 </div>
                 <!--   === Side Bar Footer Ends ===   -->
             </aside>
-            <div class="contents">
-                <div class="panel-bar1">
-                    <h2>Create Account</h2>
-                    <!-- Show error messages if any -->
-                    <c:if test="${not empty usernameError}">
-                        <div class="alert alert-danger">${usernameError}</div>
-                    </c:if>
-                    <c:if test="${not empty passwordError}">
-                        <div class="alert alert-danger">${passwordError}</div>
-                    </c:if>
-
-                    <form action="${pageContext.request.contextPath}/Users" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="service" value="createAccount"/>
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" class="form-control" name="username" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" name="password"  id="password" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="confirmPassword">Confirm password</label>
-                            <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" required>
-                            <div class="password-match" id="passwordMatch"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Register</button>
-                            <a href="${pageContext.request.contextPath}/Users?service=users" class="btn btn-secondary">Back to Users list</a>
-                        </div>
-                    </form>
-                        
-                    <script>
-                        const passwordInput = document.getElementById('password');
-                        const confirmPasswordInput = document.getElementById('confirmPassword');
-                        const passwordMatchDiv = document.getElementById('passwordMatch');
-                        const submitBtn = document.getElementById('submitBtn');
-                        const form = document.getElementById('resetPasswordForm');
-
-                        // Check if passwords match
-                        function checkPasswordsMatch() {
-                            const password = passwordInput.value;
-                            const confirmPassword = confirmPasswordInput.value;
-
-                            if (confirmPassword.length > 0) {
-                                passwordMatchDiv.style.display = 'block';
-
-                                if (password === confirmPassword) {
-                                    passwordMatchDiv.textContent = 'Passwords match';
-                                    passwordMatchDiv.className = 'password-match match-success';
-                                } else {
-                                    passwordMatchDiv.textContent = 'Passwords do not match';
-                                    passwordMatchDiv.className = 'password-match match-error';
-                                }
-                            } else {
-                                passwordMatchDiv.style.display = 'none';
-                            }
-                        }
-
-                        // Check passwords match when confirm password changes
-                        confirmPasswordInput.addEventListener('input', checkPasswordsMatch);
-                        passwordInput.addEventListener('input', checkPasswordsMatch);
-
-                        // Form submission validation - only check if passwords match
-                        form.addEventListener('submit', function (event) {
-                            const password = passwordInput.value;
-                            const confirmPassword = confirmPasswordInput.value;
-
-                            // Only check if passwords match
-                            if (password !== confirmPassword) {
-                                event.preventDefault();
-                                alert('Passwords do not match. Please try again.');
-                            }
-                        });
-                    </script>
-                    
+            <div class="page-wrapper">
+                <!-- Top Bar and Sidebar omitted for brevity; they seem fine -->
+                <div class="contents">
+                    <div class="panel-bar1">
+                        <h2>Edit Zone</h2>
+                        <c:if test="${not empty requestScope.nameError}">
+                            <div class="alert alert-danger">${requestScope.nameError}</div>
+                        </c:if>
+                        <form id="zoneForm" action="${pageContext.request.contextPath}/zones" method="POST" onsubmit="confirmSave(event)">
+                            <input type="hidden" name="service" value="editZone" />
+                            <input type="hidden" name="zone_id" value="${zone.id}" />
+                            <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control" name="name" value="${zone.name}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="store_id">Store ID</label>
+                                <input type="number" class="form-control" name="store_id" value="${zone.storeId != null ? zone.storeId.id : ''}">
+                            </div>
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select class="form-control" name="status" required>
+                                    <option value="Active" ${zone.status == 'Active' ? 'selected' : ''}>Active</option>
+                                    <option value="Inactive" ${zone.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                </select>
+                            </div>
+                            <input type="hidden" name="updateBy" value="${userName}" />
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary" style="background-color: #007bff">Save Changes</button>
+                                <a href="${pageContext.request.contextPath}/zones?service=zones&sortOrder=${param.sortOrder}" class="btn btn-secondary">Back to Zones List</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
-            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-            <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
-    </body>
-</html>
+                <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmModalLabel">Confirm Changes</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure to save the changes to this staff?
+                            </div>
+                            <div class="modal-footer">
+
+                                <button type="button" class="btn btn-primary" style="background-color: #007bff" id="saveChangesBtn">Save</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script> <!-- Updated to a stable version -->
+                <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+                <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+                <script type="text/javascript">
+                            // Hàm xử lý khi bấm "Save" trong Modal
+                            document.getElementById('saveChangesBtn').onclick = function () {
+                                document.getElementById('zoneForm').submit(); // Gửi form khi người dùng xác nhận
+                            }
+
+                            // Hàm gọi Modal để xác nhận
+                            function confirmSave(event) {
+                                event.preventDefault(); // Ngừng gửi form
+                                $('#confirmModal').modal('show'); // Hiển thị Modal xác nhận
+                            }
+
+                </script>
