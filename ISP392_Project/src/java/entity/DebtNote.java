@@ -25,4 +25,19 @@ public class DebtNote {
     private LocalDateTime updatedAt;
     private String createdBy;
     private String status;
+
+    public DebtNote(int id, String type, BigDecimal amount, String image, String description, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String status) {
+        this.id = id;
+        this.type = type;
+        this.amount = amount;
+        this.image = image;
+        this.description = description;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.createdBy = createdBy;
+        this.status = status;
+    }
+
+    
+
 }

@@ -130,7 +130,7 @@ public class controllerProducts extends HttpServlet {
                     }
 
                     imageFileName = getSubmittedFileName(file);
-                    String uploadDirectory = getServletContext().getRealPath("/") + "images";
+                    String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest1\\ISP392_Project\\web\\views\\product\\images";
                     File uploadDir = new File(uploadDirectory);
                     if (!uploadDir.exists()) {
                         uploadDir.mkdirs();
@@ -152,8 +152,6 @@ public class controllerProducts extends HttpServlet {
                     response.sendRedirect("Products");
                     return;
                 }
-
-                int zone_id = Integer.parseInt(request.getParameter("zone_id"));
                 int quantity = Integer.parseInt(request.getParameter("quantity"));
                 if (quantity <= 0) {
                     session.setAttribute("Notification", "Weight must be greater than 0.");
@@ -170,7 +168,7 @@ public class controllerProducts extends HttpServlet {
                 boolean isDelete = false;
                 Date createdAt = new java.sql.Date(System.currentTimeMillis());
 
-                Products product = new Products(productId, name, imageFileName, price, quantity, zone_id, description, createdAt, createBy, deletedAt, deletedBy, isDelete, updatedAt, status);
+                Products product = new Products(productId, name, imageFileName, price, quantity, description, createdAt, createBy, deletedAt, deletedBy, isDelete, updatedAt, status);
                 products.editProduct(product);
                 response.sendRedirect("Products");
             } catch (NumberFormatException e) {
@@ -199,7 +197,7 @@ public class controllerProducts extends HttpServlet {
                 }
                 imageFileName = getSubmittedFileName(file);
 
-                String uploadDirectory = getServletContext().getRealPath("/") + "images";
+                String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest1\\ISP392_Project\\web\\views\\product\\images";
                 File uploadDir = new File(uploadDirectory);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
@@ -233,7 +231,6 @@ public class controllerProducts extends HttpServlet {
                 request.getRequestDispatcher("Products?service=products").forward(request, response);
                 return;
             }
-            int zone_id = Integer.parseInt(request.getParameter("zone_id"));
             String description = request.getParameter("description");
             String createdBy = request.getParameter("createdBy");
             String deletedBy = request.getParameter("deletedBy");
@@ -243,7 +240,7 @@ public class controllerProducts extends HttpServlet {
             Date deletedAt = new java.sql.Date(System.currentTimeMillis());
             Date updatedAt = new java.sql.Date(System.currentTimeMillis());
             Date createdAt = new java.sql.Date(System.currentTimeMillis());
-            Products product = new Products(0, name, imageFileName, price, quantity, zone_id, description, createdAt, createdBy, deletedAt, deletedBy, isDelete, updatedAt, status);
+            Products product = new Products(0, name, imageFileName, price, quantity, description, createdAt, createdBy, deletedAt, deletedBy, isDelete, updatedAt, status);
             boolean success = products.insertProduct(product);
             if (success) {
                

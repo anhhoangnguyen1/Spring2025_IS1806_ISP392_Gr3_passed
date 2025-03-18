@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import dal.debtDAO;
 import entity.DebtNote;
+import entity.Customers;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
@@ -26,7 +27,6 @@ import java.util.List;
 import dal.customerDAO;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Map;
 
 /**
  *
@@ -72,7 +72,43 @@ public class controllerDebts extends HttpServlet {
         String service = request.getParameter("service");
         customerDAO customers = new customerDAO();
         debtDAO debts = new debtDAO();
+        if (service == null) {
+            service = "debts";
+        }
+        if (service.equals("debts")) {
+            String indexPage = request.getParameter("index");
+            String pageSizeParam = request.getParameter("pageSize");
+            String commandParam = request.getParameter("command");
+            List<String> validColumns = Arrays.asList("id", "type", "amount", "created_at", "updated_at", "created_by", "status");
+            String command = (validColumns.contains(commandParam)) ? commandParam : "created_at";
+            // Nếu `index` không có, mặc định là 1
+            int index = (indexPage != null) ? Integer.parseInt(indexPage) : 1;
+            // Nếu `pageSize` có trong request, dùng giá trị đó; nếu không, mặc định là 10
+            int pageSize = (pageSizeParam != null) ? Integer.parseInt(pageSizeParam) : 10;
+            int count = debts.countDebts();
+            int endPage = (int) Math.ceil(count * 1.0 / pageSize); // Đảm bảo làm tròn lên
 
+            // Nếu `index` lớn hơn `endPage`, đưa về `endPage`
+            if (index > endPage) {
+                index = endPage;
+            }
+
+            List<DebtNote> listDebts = debts.viewAllDebt(command, index, pageSize);
+            List<String> listCustomer = customers.getAllCustomerNames();
+            request.setAttribute("listName", listCustomer);
+            request.setAttribute("list", listDebts);
+            request.setAttribute("endPage", endPage);
+            request.setAttribute("index", index);
+            request.setAttribute("pageSize", pageSize); // Đảm bảo pageSize luôn được lưu
+
+            // Giữ lại thông báo nếu có
+            String notification = (String) request.getAttribute("Notification");
+            if (notification != null && !notification.isEmpty()) {
+                request.setAttribute("Notification", notification);
+            }
+
+            request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
+        }
         if (service.equals("searchDebts")) {
             int id = Integer.parseInt(request.getParameter("browser"));
             try {
@@ -82,7 +118,32 @@ public class controllerDebts extends HttpServlet {
             } catch (NumberFormatException e) {
             }
         }
+        if (service.equals("debtHistory")) {
+            String idStr = request.getParameter("id");
+            Integer sessionId = (Integer) request.getSession().getAttribute("id");
 
+            int id;
+            if (sessionId != null) {
+                id = sessionId;
+            } else if (idStr != null && !idStr.trim().isEmpty()) {
+                id = Integer.parseInt(idStr);
+            } else {
+                request.getSession().setAttribute("Notification", "Debt ID is required.");
+                response.sendRedirect("Debts?service=debtHistory");
+                return;
+            }
+
+
+            List<DebtNote> list = debts.getDebtByCustomerId(id);
+            request.setAttribute("list", list);
+            request.getSession().removeAttribute("id");
+            String notification = (String) request.getSession().getAttribute("Notification");
+            if (notification != null) {
+                request.setAttribute("Notification", notification);
+            }
+
+            request.getRequestDispatcher("views/debtHistory/debtHistory.jsp").forward(request, response);
+        }
         if (service.equals("addDebtInCustomers")) {
             String status = request.getParameter("status");
             String type;
@@ -92,10 +153,14 @@ public class controllerDebts extends HttpServlet {
                 response.sendRedirect("Customers?service=customers");
                 return;
             }
-            if ("Customer takes a loan".equals(status) || "Customer pays".equals(status)) {
+            if ("Customer borrows debt".equalsIgnoreCase(status) || "Owner repays debt".equalsIgnoreCase(status)) {
                 type = "+";
-            } else {
+            } else if ("Customer repays debt".equalsIgnoreCase(status) || "Owner borrows debt".equalsIgnoreCase(status)) {
                 type = "-";
+            } else {
+                request.getSession().setAttribute("Notification", "Status is required.");
+                response.sendRedirect("Customers?service=customers");
+                return;
             }
 
             String amountStr = request.getParameter("amount");
@@ -185,18 +250,16 @@ public class controllerDebts extends HttpServlet {
             // Kiểm tra xem khách hàng đã có nợ hay chưa
             BigDecimal totalDebtAmount = BigDecimal.ZERO;
 
-
-          
-                // Nếu không có nợ cũ, thêm mới
-                DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customer_id, createdAt, updatedAt, createdBy, status);
-                boolean insert = debts.insertDebtInCustomer(newDebt);
-                if (insert) {
-                    totalDebtAmount = totalDebtAmount.add(amount);
-                    customerDAO.editCustomerBalance(totalDebtAmount, customer_id);
-                    request.getSession().setAttribute("Notification", "Debt added successfully.");
-                } else {
-                    request.getSession().setAttribute("Notification", "Debt added failed.");
-                }
+            // Nếu không có nợ cũ, thêm mới
+            DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customer_id, createdAt, updatedAt, createdBy, status);
+            boolean insert = debts.insertDebtInCustomer(newDebt);
+            if (insert) {
+                totalDebtAmount = totalDebtAmount.add(amount);
+                customerDAO.editCustomerBalance(totalDebtAmount, customer_id);
+                request.getSession().setAttribute("Notification", "Debt added successfully.");
+            } else {
+                request.getSession().setAttribute("Notification", "Debt added failed.");
+            }
             response.sendRedirect("Customers?service=customers");
 
         }

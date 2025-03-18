@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import entity.Products;
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  *
@@ -39,7 +38,6 @@ public class productsDAO extends DBContext {
                             rs.getString("image"),
                             rs.getBigDecimal("price"),
                             rs.getInt("quantity"),
-                            rs.getInt("zone_id"),
                             rs.getString("description"),
                             rs.getDate("created_at"),
                             rs.getString("created_by"),
@@ -88,7 +86,6 @@ public class productsDAO extends DBContext {
                             rs.getString("image"),
                             rs.getBigDecimal("price"),
                             rs.getInt("quantity"),
-                            rs.getInt("zone_id"),
                             rs.getString("description"),
                             rs.getDate("created_at"),
                             rs.getString("created_by"),
@@ -120,7 +117,6 @@ public class productsDAO extends DBContext {
                             rs.getString("image"),
                             rs.getBigDecimal("price"),
                             rs.getInt("quantity"),
-                            rs.getInt("zone_id"),
                             rs.getString("description"),
                             rs.getDate("created_at"),
                             rs.getString("created_by"),
@@ -171,7 +167,6 @@ public class productsDAO extends DBContext {
                 + "`image` = ?, "
                 + "`price` = ?, "
                 + "`quantity` = ?, "
-                + "`zone_id` = ?, "
                 + "`description` = ?, "
                 + "`updated_at` = CURRENT_TIMESTAMP, " // ❌ Không có ?
                 + "`isDeleted` = ?, "
@@ -183,11 +178,10 @@ public class productsDAO extends DBContext {
             st.setString(2, products.getImage());
             st.setBigDecimal(3, products.getPrice());
             st.setInt(4, products.getQuantity());
-            st.setInt(5, products.getZone_id());
-            st.setString(6, products.getDescription());
-            st.setBoolean(7, products.isIsDeleted()); // ✅ Chỉ còn 9 setX()
-            st.setString(8, products.getStatus());
-            st.setInt(9, products.getProductId()); // ✅ Giờ id là tham số thứ 9
+            st.setString(5, products.getDescription());
+            st.setBoolean(6, products.isIsDeleted()); // ✅ Chỉ còn 9 setX()
+            st.setString(7, products.getStatus());
+            st.setInt(8, products.getProductId()); // ✅ Giờ id là tham số thứ 9
 
             st.executeUpdate();
         } catch (SQLException e) {
@@ -197,22 +191,21 @@ public class productsDAO extends DBContext {
 
     public boolean insertProduct(Products product) {
         String sql = "INSERT INTO products (name, image, price, quantity, zone_id, description, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, product.getName());
             st.setString(2, product.getImage());
             st.setBigDecimal(3, product.getPrice());
             st.setInt(4, product.getQuantity());
-            st.setInt(5, product.getZone_id());
-            st.setString(6, product.getDescription());
-            st.setDate(7, new java.sql.Date(product.getCreatedAt().getTime()));
-            st.setString(8, product.getCreatedBy());
-            st.setDate(9, product.getDeleteAt() != null ? new java.sql.Date(product.getDeleteAt().getTime()) : null);
-            st.setString(10, product.getDeleteBy());
-            st.setBoolean(11, product.isIsDeleted());
-            st.setDate(12, new java.sql.Date(product.getUpdatedAt().getTime()));
-            st.setString(13, product.getStatus());
+            st.setString(5, product.getDescription());
+            st.setDate(6, new java.sql.Date(product.getCreatedAt().getTime()));
+            st.setString(7, product.getCreatedBy());
+            st.setDate(8, product.getDeleteAt() != null ? new java.sql.Date(product.getDeleteAt().getTime()) : null);
+            st.setString(9, product.getDeleteBy());
+            st.setBoolean(10, product.isIsDeleted());
+            st.setDate(11, new java.sql.Date(product.getUpdatedAt().getTime()));
+            st.setString(12, product.getStatus());
 
             int rowsInserted = st.executeUpdate();
             return rowsInserted > 0; // Trả về true nếu có ít nhất 1 dòng được thêm
@@ -274,7 +267,6 @@ public class productsDAO extends DBContext {
                 "adidas-ball.jpg", // image
                 new BigDecimal("499000"), // price
                 20, // quantity
-                1, // zone_id (giả sử khu vực 1 tồn tại)
                 "Bóng đá Adidas chính hãng", // description
                 new java.sql.Date(System.currentTimeMillis()), // createdAt
                 "admin", // createdBy
@@ -288,12 +280,12 @@ public class productsDAO extends DBContext {
         // Gọi hàm insertProduct để thêm sản phẩm
         productsDAO.editProduct(newProduct);
 
-        String name = "Gạo";
+        String name = "id";
         int threshold = 1300; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
-        List<Products> lowStockProducts = productsDAO.searchProducts(name);
+        List<String[]> topProducts = productsDAO.getTopSellingProductNamesOfMonth();
 
         System.out.println("Low Stock Products:");
-        for (Products p : lowStockProducts) {
+        for (String[] p : topProducts) {
             System.out.println(p);
         }
     }

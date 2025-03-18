@@ -34,29 +34,6 @@
             </div>
         </form>
         <div class="action-bar d-flex align-items-center">
-            <div class="dropdown">
-                <button type="button" class="btn btn-outline-primary dropdown-toggle mr-2" color: var(--heading-clr); data-toggle="dropdown">
-                    Choose arrange
-                </button>
-                <div class="dropdown-menu">
-                    <form action="Products" method="POST" class="dropdown-item">
-                        <input type="hidden" name="service" value="products" />
-                        <input type="hidden" name="command" value="name" />
-                        <button class="btn btn-outline-primary" type="submit">A-Z</button>
-                    </form>
-                    <form action="Products" method="POST" class="dropdown-item">
-                        <input type="hidden" name="service" value="products" />
-                        <input type="hidden" name="command" value="price DESC" />
-                        <button class="btn btn-outline-primary" type="submit">Price from high to low</button>
-                    </form>
-                    <form action="Products" method="POST" class="dropdown-item">
-                        <input type="hidden" name="service" value="products" />
-                        <input type="hidden" name="command" value="price" />
-                        <button class="btn btn-outline-primary" type="submit">Price from low to high</button>
-                    </form>
-
-                </div>
-            </div>
 
             <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#addProductModal">
                 Add Product
@@ -90,7 +67,7 @@
                             <th style="width: 150px">Created At</th>
                             <th style="width: 150px">Updated At</th>
                             <th style="width: 150px">Status</th>
-                            <th style="width: 150px">Action</th>
+                            <th class="sticky-col" style="width: 150px">Action</th>
                         </tr>
                     </thead>
                     <tbody id="myTable">
@@ -102,7 +79,7 @@
         <td>${product.productId}</td>  <!-- Corrected to use id -->
         <td class="bold-row">${product.name}</td>  <!-- Corrected to use name -->
         <td>
-            <img src="images/${product.image}" style="width: 100px; height: 100px; object-fit: cover;" alt="Product Image" />
+            <img src="/ISP392_Project/views/product/images/${product.image}" style="width: 100px; height: 100px; object-fit: cover;" alt="Product Image" />
         </td>
         <td>${product.price}</td>
         <td>${product.quantity} Kg</td>
@@ -114,7 +91,7 @@
                 <div class="badge rounded-pill bg-secondary" style="color: white">${product.status}</div>
             </h5>
         </td>
-        <td>
+        <td class="sticky-col">
             <div class="btn-group">
                 <a class="btn btn-outline-info" href="Products?service=getProductById&product_id=${product.productId}">
                     <i class="fas fa-info-circle"></i>
