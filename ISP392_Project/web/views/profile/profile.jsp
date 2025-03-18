@@ -3,39 +3,20 @@
     Created on : Feb 4, 2025, 1:51:14 PM
     Author     : THC
 --%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page contentType="text/html" pageEncoding="UTF-8" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@page import="entity.Users"%>
 <!DOCTYPE html>
 <html>
     <head>
+        <title>User Profile</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>User Profile</title>
-
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-        <style>
-            .profile-image {
-                width: 150px;
-                height: 150px;
-                border-radius: 50%;
-                border: 3px solid #007BFF;
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-                display: inline-block;
-
-            }
-
-            .profile-name {
-                font-size: 20px;
-                font-weight: bold;
-            }
-        </style>
     </head>
     <body>
+        <!--   *** Page Wrapper Starts ***   -->
         <div class="page-wrapper">
             <!--   *** Top Bar Starts ***   -->
             <div class="top-bar">
@@ -45,12 +26,10 @@
                         <span></span>
                         <span></span>
                     </div>
-                    <div class="logo">
-                        <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
+                    <div class="logo mr-5">
+                        <img src="/ISP392_Project/views/customer/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
-
-
                 <div class="top-bar-right">
                     <div class="mode-switch">
                         <i class="fa-solid fa-moon"></i>
@@ -59,17 +38,13 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
-                        <div class="profile-menu">
-                            <ul>
-                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
-                                <li><a href="/ISP392_Project/change-password"><i class="fa-solid fa-pen"></i> Change Password</a></li>
-                            </ul>
-                        </div>
+                        <img src="/ISP392_Project/views/customer/images/profile-img.jpg" />
                     </div>
                 </div>
             </div>
+            <!--   *** Top Bar Ends ***   -->
 
+            <!--   === Side Bar Starts ===   -->
             <aside class="side-bar">
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
@@ -81,7 +56,7 @@
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="#">
+                    <li>
                         <a href="/ISP392_Project/Products">
                             <span class="nav-icon">
                                 <i class="fas fa-box"></i>
@@ -90,7 +65,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Zones">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-table"></i>
                             </span>
@@ -98,7 +73,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Customers">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user"></i>
                             </span>
@@ -106,7 +81,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Invoices">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
@@ -133,7 +108,6 @@
                         </a>
                     </li>
                 </ul>
-                <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
                     <div class="settings">
                         <span class="gear-icon">
@@ -142,76 +116,58 @@
                         <span class="text">Settings</span>
                     </div>
                     <div class="logoutBtn">
-                        <a href="/ISP392_Project/logout">
-                            <span class="logout-icon">
-                                <i class="fa-solid fa-right-from-bracket"></i>
-                            </span>
-                            <span class="text"><a href="/ISP392_Project/logout">Logout</span>
-                    </a>
+                        <span class="logout-icon">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </span>
+                        <span class="text">Logout</span>
                     </div>
                 </div>
-                <!--   === Side Bar Footer Ends ===   -->
             </aside>
+            <!--   === Side Bar Ends ===   -->
+
+            <!--   === Profile Content Starts ===   -->
             <div class="contents">
                 <div class="panel-bar1">
                     <h2>User Profile</h2>
 
-                    <div class="row">
-                        <div class="col-md-4 text-center">
+                    <div class="profile-container">
+                        <!-- Avatar Section -->
+                        <style>
+                            .avatar {
+                                width: 100px; /* Adjust width */
+                                height: 100px; /* Adjust height */
+                                background-size: cover;
+                                background-position: center;
+                                border-radius: 50%; /* Makes the image round */
+                                border: 2px solid #007bff; /* Optional: Adds a border around the avatar */
+                            }
+                        </style>
 
-                            <img src="${user.image}" alt="User Image" class="profile-image">
-
-                            <div class="profile-name">${user.name}</div>
+                        <div class="avatar-section">
+                            <div class="avatar" style="background-image: url('${pageContext.request.contextPath}/avatars/${user.image}');"></div>
+                            <div class="user-name"><c:out value="${user.name}" /></div>
                         </div>
-                        <div class="col-md-8">
-
-                            <table class="table">
-                                <tr>
-                                    <th>Name</th>
-                                    <td>${user.name}</td>
-                                </tr>
-                                <tr>
-                                    <th>Username</th>
-                                    <td>${user.username}</td>
-                                </tr>
-                                <tr>
-                                    <th>Email</th>
-                                    <td>${user.email}</td>
-                                </tr>
-                                <tr>
-                                    <th>Phone</th>
-                                    <td>${user.phone}</td>
-                                </tr>
-                                <tr>
-                                    <th>Address</th>
-                                    <td>${user.address}</td>
-                                </tr>
-                                <tr>
-                                    <th>Gender</th>
-                                    <td>${user.gender}</td>
-                                </tr>
-                                <tr>
-                                    <th>Date of Birth</th>
-                                    <td>${user.dob}</td>
-                                </tr>
-                                <tr>
-                                    <th>Role</th>
-                                    <td>${user.role}</td>
-                                </tr>
-                                <tr>
-                                    <th>Store</th>
-                                    <td>${user.storeId != null ? user.storeId.getName() : 'No store assigned'}</td>
-                                </tr>
-                            </table>
+                        <!-- User Info Section -->
+                        <div class="user-info">
+                            <p class="info"><strong>Name:</strong> <c:out value="${user.name}" /></p>
+                            <p class="info"><strong>Role:</strong> <c:out value="${user.role}" /></p>
+                            <p class="info"><strong>Gender:</strong> <c:out value="${user.gender}" /></p>
+                            <p class="info"><strong>Date of Birth:</strong> <c:out value="${user.dob}" /></p>
+                            <p class="info"><strong>Phone:</strong> <c:out value="${user.phone}" /></p>
+                            <p class="info"><strong>Email:</strong> <c:out value="${user.email}" /></p>
+                            <p class="info"><strong>Address:</strong> <c:out value="${user.address}" /></p>
+                            <p class="info"><strong>Status:</strong> <c:out value="${user.status}" /></p>
+                            <a href="editprofile" class="button">Edit Profile</a>
+                            <a href="<%= request.getContextPath() %>/dashboard" class="button back-button">Back</a>
                         </div>
                     </div>
                 </div>
             </div>
-            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+            <!--   === Profile Content Ends ===   -->
         </div>
- 
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
     </body>
 </html>
+
