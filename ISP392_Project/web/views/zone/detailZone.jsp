@@ -37,6 +37,7 @@
                 <h2>Zone Details</h2>
                 <div class="zone-detail"><label>Zone ID:</label><span>${zone.id}</span></div>
                 <div class="zone-detail"><label>Name:</label><span>${zone.name}</span></div>
+                <div class="zone-detail"><label>Description:</label><span>${zone.description != null ? zone.description : 'N/A'}</span></div>
                 <div class="zone-detail"><label>Store ID:</label><span>${zone.storeId != null ? zone.storeId.id : 'N/A'}</span></div>
                 <div class="zone-detail"><label>Created By:</label><span>${zone.createdBy}</span></div>
                 <div class="zone-detail"><label>Status:</label><span>${zone.status}</span></div>

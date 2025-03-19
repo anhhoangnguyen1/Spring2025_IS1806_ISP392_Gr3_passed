@@ -102,8 +102,6 @@
                                 <td>
                                     <a href="${pageContext.request.contextPath}/zones?service=getZoneById&zone_id=${zone.id}" class="btn btn-outline-primary">View</a>
                                     <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}" class="btn btn-outline-primary">Edit</a>
-                                    <a href="${pageContext.request.contextPath}/zones?service=deleteZone&zone_id=${zone.id}&index=${index}&searchZone=${searchZone}&sortBy=${sortBy}&sortOrder=${sortOrder}" 
-                                       class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this zone?');">Ban</a>
                                 </td>
                             </tr>
                         </c:forEach>
