@@ -39,6 +39,7 @@
                 <div class="zone-detail"><label>Name:</label><span>${zone.name}</span></div>
                 <div class="zone-detail"><label>Description:</label><span>${zone.description != null ? zone.description : 'N/A'}</span></div>
                 <div class="zone-detail"><label>Store ID:</label><span>${zone.storeId != null ? zone.storeId.id : 'N/A'}</span></div>
+                <div class="zone-detail"><label>Product Name:</label><span>${zone.productId != null ? zone.productId.name : 'N/A'}</span></div> <!-- Thêm Product Name -->
                 <div class="zone-detail"><label>Created By:</label><span>${zone.createdBy}</span></div>
                 <div class="zone-detail"><label>Status:</label><span>${zone.status}</span></div>
                 <div style="display: flex; gap: 20px;">

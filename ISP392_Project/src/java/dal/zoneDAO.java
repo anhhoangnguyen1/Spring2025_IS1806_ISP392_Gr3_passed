@@ -1,6 +1,7 @@
 package dao;
 
 import dal.DBContext;
+import entity.Products;
 import entity.Stores;
 import entity.Zone;
 import java.sql.PreparedStatement;
@@ -82,24 +83,24 @@ public class zoneDAO extends DBContext {
     public List<Zone> searchZones(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
         List<Zone> list = new ArrayList<>();
 
-        // Chỉ cho phép sắp xếp theo các cột hợp lệ
         List<String> allowedSortColumns = List.of("id", "name", "created_at", "updated_at");
         if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
             sortBy = "id";
         }
-
         if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
             sortOrder = "ASC";
         }
 
-        String sql = "SELECT id, name, description, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, store_id, status "
-                + "FROM Zones WHERE isDeleted = 0 ";
+        String sql = "SELECT z.id, z.name, z.description, z.created_at, z.created_by, z.deletedAt, z.deleteBy, z.isDeleted, z.updated_at, z.store_id, z.status, z.product_id, p.name AS product_name "
+                + "FROM Zones z "
+                + "LEFT JOIN Products p ON z.product_id = p.id "
+                + "WHERE z.isDeleted = 0 ";
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql += "AND name LIKE ? ";
+            sql += "AND z.name LIKE ? ";
         }
 
-        sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
+        sql += "ORDER BY z." + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             int paramIndex = 1;
@@ -123,10 +124,14 @@ public class zoneDAO extends DBContext {
 
         return list;
     }
+    
+    
 
-    // Lấy zone theo ID
     public Zone getZoneById(int id) {
-        String sql = "SELECT * FROM Zones WHERE id = ? AND isDeleted = 0";
+        String sql = "SELECT z.*, p.name AS product_name "
+                + "FROM Zones z "
+                + "LEFT JOIN Products p ON z.product_id = p.id "
+                + "WHERE z.id = ? AND z.isDeleted = 0";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, id);
             try (ResultSet rs = st.executeQuery()) {
@@ -139,7 +144,8 @@ public class zoneDAO extends DBContext {
         }
         return null;
     }
-
+    
+    
     public void insertZone(Zone zone) {
         String sql = "INSERT INTO Zones (name, description, store_id, created_at, created_by, status) "
                 + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
@@ -207,10 +213,18 @@ public class zoneDAO extends DBContext {
             store.setId(storeId);
         }
 
+        Products product = null;
+        int productId = rs.getInt("product_id");
+        if (!rs.wasNull()) {
+            product = new Products();
+            product.setProductId(productId);
+            product.setName(rs.getString("product_name"));
+        }
+
         return Zone.builder()
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
-                .description(rs.getString("description")) // Thêm description
+                .description(rs.getString("description"))
                 .createdAt(rs.getDate("created_at"))
                 .createdBy(rs.getString("created_by"))
                 .deleteAt(rs.getDate("deletedAt"))
@@ -219,6 +233,7 @@ public class zoneDAO extends DBContext {
                 .updatedAt(rs.getDate("updated_at"))
                 .storeId(store)
                 .status(rs.getString("status"))
+                .productId(product)
                 .build();
     }
 

@@ -132,7 +132,8 @@ public class controllerZones extends HttpServlet {
                     out.print("\"name\": \"" + zone.getName() + "\",");
                     out.print("\"storeId\": " + (zone.getStoreId() != null ? "{\"id\": " + zone.getStoreId().getId() + "}" : "null") + ",");
                     out.print("\"createdBy\": \"" + zone.getCreatedBy() + "\",");
-                    out.print("\"status\": \"" + zone.getStatus() + "\"");
+                    out.print("\"status\": \"" + zone.getStatus() + "\",");
+                    out.print("\"productName\": \"" + (zone.getProductId() != null ? zone.getProductId().getName() : "N/A") + "\"");
                     out.print("}");
                     if (i < zones.size() - 1) {
                         out.print(",");
