@@ -85,10 +85,7 @@
                             <label for="description">Description</label>
                             <textarea class="form-control" name="description" rows="3">${requestScope.description}</textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="store_id">Store ID</label>
-                            <input type="number" class="form-control" name="store_id" value="${requestScope.store_id}">
-                        </div>
+                        <!-- Không cần trường Store ID -->
                         <div class="form-group">
                             <label for="status">Status</label>
                             <select class="form-control" name="status" required>
@@ -96,9 +93,9 @@
                                 <option value="Inactive" ${requestScope.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
                             </select>
                         </div>
-                        <div class="form-group ">
+                        <div class="form-group">
                             <label for="createdBy">Created By</label>
-                            <span class="form-control" id="createdBy">${name}</span>
+                            <span class="form-control" id="createdBy">${fullName}</span>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">Add Zone</button>

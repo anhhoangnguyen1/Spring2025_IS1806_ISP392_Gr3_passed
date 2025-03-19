@@ -87,10 +87,7 @@
                             <label for="description">Description</label>
                             <textarea class="form-control" name="description" rows="3">${zone.description}</textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="store_id">Store ID</label>
-                            <input type="number" class="form-control" name="store_id" value="${zone.storeId != null ? zone.storeId.id : ''}">
-                        </div>
+                        <!-- Xóa phần Store ID -->
                         <div class="form-group">
                             <label for="status">Status</label>
                             <select class="form-control" name="status" required>
@@ -98,7 +95,7 @@
                                 <option value="Inactive" ${zone.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
                             </select>
                         </div>
-                        <input type="hidden" name="updateBy" value="${userName}" />
+                        <input type="hidden" name="updateBy" value="${zone.createdBy}" />
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff">Save Changes</button>
                             <a href="${pageContext.request.contextPath}/zones?service=zones&sortOrder=${param.sortOrder}" class="btn btn-secondary">Back to Zones List</a>

@@ -164,7 +164,7 @@ public class zoneDAO extends DBContext {
     }
 
     // Cập nhật zone
-public void updateZone(Zone zone) {
+    public void updateZone(Zone zone) {
         String sql = "UPDATE Zones SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP, store_id = ?, status = ?, "
                 + "deletedAt = ?, deleteBy = ?, isDeleted = ? WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
