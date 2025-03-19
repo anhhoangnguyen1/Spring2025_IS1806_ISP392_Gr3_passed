@@ -19,7 +19,6 @@ public class controllerStore extends HttpServlet {
 
     storeDAO storeDAO = new storeDAO();
     userDAO userDAO = new userDAO();
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
