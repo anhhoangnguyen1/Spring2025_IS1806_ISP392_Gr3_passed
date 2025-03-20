@@ -291,11 +291,21 @@ public class controllerZones extends HttpServlet {
             zoneDAO.updateZone(zone);
             session.setAttribute("Notification", "Zone details updated successfully.");
 
-            String sortBy = request.getParameter("sortBy");
-            String sortOrder = request.getParameter("sortOrder");
-            String index = request.getParameter("index");
+            int total = zoneDAO.countZones("");
+            int pageSize = 5;
+            int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
 
-            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + index);
+            session.setAttribute("Notification", "Zone added successfully.");
+
+            String sortBy = request.getParameter("sortBy");
+            if (sortBy == null) {
+                sortBy = "id";
+            }
+            String sortOrder = request.getParameter("sortOrder");
+            if (sortOrder == null) {
+                sortOrder = "ASC";
+            }
+            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage);
         }
     }
 
