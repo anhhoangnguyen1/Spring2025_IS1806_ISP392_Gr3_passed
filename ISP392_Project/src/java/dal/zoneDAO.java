@@ -1,6 +1,7 @@
 package dao;
 
 import dal.DBContext;
+import entity.Products;
 import entity.Stores;
 import entity.Zone;
 import java.sql.PreparedStatement;
@@ -16,8 +17,7 @@ public class zoneDAO extends DBContext {
         List<String> list = new ArrayList<>();
         String sql = "SELECT name FROM Zones WHERE isDeleted = 0";
 
-        try (PreparedStatement st = connection.prepareStatement(sql); 
-             ResultSet rs = st.executeQuery()) {
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 list.add(rs.getString("name"));
             }
@@ -32,7 +32,7 @@ public class zoneDAO extends DBContext {
     // Lấy tất cả zones, hỗ trợ phân trang
     public List<Zone> viewAllZones(String sortBy, int index) {
         List<Zone> zonesList = new ArrayList<>();
-        String sql = "SELECT id, name, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, store_id, status "
+        String sql = "SELECT id, name, description, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, store_id, status "
                 + "FROM Zones WHERE isDeleted = 0 "
                 + "ORDER BY " + (sortBy != null ? sortBy : "id") + " LIMIT 5 OFFSET ?";
 
@@ -56,8 +56,7 @@ public class zoneDAO extends DBContext {
         String sql;
         if (keyword == null || keyword.trim().isEmpty()) {
             sql = "SELECT COUNT(*) FROM Zones WHERE isDeleted = 0";
-            try (PreparedStatement st = connection.prepareStatement(sql); 
-                 ResultSet rs = st.executeQuery()) {
+            try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
                 }
@@ -84,24 +83,24 @@ public class zoneDAO extends DBContext {
     public List<Zone> searchZones(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
         List<Zone> list = new ArrayList<>();
 
-        // Chỉ cho phép sắp xếp theo các cột hợp lệ
         List<String> allowedSortColumns = List.of("id", "name", "created_at", "updated_at");
         if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
             sortBy = "id";
         }
-
         if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
             sortOrder = "ASC";
         }
 
-        String sql = "SELECT id, name, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, store_id, status "
-                + "FROM Zones WHERE isDeleted = 0 ";
+        String sql = "SELECT z.id, z.name, z.description, z.created_at, z.created_by, z.deletedAt, z.deleteBy, z.isDeleted, z.updated_at, z.store_id, z.status, z.product_id, p.name AS product_name "
+                + "FROM Zones z "
+                + "LEFT JOIN Products p ON z.product_id = p.id "
+                + "WHERE z.isDeleted = 0 ";
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql += "AND name LIKE ? ";
+            sql += "AND z.name LIKE ? ";
         }
 
-        sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
+        sql += "ORDER BY z." + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             int paramIndex = 1;
@@ -125,10 +124,14 @@ public class zoneDAO extends DBContext {
 
         return list;
     }
+    
+    
 
-    // Lấy zone theo ID
     public Zone getZoneById(int id) {
-        String sql = "SELECT * FROM Zones WHERE id = ? AND isDeleted = 0";
+        String sql = "SELECT z.*, p.name AS product_name "
+                + "FROM Zones z "
+                + "LEFT JOIN Products p ON z.product_id = p.id "
+                + "WHERE z.id = ? AND z.isDeleted = 0";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, id);
             try (ResultSet rs = st.executeQuery()) {
@@ -141,20 +144,25 @@ public class zoneDAO extends DBContext {
         }
         return null;
     }
-
-    // Thêm zone mới
+    
+    
     public void insertZone(Zone zone) {
-        String sql = "INSERT INTO Zones (name, created_at, created_by, store_id, status) "
-                + "VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?)";
+        String sql = "INSERT INTO Zones (name, description, store_id, created_at, created_by, status) "
+                + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, zone.getName());
-            st.setString(2, zone.getCreatedBy());
+            if (zone.getDescription() != null) {
+                st.setString(2, zone.getDescription());
+            } else {
+                st.setNull(2, java.sql.Types.VARCHAR);
+            }
             if (zone.getStoreId() != null) {
                 st.setInt(3, zone.getStoreId().getId());
             } else {
                 st.setNull(3, java.sql.Types.INTEGER);
             }
-            st.setString(4, zone.getStatus());
+            st.setString(4, zone.getCreatedBy());
+            st.setString(5, zone.getStatus());
             st.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -163,39 +171,33 @@ public class zoneDAO extends DBContext {
 
     // Cập nhật zone
     public void updateZone(Zone zone) {
-        String sql = "UPDATE Zones SET name = ?, updated_at = CURRENT_TIMESTAMP, store_id = ?, status = ?, "
+        String sql = "UPDATE Zones SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP, store_id = ?, status = ?, "
                 + "deletedAt = ?, deleteBy = ?, isDeleted = ? WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, zone.getName());
-            if (zone.getStoreId() != null) {
-                st.setInt(2, zone.getStoreId().getId());
+            if (zone.getDescription() != null) {
+                st.setString(2, zone.getDescription());
             } else {
-                st.setNull(2, java.sql.Types.INTEGER);
+                st.setNull(2, java.sql.Types.VARCHAR);
             }
-            st.setString(3, zone.getStatus());
-            if (zone.getDeleteAt() != null) {
-                st.setDate(4, zone.getDeleteAt());
+            if (zone.getStoreId() != null) {
+                st.setInt(3, zone.getStoreId().getId());
             } else {
-                st.setNull(4, java.sql.Types.DATE);
+                st.setNull(3, java.sql.Types.INTEGER);
+            }
+            st.setString(4, zone.getStatus());
+            if (zone.getDeleteAt() != null) {
+                st.setDate(5, zone.getDeleteAt());
+            } else {
+                st.setNull(5, java.sql.Types.DATE);
             }
             if (zone.getDeleteBy() != null) {
-                st.setString(5, zone.getDeleteBy());
+                st.setString(6, zone.getDeleteBy());
             } else {
-                st.setNull(5, java.sql.Types.VARCHAR);
+                st.setNull(6, java.sql.Types.VARCHAR);
             }
-            st.setBoolean(6, zone.isDeleted());
-            st.setInt(7, zone.getId());
-            st.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Xóa zone (soft delete)
-    public void deleteZone(int id) {
-        String sql = "UPDATE Zones SET isDeleted = 1, deletedAt = CURRENT_TIMESTAMP WHERE id = ?";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setInt(1, id);
+            st.setBoolean(7, zone.isDeleted());
+            st.setInt(8, zone.getId());
             st.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -211,9 +213,18 @@ public class zoneDAO extends DBContext {
             store.setId(storeId);
         }
 
+        Products product = null;
+        int productId = rs.getInt("product_id");
+        if (!rs.wasNull()) {
+            product = new Products();
+            product.setProductId(productId);
+            product.setName(rs.getString("product_name"));
+        }
+
         return Zone.builder()
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
+                .description(rs.getString("description"))
                 .createdAt(rs.getDate("created_at"))
                 .createdBy(rs.getString("created_by"))
                 .deleteAt(rs.getDate("deletedAt"))
@@ -222,9 +233,10 @@ public class zoneDAO extends DBContext {
                 .updatedAt(rs.getDate("updated_at"))
                 .storeId(store)
                 .status(rs.getString("status"))
+                .productId(product)
                 .build();
     }
-    
+
     // Trong class zoneDAO
     public boolean checkNameExists(String name, int zoneId, Integer storeId) {
         String sql = "SELECT COUNT(*) FROM Zones WHERE name = ? AND id != ? AND isDeleted = 0";
@@ -256,23 +268,22 @@ public class zoneDAO extends DBContext {
         int pageIndex = 1;
         List<Zone> zones = dao.viewAllZones("id", pageIndex);
 
-//        if (zones.isEmpty()) {
-//            System.out.println("Không có zone nào được tìm thấy!");
-//        } else {
-//            System.out.println("Danh sách zones:");
-//            for (Zone zone : zones) {
-//                System.out.println("------------------------------------------------------");
-//                System.out.println("Zone ID: " + zone.getId());
-//                System.out.println("Name: " + zone.getName());
-//                System.out.println("Created By: " + zone.getCreatedBy());
-//                System.out.println("Created At: " + zone.getCreatedAt());
-//                System.out.println("Store ID: " + (zone.getStoreId() != null ? zone.getStoreId().getId() : "null"));
-//                System.out.println("Status: " + zone.getStatus());
-//            }
-//        }
+        if (zones.isEmpty()) {
+            System.out.println("Không có zone nào được tìm thấy!");
+        } else {
+            System.out.println("Danh sách zones:");
+            for (Zone zone : zones) {
+                System.out.println("------------------------------------------------------");
+                System.out.println("Zone ID: " + zone.getId());
+                System.out.println("Name: " + zone.getName());
+                System.out.println("Created By: " + zone.getCreatedBy());
+                System.out.println("Created At: " + zone.getCreatedAt());
+                System.out.println("Store ID: " + (zone.getStoreId() != null ? zone.getStoreId().getId() : "null"));
+                System.out.println("Status: " + zone.getStatus());
+            }
+        }
 //        
 //        System.out.println("--------------------------------------");
-
 //        // 1. Test getAllZoneNames
 //        System.out.println("=== Test getAllZoneNames ===");
 //        List<String> zoneNames = dao.getAllZoneNames();
@@ -285,7 +296,6 @@ public class zoneDAO extends DBContext {
 //            }
 //        }
 //        System.out.println("--------------------------------------");
-
 //        // 3. Test countZones
 //        System.out.println("=== Test countZones ===");
 //        int totalZones = dao.countZones(null);
@@ -354,18 +364,5 @@ public class zoneDAO extends DBContext {
 //        }
 //        System.out.println("--------------------------------------");
 //
-        // 8. Test deleteZone
-        System.out.println("=== Test deleteZone ===");
-        int zoneIdToDelete = 2; // Giả sử ID 2 tồn tại
-        dao.deleteZone(zoneIdToDelete);
-        System.out.println("Đã xóa (soft delete) zone ID = " + zoneIdToDelete);
-        Zone deletedZone = dao.getZoneById(zoneIdToDelete);
-        if (deletedZone == null) {
-            System.out.println("Zone ID = " + zoneIdToDelete + " không còn tồn tại trong danh sách active!");
-        } else {
-            System.out.println("Zone ID = " + zoneIdToDelete + " vẫn còn tồn tại!");
-        }
-        System.out.println("--------------------------------------");
-        
     }
 }
