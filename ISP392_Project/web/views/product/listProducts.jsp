@@ -40,7 +40,7 @@
             </button>
 
             <div class="btn-group">
-                <!-- Nút Toggle Checkboxes -->
+                <!-- Nï¿½t Toggle Checkboxes -->
                 <button type="button" class="btn btn-outline-primary" id="toggle-checkbox-btn" title="Show Checkboxes">
                     <i class="fa-solid fa-list-check"></i>
                 </button>
