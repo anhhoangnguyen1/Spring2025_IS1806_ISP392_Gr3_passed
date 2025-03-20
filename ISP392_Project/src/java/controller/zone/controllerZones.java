@@ -291,11 +291,11 @@ public class controllerZones extends HttpServlet {
             zoneDAO.updateZone(zone);
             session.setAttribute("Notification", "Zone details updated successfully.");
 
-            int total = zoneDAO.countZones("");
-            int pageSize = 5;
-            int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
-
-            session.setAttribute("Notification", "Zone added successfully.");
+            // Lấy index hiện tại từ request (truyền từ form)
+            String currentIndex = request.getParameter("index");
+            if (currentIndex == null || currentIndex.isEmpty()) {
+                currentIndex = "1"; // Mặc định về trang 1 nếu không có index
+            }
 
             String sortBy = request.getParameter("sortBy");
             if (sortBy == null) {
@@ -305,7 +305,7 @@ public class controllerZones extends HttpServlet {
             if (sortOrder == null) {
                 sortOrder = "ASC";
             }
-            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage);
+            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + currentIndex);
         }
     }
 
