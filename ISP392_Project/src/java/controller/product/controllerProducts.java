@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import entity.Products;
 import dal.productsDAO;
+import dao.zoneDAO;
+import entity.Zone;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
 import java.io.File;
@@ -22,6 +24,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,6 +52,7 @@ public class controllerProducts extends HttpServlet {
         HttpSession session = request.getSession();
         String service = request.getParameter("service");
         productsDAO products = new productsDAO();
+        zoneDAO zonesDao = new zoneDAO();
         if (service == null) {
             service = "products";
         }
@@ -68,7 +72,7 @@ public class controllerProducts extends HttpServlet {
             if (indexPage == null) {
                 indexPage = "1";
             }
-
+           
             int index = Integer.parseInt(indexPage);
             int count = products.countProducts();
             int endPage = count / 10;
@@ -76,6 +80,8 @@ public class controllerProducts extends HttpServlet {
                 endPage++;
             }
             List<Products> listProducts = products.viewAllProducts(command, index);
+            List<String> listZoneName = zonesDao.getAllZoneNames();
+            request.setAttribute("zoneName", listZoneName);
             request.setAttribute("list", listProducts);
             request.setAttribute("endPage", endPage);
             request.setAttribute("index", index);
@@ -162,14 +168,30 @@ public class controllerProducts extends HttpServlet {
                 String deletedBy = request.getParameter("deletedBy");
                 String description = request.getParameter("description");
                 String status = request.getParameter("status");
-
+ 
                 Date deletedAt = new java.sql.Date(System.currentTimeMillis());
                 Date updatedAt = new java.sql.Date(System.currentTimeMillis());
                 boolean isDelete = false;
                 Date createdAt = new java.sql.Date(System.currentTimeMillis());
-
+                String[] zoneNames = request.getParameterValues("zoneName");
                 Products product = new Products(productId, name, imageFileName, price, quantity, description, createdAt, createBy, deletedAt, deletedBy, isDelete, updatedAt, status);
-                products.editProduct(product);
+                List<Zone> zones = new ArrayList<>();
+                if (zoneNames != null && zoneNames.length > 0) {
+                    for (String zoneName : zoneNames) {
+                        if (zoneName != null && !zoneName.trim().isEmpty()) {
+                            Zone zone = new Zone();
+                            zone.setName(zoneName);
+                            zones.add(zone);
+                        }
+                    }
+                }
+                boolean success = products.editProduct(product, zones);
+
+                if (success) {
+                    session.setAttribute("Notification", "Product updated successfully.");
+                } else {
+                    session.setAttribute("Notification", "Error updating product. Please try again.");
+                }
                 response.sendRedirect("Products");
             } catch (NumberFormatException e) {
                 session.setAttribute("Notification", "Invalid number format.");
@@ -236,17 +258,22 @@ public class controllerProducts extends HttpServlet {
             String deletedBy = request.getParameter("deletedBy");
             String status = request.getParameter("status");
             String isDeleteRaw = request.getParameter("isDelete");
+            String[] zoneNames = request.getParameterValues("zoneName"); // Lấy nhiều zone
+
             boolean isDelete = Boolean.parseBoolean(isDeleteRaw);
             Date deletedAt = new java.sql.Date(System.currentTimeMillis());
             Date updatedAt = new java.sql.Date(System.currentTimeMillis());
             Date createdAt = new java.sql.Date(System.currentTimeMillis());
             Products product = new Products(0, name, imageFileName, price, quantity, description, createdAt, createdBy, deletedAt, deletedBy, isDelete, updatedAt, status);
-            boolean success = products.insertProduct(product);
-            if (success) {
-               
-            } else {
-               
+            List<Zone> zones = new ArrayList<>();
+            if (zoneNames != null) {
+                for (String zoneName : zoneNames) {
+                    Zone zone = new Zone();
+                    zone.setName(zoneName);
+                    zones.add(zone);
+                }
             }
+            boolean success = products.insertProduct(product, zones);
 
             request.getRequestDispatcher("Products?service=products").forward(request, response);
         }

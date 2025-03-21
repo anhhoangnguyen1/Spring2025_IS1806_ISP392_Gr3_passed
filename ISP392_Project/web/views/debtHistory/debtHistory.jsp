@@ -12,156 +12,274 @@
     </head>
 
     <body>
-        <div class="container">
-            <h2 class="text-center">Debt List</h2>
-            <c:if test="${not empty sessionScope.Notification}">
-                <div class="alert alert-warning alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert">
-                        &times;
-                    </button>
-                    <strong>${sessionScope.Notification}</strong>
+        <div class="page-wrapper">
+            <!--   *** Top Bar Starts ***   -->
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <div class="hamburger-btn">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="logo">
+                        <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
+                    </div>
                 </div>
-                <c:remove var="Notification" scope="session" />
-            </c:if>
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-4">
-                        <h6 class="text-muted">Name:</h6>
-                        <p class="fw-bold">${name}</p>
+
+
+                <div class="top-bar-right">
+                    <div class="mode-switch">
+                        <i class="fa-solid fa-moon"></i>
                     </div>
-                    <div class="col-md-4">
-                        <h6 class="text-muted">Address:</h6>
-                        <p class="fw-bold">${address}</p>
+                    <div class="notifications">
+                        <i class="fa-solid fa-bell"></i>
                     </div>
-                    <div class="col-md-4">
-                        <h6 class="text-muted">Phone:</h6>
-                        <p class="fw-bold">${phone}</p>
+                    <div class="profile">
+                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
+                        <div class="profile-menu">
+                            <ul>
+                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
+                                <li><a href="/ISP392_Project/change-password"><i class="fa-solid fa-pen"></i> Change Password</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
+            <!--   *** Top Bar Ends ***   -->
+
+            <!--   === Side Bar Starts ===   -->
+            <aside class="side-bar">
+                <!--   === Nav Bar Links Starts ===   -->
+                <span class="menu-label">MENU</span>
+                <ul class="navbar-links navbar-links-1">
+                    <li >
+                        <a href="/ISP392_Project/dashboard">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-house"></i>
+                            </span>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Products">
+                            <span class="nav-icon">
+                                <i class="fas fa-box"></i>
+                            </span>
+                            <span class="nav-text">Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-table"></i>
+                            </span>
+                            <span class="nav-text">Zones</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Customers">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <span class="nav-text">Customers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </span>
+                            <span class="nav-text">Invoices</span>
+                        </a>
+                    </li>
+
+                    <li class="active">
+                        <a href="/ISP392_Project/Debts">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-money-bill"></i>
+                            </span>
+                            <span class="nav-text">Debts History</span>
+                        </a>
+                    </li>
+                </ul>
+                <span class="menu-label">OWNER ZONE</span>
+                <ul class="navbar-links navbar-links-2">
+                    <li>
+                        <a href="/ISP392_Project/Users">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-user-tie"></i>
+                            </span>
+                            <span class="nav-text">Staffs</span>
+                        </a>
+                    </li>
+                </ul>
+                <!--   === Nav Bar Links Ends ===   -->
+                <!--   === Side Bar Footer Starts ===   -->
+
+                <div class="sidebar-footer">
+                    <div class="settings">
+                        <span class="gear-icon">
+                            <i class="fa-solid fa-gear"></i>
+                        </span>
+                        <span class="text">Settings</span>
+                    </div>
+                    <div class="logoutBtn">
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
+                    </div>
+            </aside>
+
+            <div class="contents">
+                <c:if test="${not empty sessionScope.Notification}">
+                    <div class="alert alert-warning alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert">
+                            &times;
+                        </button>
+                        <strong>${sessionScope.Notification}</strong>
+                    </div>
+                    <c:remove var="Notification" scope="session" />
+                </c:if>
+                <div class="panel-bar1">
+                    <div class="container">
+                        <h2 class="text-center">Debt List</h2>
+                        <c:if test="${not empty sessionScope.Notification}">
+                            <div class="alert alert-warning alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert">
+                                    &times;
+                                </button>
+                                <strong>${sessionScope.Notification}</strong>
+                            </div>
+                            <c:remove var="Notification" scope="session" />
+                        </c:if>
 
 
-            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#DebtModal">
-                <i class="fas fa-plus"></i> Add Debt
-            </button>
-            <div class="table-container">
-                <table class="table-bordered">
-                    <thead>
-                        <tr>
-                            <th class="resizable">ID</th>
-                            <th class="resizable">Amount</th>
-                            <th>Images</th>
-                            <th class="resizable">Description</th>
-                            <th class="resizable">Created At</th>
-                            <th class="resizable">Updated At</th>
-                            <th class="resizable">Created By</th>
-                            <th class="resizable">Status</th>
-                            <th class="sticky-col1">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="debt" items="${list}">
-                            <tr>
-                                <td>${debt.id}</td>
-                                <td class="amount ${debt.type == '-' ? 'text-danger' : ''}">
-                                    <fmt:formatNumber value="${debt.amount}" pattern="###,##0"/>
-                                </td>
+                        <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#DebtModal">
+                            <i class="fas fa-plus"></i> Add Debt
+                        </button>
+                        <div class="table-container">
+                            <table class="table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th class="resizable">ID</th>
+                                        <th class="resizable">Amount</th>
+                                        <th>Images</th>
+                                        <th class="resizable">Description</th>
+                                        <th class="resizable">Created At</th>
+                                        <th class="resizable">Updated At</th>
+                                        <th class="resizable">Created By</th>
+                                        <th class="resizable">Status</th>
+                                        <th class="sticky-col1">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="debt" items="${list}">
+                                        <tr>
+                                            <td>${debt.id}</td>
+                                            <td class="amount ${debt.type == '-' ? 'text-danger' : ''}">
+                                                <fmt:formatNumber value="${debt.amount}" pattern="###,##0"/>
+                                            </td>
 
-                                <td>
-                                    <img src="images/${debt.image}" class="myImg" style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;" alt="Debt evidence"/>
-                                </td>
-                                <td style="white-space: normal; word-wrap: break-word; max-width: 200px;">
-                                    ${debt.description}
-                                </td>
-                                <td>${debt.createdAt}</td>
-                                <td>${debt.updatedAt}</td>
-                                <td>${debt.createdBy}</td>
-                                <td>${debt.status}</td>
-                                <td class="sticky-col1">
-                                    <!-- Nút xem chi tiết nợ -->
-                                    <button type="button" class="btn btn-outline-primary openDebtModal" 
-                                            data-id="${debt.id}" 
-                                            data-amount="${debt.amount}" 
-                                            data-type="${debt.type}"
-                                            data-createdat="${debt.createdAt}"
-                                            data-description="${debt.description}" 
-                                            data-status="${debt.status}"
-                                            data-image="images/${debt.image}">
-                                        <i class="fas fa-info-circle"></i>
-                                    </button>
+                                            <td>
+                                                <img src="images/${debt.image}" class="myImg" style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;" alt="Debt evidence"/>
+                                            </td>
+                                            <td style="white-space: normal; word-wrap: break-word; max-width: 200px;">
+                                                ${debt.description}
+                                            </td>
+                                            <td>${debt.createdAt}</td>
+                                            <td>${debt.updatedAt}</td>
+                                            <td>${debt.createdBy}</td>
+                                            <td>${debt.status}</td>
+                                            <td class="sticky-col1">
+                                                <!-- Nút xem chi tiết nợ -->
+                                                <button type="button" class="btn btn-outline-primary openDebtModal" 
+                                                        data-id="${debt.id}" 
+                                                        data-amount="${debt.amount}" 
+                                                        data-type="${debt.type}"
+                                                        data-createdat="${debt.createdAt}"
+                                                        data-description="${debt.description}" 
+                                                        data-status="${debt.status}"
+                                                        data-image="images/${debt.image}">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
 
 
-                                </td>
-                            </tr>
-                        </c:forEach>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="7"></td>
-                            <td class="sticky-col1 text-right font-weight-bold" id="totalAmountCell">
-                                Total Amount: <span id="totalAmount">0</span>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="7"></td>
+                                        <td class="sticky-col1 text-right font-weight-bold" id="totalAmountCell">
+                                            Total Amount: <span id="totalAmount">0</span>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div> 
+            <div id="myModal" class="modalImage">
+                <span class="close">&times;</span>
+                <img class="modalImage-content" id="img01">
+                <div id="caption"></div>
             </div>
-
             <div id="DebtModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-dialog modal-xl" role="document">
                     <div class="modal-content">
-                        <form action="${pageContext.request.contextPath}/Debts" method="POST" enctype="multipart/form-data" onsubmit="adjustAmountBeforeSubmit(event)">
-                            <input type="hidden" name="service" value="updateDebt" />
+                        <form action="${pageContext.request.contextPath}/Debts" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="service" value="addDebtInDebtDetails" />
                             <input type="hidden" name="createdBy" value="${sessionScope.username}" />
 
-                            <c:forEach var="debt" items="${list}">
-                                <input type="hidden" name="customer_id" value="${debt.customer_id}" />
-                                <input type="hidden" name="id" value="${debt.debt_note_id}" />
-                            </c:forEach>
-                                <input type="hidden" name="name" value="${name}" />
-                                <input type="hidden" name="phone" value="${phone}" />
-                                <input type="hidden" name="address" value="${address}" />
                             <div class="modal-header">
-                                <h5 class="modal-title" id="DebtModalLabel">Add Debt</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">×</span>
-                                </button>
+                                <h4 class="modal-title">Add Debt</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                             </div>
                             <div class="modal-body">
+                                <!-- Debt Type Field -->
                                 <div class="form-group">
                                     <label>Debt Type</label>
-                                    <select class="form-control" name="type" id="debtType" required>
-                                        <option value="+">+</option>
-                                        <option value="-">-</option>
+                                    <select class="form-control" name="status">
+                                        <option value="Customer repays debt">Customer repays debt</option> 
+                                        <option value="Customer borrows debt">Customer pays</option>
+                                        <option value="Owner repays debt">Owner repays debt</option> 
+                                        <option value="Owner borrows debt">Owner borrows debt</option>
                                     </select>
                                 </div>
+
+                                <!-- Amount Field -->
                                 <div class="form-group">
                                     <label>Amount</label>
-                                    <input type="text" oninput="formatNumber(event); this.value = this.value.replace('-', '');" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="amount" id="debtAmount" required />
+                                    <input type="text" oninput="formatNumber(event)" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="amount" required />
                                 </div>
+
+                                <!-- Image Upload -->
                                 <div class="form-group">
                                     <label>Image</label>
-                                    <input type="file" class="form-control-file" name="image" />
+                                    <input type="file" name="image">
                                 </div>
+
+                                <!-- Date/Time Field -->
                                 <div class="form-group">
-                                    <label>Created at</label>
-                                    <input type="datetime-local" class="form-control" name="created_at" required />
+                                    <label>Create at</label>
+                                    <input type="datetime-local" name="created_at" class="form-control" value="" required />
                                 </div>
+                                <input type="hidden" name="customer_id" value="${sessionScope.customer_id}" />
+
+                                <!-- Description Field -->
                                 <div class="form-group">
                                     <label>Description</label>
                                     <textarea class="form-control" name="description" rows="3"></textarea>
                                 </div>
-                                <div class="form-group">
-                                    <label>Status</label>
-                                    <select class="form-control" name="status" required>
-                                        <option value="Pending">Pending</option>
-                                        <option value="Paid">Paid</option>
-                                        <option value="Overdue">Overdue</option>
-                                    </select>
-                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Add Debt</button>
+                                <input type="submit" class="btn btn-primary" value="Add Debt" />
                             </div>
                         </form>
                     </div>
@@ -209,12 +327,8 @@
                 </div>
             </div>
         </div>
-        <div id="myModal" class="modalImage">
-            <span class="close">&times;</span>
-            <img class="modalImage-content" id="img01">
-            <div id="caption"></div>
-        </div>
     </body>
+
     <script>
 
         document.addEventListener("DOMContentLoaded", function () {

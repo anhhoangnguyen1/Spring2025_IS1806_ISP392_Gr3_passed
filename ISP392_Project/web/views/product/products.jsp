@@ -8,8 +8,11 @@
 <!DOCTYPE html>
 <html>
     <head>
-
+        <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+        <!-- Bootstrap Select CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/css/bootstrap-select.min.css">
+        <!-- Các CSS khác -->
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,8 +20,12 @@
     </head>
     <body>
         <!--   *** Page Wrapper Starts ***   -->
+        <style>.selectpicker {
+                background-color: #fff !important;
+                border: 1px solid #ccc !important;
+            }</style>
         <div class="page-wrapper">
-                        <!--   *** Top Bar Starts ***   -->
+            <!--   *** Top Bar Starts ***   -->
             <div class="top-bar">
                 <div class="top-bar-left">
                     <div class="hamburger-btn">
@@ -157,14 +164,48 @@
                         <c:remove var="Notification" scope="session" />
                     </c:if>
                     <c:import url="listProducts.jsp" />
+
                 </div>
             </div>
         </div>
-        <c:import url="addProduct.jsp" />
+        <div id="myModal" class="modalImage">
+            <span class="close">&times;</span>
+            <img class="modalImage-content" id="img01">
+            <div id="caption"></div>
+        </div>
+        <script>
+            $(".myImg").on("click", function () {
+                var modal = $("#myModal");
+                var modalImg = $("#img01");
+                var captionText = $("#caption");
+
+                modal.show();
+                modalImg.attr("src", this.src);
+                captionText.text(this.alt);
+            });
+
+            // Đóng modal khi bấm vào nền đen
+            $("#myModal").on("click", function (e) {
+                if (e.target === this) {
+                    $(this).hide();
+                }
+            });
+        </script>
         <c:import url="editProduct.jsp" />
         <!--   === java script ===   -->
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
+        <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Bootstrap Select JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/js/bootstrap-select.min.js"></script>
+        <!-- Script khác -->
         <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+        <!-- Khởi tạo Bootstrap Select -->
+        <script>
+            $(document).ready(function () {
+                $('.selectpicker').selectpicker();
+            });
+        </script>
+        <c:import url="addProduct.jsp" />
     </body>
 </html>
