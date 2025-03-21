@@ -29,7 +29,7 @@ public class customerDAO extends DBContext {
                 list.add(rs.getString("name"));
             }
         } catch (SQLException e) {
-            System.out.println("Error fetching customer names: " + e.getMessage());
+            System.out.println("Found errors in fetching customer names: " + e.getMessage());
             e.printStackTrace();
         }
 
