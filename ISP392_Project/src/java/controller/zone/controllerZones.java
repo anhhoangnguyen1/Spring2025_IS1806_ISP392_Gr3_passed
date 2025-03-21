@@ -162,12 +162,32 @@ public class controllerZones extends HttpServlet {
             case "editZone": {
                 int zoneId = Integer.parseInt(request.getParameter("zone_id"));
                 Zone zoneForEdit = zoneDAO.getZoneById(zoneId);
+
+                String currentIndex = request.getParameter("index");
+                if (currentIndex == null) {
+                    currentIndex = "1";
+                }
+
+                String currentSortBy = request.getParameter("sortBy");
+                if (currentSortBy == null) {
+                    currentSortBy = "id";
+                }
+
+                String currentSortOrder = request.getParameter("sortOrder");
+                if (currentSortOrder == null) {
+                    currentSortOrder = "ASC";
+                }
+
                 request.setAttribute("zone", zoneForEdit);
                 request.setAttribute("fullName", fullName);
-                request.setAttribute("sortOrder", sortOrder);
+                request.setAttribute("index", currentIndex);
+                request.setAttribute("sortBy", currentSortBy);
+                request.setAttribute("sortOrder", currentSortOrder);
+
                 request.getRequestDispatcher("views/zone/editZone.jsp").forward(request, response);
                 break;
             }
+
         }
     }
 

@@ -17,18 +17,6 @@
                 width: 100%;
                 border-collapse: collapse;
             }
-            .btn-danger {
-                background-color: transparent;
-                color: red;
-                border: 1px solid red;
-                padding: 8px 16px;
-                text-align: center;
-            }
-            .btn-danger:hover {
-                background-color: red;
-                color: white;
-                border: 1px solid red;
-            }
             .sortable {
                 cursor: pointer;
             }

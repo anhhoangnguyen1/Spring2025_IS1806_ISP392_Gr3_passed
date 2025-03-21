@@ -78,9 +78,10 @@
                     <form id="zoneForm" action="${pageContext.request.contextPath}/zones" method="POST" onsubmit="confirmSave(event)">
                         <input type="hidden" name="service" value="editZone" />
                         <input type="hidden" name="zone_id" value="${zone.id}" />
-                        <input type="hidden" name="index" value="${param.index}"> <!-- Truyền index hiện tại -->
-                        <input type="hidden" name="sortBy" value="${param.sortBy}">
-                        <input type="hidden" name="sortOrder" value="${param.sortOrder}">
+                        <input type="hidden" name="index" value="${index}" />
+                        <input type="hidden" name="sortBy" value="${sortBy}" />
+                        <input type="hidden" name="sortOrder" value="${sortOrder}" />
+
                         <div class="form-group">
                             <label for="name">Name</label>
                             <input type="text" class="form-control" name="name" value="${zone.name}" required>
