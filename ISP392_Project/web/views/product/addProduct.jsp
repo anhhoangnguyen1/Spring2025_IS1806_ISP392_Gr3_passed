@@ -3,6 +3,7 @@
     Created on : Jan 27, 2025, 2:29:26 PM
     Author     : phamh
 --%>
+
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -12,7 +13,7 @@
         <title>JSP Page</title>
     </head>
     <body>
-    
+
         <div id="addProductModal" class="modal fade show">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
@@ -34,23 +35,31 @@
 
                             <div class="form-group">
                                 <label>Image</label>
-                                    <input  type="file" name="image" required>
+                                <input  type="file" name="image" required>
                             </div>
                             <div class="form-row">
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-4">
                                     <label>Price</label>
-                                    <input type="number" step="0.01" class="form-control" name="price" required>
+                                    <input type="text" oninput="formatNumber(event)" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="price" required />
                                 </div>
-                                <div class="form-group col-md-3">
+
+                                <div class="form-group col-md-4">
                                     <label>Quantity (kg)</label>
                                     <input type="number" class="form-control" name="quantity" required>
                                 </div>
+
+                                <div class="form-group col-md-4">
+                                    <label>Zone name</label>
+                                    <select class="form-control selectpicker" name="zoneName" multiple required data-live-search="true">
+                                        <c:forEach var="zone" items="${zoneName}">
+                                            <option value="${zone}">${zone}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
                             </div>
 
-                            <div class="form-row">
-                                <label>Zone_id</label>
-                                <input type="text" class="form-control" name="zone_id" required>
-                            </div>
+
+
 
                             <div class="form-group">
                                 <label>Description</label>
@@ -75,6 +84,6 @@
                 </div>
             </div>
         </div>
-         
+
     </body>
 </html>

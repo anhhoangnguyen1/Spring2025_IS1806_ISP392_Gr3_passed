@@ -206,13 +206,7 @@
                                 <th style="width: 150px">Status</th>
                                 <td>${product.status}</td>
                             </tr>
-                            <tr>
-                                <th style="width: 150px">Action</th>
-                                <td class="action-buttons">
-                                    <a href="editProduct.jsp?id=<%= request.getAttribute("id") %>" class="edit">Edit</a>
-                                    <a href="deleteProduct?id=<%= request.getAttribute("id") %>" class="delete" onclick="return confirm('Are you sure?')">Delete</a>
-                                </td>
-                            </tr>
+
                         </table>
                     </c:forEach>
                 </div>

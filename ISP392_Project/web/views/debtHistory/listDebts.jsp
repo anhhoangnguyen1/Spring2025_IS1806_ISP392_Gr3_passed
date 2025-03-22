@@ -28,6 +28,8 @@
                 Add Debt
             </button>
         </div>
+        <c:remove var="customer_id" scope="session" />
+
         <br>
         <div class="table-container">
             <form action="Debts" method="POST">
@@ -61,7 +63,7 @@
                                 <td class="sticky-col1">
                                     <div class="btn-group">
                                         <a class="btn btn-outline-info"
-                                           href="Debts?service=debtHistory&id=${debt.getId()}">
+                                           href="Debts?service=debtHistory&id=${debt.getCustomer_id()}">
                                             <i class="fas fa-info-circle"></i>
                                         </a>
 

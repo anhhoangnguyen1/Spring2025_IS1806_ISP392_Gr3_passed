@@ -18,41 +18,42 @@
                             <!-- Debt Type Field -->
                             <div class="form-group">
                                 <label>Debt Type</label>
-                                <select class="form-control" name="type">
+                                <select class="form-control" name="status">
                                     <option value="Customer repays debt">Customer repays debt</option> 
                                     <option value="Customer borrows debt">Customer pays</option>
                                     <option value="Owner repays debt">Owner repays debt</option> 
                                     <option value="Owner borrows debt">Owner borrows debt</option>
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control" name="name" value="" required>
+                            </div>
 
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="text" class="form-control" name="phone" value="" required>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label for="address">Address</label>
+                                <input type="text" class="form-control" name="address" value="" required>
+                            </div>
                             <!-- Amount Field -->
                             <div class="form-group">
                                 <label>Amount</label>
                                 <input type="text" oninput="formatNumber(event)" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="amount" required />
                             </div>
-
+                            <input type="hidden" name="balance" value="0.0"/>
                             <div class="form-group">
                                 <label>Image</label>
                                 <input  type="file" name="image">
                             </div>
 
                             <div class="form-group">
-                                <label>Name</label>
-                                <input type="text" name="debtorName" class="form-control" value="" required/>
-                            </div>
-                            <div class="form-group">
-                                <label>Address</label>
-                                <input type="text" name="debtorAddress" class="form-control" value="" required/>
-                            </div>
-                            <div class="form-group">
                                 <label>Create at</label>
                                 <input type="datetime-local" name="created_at" class="form-control" value="" required/>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Phone</label>
-                                <input type="text" name="debtorPhone"  class="form-control" value="" required/>
                             </div>
 
 
@@ -65,14 +66,6 @@
                                 <input type="hidden" name="createdBy" value="${sessionScope.username}" />
                             </div>
 
-                            <div class="form-group">
-                                <label>Status</label>
-                                <select class="form-control" name="status" required>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Paid">Paid</option>
-                                    <option value="Overdue">Overdue</option>
-                                </select>
-                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>

@@ -330,6 +330,25 @@ public class customerDAO extends DBContext {
         }
         return false;
     }
+// Lấy customerId từ số điện thoại
+
+    public Integer getCustomerIdByPhone(String phone) {
+        String sql = "SELECT id FROM Customers WHERE phone = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, phone);  // Gán số điện thoại vào PreparedStatement
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");  // Trả về customerId nếu tìm thấy
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;  // Trả về null nếu không tìm thấy khách hàng
+    }
 
 //    private Customers mapResultSetToCustomer(ResultSet rs) throws SQLException {
 //        return Customers.builder()
@@ -406,7 +425,6 @@ public class customerDAO extends DBContext {
 //                }
 //            }
 //        }
-
 
     }
 
