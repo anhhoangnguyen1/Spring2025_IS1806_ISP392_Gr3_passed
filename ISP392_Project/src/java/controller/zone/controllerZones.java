@@ -10,7 +10,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import org.json.JSONArray;
 
 /**
  *
@@ -35,6 +40,16 @@ public class controllerZones extends HttpServlet {
     }
 
     zoneDAO zoneDAO = new zoneDAO();
+
+    // Hàm loại bỏ dấu từ chuỗi tiếng Việt
+    private String removeDiacritics(String str) {
+        if (str == null) {
+            return null;
+        }
+        String normalized = java.text.Normalizer.normalize(str, java.text.Normalizer.Form.NFD);
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(normalized).replaceAll("");
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -133,7 +148,8 @@ public class controllerZones extends HttpServlet {
                     out.print("\"storeId\": " + (zone.getStoreId() != null ? "{\"id\": " + zone.getStoreId().getId() + "}" : "null") + ",");
                     out.print("\"createdBy\": \"" + zone.getCreatedBy() + "\",");
                     out.print("\"status\": \"" + zone.getStatus() + "\",");
-                    out.print("\"productName\": \"" + (zone.getProductId() != null ? zone.getProductId().getName() : "N/A") + "\"");
+                    out.print("\"productName\": \"" + (zone.getProductId() != null ? zone.getProductId().getName() : "N/A") + "\",");
+                    out.print("\"history\": " + (zone.getHistory() != null ? zone.getHistory().toString() : "[]"));
                     out.print("}");
                     if (i < zones.size() - 1) {
                         out.print(",");
@@ -154,6 +170,175 @@ public class controllerZones extends HttpServlet {
                 request.getRequestDispatcher("views/zone/detailZone.jsp").forward(request, response);
                 break;
             }
+            case "viewZoneHistory": {
+                int zoneId = Integer.parseInt(request.getParameter("zone_id"));
+                Zone zone = zoneDAO.getZoneById(zoneId);
+
+                // Lấy tham số tìm kiếm, sắp xếp và phân trang
+                String searchHistory = request.getParameter("searchHistory");
+                if (searchHistory == null) {
+                    searchHistory = "";
+                }
+                String sortHistoryBy = request.getParameter("sortHistoryBy");
+                if (sortHistoryBy == null) {
+                    sortHistoryBy = "productName";
+                }
+                String sortHistoryOrderTemp = request.getParameter("sortHistoryOrder");
+                if (sortHistoryOrderTemp == null || (!sortHistoryOrderTemp.equalsIgnoreCase("ASC") && !sortHistoryOrderTemp.equalsIgnoreCase("DESC"))) {
+                    sortHistoryOrderTemp = "ASC";
+                }
+                final String sortHistoryOrder = sortHistoryOrderTemp;
+
+                int historyPageIndex = 1;
+                try {
+                    historyPageIndex = Integer.parseInt(request.getParameter("historyPageIndex"));
+                    if (historyPageIndex < 1) {
+                        historyPageIndex = 1;
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+
+                // Lọc và sắp xếp historyList
+                List<Map<String, String>> historyList = zone.getHistoryList();
+                List<Map<String, String>> filteredHistoryList = new ArrayList<>();
+
+                // Chuẩn hóa từ khóa tìm kiếm
+                String searchHistoryNoDiacritics = removeDiacritics(searchHistory).toLowerCase();
+
+                // Lọc theo productName (không phân biệt dấu)
+                if (searchHistory.trim().isEmpty()) {
+                    filteredHistoryList.addAll(historyList);
+                } else {
+                    for (Map<String, String> entry : historyList) {
+                        String productNameNoDiacritics = removeDiacritics(entry.get("productName")).toLowerCase();
+                        if (productNameNoDiacritics.contains(searchHistoryNoDiacritics)) {
+                            filteredHistoryList.add(entry);
+                        }
+                    }
+                }
+
+                // Sắp xếp theo productName
+                if (sortHistoryBy.equals("productName")) {
+                    Collections.sort(filteredHistoryList, (o1, o2) -> {
+                        int result = o1.get("productName").compareToIgnoreCase(o2.get("productName"));
+                        return sortHistoryOrder.equalsIgnoreCase("ASC") ? result : -result;
+                    });
+                }
+
+                // Phân trang
+                int pageSize = 5;
+                int totalHistoryRecords = filteredHistoryList.size();
+                int historyEndPage = (totalHistoryRecords % pageSize == 0) ? totalHistoryRecords / pageSize : (totalHistoryRecords / pageSize) + 1;
+                if (historyPageIndex > historyEndPage) {
+                    historyPageIndex = historyEndPage;
+                }
+
+                int startIndex = (historyPageIndex - 1) * pageSize;
+                int endIndex = Math.min(startIndex + pageSize, totalHistoryRecords);
+                List<Map<String, String>> paginatedHistoryList = filteredHistoryList.subList(startIndex, endIndex);
+
+                request.setAttribute("zone", zone);
+                request.setAttribute("historyList", paginatedHistoryList);
+                request.setAttribute("searchHistory", searchHistory);
+                request.setAttribute("sortHistoryBy", sortHistoryBy);
+                request.setAttribute("sortHistoryOrder", sortHistoryOrder);
+                request.setAttribute("historyPageIndex", historyPageIndex);
+                request.setAttribute("historyEndPage", historyEndPage);
+                request.getRequestDispatcher("views/zone/zoneHistory.jsp").forward(request, response);
+                break;
+            }
+            case "searchHistoryAjax": {
+                int zoneId = Integer.parseInt(request.getParameter("zone_id"));
+                Zone zone = zoneDAO.getZoneById(zoneId);
+
+                // Lấy tham số tìm kiếm, sắp xếp và phân trang
+                String searchHistory = request.getParameter("searchHistory");
+                if (searchHistory == null) {
+                    searchHistory = "";
+                }
+                String sortHistoryBy = request.getParameter("sortHistoryBy");
+                if (sortHistoryBy == null) {
+                    sortHistoryBy = "productName";
+                }
+                String sortHistoryOrderTemp = request.getParameter("sortHistoryOrder");
+                if (sortHistoryOrderTemp == null || (!sortHistoryOrderTemp.equalsIgnoreCase("ASC") && !sortHistoryOrderTemp.equalsIgnoreCase("DESC"))) {
+                    sortHistoryOrderTemp = "ASC";
+                }
+                final String sortHistoryOrder = sortHistoryOrderTemp;
+
+                int historyPageIndex = 1;
+                try {
+                    historyPageIndex = Integer.parseInt(request.getParameter("historyPageIndex"));
+                    if (historyPageIndex < 1) {
+                        historyPageIndex = 1;
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+
+                // Lọc và sắp xếp historyList
+                List<Map<String, String>> historyList = zone.getHistoryList();
+                List<Map<String, String>> filteredHistoryList = new ArrayList<>();
+
+                // Chuẩn hóa từ khóa tìm kiếm
+                String searchHistoryNoDiacritics = removeDiacritics(searchHistory).toLowerCase();
+
+                // Lọc theo productName (không phân biệt dấu)
+                if (searchHistory.trim().isEmpty()) {
+                    filteredHistoryList.addAll(historyList);
+                } else {
+                    for (Map<String, String> entry : historyList) {
+                        String productNameNoDiacritics = removeDiacritics(entry.get("productName")).toLowerCase();
+                        if (productNameNoDiacritics.contains(searchHistoryNoDiacritics)) {
+                            filteredHistoryList.add(entry);
+                        }
+                    }
+                }
+
+                // Sắp xếp theo productName
+                if (sortHistoryBy.equals("productName")) {
+                    Collections.sort(filteredHistoryList, (o1, o2) -> {
+                        int result = o1.get("productName").compareToIgnoreCase(o2.get("productName"));
+                        return sortHistoryOrder.equalsIgnoreCase("ASC") ? result : -result;
+                    });
+                }
+
+                // Phân trang
+                int pageSize = 5;
+                int totalHistoryRecords = filteredHistoryList.size();
+                int historyEndPage = (totalHistoryRecords % pageSize == 0) ? totalHistoryRecords / pageSize : (totalHistoryRecords / pageSize) + 1;
+                if (historyPageIndex > historyEndPage) {
+                    historyPageIndex = historyEndPage;
+                }
+
+                int startIndex = (historyPageIndex - 1) * pageSize;
+                int endIndex = Math.min(startIndex + pageSize, totalHistoryRecords);
+                List<Map<String, String>> paginatedHistoryList = filteredHistoryList.subList(startIndex, endIndex);
+
+                // Trả về JSON
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                PrintWriter out = response.getWriter();
+                out.print("{");
+                out.print("\"historyList\": [");
+                for (int i = 0; i < paginatedHistoryList.size(); i++) {
+                    Map<String, String> entry = paginatedHistoryList.get(i);
+                    out.print("{");
+                    out.print("\"productName\": \"" + entry.get("productName") + "\",");
+                    out.print("\"startDate\": \"" + entry.get("startDate") + "\",");
+                    out.print("\"endDate\": \"" + (entry.get("endDate") != null ? entry.get("endDate") : "Now") + "\"");
+                    out.print("}");
+                    if (i < paginatedHistoryList.size() - 1) {
+                        out.print(",");
+                    }
+                }
+                out.print("],");
+                out.print("\"historyPageIndex\": " + historyPageIndex + ",");
+                out.print("\"historyEndPage\": " + historyEndPage);
+                out.print("}");
+                out.flush();
+                break;
+            }
+
             case "addZone": {
                 request.setAttribute("fullName", fullName);
                 request.getRequestDispatcher("views/zone/addZone.jsp").forward(request, response);

@@ -78,6 +78,8 @@ CREATE TABLE Zones (
 	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
 );
 
+ALTER TABLE Zones ADD COLUMN history JSON;
+
 -- Table Customers
 CREATE TABLE Customers (
     id INT AUTO_INCREMENT PRIMARY KEY,

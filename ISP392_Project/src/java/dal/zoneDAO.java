@@ -8,7 +8,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class zoneDAO extends DBContext {
 
@@ -29,10 +33,31 @@ public class zoneDAO extends DBContext {
         return list;
     }
 
+    public List<Zone> getAllZones() {
+        List<Zone> zones = new ArrayList<>();
+        String sql = "SELECT * FROM Zones";
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Zone zone = Zone.builder()
+                        .id(rs.getInt("id"))
+                        .name(rs.getString("name"))
+                        .description(rs.getString("description"))
+                        .createdBy(rs.getString("created_by"))
+                        .status(rs.getString("status"))
+                        .history(rs.getString("history") != null ? new JSONArray(rs.getString("history")) : null)
+                        .build();
+                zones.add(zone);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return zones;
+    }
+
     // Lấy tất cả zones, hỗ trợ phân trang
     public List<Zone> viewAllZones(String sortBy, int index) {
         List<Zone> zonesList = new ArrayList<>();
-        String sql = "SELECT id, name, description, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, store_id, status "
+        String sql = "SELECT id, name, description, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, store_id, status, product_id, history "
                 + "FROM Zones WHERE isDeleted = 0 "
                 + "ORDER BY " + (sortBy != null ? sortBy : "id") + " LIMIT 5 OFFSET ?";
 
@@ -91,7 +116,7 @@ public class zoneDAO extends DBContext {
             sortOrder = "ASC";
         }
 
-        String sql = "SELECT z.id, z.name, z.description, z.created_at, z.created_by, z.deletedAt, z.deleteBy, z.isDeleted, z.updated_at, z.store_id, z.status, z.product_id, p.name AS product_name "
+        String sql = "SELECT z.id, z.name, z.description, z.created_at, z.created_by, z.deletedAt, z.deleteBy, z.isDeleted, z.updated_at, z.store_id, z.status, z.product_id, p.name AS product_name, z.history "
                 + "FROM Zones z "
                 + "LEFT JOIN Products p ON z.product_id = p.id "
                 + "WHERE z.isDeleted = 0 ";
@@ -124,11 +149,9 @@ public class zoneDAO extends DBContext {
 
         return list;
     }
-    
-    
 
     public Zone getZoneById(int id) {
-        String sql = "SELECT z.*, p.name AS product_name "
+        String sql = "SELECT z.*, p.name AS product_name, z.history "
                 + "FROM Zones z "
                 + "LEFT JOIN Products p ON z.product_id = p.id "
                 + "WHERE z.id = ? AND z.isDeleted = 0";
@@ -144,11 +167,10 @@ public class zoneDAO extends DBContext {
         }
         return null;
     }
-    
-    
+
     public void insertZone(Zone zone) {
-        String sql = "INSERT INTO Zones (name, description, store_id, created_at, created_by, status) "
-                + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
+        String sql = "INSERT INTO Zones (name, description, store_id, created_at, created_by, status, history) "
+                + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, '[]')";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, zone.getName());
             if (zone.getDescription() != null) {
@@ -172,7 +194,7 @@ public class zoneDAO extends DBContext {
     // Cập nhật zone
     public void updateZone(Zone zone) {
         String sql = "UPDATE Zones SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP, store_id = ?, status = ?, "
-                + "deletedAt = ?, deleteBy = ?, isDeleted = ? WHERE id = ?";
+                + "deletedAt = ?, deleteBy = ?, isDeleted = ?, history = ? WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, zone.getName());
             if (zone.getDescription() != null) {
@@ -197,7 +219,8 @@ public class zoneDAO extends DBContext {
                 st.setNull(6, java.sql.Types.VARCHAR);
             }
             st.setBoolean(7, zone.isDeleted());
-            st.setInt(8, zone.getId());
+            st.setString(8, zone.getHistory() != null ? zone.getHistory().toString() : "[]");
+            st.setInt(9, zone.getId());
             st.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -221,6 +244,18 @@ public class zoneDAO extends DBContext {
             product.setName(rs.getString("product_name"));
         }
 
+        String historyJson = rs.getString("history");
+        JSONArray history = (historyJson == null || historyJson.isEmpty()) ? new JSONArray() : new JSONArray(historyJson);
+        List<Map<String, String>> historyList = new ArrayList<>();
+        for (int i = 0; i < history.length(); i++) {
+            JSONObject entry = history.getJSONObject(i);
+            Map<String, String> historyEntry = new HashMap<>();
+            historyEntry.put("productName", entry.getString("productName"));
+            historyEntry.put("startDate", entry.getString("startDate"));
+            historyEntry.put("endDate", entry.optString("endDate", null));
+            historyList.add(historyEntry);
+        }
+
         return Zone.builder()
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
@@ -234,10 +269,38 @@ public class zoneDAO extends DBContext {
                 .storeId(store)
                 .status(rs.getString("status"))
                 .productId(product)
+                .history(history)
+                .historyList(historyList) // Set the new field
                 .build();
     }
 
-    // Trong class zoneDAO
+    public String getProductNameById(int productId) {
+        String productName = "N/A";
+        String sql = "SELECT name FROM Product WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                productName = rs.getString("name");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productName;
+    }
+
+    public void updateZoneHistory(Zone zone) {
+        String sql = "UPDATE Zone SET history = ? WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, zone.getHistory().toString());
+            ps.setInt(2, zone.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Kiểm tra tên zone có tồn tại không
     public boolean checkNameExists(String name, int zoneId, Integer storeId) {
         String sql = "SELECT COUNT(*) FROM Zones WHERE name = ? AND id != ? AND isDeleted = 0";
         if (storeId != null) {
@@ -280,6 +343,7 @@ public class zoneDAO extends DBContext {
                 System.out.println("Created At: " + zone.getCreatedAt());
                 System.out.println("Store ID: " + (zone.getStoreId() != null ? zone.getStoreId().getId() : "null"));
                 System.out.println("Status: " + zone.getStatus());
+                System.out.println("History: " + zone.getHistory());
             }
         }
 //        

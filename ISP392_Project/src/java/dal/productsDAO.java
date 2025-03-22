@@ -16,6 +16,9 @@ import entity.Zone;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.sql.Timestamp;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -24,6 +27,86 @@ import java.util.Map;
 public class productsDAO extends DBContext {
 
     zoneDAO zones = new zoneDAO();
+
+    // Lấy productId hiện tại của Zone
+    private int getCurrentProductId(int zoneId) {
+        String sql = "SELECT product_id FROM Zones WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, zoneId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? rs.getInt("product_id") : -1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    // Lấy productName từ productId
+    private String getProductName(int productId) {
+        String sql = "SELECT name FROM Products WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? rs.getString("name") : "Unknown";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Unknown";
+        }
+    }
+
+    // Lấy Zone ID từ tên Zone
+    private int getZoneIdByName(String zoneName) {
+        String sql = "SELECT id FROM Zones WHERE name = ? AND isDeleted = 0";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, zoneName);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? rs.getInt("id") : -1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    // Cập nhật lịch sử JSON cho Zone
+    private void updateZoneHistory(int zoneId, int oldProductId, String oldProductName) {
+        String selectSql = "SELECT history FROM Zones WHERE id = ?";
+        String updateSql = "UPDATE Zones SET history = ? WHERE id = ?";
+        try {
+            // Lấy lịch sử hiện tại
+            JSONArray historyArray;
+            try (PreparedStatement psSelect = connection.prepareStatement(selectSql)) {
+                psSelect.setInt(1, zoneId);
+                ResultSet rs = psSelect.executeQuery();
+                if (rs.next()) {
+                    String historyJson = rs.getString("history");
+                    historyArray = (historyJson == null || historyJson.isEmpty()) ? new JSONArray() : new JSONArray(historyJson);
+                } else {
+                    historyArray = new JSONArray();
+                }
+            }
+
+            // Thêm thông tin sản phẩm cũ vào lịch sử
+            JSONObject historyEntry = new JSONObject();
+            historyEntry.put("productName", oldProductName);
+            historyEntry.put("startDate", getZoneStartDate(zoneId, oldProductId));
+            historyEntry.put("endDate", new Timestamp(System.currentTimeMillis()).toString());
+            historyArray.put(historyEntry);
+
+            // Cập nhật lịch sử mới
+            try (PreparedStatement psUpdate = connection.prepareStatement(updateSql)) {
+                psUpdate.setString(1, historyArray.toString());
+                psUpdate.setInt(2, zoneId);
+                psUpdate.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Hàm giả định lấy startDate (có thể thay bằng createdAt hoặc logic khác)
+    private String getZoneStartDate(int zoneId, int productId) {
+        return new Timestamp(System.currentTimeMillis() - 86400000).toString(); // Ví dụ: 1 ngày trước
+    }
 
     public List<Products> viewAllProducts(String command, int index) {
         List<Products> list = new ArrayList<>();
@@ -248,9 +331,17 @@ public class productsDAO extends DBContext {
                 try (PreparedStatement updateZoneStmt = connection.prepareStatement(sqlUpdateZone)) {
                     for (Zone zone : zones) {
                         if (zone.getName() != null && !zone.getName().trim().isEmpty()) {
-                            updateZoneStmt.setInt(1, product.getProductId());
-                            updateZoneStmt.setString(2, zone.getName());
-                            updateZoneStmt.executeUpdate();
+                            int zoneId = getZoneIdByName(zone.getName());
+                            if (zoneId != -1) {
+                                int oldProductId = getCurrentProductId(zoneId);
+                                if (oldProductId != -1 && oldProductId != product.getProductId()) {
+                                    String oldProductName = getProductName(oldProductId);
+                                    updateZoneHistory(zoneId, oldProductId, oldProductName);
+                                }
+                                updateZoneStmt.setInt(1, product.getProductId());
+                                updateZoneStmt.setString(2, zone.getName());
+                                updateZoneStmt.executeUpdate();
+                            }
                         }
                     }
                 }
@@ -327,14 +418,24 @@ public class productsDAO extends DBContext {
             if (zones != null && !zones.isEmpty()) {
                 try (PreparedStatement updateZoneStmt = connection.prepareStatement(sqlUpdateZone)) {
                     for (Zone zone : zones) {
-                        updateZoneStmt.setInt(1, productId);
-                        updateZoneStmt.setString(2, zone.getName());
-                        updateZoneStmt.executeUpdate();
+                        if (zone.getName() != null && !zone.getName().trim().isEmpty()) {
+                            int zoneId = getZoneIdByName(zone.getName());
+                            if (zoneId != -1) {
+                                int oldProductId = getCurrentProductId(zoneId);
+                                if (oldProductId != -1 && oldProductId != productId) {
+                                    String oldProductName = getProductName(oldProductId);
+                                    updateZoneHistory(zoneId, oldProductId, oldProductName);
+                                }
+                                updateZoneStmt.setInt(1, productId);
+                                updateZoneStmt.setString(2, zone.getName());
+                                updateZoneStmt.executeUpdate();
+                            }
+                        }
                     }
                 }
             }
 
-            // ✅ Commit transaction
+            // Commit transaction
             connection.commit();
             return true;
 
@@ -401,7 +502,7 @@ public class productsDAO extends DBContext {
 
     public static void main(String[] args) {
         productsDAO productsDAO = new productsDAO();
- 
+
 
         String name = "id";
         int threshold = 1300; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
