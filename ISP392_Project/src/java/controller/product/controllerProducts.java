@@ -369,7 +369,7 @@ public class controllerProducts extends HttpServlet {
                     zones.add(zone);
                 }
             }
-            boolean success = products.editProduct(product, zones, fullName);
+            boolean success = products.insertProduct(product, zones, fullName);
 
             if (success) {
                 request.setAttribute("Notification", "Product added successfully!");
