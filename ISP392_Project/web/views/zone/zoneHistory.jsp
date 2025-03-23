@@ -115,9 +115,9 @@
                     </li>
                     <c:if test="${historyPageIndex > 3}">
                         <li class="page-item disabled"><span class="page-link">...</span></li>
-                    </c:if>
-                    <c:forEach begin="${historyPageIndex - 1}" end="${historyPageIndex + 1}" var="page">
-                        <c:if test="${page > 1 && page < historyEndPage}">
+                        </c:if>
+                        <c:forEach begin="${historyPageIndex - 1 > 0 ? historyPageIndex - 1 : 1}" end="${historyPageIndex + 1 < historyEndPage ? historyPageIndex + 1 : historyEndPage}" var="page">
+                            <c:if test="${page > 1 && page < historyEndPage}">
                             <li class="page-item ${historyPageIndex == page ? 'active' : ''}">
                                 <a class="page-link page-nav" data-page="${page}">${page}</a>
                             </li>
@@ -125,8 +125,8 @@
                     </c:forEach>
                     <c:if test="${historyPageIndex < historyEndPage - 2}">
                         <li class="page-item disabled"><span class="page-link">...</span></li>
-                    </c:if>
-                    <c:if test="${historyEndPage > 1}">
+                        </c:if>
+                        <c:if test="${historyEndPage > 1}">
                         <li class="page-item ${historyPageIndex == historyEndPage ? 'active' : ''}">
                             <a class="page-link page-nav" data-page="${historyEndPage}">${historyEndPage}</a>
                         </li>
@@ -153,6 +153,7 @@
 
             // Hàm tìm kiếm lịch sử
             function searchHistory(keyword, page, sortBy, sortOrder) {
+                if (page < 1) page = 1; // Đảm bảo page không nhỏ hơn 1
                 $.ajax({
                     url: '<%= request.getContextPath() %>/zones',
                     type: 'GET',
@@ -190,12 +191,12 @@
                 } else {
                     historyList.forEach(function (entry) {
                         tbody.append(
-                            '<tr>' +
-                            '<td>' + entry.productName + '</td>' +
-                            '<td>' + entry.startDate + '</td>' +
-                            '<td>' + entry.endDate + '</td>' +
-                            '</tr>'
-                        );
+                                '<tr>' +
+                                '<td>' + entry.productName + '</td>' +
+                                '<td>' + entry.startDate + '</td>' +
+                                '<td>' + entry.endDate + '</td>' +
+                                '</tr>'
+                                );
                     });
                 }
             }
@@ -207,13 +208,13 @@
 
                 if (currentPage > 1) {
                     pagination.append(
-                        '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentPage - 1) + '"><i class="fa fa-angle-left"></i></a></li>'
-                    );
+                            '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentPage - 1) + '"><i class="fa fa-angle-left"></i></a></li>'
+                            );
                 }
 
                 pagination.append(
-                    '<li class="page-item ' + (currentPage === 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>'
-                );
+                        '<li class="page-item ' + (currentPage === 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>'
+                        );
 
                 if (currentPage > 3) {
                     pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
@@ -222,8 +223,8 @@
                 for (let page = currentPage - 1; page <= currentPage + 1; page++) {
                     if (page > 1 && page < endPage) {
                         pagination.append(
-                            '<li class="page-item ' + (currentPage === page ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + page + '">' + page + '</a></li>'
-                        );
+                                '<li class="page-item ' + (currentPage === page ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + page + '">' + page + '</a></li>'
+                                );
                     }
                 }
 
@@ -233,14 +234,14 @@
 
                 if (endPage > 1) {
                     pagination.append(
-                        '<li class="page-item ' + (currentPage === endPage ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + endPage + '">' + endPage + '</a></li>'
-                    );
+                            '<li class="page-item ' + (currentPage === endPage ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + endPage + '">' + endPage + '</a></li>'
+                            );
                 }
 
                 if (currentPage < endPage) {
                     pagination.append(
-                        '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentPage + 1) + '"><i class="fa fa-angle-right"></i></a></li>'
-                    );
+                            '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentPage + 1) + '"><i class="fa fa-angle-right"></i></a></li>'
+                            );
                 }
 
                 $('.page-nav').on('click', function (e) {

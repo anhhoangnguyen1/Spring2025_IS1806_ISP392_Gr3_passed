@@ -12,10 +12,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONArray;
 
 /**
  *
@@ -196,6 +194,7 @@ public class controllerZones extends HttpServlet {
                         historyPageIndex = 1;
                     }
                 } catch (NumberFormatException ignored) {
+                    historyPageIndex = 1; // Giá trị mặc định nếu parse thất bại
                 }
 
                 // Lọc và sắp xếp historyList
@@ -235,7 +234,30 @@ public class controllerZones extends HttpServlet {
 
                 int startIndex = (historyPageIndex - 1) * pageSize;
                 int endIndex = Math.min(startIndex + pageSize, totalHistoryRecords);
-                List<Map<String, String>> paginatedHistoryList = filteredHistoryList.subList(startIndex, endIndex);
+
+                // Đảm bảo startIndex không âm và endIndex hợp lệ
+                if (startIndex < 0) {
+                    startIndex = 0;
+                }
+                if (totalHistoryRecords == 0) {
+                    startIndex = 0;
+                    endIndex = 0;
+                } else if (startIndex >= totalHistoryRecords) {
+                    startIndex = totalHistoryRecords - 1;
+                    endIndex = totalHistoryRecords;
+                }
+
+                List<Map<String, String>> paginatedHistoryList;
+                if (filteredHistoryList.isEmpty()) {
+                    paginatedHistoryList = new ArrayList<>();
+                } else {
+                    startIndex = (historyPageIndex - 1) * pageSize;
+                    endIndex = Math.min(startIndex + pageSize, totalHistoryRecords);
+                    if (startIndex < 0) {
+                        startIndex = 0;
+                    }
+                    paginatedHistoryList = filteredHistoryList.subList(startIndex, endIndex);
+                }
 
                 request.setAttribute("zone", zone);
                 request.setAttribute("historyList", paginatedHistoryList);
@@ -312,6 +334,19 @@ public class controllerZones extends HttpServlet {
 
                 int startIndex = (historyPageIndex - 1) * pageSize;
                 int endIndex = Math.min(startIndex + pageSize, totalHistoryRecords);
+
+                // Đảm bảo startIndex không âm và endIndex hợp lệ
+                if (startIndex < 0) {
+                    startIndex = 0;
+                }
+                if (totalHistoryRecords == 0) {
+                    startIndex = 0;
+                    endIndex = 0;
+                } else if (startIndex >= totalHistoryRecords) {
+                    startIndex = totalHistoryRecords - 1;
+                    endIndex = totalHistoryRecords;
+                }
+
                 List<Map<String, String>> paginatedHistoryList = filteredHistoryList.subList(startIndex, endIndex);
 
                 // Trả về JSON
