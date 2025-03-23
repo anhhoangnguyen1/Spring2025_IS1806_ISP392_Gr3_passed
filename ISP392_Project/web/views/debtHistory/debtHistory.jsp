@@ -156,9 +156,23 @@
                         </c:if>
 
 
-                        <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#DebtModal">
-                            <i class="fas fa-plus"></i> Add Debt
-                        </button>
+                        <div class="d-flex justify-content-between mb-3">
+                            <a href="/ISP392_Project/Debts" class="btn btn-outline-primary">Back to debt</a>
+                            <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#DebtModal">
+                                <i class="fas fa-plus"></i> Add Debt
+                            </button>
+                        </div>
+                        <c:if test="${not empty list}">
+                            <c:set var="customer" value="${list[0]}" />
+                            <div class="customer-info border p-3 rounded">
+                                <h3 class="mb-3">Customer Information</h3>
+                                <p><strong>Name:</strong> ${customer.name}</p>
+                                <p><strong>Phone:</strong> ${customer.phone}</p>
+                                <p><strong>Address:</strong> ${customer.address}</p>
+                            </div>
+                        </c:if>
+
+
                         <div class="table-container">
                             <table class="table-bordered">
                                 <thead>
@@ -178,9 +192,13 @@
                                     <c:forEach var="debt" items="${list}">
                                         <tr>
                                             <td>${debt.id}</td>
-                                            <td class="amount ${debt.type == '-' ? 'text-danger' : ''}">
-                                                <fmt:formatNumber value="${debt.amount}" pattern="###,##0"/>
+                                            <td class="amount ${debt.type == '-' ? 'text-danger' : ''}" 
+                                                data-amount="${debt.amount}" 
+                                                data-type="${debt.type}">
+                                                <fmt:formatNumber value="${debt.type == '-' ? -debt.amount : debt.amount}" pattern="###,##0"/>
                                             </td>
+
+
 
                                             <td>
                                                 <img src="images/${debt.image}" class="myImg" style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;" alt="Debt evidence"/>
@@ -287,7 +305,7 @@
             </div>
         </div> 
         <div class="modal fade" id="debtDetailModal" tabindex="-1" role="dialog" aria-labelledby="debtDetailLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Debt Details - <strong id="modalDebtId"></strong></h5>
@@ -296,109 +314,115 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label><strong>Amount:</strong></label>
-                            <input id="modalDebtAmount" type="text" class="form-control" readonly>
+                        <div class="row">
+                            <!-- Cột trái -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label><strong>Amount:</strong></label>
+                                    <input id="modalDebtAmount" type="text" class="form-control" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Status:</strong></label>
+                                    <input id="modalDebtStatus" type="text" class="form-control" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Cột phải -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label><strong>Created At:</strong></label>
+                                    <input id="modalDebtCreatedAt" type="text" class="form-control" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Description:</strong></label>
+                                    <textarea id="modalDebtDescription" class="form-control" rows="3" readonly></textarea>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label><strong>Type:</strong></label>
-                            <input id="modalDebtType" type="text" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label><strong>Created At:</strong></label>
-                            <input id="modalDebtCreatedAt" type="text" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label><strong>Description:</strong></label>
-                            <input id="modalDebtDescription" type="text" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label><strong>Status:</strong></label>
-                            <input id="modalDebtStatus" type="text" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
+
+                        <!-- Phần ảnh chứng cứ (Evidence) bên dưới) -->
+                        <div class="form-group text-center mt-3">
                             <label><strong>Evidence:</strong></label>
-                            <img id="modalDebtImage" class="myImg" style="width: 100%; height: auto; object-fit: cover; border-radius: 8px;" alt="Debt evidence">
+                            <div>
+                                <img id="modalDebtImage" class="myImg"
+                                     style="max-width: 100%; max-height: 300px; object-fit: contain;" 
+                                     alt="Debt evidence">
+                            </div>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
         </div>
+
     </body>
 
     <script>
-
         document.addEventListener("DOMContentLoaded", function () {
-            let totalAmount = 0;
+            // ✅ Tính tổng số tiền chính xác (bao gồm cả số âm)
+            let total = 0;
+            document.querySelectorAll(".amount").forEach(function (amountElement) {
+                let text = amountElement.textContent.trim(); // Lấy nội dung số liệu
+                let amount = parseFloat(text.replace(/,/g, "")) || 0; // Xóa dấu phẩy rồi chuyển thành số
 
-            // Lấy tất cả các ô có class 'amount'
-            document.querySelectorAll(".amount").forEach(function (cell) {
-                let amountText = cell.innerText.replace(/,/g, "").trim(); // Xóa dấu phẩy, khoảng trắng
-
-                // Kiểm tra nếu có dấu '-' thì chuyển thành số âm
-                let amount = amountText.startsWith("-") ? -parseFloat(amountText.substring(1)) : parseFloat(amountText);
-
-                if (!isNaN(amount)) {
-                    totalAmount += amount;
+                // Kiểm tra nếu có dấu '-' hoặc class 'text-danger' (dành cho nợ)
+                if (text.includes("-") || amountElement.classList.contains("text-danger")) {
+                    amount = -Math.abs(amount); // Đảm bảo luôn là số âm
                 }
+
+                total += amount;
             });
 
-            // Hiển thị tổng số tiền, nếu là số nguyên thì không hiển thị .00
-            let formattedAmount = totalAmount % 1 === 0 ? totalAmount.toLocaleString("en-US") : totalAmount.toLocaleString("en-US", {minimumFractionDigits: 2});
-            document.getElementById("totalAmount").innerText = formattedAmount;
-        });
-        var modal = document.getElementById("myModal");
+            // Hiển thị tổng số tiền với định dạng số có dấu phân cách hàng nghìn
+            document.getElementById("totalAmount").textContent = total.toLocaleString();
 
-// Get all images with class "myImg"
-        var imgs = document.getElementsByClassName("myImg");
-        var modalImg = document.getElementById("img01");
-        var captionText = document.getElementById("caption");
+            // ✅ Hiển thị modal ảnh
+            var modal = document.getElementById("myModal");
+            var modalImg = document.getElementById("img01");
+            var captionText = document.getElementById("caption");
 
-// Loop through all images and add event listener to each
-        document.querySelectorAll(".myImg").forEach(img => {
-            img.addEventListener("click", function () {
-                modal.style.display = "block";
-                modalImg.src = this.src;
-                captionText.innerHTML = this.alt;
+            document.querySelectorAll(".myImg").forEach(img => {
+                img.addEventListener("click", function () {
+                    modal.style.display = "block";
+                    modalImg.src = this.src;
+                    captionText.innerHTML = this.alt;
+                });
             });
-        });
 
-
-// Get the <span> element that closes the modal
-        document.querySelectorAll(".close").forEach(closeBtn => {
-            closeBtn.addEventListener("click", function () {
-                modal.style.display = "none";
+            document.querySelectorAll(".close").forEach(closeBtn => {
+                closeBtn.addEventListener("click", function () {
+                    modal.style.display = "none";
+                });
             });
-        });
-        document.addEventListener("DOMContentLoaded", function () {
+
+            // ✅ Hiển thị modal chi tiết nợ
             document.querySelectorAll(".openDebtModal").forEach(button => {
                 button.addEventListener("click", function () {
                     // Lấy dữ liệu từ data-attribute của nút được click
                     const debtId = this.getAttribute("data-id");
                     const amount = this.getAttribute("data-amount");
-                    const type = this.getAttribute("data-type");
                     const createdAt = this.getAttribute("data-createdat");
                     const description = this.getAttribute("data-description");
                     const status = this.getAttribute("data-status");
                     const image = this.getAttribute("data-image");
 
-                    // Gán dữ liệu vào input readonly
+                    // Gán dữ liệu vào modal
                     document.getElementById("modalDebtId").textContent = debtId;
                     document.getElementById("modalDebtAmount").value = amount;
-                    document.getElementById("modalDebtType").value = type;
                     document.getElementById("modalDebtCreatedAt").value = createdAt;
                     document.getElementById("modalDebtDescription").value = description;
                     document.getElementById("modalDebtStatus").value = status;
                     document.getElementById("modalDebtImage").src = image;
 
-                    // Hiển thị modal
+                    // Hiển thị modal Bootstrap
                     $("#debtDetailModal").modal("show");
                 });
             });
         });
+
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>

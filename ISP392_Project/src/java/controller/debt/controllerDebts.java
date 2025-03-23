@@ -92,11 +92,13 @@ public class controllerDebts extends HttpServlet {
 
             request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
         }
+        
         if (service.equals("searchDebts")) {
-            int id = Integer.parseInt(request.getParameter("browser"));
+            String name = request.getParameter("browser");
             try {
-                List<DebtNote> list = debts.searchDebts(id);
+                List<DebtNote> list = debts.searchDebts(name);
                 request.setAttribute("list", list);
+                request.setAttribute("name", name);
                 request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
             } catch (NumberFormatException e) {
             }

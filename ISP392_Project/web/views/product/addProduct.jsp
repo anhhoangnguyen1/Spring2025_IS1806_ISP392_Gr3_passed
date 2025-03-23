@@ -38,19 +38,14 @@
                                 <input  type="file" name="image" required>
                             </div>
                             <div class="form-row">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label>Price</label>
                                     <input type="text" oninput="formatNumber(event)" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="price" required />
                                 </div>
 
-                                <div class="form-group col-md-4">
-                                    <label>Quantity (kg)</label>
-                                    <input type="number" class="form-control" name="quantity" required>
-                                </div>
-
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label>Zone name</label>
-                                    <select class="form-control selectpicker" name="zoneName" multiple required data-live-search="true">
+                                    <select class="form-control selectpicker" name="zoneName" multiple data-live-search="true">
                                         <c:forEach var="zone" items="${zoneName}">
                                             <option value="${zone}">${zone}</option>
                                         </c:forEach>

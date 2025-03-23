@@ -20,8 +20,12 @@
                             <h4 class="modal-title">Debt List - record ${customer.debtNotes.size()}</h4>
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         </div>
-                        <h3 class="font-weight-bold">${customer.name} - ${customer.phone}</h3>
-
+                        <div class="customer-info border p-3 rounded">
+                            <h3 class="mb-3">Customer Information</h3>
+                            <p><strong>Name:</strong> ${customer.name}</p>
+                            <p><strong>Phone:</strong> ${customer.phone}</p>
+                            <p><strong>Address:</strong> ${customer.address}</p>
+                        </div>
                         <button type="button" class="btn btn-outline-success ml-auto mr-5" data-toggle="modal" data-target="#DebtModal${customer.id}">
                             <i class="fas fa-plus"></i> Add
                         </button>
@@ -102,46 +106,66 @@
 
         </c:forEach>   
         <div class="modal fade" id="debtDetailModal" tabindex="-1" role="dialog" aria-labelledby="debtDetailLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Debt Details - <strong id="modalDebtId"></strong></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-file-invoice-dollar"></i> Debt Details - <strong id="modalDebtId"></strong>
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
+
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label><strong>Amount:</strong></label>
-                            <input id="modalDebtAmount" type="text" class="form-control" readonly>
+                        <div class="row">
+                            <!-- Thông tin chính -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="text-muted"><strong>Amount:</strong></label>
+                                    <input id="modalDebtAmount" type="text" class="form-control bg-light border-0" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-muted"><strong>Type:</strong></label>
+                                    <input id="modalDebtType" type="text" class="form-control bg-light border-0" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-muted"><strong>Created At:</strong></label>
+                                    <input id="modalDebtCreatedAt" type="text" class="form-control bg-light border-0" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Thông tin bổ sung -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="text-muted"><strong>Description:</strong></label>
+                                    <textarea id="modalDebtDescription" class="form-control bg-light border-0" rows="3" readonly></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-muted"><strong>Status:</strong></label>
+                                    <input id="modalDebtStatus" type="text" class="form-control bg-light border-0" readonly>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label><strong>Type:</strong></label>
-                            <input id="modalDebtType" type="text" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label><strong>Created At:</strong></label>
-                            <input id="modalDebtCreatedAt" type="text" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label><strong>Description:</strong></label>
-                            <input id="modalDebtDescription" type="text" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label><strong>Status:</strong></label>
-                            <input id="modalDebtStatus" type="text" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label><strong>Evidence:</strong></label>
-                            <img id="modalDebtImage" class="myImg" style="width: 100%; height: auto; object-fit: cover; border-radius: 8px;" alt="Debt evidence">
+
+                        <!-- Ảnh chứng cứ -->
+                        <div class="text-center mt-3">
+                            <label class="text-muted"><strong>Evidence:</strong></label>
+                            <div class="border p-2 rounded bg-light">
+                                <img id="modalDebtImage" class="myImg img-fluid rounded shadow" style="max-height: 300px; object-fit: cover;" alt="Debt evidence">
+                            </div>
                         </div>
                     </div>
+
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Close
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+
 
 
         <!-- Modal để hiển thị ảnh -->
@@ -151,100 +175,101 @@
             <div id="caption"></div>
         </div>
         <script>
- function myFunction(customerId) {
-    var input, filter, table, tr, td, i, txtValue;
-    input = document.getElementById("myInput");
-    filter = input.value.toUpperCase();
+            function myFunction(customerId) {
+                var input, filter, table, tr, td, i, txtValue;
+                input = document.getElementById("myInput");
+                filter = input.value.toUpperCase();
 
-    // Tạo ID động dựa trên customerId
-    table = document.getElementById(`myTable1-${customerId}`);
+                // Tạo ID động dựa trên customerId
+                table = document.getElementById(`myTable1-${customerId}`);
 
-    if (!table) return; // Tránh lỗi nếu bảng không tồn tại
+                if (!table)
+                    return; // Tránh lỗi nếu bảng không tồn tại
 
-    tr = table.getElementsByTagName("tr");
+                tr = table.getElementsByTagName("tr");
 
-    for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[0];
-        if (td) {
-            txtValue = td.textContent || td.innerText;
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-            }
-        }
-    }
-}
-
-$(document).ready(function () {
-    // Gỡ sự kiện trước khi gắn lại để tránh gọi lặp vô hạn
-    $(document).off("click", ".openDebtModal").on("click", ".openDebtModal", function () {
-        try {
-            console.log("Opening modal...");
-            let debtId = $(this).data("id");
-            let amount = $(this).data("amount");
-            let type = $(this).data("type");
-            let createdAt = $(this).data("createdat");
-            let description = $(this).data("description");
-            let status = $(this).data("status");
-            let imageSrc = $(this).data("image");
-
-            console.log("Debt Data:", { debtId, amount, type, createdAt, description, status, imageSrc });
-
-            $("#modalDebtId").text(debtId);
-            $("#modalDebtAmount").val(amount);
-            $("#modalDebtType").val(type);
-            $("#modalDebtCreatedAt").val(createdAt);
-            $("#modalDebtDescription").val(description);
-            $("#modalDebtStatus").val(status);
-
-            if (imageSrc && imageSrc !== "images/null") {
-                console.log("Loading image:", imageSrc);
-                $("#modalDebtImage").attr("src", imageSrc).show();
-            } else {
-                $("#modalDebtImage").hide();
+                for (i = 0; i < tr.length; i++) {
+                    td = tr[i].getElementsByTagName("td")[0];
+                    if (td) {
+                        txtValue = td.textContent || td.innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                        } else {
+                            tr[i].style.display = "none";
+                        }
+                    }
+                }
             }
 
-            $("#debtDetailModal").modal("show");
-            console.log("Modal shown successfully");
-        } catch (error) {
-            console.error("Error opening modal:", error);
-        }
-    });
+            $(document).ready(function () {
+                // Gỡ sự kiện trước khi gắn lại để tránh gọi lặp vô hạn
+                $(document).off("click", ".openDebtModal").on("click", ".openDebtModal", function () {
+                    try {
+                        console.log("Opening modal...");
+                        let debtId = $(this).data("id");
+                        let amount = $(this).data("amount");
+                        let type = $(this).data("type");
+                        let createdAt = $(this).data("createdat");
+                        let description = $(this).data("description");
+                        let status = $(this).data("status");
+                        let imageSrc = $(this).data("image");
 
-                    
+                        console.log("Debt Data:", {debtId, amount, type, createdAt, description, status, imageSrc});
 
-    // Chỉ cho phép modal mở một lần
-    $("#myModal").one("show.bs.modal", function () {
-        $(this).addClass("already-open");
-    });
+                        $("#modalDebtId").text(debtId);
+                        $("#modalDebtAmount").val(amount);
+                        $("#modalDebtType").val(type);
+                        $("#modalDebtCreatedAt").val(createdAt);
+                        $("#modalDebtDescription").val(description);
+                        $("#modalDebtStatus").val(status);
 
-    // Modal hình ảnh
-    $(".myImg").on("click", function () {
-        var modal = $("#myModal");
-        var modalImg = $("#img01");
-        var captionText = $("#caption");
+                        if (imageSrc && imageSrc !== "images/null") {
+                            console.log("Loading image:", imageSrc);
+                            $("#modalDebtImage").attr("src", imageSrc).show();
+                        } else {
+                            $("#modalDebtImage").hide();
+                        }
 
-        modal.show();
-        modalImg.attr("src", this.src);
-        captionText.text(this.alt);
-    });
+                        $("#debtDetailModal").modal("show");
+                        console.log("Modal shown successfully");
+                    } catch (error) {
+                        console.error("Error opening modal:", error);
+                    }
+                });
 
-    // Đóng modal khi bấm vào nền đen
-    $("#myModal").on("click", function (e) {
-        if (e.target === this) {
-            $(this).hide();
-        }
-    });
 
-    // Gỡ sự kiện cũ trước khi gắn mới
-    $(document).off("click", ".modal-button").on("click", ".modal-button", function () {
-        console.log("Modal button clicked");
-    });
 
-    // Tắt enforceFocus để tránh lỗi focus lặp vô hạn
-    $.fn.modal.Constructor.prototype._enforceFocus = function () {};
-});
+                // Chỉ cho phép modal mở một lần
+                $("#myModal").one("show.bs.modal", function () {
+                    $(this).addClass("already-open");
+                });
+
+                // Modal hình ảnh
+                $(".myImg").on("click", function () {
+                    var modal = $("#myModal");
+                    var modalImg = $("#img01");
+                    var captionText = $("#caption");
+
+                    modal.show();
+                    modalImg.attr("src", this.src);
+                    captionText.text(this.alt);
+                });
+
+                // Đóng modal khi bấm vào nền đen
+                $("#myModal").on("click", function (e) {
+                    if (e.target === this) {
+                        $(this).hide();
+                    }
+                });
+
+                // Gỡ sự kiện cũ trước khi gắn mới
+                $(document).off("click", ".modal-button").on("click", ".modal-button", function () {
+                    console.log("Modal button clicked");
+                });
+
+                // Tắt enforceFocus để tránh lỗi focus lặp vô hạn
+                $.fn.modal.Constructor.prototype._enforceFocus = function () {};
+            });
 
         </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
