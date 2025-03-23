@@ -1,10 +1,12 @@
 package controller.zone;
 
-import dao.zoneDAO;
+import dal.zoneDAO;
 import entity.Stores;
 import entity.Zone;
+import dal.productsDAO; // Thêm import
 import java.io.IOException;
 import java.io.PrintWriter;
+import entity.Products; // Thêm import nếu cần
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +40,7 @@ public class controllerZones extends HttpServlet {
     }
 
     zoneDAO zoneDAO = new zoneDAO();
+    productsDAO productsDAO = new productsDAO(); // Khai báo productsDAO
 
     // Hàm loại bỏ dấu từ chuỗi tiếng Việt
     private String removeDiacritics(String str) {
@@ -177,6 +180,7 @@ public class controllerZones extends HttpServlet {
                 if (searchHistory == null) {
                     searchHistory = "";
                 }
+                String filterId = request.getParameter("filterId"); // Thêm filterId
                 String sortHistoryBy = request.getParameter("sortHistoryBy");
                 if (sortHistoryBy == null) {
                     sortHistoryBy = "productName";
@@ -210,7 +214,10 @@ public class controllerZones extends HttpServlet {
                 } else {
                     for (Map<String, String> entry : historyList) {
                         String productNameNoDiacritics = removeDiacritics(entry.get("productName")).toLowerCase();
-                        if (productNameNoDiacritics.contains(searchHistoryNoDiacritics)) {
+                        String historyId = entry.get("id");
+                        // Sửa: So sánh filterId với historyId chính xác hơn
+                        boolean matchesId = (filterId == null || filterId.trim().isEmpty() || historyId.equals(filterId));
+                        if ((searchHistory.trim().isEmpty() || productNameNoDiacritics.contains(searchHistoryNoDiacritics)) && matchesId) {
                             filteredHistoryList.add(entry);
                         }
                     }
@@ -220,6 +227,11 @@ public class controllerZones extends HttpServlet {
                 if (sortHistoryBy.equals("productName")) {
                     Collections.sort(filteredHistoryList, (o1, o2) -> {
                         int result = o1.get("productName").compareToIgnoreCase(o2.get("productName"));
+                        return sortHistoryOrder.equalsIgnoreCase("ASC") ? result : -result;
+                    });
+                } else if (sortHistoryBy.equals("id")) { // Thêm sắp xếp theo id
+                    Collections.sort(filteredHistoryList, (o1, o2) -> {
+                        int result = o1.get("id").compareTo(o2.get("id"));
                         return sortHistoryOrder.equalsIgnoreCase("ASC") ? result : -result;
                     });
                 }
@@ -262,6 +274,7 @@ public class controllerZones extends HttpServlet {
                 request.setAttribute("zone", zone);
                 request.setAttribute("historyList", paginatedHistoryList);
                 request.setAttribute("searchHistory", searchHistory);
+                request.setAttribute("filterId", filterId); // Truyền filterId vào JSP
                 request.setAttribute("sortHistoryBy", sortHistoryBy);
                 request.setAttribute("sortHistoryOrder", sortHistoryOrder);
                 request.setAttribute("historyPageIndex", historyPageIndex);
@@ -278,6 +291,7 @@ public class controllerZones extends HttpServlet {
                 if (searchHistory == null) {
                     searchHistory = "";
                 }
+                String filterId = request.getParameter("filterId"); // Thêm filterId
                 String sortHistoryBy = request.getParameter("sortHistoryBy");
                 if (sortHistoryBy == null) {
                     sortHistoryBy = "productName";
@@ -310,7 +324,10 @@ public class controllerZones extends HttpServlet {
                 } else {
                     for (Map<String, String> entry : historyList) {
                         String productNameNoDiacritics = removeDiacritics(entry.get("productName")).toLowerCase();
-                        if (productNameNoDiacritics.contains(searchHistoryNoDiacritics)) {
+                        String historyId = entry.get("id");
+                        // Sửa: So sánh filterId với historyId chính xác hơn
+                        boolean matchesId = (filterId == null || filterId.trim().isEmpty() || historyId.equals(filterId));
+                        if ((searchHistory.trim().isEmpty() || productNameNoDiacritics.contains(searchHistoryNoDiacritics)) && matchesId) {
                             filteredHistoryList.add(entry);
                         }
                     }
@@ -320,6 +337,11 @@ public class controllerZones extends HttpServlet {
                 if (sortHistoryBy.equals("productName")) {
                     Collections.sort(filteredHistoryList, (o1, o2) -> {
                         int result = o1.get("productName").compareToIgnoreCase(o2.get("productName"));
+                        return sortHistoryOrder.equalsIgnoreCase("ASC") ? result : -result;
+                    });
+                } else if (sortHistoryBy.equals("id")) {
+                    Collections.sort(filteredHistoryList, (o1, o2) -> {
+                        int result = o1.get("id").compareTo(o2.get("id"));
                         return sortHistoryOrder.equalsIgnoreCase("ASC") ? result : -result;
                     });
                 }
@@ -358,9 +380,11 @@ public class controllerZones extends HttpServlet {
                 for (int i = 0; i < paginatedHistoryList.size(); i++) {
                     Map<String, String> entry = paginatedHistoryList.get(i);
                     out.print("{");
+                    out.print("\"id\": \"" + entry.get("id") + "\",");
                     out.print("\"productName\": \"" + entry.get("productName") + "\",");
                     out.print("\"startDate\": \"" + entry.get("startDate") + "\",");
-                    out.print("\"endDate\": \"" + (entry.get("endDate") != null ? entry.get("endDate") : "Now") + "\"");
+                    out.print("\"endDate\": \"" + (entry.get("endDate") != null ? entry.get("endDate") : "Now") + "\",");
+                    out.print("\"updatedBy\": \"" + entry.get("updatedBy") + "\"");
                     out.print("}");
                     if (i < paginatedHistoryList.size() - 1) {
                         out.print(",");
@@ -488,6 +512,7 @@ public class controllerZones extends HttpServlet {
             int zoneId = Integer.parseInt(request.getParameter("zone_id"));
             String name = request.getParameter("name");
             String description = request.getParameter("description");
+            String productIdStr = request.getParameter("productId"); // Giả sử form gửi productId
 
             // Lấy storeId từ session
             String storeIdStr = (String) session.getAttribute("storeID");
@@ -520,6 +545,11 @@ public class controllerZones extends HttpServlet {
             Stores store = new Stores();
             store.setId(storeId); // Gán storeId từ session vào entity Stores
 
+            // Lấy Zone hiện tại để so sánh productId
+            Zone currentZone = zoneDAO.getZoneById(zoneId);
+            Integer newProductId = (productIdStr != null && !productIdStr.isEmpty()) ? Integer.parseInt(productIdStr) : null;
+            Integer oldProductId = (currentZone.getProductId() != null) ? currentZone.getProductId().getProductId() : null;
+
             Zone zone = Zone.builder()
                     .id(zoneId)
                     .name(name)
@@ -528,6 +558,22 @@ public class controllerZones extends HttpServlet {
                     .status(request.getParameter("status") != null ? request.getParameter("status") : "Active")
                     .build();
 
+            // Nếu productId thay đổi, cập nhật lịch sử qua productsDAO
+            if (newProductId != null && !newProductId.equals(oldProductId)) {
+                List<Zone> zones = new ArrayList<>();
+                zones.add(zone); // Chỉ cập nhật cho Zone hiện tại
+                Products product = new Products();
+                product.setProductId(newProductId);
+                // Gọi editProduct để cập nhật productId và lịch sử
+                boolean success = productsDAO.editProduct(product, zones, fullName); // Truyền fullName làm updatedBy
+                if (!success) {
+                    session.setAttribute("errorMessage", "Failed to update product history.");
+                    response.sendRedirect("zones?service=editZone&zone_id=" + zoneId);
+                    return;
+                }
+            }
+
+            // Cập nhật thông tin Zone
             zoneDAO.updateZone(zone);
             session.setAttribute("Notification", "Zone details updated successfully.");
 

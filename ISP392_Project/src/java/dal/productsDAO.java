@@ -4,7 +4,7 @@
  */
 package dal;
 
-import dao.zoneDAO;
+import dal.zoneDAO;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -68,7 +68,7 @@ public class productsDAO extends DBContext {
     }
 
     // Cập nhật lịch sử JSON cho Zone
-    private void updateZoneHistory(int zoneId, int oldProductId, String oldProductName) {
+    private void updateZoneHistory(int zoneId, int oldProductId, String oldProductName, String updatedBy) {
         String selectSql = "SELECT history FROM Zones WHERE id = ?";
         String updateSql = "UPDATE Zones SET history = ? WHERE id = ?";
         try {
@@ -85,11 +85,28 @@ public class productsDAO extends DBContext {
                 }
             }
 
+            // Tìm id lớn nhất hiện tại
+            int maxId = 0;
+            for (int i = 0; i < historyArray.length(); i++) {
+                JSONObject entry = historyArray.getJSONObject(i);
+                if (entry.has("id")) {
+                    int currentId = Integer.parseInt(entry.getString("id"));
+                    if (currentId > maxId) {
+                        maxId = currentId;
+                    }
+                }
+            }
+
+            // Tạo id mới (tăng maxId lên 1)
+            String historyId = String.valueOf(maxId + 1);
+
             // Thêm thông tin sản phẩm cũ vào lịch sử
             JSONObject historyEntry = new JSONObject();
+            historyEntry.put("id", historyId); // Thêm ID
             historyEntry.put("productName", oldProductName);
             historyEntry.put("startDate", getZoneStartDate(zoneId, oldProductId));
             historyEntry.put("endDate", new Timestamp(System.currentTimeMillis()).toString());
+            historyEntry.put("updatedBy", updatedBy != null ? updatedBy : "System"); // Thêm updatedBy, mặc định "System" nếu null
             historyArray.put(historyEntry);
 
             // Cập nhật lịch sử mới
@@ -100,6 +117,7 @@ public class productsDAO extends DBContext {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            // Có thể thêm log hoặc ném ngoại lệ để xử lý ở lớp trên
         }
     }
 
@@ -290,7 +308,7 @@ public class productsDAO extends DBContext {
         return topProducts;
     }
 
-    public boolean editProduct(Products product, List<Zone> zones) {
+    public boolean editProduct(Products product, List<Zone> zones, String updatedBy) {
         String sqlProduct = "UPDATE products "
                 + "SET `name` = ?, "
                 + "`image` = ?, "
@@ -336,7 +354,7 @@ public class productsDAO extends DBContext {
                                 int oldProductId = getCurrentProductId(zoneId);
                                 if (oldProductId != -1 && oldProductId != product.getProductId()) {
                                     String oldProductName = getProductName(oldProductId);
-                                    updateZoneHistory(zoneId, oldProductId, oldProductName);
+                                    updateZoneHistory(zoneId, oldProductId, oldProductName, updatedBy); // Truyền updatedBy
                                 }
                                 updateZoneStmt.setInt(1, product.getProductId());
                                 updateZoneStmt.setString(2, zone.getName());
@@ -367,7 +385,7 @@ public class productsDAO extends DBContext {
         }
     }
 
-    public boolean insertProduct(Products product, List<Zone> zones) {
+    public boolean insertProduct(Products product, List<Zone> zones, String updatedBy) {
         String sqlProduct = "INSERT INTO products (name, image, price, quantity, description, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -424,7 +442,7 @@ public class productsDAO extends DBContext {
                                 int oldProductId = getCurrentProductId(zoneId);
                                 if (oldProductId != -1 && oldProductId != productId) {
                                     String oldProductName = getProductName(oldProductId);
-                                    updateZoneHistory(zoneId, oldProductId, oldProductName);
+                                    updateZoneHistory(zoneId, oldProductId, oldProductName, updatedBy);
                                 }
                                 updateZoneStmt.setInt(1, productId);
                                 updateZoneStmt.setString(2, zone.getName());
@@ -502,7 +520,6 @@ public class productsDAO extends DBContext {
 
     public static void main(String[] args) {
         productsDAO productsDAO = new productsDAO();
-
 
         String name = "id";
         int threshold = 1300; // Ngưỡng cảnh báo sản phẩm sắp hết hàng

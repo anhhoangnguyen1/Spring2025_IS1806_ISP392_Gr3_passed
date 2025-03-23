@@ -1,4 +1,4 @@
-package dao;
+package dal;
 
 import dal.DBContext;
 import entity.Products;
@@ -250,9 +250,11 @@ public class zoneDAO extends DBContext {
         for (int i = 0; i < history.length(); i++) {
             JSONObject entry = history.getJSONObject(i);
             Map<String, String> historyEntry = new HashMap<>();
+            historyEntry.put("id", entry.optString("id", String.valueOf(i + 1))); // Nếu không có id, dùng index tạm thời
             historyEntry.put("productName", entry.getString("productName"));
             historyEntry.put("startDate", entry.getString("startDate"));
             historyEntry.put("endDate", entry.optString("endDate", null));
+            historyEntry.put("updatedBy", entry.optString("updatedBy", "N/A")); // Nếu không có, mặc định "N/A"
             historyList.add(historyEntry);
         }
 

@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import entity.Products;
 import dal.productsDAO;
-import dao.zoneDAO;
+import dal.zoneDAO;
 import entity.Zone;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
@@ -53,6 +53,8 @@ public class controllerProducts extends HttpServlet {
         String service = request.getParameter("service");
         productsDAO products = new productsDAO();
         zoneDAO zonesDao = new zoneDAO();
+
+        String fullName = (String) session.getAttribute("fullName");
         if (service == null) {
             service = "products";
         }
@@ -72,7 +74,7 @@ public class controllerProducts extends HttpServlet {
             if (indexPage == null) {
                 indexPage = "1";
             }
-           
+
             int index = Integer.parseInt(indexPage);
             int count = products.countProducts();
             int endPage = count / 10;
@@ -168,12 +170,13 @@ public class controllerProducts extends HttpServlet {
                 String deletedBy = request.getParameter("deletedBy");
                 String description = request.getParameter("description");
                 String status = request.getParameter("status");
- 
+
                 Date deletedAt = new java.sql.Date(System.currentTimeMillis());
                 Date updatedAt = new java.sql.Date(System.currentTimeMillis());
                 boolean isDelete = false;
                 Date createdAt = new java.sql.Date(System.currentTimeMillis());
                 String[] zoneNames = request.getParameterValues("zoneName");
+
                 Products product = new Products(productId, name, imageFileName, price, quantity, description, createdAt, createBy, deletedAt, deletedBy, isDelete, updatedAt, status);
                 List<Zone> zones = new ArrayList<>();
                 if (zoneNames != null && zoneNames.length > 0) {
@@ -185,7 +188,10 @@ public class controllerProducts extends HttpServlet {
                         }
                     }
                 }
-                boolean success = products.editProduct(product, zones);
+//                boolean success = products.editProduct(product, zones);
+
+                // Truyền fullName làm updatedBy
+                boolean success = products.editProduct(product, zones, fullName);
 
                 if (success) {
                     session.setAttribute("Notification", "Product updated successfully.");
@@ -273,7 +279,7 @@ public class controllerProducts extends HttpServlet {
                     zones.add(zone);
                 }
             }
-            boolean success = products.insertProduct(product, zones);
+            boolean success = products.editProduct(product, zones, fullName);
 
             request.getRequestDispatcher("Products?service=products").forward(request, response);
         }

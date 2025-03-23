@@ -200,8 +200,6 @@
                                 '<td>' +
                                 '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '" class="btn btn-outline-primary">View</a> ' +
                                 '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '" class="btn btn-outline-primary">Edit</a> ' +
-                                '<a href="<%= request.getContextPath() %>/zones?service=deleteZone&zone_id=' + zone.id + '" ' +
-                                'class="btn btn-danger" onclick="return confirm(\'Are you sure you want to delete this zone?\');">Ban</a>' +
                                 '</td>' +
                                 '</tr>'
                                 );
