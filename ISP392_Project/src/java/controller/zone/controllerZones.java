@@ -3,10 +3,10 @@ package controller.zone;
 import dal.zoneDAO;
 import entity.Stores;
 import entity.Zone;
-import dal.productsDAO; // Thêm import
+import dal.productsDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
-import entity.Products; // Thêm import nếu cần
+import entity.Products;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,10 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * @author bsd12418
- */
 public class controllerZones extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -40,9 +36,8 @@ public class controllerZones extends HttpServlet {
     }
 
     zoneDAO zoneDAO = new zoneDAO();
-    productsDAO productsDAO = new productsDAO(); // Khai báo productsDAO
+    productsDAO productsDAO = new productsDAO();
 
-    // Hàm loại bỏ dấu từ chuỗi tiếng Việt
     private String removeDiacritics(String str) {
         if (str == null) {
             return null;
@@ -78,6 +73,17 @@ public class controllerZones extends HttpServlet {
             sortOrder = "ASC";
         }
 
+        // Lấy pageSize từ request, mặc định là 5
+        int pageSize = 5;
+        try {
+            pageSize = Integer.parseInt(request.getParameter("pageSize"));
+            if (pageSize <= 0) {
+                pageSize = 5; // Đảm bảo pageSize không âm
+            }
+        } catch (NumberFormatException ignored) {
+            pageSize = 5; // Mặc định nếu không parse được
+        }
+
         switch (service) {
             case "zones": {
                 String keyword = request.getParameter("searchZone");
@@ -87,23 +93,21 @@ public class controllerZones extends HttpServlet {
 
                 int index = 1;
                 try {
-                    index = Integer.parseInt(request.getParameter("index")); // Lấy index từ URL
+                    index = Integer.parseInt(request.getParameter("index"));
                     if (index < 1) {
-                        index = 1; // Đảm bảo index không âm
+                        index = 1;
                     }
                 } catch (NumberFormatException ignored) {
-                    // Nếu không parse được, giữ mặc định index = 1
                 }
 
                 int total = zoneDAO.countZones(keyword);
-                int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
+                int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
 
-                // Đảm bảo index không vượt quá endPage
                 if (index > endPage) {
                     index = endPage;
                 }
 
-                List<Zone> list = zoneDAO.searchZones(keyword, index, 5, sortBy, sortOrder);
+                List<Zone> list = zoneDAO.searchZones(keyword, index, pageSize, sortBy, sortOrder);
                 String notification = (String) session.getAttribute("Notification");
                 if (notification != null) {
                     request.setAttribute("Notification", notification);
@@ -112,10 +116,12 @@ public class controllerZones extends HttpServlet {
 
                 request.setAttribute("list", list);
                 request.setAttribute("endPage", endPage);
-                request.setAttribute("index", index); // Đảm bảo index được truyền vào JSP
+                request.setAttribute("index", index);
                 request.setAttribute("searchZone", keyword);
                 request.setAttribute("sortBy", sortBy);
                 request.setAttribute("sortOrder", sortOrder);
+                request.setAttribute("pageSize", pageSize); // Truyền pageSize vào JSP
+                request.setAttribute("totalRecords", total); // Truyền tổng số bản ghi
 
                 request.getRequestDispatcher("views/zone/zones.jsp").forward(request, response);
                 break;
@@ -131,7 +137,6 @@ public class controllerZones extends HttpServlet {
                 } catch (NumberFormatException ignored) {
                 }
 
-                int pageSize = 5;
                 int total = zoneDAO.countZones(keyword);
                 int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
                 List<Zone> zones = zoneDAO.searchZones(keyword, index, pageSize, sortBy, sortOrder);
@@ -158,11 +163,11 @@ public class controllerZones extends HttpServlet {
                 }
                 out.print("],");
                 out.print("\"endPage\": " + endPage + ",");
-                out.print("\"index\": " + index);
+                out.print("\"index\": " + index + ",");
+                out.print("\"totalRecords\": " + total); // Thêm tổng số bản ghi vào JSON
                 out.print("}");
                 out.flush();
                 break;
-
             }
             case "getZoneById": {
                 int id = Integer.parseInt(request.getParameter("zone_id"));
@@ -175,7 +180,6 @@ public class controllerZones extends HttpServlet {
                 int zoneId = Integer.parseInt(request.getParameter("zone_id"));
                 Zone zone = zoneDAO.getZoneById(zoneId);
 
-                // Lấy tham số tìm kiếm, sắp xếp và phân trang
                 String searchHistory = request.getParameter("searchHistory");
                 if (searchHistory == null) {
                     searchHistory = "";
@@ -236,8 +240,6 @@ public class controllerZones extends HttpServlet {
                     });
                 }
 
-                // Phân trang
-                int pageSize = 5;
                 int totalHistoryRecords = filteredHistoryList.size();
                 int historyEndPage = (totalHistoryRecords % pageSize == 0) ? totalHistoryRecords / pageSize : (totalHistoryRecords / pageSize) + 1;
                 if (historyPageIndex > historyEndPage) {
@@ -346,8 +348,6 @@ public class controllerZones extends HttpServlet {
                     });
                 }
 
-                // Phân trang
-                int pageSize = 5;
                 int totalHistoryRecords = filteredHistoryList.size();
                 int historyEndPage = (totalHistoryRecords % pageSize == 0) ? totalHistoryRecords / pageSize : (totalHistoryRecords / pageSize) + 1;
                 if (historyPageIndex > historyEndPage) {
@@ -427,6 +427,7 @@ public class controllerZones extends HttpServlet {
                 request.setAttribute("index", currentIndex);
                 request.setAttribute("sortBy", currentSortBy);
                 request.setAttribute("sortOrder", currentSortOrder);
+                request.setAttribute("pageSize", pageSize); // Truyền pageSize vào JSP
 
                 request.getRequestDispatcher("views/zone/editZone.jsp").forward(request, response);
                 break;
@@ -445,6 +446,16 @@ public class controllerZones extends HttpServlet {
         if (fullName == null) {
             response.sendRedirect("login");
             return;
+        }
+
+        // Lấy pageSize từ request, mặc định là 5
+        int pageSize = 5;
+        try {
+            pageSize = Integer.parseInt(request.getParameter("pageSize"));
+            if (pageSize <= 0) {
+                pageSize = 5;
+            }
+        } catch (NumberFormatException ignored) {
         }
 
         if ("addZone".equals(service)) {
@@ -491,7 +502,6 @@ public class controllerZones extends HttpServlet {
             zoneDAO.insertZone(zone);
 
             int total = zoneDAO.countZones("");
-            int pageSize = 5;
             int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
 
             session.setAttribute("Notification", "Zone added successfully.");
@@ -504,7 +514,7 @@ public class controllerZones extends HttpServlet {
             if (sortOrder == null) {
                 sortOrder = "ASC";
             }
-            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage);
+            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage + "&pageSize=" + pageSize);
             return;
         }
 
@@ -591,7 +601,7 @@ public class controllerZones extends HttpServlet {
             if (sortOrder == null) {
                 sortOrder = "ASC";
             }
-            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + currentIndex);
+            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + currentIndex + "&pageSize=" + pageSize);
         }
     }
 

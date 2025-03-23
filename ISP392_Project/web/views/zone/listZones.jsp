@@ -39,6 +39,10 @@
                 align-items: center;
                 z-index: 10; /* Đảm bảo search-box nằm trên các phần tử khác */
             }
+            .showing-info {
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
         </style>
     </head>
     <body>
@@ -62,6 +66,16 @@
                 <a href="${pageContext.request.contextPath}/zones?service=addZone" class="btn btn-outline-primary mr-lg-auto">
                     Add Zone
                 </a>
+            </div>
+            <!-- Thêm dropdown chọn page size -->
+            <div class="showing-info" style="margin-top: 10px; margin-bottom: -15px">
+                Showing: 
+                <select id="pageSizeSelect">
+                    <option value="5" ${pageSize == 5 ? 'selected' : ''}>5</option>
+                    <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                    <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+                </select>
+                of ${totalRecords} zones
             </div>
             <div class="table-container mt-4">
                 <table class="table table-striped table-hover table-bordered" id="zoneTable">
@@ -102,13 +116,13 @@
                 <ul class="pagination">
                     <c:if test="${index > 1}">
                         <li class="page-item">
-                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         </li>
                     </c:if>
                     <li class="page-item ${index == 1 ? 'active' : ''}">
-                        <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}">1</a>
+                        <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}">1</a>
                     </li>
                     <c:if test="${index > 3}">
                         <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -116,7 +130,7 @@
                         <c:forEach begin="${index - 1}" end="${index + 1}" var="page">
                             <c:if test="${page > 1 && page < endPage}">
                             <li class="page-item ${index == page ? 'active' : ''}">
-                                <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}">
                                     ${page}
                                 </a>
                             </li>
@@ -127,14 +141,14 @@
                         </c:if>
                         <c:if test="${endPage > 1}">
                         <li class="page-item ${index == endPage ? 'active' : ''}">
-                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}">
                                 ${endPage}
                             </a>
                         </li>
                     </c:if>
                     <c:if test="${index < endPage}">
                         <li class="page-item">
-                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         </li>
@@ -147,12 +161,13 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
         <script>
-
             let timeout = null;
-            let currentSortBy = '${sortBy}'; // Lưu giá trị sortBy hiện tại
-            let currentSortOrder = '${sortOrder}'; // Lưu giá trị sortOrder hiện tại
-            // [NOTE: Sửa tại đây] Định nghĩa hàm searchZones ngoài phạm vi $(document).ready() để nó trở thành hàm toàn cục
-            function searchZones(keyword, page, sortBy, sortOrder) {
+            let currentSortBy = '${sortBy}';
+            let currentSortOrder = '${sortOrder}';
+            let currentPageSize = ${pageSize != null ? pageSize : 5}; // Mặc định là 5 nếu không có giá trị
+            let totalRecords = ${totalRecords != null ? totalRecords : 0};
+
+            function searchZones(keyword, page, sortBy, sortOrder, pageSize) {
                 $.ajax({
                     url: '<%= request.getContextPath() %>/zones',
                     type: 'GET',
@@ -161,12 +176,15 @@
                         keyword: keyword,
                         index: page,
                         sortBy: sortBy,
-                        sortOrder: sortOrder
+                        sortOrder: sortOrder,
+                        pageSize: pageSize // Thêm pageSize vào request
                     },
                     success: function (response) {
+                        totalRecords = response.totalRecords; // Cập nhật tổng số bản ghi
                         updateTable(response.zones, response.endPage, response.index, keyword);
                         // Cập nhật phân trang với page hiện tại
                         updatePagination(response.endPage, page, keyword);
+                        updateShowingInfo(pageSize, response.totalRecords); // Cập nhật thông tin hiển thị
                     },
                     error: function () {
                         $('#zoneTableBody').html('<tr><td colspan="6">Error fetching zones</td></tr>');
@@ -176,8 +194,8 @@
 
             // [NOTE: Sửa tại đây] Định nghĩa hàm loadDefaultZones ngoài phạm vi $(document).ready()
             function loadDefaultZones() {
-                const currentIndex = ${index}; // Lấy index từ server
-                searchZones('', currentIndex, currentSortBy, currentSortOrder);
+                const currentIndex = ${index};
+                searchZones('', currentIndex, currentSortBy, currentSortOrder, currentPageSize);
             }
 
             // Hàm cập nhật bảng
@@ -256,11 +274,24 @@
                 $('.page-nav').on('click', function (e) {
                     e.preventDefault();
                     const page = $(this).data('page');
-                    searchZones(keyword, page, currentSortBy, currentSortOrder);
+                    searchZones(keyword, page, currentSortBy, currentSortOrder, currentPageSize);
                 });
             }
 
-            // Hàm cập nhật biểu tượng sắp xếp
+            // Hàm cập nhật thông tin "Showing: X of Y zones"
+            function updateShowingInfo(pageSize, totalRecords) {
+                $('.showing-info').html('Showing: <select id="pageSizeSelect">' +
+                        '<option value="5" ' + (pageSize == 5 ? 'selected' : '') + '>5</option>' +
+                        '<option value="10" ' + (pageSize == 10 ? 'selected' : '') + '>10</option>' +
+                        '<option value="20" ' + (pageSize == 20 ? 'selected' : '') + '>20</option>' +
+                        '</select> of ' + totalRecords + ' zones');
+                // Gắn lại sự kiện cho dropdown mới
+                $('#pageSizeSelect').on('change', function () {
+                    currentPageSize = parseInt($(this).val());
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize);
+                });
+            }
+
             function updateSortIcons() {
                 $('.sortable').each(function () {
                     const sortBy = $(this).data('sort');
@@ -283,7 +314,7 @@
                     const keyword = $(this).val().trim();
 
                     timeout = setTimeout(function () {
-                        searchZones(keyword, 1, currentSortBy, currentSortOrder); // Bắt đầu từ trang 1 khi tìm kiếm
+                        searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize);
                     }, 300);
                 });
 
@@ -299,26 +330,24 @@
                         currentSortBy = sortBy;
                         currentSortOrder = 'ASC'; // Mặc định ASC khi chọn cột mới
                     }
-
-                    // Cập nhật biểu tượng sắp xếp
                     updateSortIcons();
-
-                    // Tải lại dữ liệu với sắp xếp mới
-                    searchZones(keyword, 1, currentSortBy, currentSortOrder);
+                    searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize);
                 });
 
 
 
                 // Xử lý nút Clear
                 $('#clearBtn').on('click', function () {
-                    $('#searchInput').val(''); // Xóa nội dung ô tìm kiếm
-                    loadDefaultZones(); // Gọi loadDefaultZones để làm mới toàn bộ danh sách và phân trang
+                    $('#searchInput').val('');
+                    loadDefaultZones();
                 });
 
-                // Khởi tạo biểu tượng sắp xếp ban đầu
-                updateSortIcons();
+                $('#pageSizeSelect').on('change', function () {
+                    currentPageSize = parseInt($(this).val());
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize);
+                });
 
-                // [NOTE: Sửa tại đây] Tải danh sách mặc định khi trang load
+                updateSortIcons();
                 loadDefaultZones();
             });
 
