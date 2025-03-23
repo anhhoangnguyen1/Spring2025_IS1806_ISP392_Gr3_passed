@@ -126,7 +126,7 @@ public class productsDAO extends DBContext {
         return new Timestamp(System.currentTimeMillis() - 86400000).toString(); // Ví dụ: 1 ngày trước
     }
 
-    public List<Products> viewAllProducts(String command, int index) {
+    public List<Products> viewAllProducts(String command, int index,  int pageSize) {
         List<Products> list = new ArrayList<>();
         Map<Integer, List<String>> zoneMap = new HashMap<>();
         String zoneQuery = "SELECT product_id, name FROM zones";
