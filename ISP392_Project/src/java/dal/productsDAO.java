@@ -25,7 +25,7 @@ public class productsDAO extends DBContext {
 
     zoneDAO zones = new zoneDAO();
 
-    public List<Products> viewAllProducts(String command, int index) {
+    public List<Products> viewAllProducts(String command, int index, int pageSize) {
         List<Products> list = new ArrayList<>();
         Map<Integer, List<String>> zoneMap = new HashMap<>();
         String zoneQuery = "SELECT product_id, name FROM zones";
@@ -41,10 +41,12 @@ public class productsDAO extends DBContext {
         } catch (SQLException e) {
             System.err.println("Error fetching zones: " + e.getMessage());
         }
-        String productQuery = "SELECT * FROM products ORDER BY " + command + " LIMIT 10 OFFSET ?";
+
+        String productQuery = "SELECT * FROM products ORDER BY " + command + " LIMIT ? OFFSET ?";
 
         try (PreparedStatement st = connection.prepareStatement(productQuery)) {
-            st.setInt(1, (index - 1) * 10);
+            st.setInt(1, pageSize); // Số lượng bản ghi trên mỗi trang
+            st.setInt(2, (index - 1) * pageSize); // Offset dựa trên trang hiện tại
 
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
@@ -80,23 +82,87 @@ public class productsDAO extends DBContext {
         return list;
     }
 
-    public int countProducts() {
-        String sql = "Select count(*) from products";
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            ResultSet rs = st.executeQuery();
+    public List<Products> viewAllProductsEditHistory(String command, int index,int pageSize) {
+        List<Products> list = new ArrayList<>();
+        Map<Integer, List<String>> zoneMap = new HashMap<>();
+        String zoneQuery = "SELECT product_id, name FROM zones";
+
+        try (PreparedStatement st = connection.prepareStatement(zoneQuery); ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
+                int productId = rs.getInt("product_id");
+                String zoneName = rs.getString("name");
+
+                zoneMap.putIfAbsent(productId, new ArrayList<>());
+                zoneMap.get(productId).add(zoneName);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching zones: " + e.getMessage());
+        }
+        String productQuery = "SELECT * FROM products WHERE updated_at IS NOT NULL ORDER BY " + command + " LIMIT ? OFFSET ?";
+
+        try (PreparedStatement st = connection.prepareStatement(productQuery)) {
+            st.setInt(1, pageSize);
+            st.setInt(2, (index - 1) * pageSize);
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    int productId = rs.getInt("id");
+
+                    List<String> zones = zoneMap.getOrDefault(productId, List.of("Unknown"));
+                    String zoneNames = String.join(",", zones);
+
+                    Products product = new Products(
+                            productId,
+                            rs.getString("name"),
+                            rs.getString("image"),
+                            rs.getBigDecimal("price"),
+                            rs.getInt("quantity"),
+                            rs.getString("description"),
+                            rs.getDate("created_at"),
+                            rs.getString("created_by"),
+                            rs.getDate("deletedAt"),
+                            rs.getString("deleteBy"),
+                            rs.getBoolean("isDeleted"),
+                            rs.getDate("updated_at"),
+                            rs.getString("status"),
+                            zoneNames
+                    );
+
+                    list.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching products: " + e.getMessage());
+        }
+
+        return list;
+    }
+
+    public int countProducts(String condition) {
+        // Nếu không có điều kiện, chỉ lấy tổng số sản phẩm
+        String sql = "SELECT COUNT(*) FROM products";
+        if (condition != null && !condition.isEmpty()) {
+            sql += " WHERE " + condition;
+        }
+
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            if (rs.next()) {
                 return rs.getInt(1);
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return 0;
     }
 
-    public List<Products> searchProducts(String name) {
-        String sql = "SELECT * FROM products WHERE MATCH(name, description) AGAINST (? IN NATURAL LANGUAGE MODE) AND isDeleted = FALSE;";
+    public List<Products> searchProducts(String name, boolean onlyEdited) {
+        String sql = "SELECT * FROM products WHERE MATCH(name, description) AGAINST (? IN NATURAL LANGUAGE MODE) "
+                + "AND isDeleted = FALSE";
+
+        if (onlyEdited) {
+            sql += " AND updated_at IS NOT NULL";  // Chỉ lấy sản phẩm đã được chỉnh sửa
+        }
+
         List<Products> productsList = new ArrayList<>();
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
@@ -304,7 +370,7 @@ public class productsDAO extends DBContext {
 
                 stProduct.setString(9, product.getDeleteBy());
                 stProduct.setBoolean(10, product.isIsDeleted());
-                stProduct.setTimestamp(11, new java.sql.Timestamp(product.getUpdatedAt().getTime()));
+                stProduct.setNull(11, java.sql.Types.TIMESTAMP);
                 stProduct.setString(12, product.getStatus());
 
                 int rowsInserted = stProduct.executeUpdate();
@@ -401,11 +467,10 @@ public class productsDAO extends DBContext {
 
     public static void main(String[] args) {
         productsDAO productsDAO = new productsDAO();
- 
 
         String name = "id";
         int threshold = 1300; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
-        List<Products> topProducts = productsDAO.getProductById(9);
+        List<Products> topProducts = productsDAO.viewAllProductsEditHistory(name, 1, 15);
 
         System.out.println("Low Stock Products:");
         for (Products p : topProducts) {

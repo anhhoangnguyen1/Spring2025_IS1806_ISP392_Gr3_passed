@@ -107,9 +107,9 @@ th, td {
 }
 .sticky-col1 {
     table-layout: auto; /* Để bảng có thể co giãn theo nội dung */
-    width: 100px !important; /* Đặt chiều rộng cố định cho cột */
-    min-width: 100px !important;
-    max-width: 100px !important; /* Giới hạn chiều rộng không thể nhỏ hoặc lớn hơn */
+    width: 140px !important; /* Đặt chiều rộng cố định cho cột */
+    min-width: 140px !important;
+    max-width: 140px !important; /* Giới hạn chiều rộng không thể nhỏ hoặc lớn hơn */
     white-space: nowrap; /* Giữ nội dung trên 1 dòng */
     overflow: visible !important; /* Không ẩn nội dung */
     text-overflow: clip; /* Không hiển thị "..." */

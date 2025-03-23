@@ -190,7 +190,7 @@
                     $(this).hide();
                 }
             });
-        </script>
+        </script> 
         <c:import url="editProduct.jsp" />
         <!--   === java script ===   -->
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
