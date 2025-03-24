@@ -19,7 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.regex.Pattern;
 import utils.GlobalUtils;
@@ -41,12 +41,14 @@ public class controllerUsers extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
+        
+        
         String service = request.getParameter("service");
         if (service == null) {
             service = "users";
         }
         String sortBy = request.getParameter("sortBy");
-        if (sortBy == null) {
+        if (sortBy == null || !sortBy.equals("name")) {
             sortBy = "id";
         }
 
@@ -64,13 +66,25 @@ public class controllerUsers extends HttpServlet {
                 int index = 1;
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
+                    if (index < 1) {
+                        index = 1; 
+                    }
                 } catch (NumberFormatException ignored) {
+                    
                 }
                 int total = userDAO.countUsers(keyword);
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
+                 if (index > endPage) {
+                    index = endPage;
+                }
+                
                 List<Users> list = userDAO.searchUsers(keyword, index, 5, sortBy, sortOrder);
 
+                String notification = (String) request.getSession().getAttribute("Notification");
+                if (notification != null) {
+                    request.setAttribute("Notification", notification);
+                }
                 request.setAttribute("list", list);
                 request.setAttribute("endPage", endPage);
                 request.setAttribute("index", index);
@@ -81,6 +95,53 @@ public class controllerUsers extends HttpServlet {
                 break;
             }
 
+             case "searchUsersAjax": {
+                String keyword = request.getParameter("searchUser");
+                if (keyword == null) {
+                    keyword = "";
+                }
+                int index = 1;
+                try {
+                    index = Integer.parseInt(request.getParameter("index"));
+                } catch (NumberFormatException ignored) {
+                }
+
+                int pageSize = 5;
+                int total = userDAO.countUsers(keyword);
+                int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
+                List<Users> users = userDAO.searchUsers(keyword, index, pageSize, sortBy, sortOrder);
+
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                PrintWriter out = response.getWriter();
+                out.print("{");
+                out.print("\"users\": [");
+                for (int i = 0; i < users.size(); i++) {
+                    Users user = users.get(i);
+                    out.print("{");
+                    out.print("\"id\": " + user.getId() + ",");
+                    out.print("\"role\": " + user.getRole()+ ",");
+                    out.print("\"name\": \"" + user.getName() + "\",");
+                    out.print("\"phone\": \"" + user.getPhone() + "\",");
+                    out.print("\"address\": \"" + user.getAddress() + "\",");
+                    out.print("\"gender\": \"" + user.getGender()+ "\",");
+                    out.print("\"dob\": \"" + user.getDob()+ "\",");
+                    out.print("\"email\": \"" + user.getEmail()+ "\",");
+                    out.print("\"status\": \"" + user.getStatus()+ "\"");
+
+                    out.print("}");
+                    if (i < users.size() - 1) {
+                        out.print(",");
+                    }
+                }
+                out.print("],");
+                out.print("\"endPage\": " + endPage + ",");
+                out.print("\"index\": " + index);
+                out.print("}");
+                out.flush();
+                break;
+
+            }
             case "getUserById": {
                 int id = Integer.parseInt(request.getParameter("user_id"));
                 Users user = userDAO.getUserById(id);
@@ -94,8 +155,8 @@ public class controllerUsers extends HttpServlet {
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users userForEdit = userDAO.getUserById(userId);
                 request.setAttribute("user", userForEdit);
-                String userName = (String) session.getAttribute("username");
-                request.setAttribute("userName", userName);
+                 String fullName = (String) session.getAttribute("fullName");
+                request.setAttribute("fullName", fullName);
 
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 break;
@@ -344,7 +405,21 @@ public class controllerUsers extends HttpServlet {
 
             userDAO.updateUserInfo(user);
             session.removeAttribute("userId");
-            response.sendRedirect("Users?service=users");
+            int total = userDAO.countUsers("");
+            int pageSize = 5; 
+            int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
+        
+
+            String sortBy = request.getParameter("sortBy");
+            if (sortBy == null) {
+                sortBy = "id";
+            }
+            String sortOrder = request.getParameter("sortOrder");
+            if (sortOrder == null) {
+                sortOrder = "ASC"; 
+            }
+            
+            response.sendRedirect("Users?service=users&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage);
         }
     }
 

@@ -128,7 +128,7 @@
             <!--   === Profile Content Starts ===   -->
             <div class="contents">
                 <div class="panel-bar1">
-                    <h2>User Profile</h2>
+                    <h1>Profile</h1>
 
                     <div class="profile-container">
                         <!-- Avatar Section -->
@@ -143,7 +143,6 @@
                                 margin: 0;
                             }
 
-
                             .avatar {
                                 width: 150px;
                                 height: 150px;
@@ -155,33 +154,145 @@
                                 display: inline-block;
                                 margin-bottom: 15px;
                             }
+
+                            h1 {
+                                font-size: 32px;
+                                font-weight: 500;
+                                color: #333;
+                                margin-bottom: 40px;
+                            }
+
+                            h2 {
+                                font-size: 20px;
+                                font-weight: 500;
+                                color: #777;
+                               
+                            }
+
+                            .profile-container {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 20px;
+                            }
+
+                            .profile-header {
+                                display: flex;
+                                align-items: flex-start;
+                                gap: 20px;
+                            }
+
+                            .form-container {
+                                flex: 1;
+                                order: -1; 
+                            }
+
+                            .avatar-section {
+                                order: 1; 
+                            }
+
+                            .form-row {
+                                display: flex;
+                                gap: 15px;
+                                margin-bottom: 15px;
+                            }
+
+                            .form-group {
+                                flex: 1;
+                                display: flex;
+                                flex-direction: column;
+                            }
+
+                            .form-group label {
+                                font-size: 14px;
+                                font-weight: bold; 
+                                color: #333;
+                                margin-bottom: 8px;
+                            }
+
+                            .form-group .info {
+                                font-size: 18px;
+                                color: #333;
+                                margin-bottom: 10px;
+                            }
+
+
+                           
+
+                            .btn:hover {
+                                background-color: #0056b3;
+                            }
+
+                            @media (max-width: 768px) {
+                                .profile-header {
+                                    flex-direction: column;
+                                    align-items: center;
+                                }
+
+                                .form-row {
+                                    flex-direction: column;
+                                    gap: 15px;
+                                }
+
+                                body {
+                                    padding: 20px;
+                                }
+                            }
                         </style>
 
-                        <div class="avatar-section">
-                            <div class="avatar" style="background-image: url('${pageContext.request.contextPath}/avatars/${user.image}');"></div>
+                        <div class="profile-container">
+                            <div class="profile-header">
+                                <div class="avatar-section">
+                                    <div class="avatar" style="background-image: url('${pageContext.request.contextPath}/avatars/${user.image}');"></div>
+                                </div>
+                                <div class="form-container">
+                                    <h2>Personal Information</h2>
 
-                        </div>
-                        <!-- User Info Section -->
-                        <div class="user-info">
-                            <p class="info"><strong>Name:</strong> <c:out value="${user.name}" /></p>
-                            <p class="info"><strong>Role:</strong> <c:out value="${user.role}" /></p>
-                            <p class="info"><strong>Gender:</strong> <c:out value="${user.gender}" /></p>
-                            <p class="info"><strong>Date of Birth:</strong> <c:out value="${user.dob}" /></p>
-                            <p class="info"><strong>Phone:</strong> <c:out value="${user.phone}" /></p>
-                            <p class="info"><strong>Email:</strong> <c:out value="${user.email}" /></p>
-                            <p class="info"><strong>Address:</strong> <c:out value="${user.address}" /></p>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="name">Name</label>
+                                            <p class="info"><c:out value="${user.name}" /></p>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="gender">Gender</label>
+                                            <p class="info"><c:out value="${user.gender}" /></p>
+                                        </div>
+                                    </div>
 
-                            <a href="${pageContext.request.contextPath}/views/profile/editProfile.jsp" class="btn btn-primary" style="background-color: #007bff ">Edit Profile</a>
-                            <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-primary" style="background-color: #6c757d ">Back</a>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="dob">Date of Birth</label>
+                                            <p class="info"><c:out value="${user.dob}" /></p>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="email">Email</label>
+                                            <p class="info"><c:out value="${user.email}" /></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="phone">Phone</label>
+                                            <p class="info"><c:out value="${user.phone}" /></p>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="address">Address</label>
+                                            <p class="info"><c:out value="${user.address}" /></p>
+                                        </div>
+                                    </div>
+
+
+                                    <a href="${pageContext.request.contextPath}/views/profile/editProfile.jsp" class="btn btn-primary" style="background-color: #007bff ">Edit Profile</a>
+                                    <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-primary" style="background-color: #6c757d ">Back</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <!--   === Profile Content Ends ===   -->
                 </div>
-            </div>
-            <!--   === Profile Content Ends ===   -->
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
-    </body>
-</html>
+                <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+                <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+                </body>
+                </html>
 
