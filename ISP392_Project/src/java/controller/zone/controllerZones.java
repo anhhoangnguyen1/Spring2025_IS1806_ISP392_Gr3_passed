@@ -522,7 +522,6 @@ public class controllerZones extends HttpServlet {
             int zoneId = Integer.parseInt(request.getParameter("zone_id"));
             String name = request.getParameter("name");
             String description = request.getParameter("description");
-            String productIdStr = request.getParameter("productId"); // Giả sử form gửi productId
 
             // Lấy storeId từ session
             String storeIdStr = (String) session.getAttribute("storeID");
@@ -541,7 +540,7 @@ public class controllerZones extends HttpServlet {
                 return;
             }
 
-            // Kiểm tra trùng tên với storeId từ session
+            // Kiểm tra trùng tên
             if (zoneDAO.checkNameExists(name, zoneId, storeId)) {
                 request.setAttribute("nameError", "Zone name already exists for this store.");
                 Zone zoneForEdit = zoneDAO.getZoneById(zoneId);
@@ -552,45 +551,37 @@ public class controllerZones extends HttpServlet {
                 return;
             }
 
-            Stores store = new Stores();
-            store.setId(storeId); // Gán storeId từ session vào entity Stores
-
-            // Lấy Zone hiện tại để so sánh productId
+            // Lấy Zone hiện tại để giữ các trường không thay đổi
             Zone currentZone = zoneDAO.getZoneById(zoneId);
-            Integer newProductId = (productIdStr != null && !productIdStr.isEmpty()) ? Integer.parseInt(productIdStr) : null;
-            Integer oldProductId = (currentZone.getProductId() != null) ? currentZone.getProductId().getProductId() : null;
+            if (currentZone == null) {
+                session.setAttribute("errorMessage", "Zone not found.");
+                response.sendRedirect("zones?service=zones");
+                return;
+            }
 
+            Stores store = new Stores();
+            store.setId(storeId);
+
+            // Tạo đối tượng Zone mới dựa trên dữ liệu cũ, không cho phép thay đổi productId
             Zone zone = Zone.builder()
                     .id(zoneId)
                     .name(name)
                     .description(description)
-                    .storeId(store) // Gán entity Stores với storeId từ session
-                    .status(request.getParameter("status") != null ? request.getParameter("status") : "Active")
+                    .storeId(store)
+                    .status(request.getParameter("status") != null ? request.getParameter("status") : currentZone.getStatus())
+                    .createdAt(currentZone.getCreatedAt()) // Giữ nguyên
+                    .createdBy(currentZone.getCreatedBy()) // Giữ nguyên
+                    .history(currentZone.getHistory()) // Giữ nguyên lịch sử
+                    .productId(currentZone.getProductId()) // Giữ nguyên productId
                     .build();
 
-            // Nếu productId thay đổi, cập nhật lịch sử qua productsDAO
-            if (newProductId != null && !newProductId.equals(oldProductId)) {
-                List<Zone> zones = new ArrayList<>();
-                zones.add(zone); // Chỉ cập nhật cho Zone hiện tại
-                Products product = new Products();
-                product.setProductId(newProductId);
-                // Gọi editProduct để cập nhật productId và lịch sử
-                boolean success = productsDAO.editProduct(product, zones, fullName); // Truyền fullName làm updatedBy
-                if (!success) {
-                    session.setAttribute("errorMessage", "Failed to update product history.");
-                    response.sendRedirect("zones?service=editZone&zone_id=" + zoneId);
-                    return;
-                }
-            }
-
-            // Cập nhật thông tin Zone
+            // Cập nhật Zone mà không thay đổi productId
             zoneDAO.updateZone(zone);
             session.setAttribute("Notification", "Zone details updated successfully.");
 
-            // Lấy index hiện tại từ request (truyền từ form)
             String currentIndex = request.getParameter("index");
             if (currentIndex == null || currentIndex.isEmpty()) {
-                currentIndex = "1"; // Mặc định về trang 1 nếu không có index
+                currentIndex = "1";
             }
 
             String sortBy = request.getParameter("sortBy");
