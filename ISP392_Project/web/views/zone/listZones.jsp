@@ -212,7 +212,7 @@
                                 '<td>' + zone.id + '</td>' +
                                 '<td style="text-align: left;">' + zone.name + '</td>' +
                                 '<td>' + (zone.storeId ? zone.storeId.id : 'null') + '</td>' +
-                                '<td>' + (zone.productName ? zone.productName : 'null) + '</td>' + // Hiển thị Product Name từ AJAX
+                                '<td>' + (zone.productName ? zone.productName : 'null') + '</td>' + // Hiển thị Product Name từ AJAX
                                 '<td>' + zone.createdBy + '</td>' +
                                 '<td>' + zone.status + '</td>' +
                                 '<td>' +
