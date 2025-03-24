@@ -133,19 +133,33 @@
                     <div class="profile-container">
                         <!-- Avatar Section -->
                         <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f4f4;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                height: 100vh;
+                                margin: 0;
+                            }
+
+
                             .avatar {
-                                width: 100px; /* Adjust width */
-                                height: 100px; /* Adjust height */
+                                width: 150px;
+                                height: 150px;
+                                border-radius: 50%;
+                                border: 3px solid #007BFF;
                                 background-size: cover;
                                 background-position: center;
-                                border-radius: 50%; /* Makes the image round */
-                                border: 2px solid #007bff; /* Optional: Adds a border around the avatar */
+                                background-repeat: no-repeat;
+                                display: inline-block;
+                                margin-bottom: 15px;
                             }
                         </style>
 
                         <div class="avatar-section">
                             <div class="avatar" style="background-image: url('${pageContext.request.contextPath}/avatars/${user.image}');"></div>
-                            <div class="user-name"><c:out value="${user.name}" /></div>
+
                         </div>
                         <!-- User Info Section -->
                         <div class="user-info">
@@ -156,9 +170,9 @@
                             <p class="info"><strong>Phone:</strong> <c:out value="${user.phone}" /></p>
                             <p class="info"><strong>Email:</strong> <c:out value="${user.email}" /></p>
                             <p class="info"><strong>Address:</strong> <c:out value="${user.address}" /></p>
-                            <p class="info"><strong>Status:</strong> <c:out value="${user.status}" /></p>
-                            <a href="editprofile" class="button">Edit Profile</a>
-                            <a href="<%= request.getContextPath() %>/dashboard" class="button back-button">Back</a>
+
+                            <a href="${pageContext.request.contextPath}/views/profile/editProfile.jsp" class="btn btn-primary" style="background-color: #007bff ">Edit Profile</a>
+                            <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-primary" style="background-color: #6c757d ">Back</a>
                         </div>
                     </div>
                 </div>
