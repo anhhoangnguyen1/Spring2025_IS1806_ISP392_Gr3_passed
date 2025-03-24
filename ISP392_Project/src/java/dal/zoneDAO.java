@@ -77,10 +77,13 @@ public class zoneDAO extends DBContext {
     }
 
     // Đếm số lượng zones
-    public int countZones(String keyword) {
+    public int countZones(String keyword, boolean showInactive) {
         String sql;
         if (keyword == null || keyword.trim().isEmpty()) {
             sql = "SELECT COUNT(*) FROM Zones WHERE isDeleted = 0";
+            if (!showInactive) {
+                sql += " AND status = 'Active'";
+            }
             try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
@@ -90,6 +93,9 @@ public class zoneDAO extends DBContext {
             }
         } else {
             sql = "SELECT COUNT(*) FROM Zones WHERE name LIKE ? AND isDeleted = 0";
+            if (!showInactive) {
+                sql += " AND status = 'Active'";
+            }
             try (PreparedStatement st = connection.prepareStatement(sql)) {
                 st.setString(1, "%" + keyword + "%");
                 try (ResultSet rs = st.executeQuery()) {
@@ -105,7 +111,7 @@ public class zoneDAO extends DBContext {
     }
 
     // Tìm kiếm zones theo từ khóa, hỗ trợ phân trang và sắp xếp
-    public List<Zone> searchZones(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
+    public List<Zone> searchZones(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, boolean showInactive) {
         List<Zone> list = new ArrayList<>();
 
         List<String> allowedSortColumns = List.of("id", "name", "created_at", "updated_at");
@@ -123,6 +129,10 @@ public class zoneDAO extends DBContext {
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql += "AND z.name LIKE ? ";
+        }
+
+        if (!showInactive) {
+            sql += "AND z.status = 'Active' ";
         }
 
         sql += "ORDER BY z." + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
@@ -343,6 +353,65 @@ public class zoneDAO extends DBContext {
             e.printStackTrace();
         }
         return false;
+    }
+
+    // Thêm bản ghi kiểm kho mới
+    public void addStockCheck(int zoneId, int productId, int systemQuantity, int actualQuantity, String checkedBy, String note) {
+        String sql = "INSERT INTO StockChecks (zone_id, product_id, system_quantity, actual_quantity, checked_by, note) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, zoneId);
+            ps.setInt(2, productId);
+            ps.setInt(3, systemQuantity);
+            ps.setInt(4, actualQuantity);
+            ps.setString(5, checkedBy);
+            ps.setString(6, note != null ? note : null);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+// Lấy lịch sử kiểm kho của một zone
+    public List<Map<String, Object>> getStockCheckHistory(int zoneId) {
+        List<Map<String, Object>> history = new ArrayList<>();
+        String sql = "SELECT sc.id, sc.product_id, p.name AS product_name, sc.system_quantity, sc.actual_quantity, "
+                + "sc.difference, sc.checked_by, sc.check_date, sc.note "
+                + "FROM StockChecks sc "
+                + "LEFT JOIN Products p ON sc.product_id = p.id "
+                + "WHERE sc.zone_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, zoneId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> entry = new HashMap<>();
+                    entry.put("check_id", rs.getInt("id"));
+                    entry.put("product_id", rs.getInt("product_id"));
+                    entry.put("product_name", rs.getString("product_name"));
+                    entry.put("system_quantity", rs.getInt("system_quantity"));
+                    entry.put("actual_quantity", rs.getInt("actual_quantity"));
+                    entry.put("difference", rs.getInt("difference"));
+                    entry.put("checked_by", rs.getString("checked_by"));
+                    entry.put("check_date", rs.getTimestamp("check_date").toString());
+                    entry.put("note", rs.getString("note"));
+                    history.add(entry);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return history;
+    }
+
+    public void updateProductQuantity(int productId, int newQuantity) {
+        String sql = "UPDATE Products SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, newQuantity);
+            ps.setInt(2, productId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     // Phương thức main để test
