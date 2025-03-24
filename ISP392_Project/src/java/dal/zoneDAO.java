@@ -194,7 +194,7 @@ public class zoneDAO extends DBContext {
     // Cập nhật zone
     public void updateZone(Zone zone) {
         String sql = "UPDATE Zones SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP, store_id = ?, status = ?, "
-                + "deletedAt = ?, deleteBy = ?, isDeleted = ?, history = ? WHERE id = ?";
+                + "product_id = ?, deletedAt = ?, deleteBy = ?, isDeleted = ?, history = ? WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, zone.getName());
             if (zone.getDescription() != null) {
@@ -208,23 +208,43 @@ public class zoneDAO extends DBContext {
                 st.setNull(3, java.sql.Types.INTEGER);
             }
             st.setString(4, zone.getStatus());
-            if (zone.getDeleteAt() != null) {
-                st.setDate(5, zone.getDeleteAt());
+            // Xử lý product_id
+            if (zone.getProductId() != null) {
+                st.setInt(5, zone.getProductId().getProductId());
             } else {
-                st.setNull(5, java.sql.Types.DATE);
+                st.setNull(5, java.sql.Types.INTEGER); // Set product_id thành NULL nếu null
+            }
+            if (zone.getDeleteAt() != null) {
+                st.setDate(6, zone.getDeleteAt());
+            } else {
+                st.setNull(6, java.sql.Types.DATE);
             }
             if (zone.getDeleteBy() != null) {
-                st.setString(6, zone.getDeleteBy());
+                st.setString(7, zone.getDeleteBy());
             } else {
-                st.setNull(6, java.sql.Types.VARCHAR);
+                st.setNull(7, java.sql.Types.VARCHAR);
             }
-            st.setBoolean(7, zone.isDeleted());
-            st.setString(8, zone.getHistory() != null ? zone.getHistory().toString() : "[]");
-            st.setInt(9, zone.getId());
+            st.setBoolean(8, zone.isDeleted());
+            st.setString(9, zone.getHistory() != null ? zone.getHistory().toString() : "[]");
+            st.setInt(10, zone.getId());
             st.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<String> getActiveZoneNames() {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT name FROM Zones WHERE status = 'Active' AND isDeleted = 0";
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                list.add(rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error fetching active zone names: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
     }
 
     // Ánh xạ ResultSet sang Zone

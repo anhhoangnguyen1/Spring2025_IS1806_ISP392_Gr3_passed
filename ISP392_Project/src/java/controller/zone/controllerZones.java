@@ -522,6 +522,7 @@ public class controllerZones extends HttpServlet {
             int zoneId = Integer.parseInt(request.getParameter("zone_id"));
             String name = request.getParameter("name");
             String description = request.getParameter("description");
+            String status = request.getParameter("status") != null ? request.getParameter("status") : "Active";
 
             // Lấy storeId từ session
             String storeIdStr = (String) session.getAttribute("storeID");
@@ -545,13 +546,14 @@ public class controllerZones extends HttpServlet {
                 request.setAttribute("nameError", "Zone name already exists for this store.");
                 Zone zoneForEdit = zoneDAO.getZoneById(zoneId);
                 request.setAttribute("zone", zoneForEdit);
+                request.setAttribute("status", status); // Giữ trạng thái vừa chọn
                 request.setAttribute("fullName", fullName);
                 request.setAttribute("sortOrder", request.getParameter("sortOrder"));
                 request.getRequestDispatcher("views/zone/editZone.jsp").forward(request, response);
                 return;
             }
 
-            // Lấy Zone hiện tại để giữ các trường không thay đổi
+            // Lấy Zone hiện tại
             Zone currentZone = zoneDAO.getZoneById(zoneId);
             if (currentZone == null) {
                 session.setAttribute("errorMessage", "Zone not found.");
@@ -562,20 +564,25 @@ public class controllerZones extends HttpServlet {
             Stores store = new Stores();
             store.setId(storeId);
 
-            // Tạo đối tượng Zone mới dựa trên dữ liệu cũ, không cho phép thay đổi productId
+            // Tạo đối tượng Zone mới
             Zone zone = Zone.builder()
                     .id(zoneId)
                     .name(name)
                     .description(description)
                     .storeId(store)
-                    .status(request.getParameter("status") != null ? request.getParameter("status") : currentZone.getStatus())
-                    .createdAt(currentZone.getCreatedAt()) // Giữ nguyên
-                    .createdBy(currentZone.getCreatedBy()) // Giữ nguyên
-                    .history(currentZone.getHistory()) // Giữ nguyên lịch sử
-                    .productId(currentZone.getProductId()) // Giữ nguyên productId
+                    .status(status)
+                    .createdAt(currentZone.getCreatedAt())
+                    .createdBy(currentZone.getCreatedBy())
+                    .history(currentZone.getHistory())
+                    .productId(currentZone.getProductId()) // Mặc định giữ nguyên
                     .build();
 
-            // Cập nhật Zone mà không thay đổi productId
+            // Nếu trạng thái là "Inactive", set productId thành null
+            if ("Inactive".equals(status)) {
+                zone.setProductId(null); // Set productId về null
+            }
+
+            // Cập nhật Zone
             zoneDAO.updateZone(zone);
             session.setAttribute("Notification", "Zone details updated successfully.");
 
@@ -595,6 +602,7 @@ public class controllerZones extends HttpServlet {
             response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + currentIndex + "&pageSize=" + pageSize);
         }
     }
+    
 
     private Zone getZoneFromRequest(HttpServletRequest request, boolean isNew) {
         Zone.ZoneBuilder zoneBuilder = Zone.builder();

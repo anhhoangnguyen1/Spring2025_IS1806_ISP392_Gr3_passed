@@ -99,9 +99,9 @@ public class controllerProducts extends HttpServlet {
                 endPage++;
             }
 
-            // Lấy danh sách sản phẩm theo trang và kích thước trang
+            // Lấy danh sách sản phẩm và Zone Active
             List<Products> listProducts = products.viewAllProducts(command, index, pageSize);
-            List<String> listZoneName = zonesDao.getAllZoneNames();
+            List<String> listZoneName = zonesDao.getActiveZoneNames(); // Thay đổi ở đây
 
             // Đặt các thuộc tính cho request
             request.setAttribute("totalProducts", count);
@@ -302,13 +302,15 @@ public class controllerProducts extends HttpServlet {
                 response.sendRedirect("Products");
             }
         }
-
         if (service.equals("addProduct")) {
-
             String name = request.getParameter("name");
+            if (name == null || name.trim().isEmpty()) {
+                request.setAttribute("Notification", "Product name is required.");
+                request.getRequestDispatcher("Products?service=products").forward(request, response);
+                return;
+            }
 
             Part file = request.getPart("image");
-
             String imageFileName = null;
 
             if (file != null && file.getSize() > 0) {
@@ -328,7 +330,6 @@ public class controllerProducts extends HttpServlet {
 
                 String uploadPath = uploadDirectory + File.separator + imageFileName;
                 try (FileOutputStream fos = new FileOutputStream(uploadPath); InputStream is = file.getInputStream()) {
-
                     byte[] buffer = new byte[1024];
                     int bytesRead;
                     while ((bytesRead = is.read(buffer)) != -1) {
@@ -336,39 +337,69 @@ public class controllerProducts extends HttpServlet {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    request.setAttribute("Notification", "Error uploading image.");
+                    request.getRequestDispatcher("Products?service=products").forward(request, response);
+                    return;
                 }
             }
 
             String priceRaw = request.getParameter("price");
-            BigDecimal price = new BigDecimal(priceRaw);
-            price = new BigDecimal(priceRaw);
-            if (price.compareTo(BigDecimal.ZERO) <= 0) {
-                request.setAttribute("Notification", "Price must be greater than 0.");
+            BigDecimal price;
+            try {
+                price = new BigDecimal(priceRaw);
+                if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                    request.setAttribute("Notification", "Price must be greater than 0.");
+                    request.getRequestDispatcher("Products?service=products").forward(request, response);
+                    return;
+                }
+            } catch (NumberFormatException | NullPointerException e) {
+                request.setAttribute("Notification", "Invalid price format.");
                 request.getRequestDispatcher("Products?service=products").forward(request, response);
                 return;
             }
 
-            int quantity = 0;
-            String description = request.getParameter("description");
-            String createdBy = request.getParameter("createdBy");
-            String deletedBy = request.getParameter("deletedBy");
-            String status = request.getParameter("status");
-            String isDeleteRaw = request.getParameter("isDelete");
-            String[] zoneNames = request.getParameterValues("zoneName"); // Lấy nhiều zone
+            int quantity;
+            try {
+                String quantityRaw = request.getParameter("quantity");
+                quantity = (quantityRaw != null && !quantityRaw.isEmpty()) ? Integer.parseInt(quantityRaw) : 0;
+                if (quantity < 0) {
+                    request.setAttribute("Notification", "Quantity must be 0 or greater.");
+                    request.getRequestDispatcher("Products?service=products").forward(request, response);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("Notification", "Invalid quantity format.");
+                request.getRequestDispatcher("Products?service=products").forward(request, response);
+                return;
+            }
 
+            String description = request.getParameter("description");
+            String createdBy = fullName; // Sử dụng fullName từ session
+            String deletedBy = null; // Không cần deletedBy khi thêm mới
+            String status = request.getParameter("status") != null ? request.getParameter("status") : "Active";
+            String isDeleteRaw = request.getParameter("isDelete");
             boolean isDelete = Boolean.parseBoolean(isDeleteRaw);
-            Date deletedAt = new java.sql.Date(System.currentTimeMillis());
-            Date updatedAt = new java.sql.Date(System.currentTimeMillis());
             Date createdAt = new java.sql.Date(System.currentTimeMillis());
+            Date updatedAt = null; // Chưa cập nhật khi mới thêm
+            Date deletedAt = null; // Chưa xóa khi mới thêm
+
             Products product = new Products(0, name, imageFileName, price, quantity, description, createdAt, createdBy, deletedAt, deletedBy, isDelete, updatedAt, status);
+
+            // Lấy danh sách Zone Active để kiểm tra
+            List<String> activeZoneNames = zonesDao.getActiveZoneNames();
+            String[] zoneNames = request.getParameterValues("zoneName");
             List<Zone> zones = new ArrayList<>();
+
             if (zoneNames != null) {
                 for (String zoneName : zoneNames) {
-                    Zone zone = new Zone();
-                    zone.setName(zoneName);
-                    zones.add(zone);
+                    if (zoneName != null && !zoneName.trim().isEmpty() && activeZoneNames.contains(zoneName)) {
+                        Zone zone = new Zone();
+                        zone.setName(zoneName);
+                        zones.add(zone);
+                    }
                 }
             }
+
             boolean success = products.insertProduct(product, zones, fullName);
 
             if (success) {
@@ -379,6 +410,7 @@ public class controllerProducts extends HttpServlet {
 
             request.getRequestDispatcher("Products?service=products").forward(request, response);
         }
+
         if (service.equals("deleteProduct")) {
             String[] selectedProducts = request.getParameterValues("id");
 

@@ -93,9 +93,9 @@
                         <!-- Xóa phần Store ID -->
                         <div class="form-group">
                             <label for="status">Status</label>
-                            <select class="form-control" name="status" required>
-                                <option value="Active" ${zone.status == 'Active' ? 'selected' : ''}>Active</option>
-                                <option value="Inactive" ${zone.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            <select class="form-control" id="status" name="status">
+                                <option value="Active" ${status == null ? (zone.status == 'Active' ? 'selected' : '') : (status == 'Active' ? 'selected' : '')}>Active</option>
+                                <option value="Inactive" ${status == null ? (zone.status == 'Inactive' ? 'selected' : '') : (status == 'Inactive' ? 'selected' : '')}>Inactive</option>
                             </select>
                         </div>
                         <input type="hidden" name="updateBy" value="${zone.createdBy}" />
