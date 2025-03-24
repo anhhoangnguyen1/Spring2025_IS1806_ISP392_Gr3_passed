@@ -76,21 +76,21 @@
 
         <div class="container d-flex justify-content-center mt-4">
             <ul class="pagination">
-                <!-- Nút Previous -->
+                <!-- Nï¿½t Previous -->
                 <c:if test="${index > 1}">
                     <li class="page-item">
                         <a class="page-link" href="Debts?service=debts&index=${index - 1}&pageSize=${pageSize}">&laquo;</a>
                     </li>
                 </c:if>
 
-                <!-- Các trang -->
+                <!-- Cï¿½c trang -->
                 <c:forEach var="i" begin="1" end="${endPage}">
                     <li class="page-item ${i == index ? 'active' : ''}">
                         <a class="page-link" href="Debts?service=debts&index=${i}&pageSize=${pageSize}">${i}</a>
                     </li>
                 </c:forEach>
 
-                <!-- Nút Next -->
+                <!-- Nï¿½t Next -->
                 <c:if test="${index < endPage}">
                     <li class="page-item">
                         <a class="page-link" href="Debts?service=debts&index=${index + 1}&pageSize=${pageSize}">&raquo;</a>

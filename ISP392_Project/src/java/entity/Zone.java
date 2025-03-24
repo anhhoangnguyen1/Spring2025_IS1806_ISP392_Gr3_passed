@@ -1,8 +1,6 @@
 package entity;
 
-import entity.*;
 import java.sql.Date;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +17,7 @@ public class Zone {
 
     private int id;
     private String name;
+    private String description;
     private Date createdAt;
     private String createdBy;
     private Date deleteAt;
@@ -27,6 +26,5 @@ public class Zone {
     private Date updatedAt;
     private Stores storeId;
     private String status;
-    private List<Products> products;
-
+    private Products productId; // Một Zone chỉ thuộc về một Product
 }
