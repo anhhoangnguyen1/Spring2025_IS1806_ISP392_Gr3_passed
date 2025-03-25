@@ -265,7 +265,7 @@
                     }
 
                     pagination.append(
-                            '<li class="page-item ' + (currentIndex === 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>'
+                            '<li class="page-item ' + (currentIndex == 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>'
                             );
 
                     if (currentIndex > 3) {
@@ -275,7 +275,7 @@
                     for (let page = currentIndex - 1; page <= currentIndex + 1; page++) {
                         if (page > 1 && page < endPage) {
                             pagination.append(
-                                    '<li class="page-item ' + (currentIndex === page ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + page + '">' + page + '</a></li>'
+                                    '<li class="page-item ' + (currentIndex == page ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + page + '">' + page + '</a></li>'
                                     );
                         }
                     }
@@ -286,7 +286,7 @@
 
                     if (endPage > 1) {
                         pagination.append(
-                                '<li class="page-item ' + (currentIndex ==== endPage ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + endPage + '">' + endPage + '</a></li>'
+                                '<li class="page-item ' + (currentIndex == endPage ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + endPage + '">' + endPage + '</a></li>'
                                 );
                     }
 

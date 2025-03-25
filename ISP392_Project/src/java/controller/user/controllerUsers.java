@@ -20,7 +20,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.regex.Pattern;
 import utils.GlobalUtils;
@@ -37,12 +36,21 @@ public class controllerUsers extends HttpServlet {
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$");
 
     userDAO userDAO = new userDAO();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        String service = request.getParameter("service");
+           String role = (String) session.getAttribute("role");
+
         
+        if (role == null || !role.equals("owner")) {
+            
+            response.sendRedirect("/dashboard");  
+            return;
+        }
+        String service = request.getParameter("service");
+
         if (service == null) {
             service = "users";
         }
@@ -66,18 +74,18 @@ public class controllerUsers extends HttpServlet {
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
                     if (index < 1) {
-                        index = 1; 
+                        index = 1;
                     }
                 } catch (NumberFormatException ignored) {
-                    
+
                 }
                 int total = userDAO.countUsers(keyword);
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
-                 if (index > endPage) {
+                if (index > endPage) {
                     index = endPage;
                 }
-                
+
                 List<Users> list = userDAO.searchUsers(keyword, index, 5, sortBy, sortOrder);
 
                 String notification = (String) request.getSession().getAttribute("Notification");
@@ -93,7 +101,7 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
                 break;
             }
- case "searchUsersAjax": {
+            case "searchUsersAjax": {
                 String keyword = request.getParameter("searchUser");
                 if (keyword == null) {
                     keyword = "";
@@ -157,7 +165,7 @@ public class controllerUsers extends HttpServlet {
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users userForEdit = userDAO.getUserById(userId);
                 request.setAttribute("user", userForEdit);
-                 String fullName = (String) session.getAttribute("fullName");
+                String fullName = (String) session.getAttribute("fullName");
                 request.setAttribute("fullName", fullName);
 
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
@@ -367,7 +375,7 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
                 return;
             }
-            
+
             if (!phone.matches("^0\\d{9}$")) {
                 request.setAttribute("phoneError", "Invalid phone number format.");
                 request.setAttribute("name", name);
@@ -408,9 +416,8 @@ public class controllerUsers extends HttpServlet {
             userDAO.updateUserInfo(user);
             session.removeAttribute("userId");
             int total = userDAO.countUsers("");
-            int pageSize = 5; 
+            int pageSize = 5;
             int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
-        
 
             String sortBy = request.getParameter("sortBy");
             if (sortBy == null) {
@@ -418,9 +425,9 @@ public class controllerUsers extends HttpServlet {
             }
             String sortOrder = request.getParameter("sortOrder");
             if (sortOrder == null) {
-                sortOrder = "ASC"; 
+                sortOrder = "ASC";
             }
-            
+
             response.sendRedirect("Users?service=users&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage);
         }
     }
