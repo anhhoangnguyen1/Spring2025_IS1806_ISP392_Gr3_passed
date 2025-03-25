@@ -22,6 +22,9 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -29,6 +32,9 @@ import org.json.JSONObject;
  */
 public class productsDAO extends DBContext {
 
+    private static final Logger LOGGER = Logger.getLogger(productsDAO.class.getName());
+    private static final String RED_COLOR = "\u001B[31m";
+    private static final String RESET_COLOR = "\u001B[0m";
     zoneDAO zones = new zoneDAO();
 
     // Lấy productId hiện tại của Zone
@@ -139,7 +145,7 @@ public class productsDAO extends DBContext {
         try (PreparedStatement st = connection.prepareStatement(zoneQuery); ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 int productId = rs.getInt("product_id");
-                if (!rs.wasNull()) { 
+                if (!rs.wasNull()) {
                     String zoneName = rs.getString("name");
 
                     zoneMap.putIfAbsent(productId, new ArrayList<>());
@@ -309,6 +315,46 @@ public class productsDAO extends DBContext {
         return productsList;
     }
 
+    public List<Products> searchProductsByName(String name) {
+        List<Products> products = new ArrayList<>();
+
+        // Ensure connection is open
+        if (connection == null) {
+            logSevere("Error: Cannot connect to database!");
+            return products;
+        }
+
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        String sql = "SELECT * FROM Products WHERE name LIKE ? AND isDeleted = false";
+
+        try {
+            pst = connection.prepareStatement(sql);
+            pst.setString(1, "%" + name + "%");
+            rs = pst.executeQuery();
+
+            while (rs.next()) {
+                products.add(getFromResultSet(rs));
+            }
+        } catch (SQLException ex) {
+            logSevere("Error searching products by name: " + name, ex);
+        } finally {
+            // Close ResultSet and PreparedStatement
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
+            } catch (SQLException ex) {
+                logSevere("Error closing ResultSet or PreparedStatement", ex);
+            }
+        }
+
+        return products;
+    }
+
     public List<Products> getProductById(int id) {
         List<Products> products = new ArrayList<>();
         String sql = "SELECT * FROM products WHERE id = ?";
@@ -361,6 +407,11 @@ public class productsDAO extends DBContext {
             e.printStackTrace();
         }
         return products;
+    }
+
+    public Products getProductById02(int id) {
+        List<Products> list = getProductById(id);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     public List<String[]> getTopSellingProductNamesOfMonth() {
@@ -658,6 +709,103 @@ public class productsDAO extends DBContext {
             e.printStackTrace();
         }
         return products;
+    }
+
+    public Vector<Products> findAll() {
+        Vector<Products> products = new Vector<>();
+
+        // Ensure connection is open
+        if (connection == null) {
+            logSevere("Error: Cannot connect to database!");
+            return products;
+        }
+
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        String sql = "SELECT * FROM Products WHERE isDeleted = false";
+
+        try {
+            pst = connection.prepareStatement(sql);
+            rs = pst.executeQuery();
+
+            while (rs.next()) {
+                products.add(getFromResultSet(rs));
+            }
+        } catch (SQLException ex) {
+            logSevere("Error retrieving products list", ex);
+        } finally {
+            // Close ResultSet and PreparedStatement
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
+            } catch (SQLException ex) {
+                logSevere("Error closing ResultSet or PreparedStatement", ex);
+            }
+        }
+
+        return products;
+    }
+
+    private void logSevere(String message) {
+        System.err.println(RED_COLOR + "SEVERE: " + message + RESET_COLOR);
+        LOGGER.severe(message);
+    }
+
+    private void logSevere(String message, Exception ex) {
+        System.err.println(RED_COLOR + "SEVERE: " + message + "\n" + ex.getMessage() + RESET_COLOR);
+        LOGGER.log(Level.SEVERE, message, ex);
+    }
+
+    private Products getFromResultSet(ResultSet rs) throws SQLException {
+        return Products.builder()
+                .productId(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .image(rs.getString("image"))
+                .price(rs.getBigDecimal("price"))
+                .quantity(rs.getInt("quantity"))
+                .description(rs.getString("description"))
+                .createdAt(rs.getDate("created_at"))
+                .createdBy(rs.getString("created_by"))
+                .deleteAt(rs.getDate("deletedAt"))
+                .deleteBy(rs.getString("deleteBy"))
+                .isDeleted(rs.getBoolean("isDeleted"))
+                .updatedAt(rs.getDate("updated_at"))
+                .status(rs.getString("status"))
+                .build();
+    }
+
+    public boolean updateProduct(Products product) {
+        String sql = "UPDATE Products "
+                + "SET `name` = ?, "
+                + "`image` = ?, "
+                + "`price` = ?, "
+                + "`quantity` = ?, "
+                + "`description` = ?, "
+                + "`updated_at` = CURRENT_TIMESTAMP, "
+                + "`isDeleted` = ?, "
+                + "`status` = ? "
+                + "WHERE `id` = ?;";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, product.getName());
+            st.setString(2, product.getImage());
+            st.setBigDecimal(3, product.getPrice());
+            st.setInt(4, product.getQuantity());
+            st.setString(5, product.getDescription());
+            st.setBoolean(6, product.isIsDeleted());
+            st.setString(7, product.getStatus());
+            st.setInt(8, product.getProductId());
+
+            int rowsUpdated = st.executeUpdate();
+            return rowsUpdated > 0; // Trả về true nếu có ít nhất 1 dòng được cập nhật
+        } catch (SQLException e) {
+            logSevere("Error updating product with ID: " + product.getProductId(), e);
+            return false;
+        }
     }
 
     public static void main(String[] args) {

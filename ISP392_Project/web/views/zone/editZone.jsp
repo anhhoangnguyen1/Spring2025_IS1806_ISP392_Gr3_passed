@@ -51,7 +51,7 @@
                     <li><a href="/ISP392_Project/Products"><span class="nav-icon"><i class="fas fa-box"></i></span><span class="nav-text">Products</span></a></li>
                     <li><a href="#"><span class="nav-icon"><i class="fa-solid fa-table"></i></span><span class="nav-text">Zones</span></a></li>
                     <li><a href="#"><span class="nav-icon"><i class="fa-solid fa-user"></i></span><span class="nav-text">Customers</span></a></li>
-                    <li><a href="#"><span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span><span class="nav-text">Invoices</span></a></li>
+                    <li><a href="sale"><span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span><span class="nav-text">Invoices</span></a></li>
                     <li><a href="/ISP392_Project/Debts"><span class="nav-icon"><i class="fa-solid fa-money-bill"></i></span><span class="nav-text">Debts History</span></a></li>
                 </ul>
                 <span class="menu-label">OWNER ZONE</span>

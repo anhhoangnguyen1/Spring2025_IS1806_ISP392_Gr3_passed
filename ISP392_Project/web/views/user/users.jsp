@@ -90,7 +90,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="sale">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>

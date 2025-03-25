@@ -89,7 +89,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/ISP392_Project/Invoices">
+                        <a href="sale">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
