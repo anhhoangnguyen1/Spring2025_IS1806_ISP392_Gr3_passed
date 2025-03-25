@@ -19,7 +19,6 @@ public class controllerStore extends HttpServlet {
 
     storeDAO storeDAO = new storeDAO();
     userDAO userDAO = new userDAO();
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -30,7 +29,7 @@ public class controllerStore extends HttpServlet {
 
         // Kiểm tra phân quyền
         if ("admin".equals(role)) {
-            response.sendRedirect(request.getContextPath() + "/dashboard"); // Admin không được truy cập vào store
+            response.sendRedirect(request.getContextPath() + "/Users"); // Admin không được truy cập vào store
             return;
         }
 
