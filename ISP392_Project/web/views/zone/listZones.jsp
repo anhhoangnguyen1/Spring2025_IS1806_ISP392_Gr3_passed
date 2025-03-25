@@ -66,10 +66,6 @@
                 <a href="${pageContext.request.contextPath}/zones?service=addZone" class="btn btn-outline-primary mr-lg-auto">
                     Add Zone
                 </a>
-                <div class="form-check mb-3">
-                    <input type="checkbox" class="form-check-input" id="showInactive" name="showInactive" ${showInactive ? 'checked' : ''}>
-                    <label class="form-check-label" for="showInactive">Show inactive zone</label>
-                </div>
             </div>
             <!-- Thêm dropdown chọn page size -->
             <div class="showing-info" style="margin-top: 10px; margin-bottom: -15px">
@@ -110,8 +106,6 @@
                                 <td>
                                     <a href="${pageContext.request.contextPath}/zones?service=getZoneById&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">View</a>
                                     <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">Edit</a>
-                                    <a href="${pageContext.request.contextPath}/zones?service=stockCheck&zone_id=${zone.id}" class="btn btn-outline-success">Stock Check</a>
-                                    <a href="${pageContext.request.contextPath}/zones?service=viewStockCheckHistory&zone_id=${zone.id}" class="btn btn-outline-info">History</a>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -170,9 +164,8 @@
             let timeout = null;
             let currentSortBy = '${sortBy}';
             let currentSortOrder = '${sortOrder}';
-            let currentPageSize = ${pageSize != null ? pageSize : 5};
+            let currentPageSize = ${pageSize != null ? pageSize : 5}; // Mặc định là 5 nếu không có giá trị
             let totalRecords = ${totalRecords != null ? totalRecords : 0};
-            let showInactive = ${showInactive != null ? showInactive : false}; // Lấy giá trị từ server, mặc định là false
 
             function searchZones(keyword, page, sortBy, sortOrder, pageSize) {
                 $.ajax({
@@ -184,14 +177,14 @@
                         index: page,
                         sortBy: sortBy,
                         sortOrder: sortOrder,
-                        pageSize: pageSize,
-                        showInactive: showInactive // Thêm tham số showInactive
+                        pageSize: pageSize // Thêm pageSize vào request
                     },
                     success: function (response) {
-                        totalRecords = response.totalRecords;
+                        totalRecords = response.totalRecords; // Cập nhật tổng số bản ghi
                         updateTable(response.zones, response.endPage, response.index, keyword);
+                        // Cập nhật phân trang với page hiện tại
                         updatePagination(response.endPage, page, keyword);
-                        updateShowingInfo(pageSize, response.totalRecords);
+                        updateShowingInfo(pageSize, response.totalRecords); // Cập nhật thông tin hiển thị
                     },
                     error: function () {
                         $('#zoneTableBody').html('<tr><td colspan="6">Error fetching zones</td></tr>');
@@ -199,11 +192,13 @@
                 });
             }
 
+            // [NOTE: Sửa tại đây] Định nghĩa hàm loadDefaultZones ngoài phạm vi $(document).ready()
             function loadDefaultZones() {
                 const currentIndex = ${index};
                 searchZones('', currentIndex, currentSortBy, currentSortOrder, currentPageSize);
             }
 
+            // Hàm cập nhật bảng
             function updateTable(zones, endPage, currentIndex, keyword) {
                 const tbody = $('#zoneTableBody');
                 tbody.empty();
@@ -217,14 +212,12 @@
                                 '<td>' + zone.id + '</td>' +
                                 '<td style="text-align: left;">' + zone.name + '</td>' +
                                 '<td>' + (zone.storeId ? zone.storeId.id : 'null') + '</td>' +
-                                '<td>' + (zone.productName ? zone.productName : 'null') + '</td>' +
+                                '<td>' + (zone.productName ? zone.productName : 'null) + '</td>' + // Hiển thị Product Name từ AJAX
                                 '<td>' + zone.createdBy + '</td>' +
                                 '<td>' + zone.status + '</td>' +
                                 '<td>' +
                                 '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '" class="btn btn-outline-primary">View</a> ' +
                                 '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '" class="btn btn-outline-primary">Edit</a> ' +
-                                '<a href="<%= request.getContextPath() %>/zones?service=stockCheck&zone_id=' + zone.id" class="btn btn-outline-success">Stock Check</a> ' +
-                                '<a href="<%= request.getContextPath() %>/zones?service=viewStockCheckHistory&zone_id=' + zone.id" class="btn btn-outline-info">History</a> ' +
                                 '</td>' +
                                 '</tr>'
                                 );
@@ -277,6 +270,7 @@
                             );
                 }
 
+                // [NOTE: Sửa tại đây] Gắn sự kiện click cho các liên kết phân trang bằng jQuery
                 $('.page-nav').on('click', function (e) {
                     e.preventDefault();
                     const page = $(this).data('page');
@@ -284,12 +278,14 @@
                 });
             }
 
+            // Hàm cập nhật thông tin "Showing: X of Y zones"
             function updateShowingInfo(pageSize, totalRecords) {
                 $('.showing-info').html('Showing: <select id="pageSizeSelect">' +
                         '<option value="5" ' + (pageSize == 5 ? 'selected' : '') + '>5</option>' +
                         '<option value="10" ' + (pageSize == 10 ? 'selected' : '') + '>10</option>' +
                         '<option value="20" ' + (pageSize == 20 ? 'selected' : '') + '>20</option>' +
                         '</select> of ' + totalRecords + ' zones');
+                // Gắn lại sự kiện cho dropdown mới
                 $('#pageSizeSelect').on('change', function () {
                     currentPageSize = parseInt($(this).val());
                     searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize);
@@ -305,18 +301,14 @@
                         icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
                     } else {
                         icon.removeClass('fa-sort-up fa-sort-down');
-                        icon.addClass('fa-sort-down');
+                        icon.addClass('fa-sort-down'); // Mặc định là mũi tên xuống
                     }
                 });
             }
 
             $(document).ready(function () {
-                // Xử lý sự kiện thay đổi checkbox
-                $('#showInactive').on('change', function () {
-                    showInactive = $(this).is(':checked');
-                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize);
-                });
 
+                // Xử lý tìm kiếm tự động bằng AJAX
                 $('#searchInput').on('keyup', function () {
                     clearTimeout(timeout);
                     const keyword = $(this).val().trim();
@@ -326,20 +318,25 @@
                     }, 300);
                 });
 
+                // Xử lý sắp xếp khi nhấp vào cột
                 $('.sortable').on('click', function () {
                     const sortBy = $(this).data('sort');
                     const keyword = $('#searchInput').val().trim();
 
+                    // Đảo ngược sortOrder nếu nhấp lại vào cùng cột
                     if (currentSortBy === sortBy) {
                         currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
                     } else {
                         currentSortBy = sortBy;
-                        currentSortOrder = 'ASC';
+                        currentSortOrder = 'ASC'; // Mặc định ASC khi chọn cột mới
                     }
                     updateSortIcons();
                     searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize);
                 });
 
+
+
+                // Xử lý nút Clear
                 $('#clearBtn').on('click', function () {
                     $('#searchInput').val('');
                     loadDefaultZones();
@@ -353,6 +350,9 @@
                 updateSortIcons();
                 loadDefaultZones();
             });
+
+
+
         </script>
     </body>
 </html>
