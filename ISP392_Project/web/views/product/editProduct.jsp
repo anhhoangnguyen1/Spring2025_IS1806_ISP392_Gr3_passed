@@ -38,17 +38,21 @@
                                 </div>
 
                                 <div class="form-row">
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-6">
                                         <label>Price</label>
                                         <input type="number" step="0.01" class="form-control" name="price" value="${product.getPrice()}" required>
                                     </div>
-                                    <div class="form-group col-md-4">
-                                        <label>Quantity (kg)</label>
-                                        <input type="number" class="form-control" name="quantity" value="${product.getQuantity()}" required>
+                                    <div class="form-group col-md-6">
+                                        <label>Zone name</label>
+                                        <select class="form-control selectpicker" name="zoneName" multiple data-live-search="true">
+                                            <c:forEach var="zone" items="${zoneName}">
+                                                <option value="${zone}" 
+                                                        <c:if test="${product.zoneName != null && product.zoneName.contains(zone)}">selected</c:if>>${zone}</option>
+                                            </c:forEach>
+                                        </select>
                                     </div>
-  
                                 </div>
-
+                                        <input type="hidden" name="index" value="${index}">
                                 <div class="form-group">
                                     <label>Description</label>
                                     <textarea class="form-control" name="description" rows="4" >${product.getDescription()}</textarea>

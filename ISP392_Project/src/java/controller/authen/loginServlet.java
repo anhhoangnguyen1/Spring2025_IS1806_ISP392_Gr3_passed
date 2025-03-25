@@ -48,6 +48,13 @@ public class loginServlet extends HttpServlet {
 
         //if authenticate success 
          if (login != null) {
+             
+             if ("Deactive".equals(login.getStatus())) {
+            // Nếu tài khoản bị ban, từ chối đăng nhập và thông báo lỗi
+            request.setAttribute("error", "Your account is deactivated. Please contact admin.");
+            request.getRequestDispatcher("/views/login.jsp").forward(request, response);
+            return;
+        }
               Stores store = login.getStoreId();  // Lấy đối tượng Stores
             String storeID = store != null ? String.valueOf(store.getId()) : null;  // Lấy storeID từ đối tượng Stores
 

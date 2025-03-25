@@ -18,7 +18,7 @@
     <body>
         <!--   *** Page Wrapper Starts ***   -->
         <div class="page-wrapper">
-                        <!--   *** Top Bar Starts ***   -->
+            <!--   *** Top Bar Starts ***   -->
             <div class="top-bar">
                 <div class="top-bar-left">
                     <div class="hamburger-btn">
@@ -121,10 +121,10 @@
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
                     <div class="settings">
-                            <span class="gear-icon">
-                                <i class="fa-solid fa-gear"></i>
-                            </span>
-                            <span class="text">Settings</span>
+                        <span class="gear-icon">
+                            <i class="fa-solid fa-gear"></i>
+                        </span>
+                        <span class="text">Settings</span>
                     </div>
                     <div class="logoutBtn">
                         <a href="/ISP392_Project/logout">
@@ -140,27 +140,13 @@
 
             <div class="contents">
                 <div class="panel-bar1">
-                    <c:if test="${not empty requestScope.Notification}">
-                        <div class="alert alert-warning alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            <strong>${requestScope.Notification}</strong>
-                        </div>
-                    </c:if>
-                    <c:if test="${not empty sessionScope.Notification}">
-                        <div class="alert alert-warning alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            <strong>${sessionScope.Notiication}</strong>
-                        </div>
-                        <c:remove var="Notification" scope="session" />
-                    </c:if>
+
                     <c:import url="listUsers.jsp" />
                 </div>
             </div>
         </div>
 
-        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <!-- Bootstrap JS -->
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
     </body>

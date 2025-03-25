@@ -68,52 +68,59 @@ public class userDAO extends DBContext {
         return 0;
     }
 
+    public void deactivateUser(int userId) {
+        String sql = "UPDATE users SET status = 'Deactive' WHERE id = ?";
+      try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, userId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+        public void activateUser(int userId) {
+        String sql = "UPDATE users SET status = 'Active' WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, userId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public List<Users> searchUsers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
         List<Users> list = new ArrayList<>();
-        if (sortBy == null || !sortBy.equals("balance")) {
+        List<String> allowedSortColumns = List.of("id", "role", "name", "phone", "address", "gender", "dob", "email", "status");
+        if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
             sortBy = "id";
         }
 
         if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
             sortOrder = "ASC";
         }
-        String sql;
-        if (keyword == null || keyword.trim().isEmpty()) {
-            sql = "SELECT *"
-                    + "FROM users "
-                    + "ORDER BY " + sortBy + " " + sortOrder + " "
-                    + "LIMIT ? OFFSET ?";
-            try (PreparedStatement st = connection.prepareStatement(sql)) {
-                st.setInt(1, pageSize);
-                st.setInt(2, (pageIndex - 1) * pageSize);
-                try (ResultSet rs = st.executeQuery()) {
-                    while (rs.next()) {
-                        list.add(mapResultSetToUser(rs));
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        } else {
-            sql = "SELECT * "
-                    + "FROM users "
-                    + "WHERE name LIKE ? OR phone LIKE ? "
-                    + "ORDER BY " + sortBy + " " + sortOrder + " "
-                    + "LIMIT ? OFFSET ?";
-            try (PreparedStatement st = connection.prepareStatement(sql)) {
+        String sql = "SELECT * FROM users ";
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql += "WHERE name LIKE ? OR phone LIKE ? ";
+        }
+        sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            int paramIndex = 1;
+            if (keyword != null && !keyword.trim().isEmpty()) {
                 String param = "%" + keyword + "%";
-                st.setString(1, param);
-                st.setString(2, param);
-                st.setInt(3, pageSize);
-                st.setInt(4, (pageIndex - 1) * pageSize);
-                try (ResultSet rs = st.executeQuery()) {
-                    while (rs.next()) {
-                        list.add(mapResultSetToUser(rs));
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+                st.setString(paramIndex++, param);
+                st.setString(paramIndex++, param);
             }
+            st.setInt(paramIndex++, pageSize);
+            st.setInt(paramIndex, (pageIndex - 1) * pageSize);
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Users user = mapResultSetToUser(rs);
+                    list.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return list;
@@ -216,7 +223,6 @@ public class userDAO extends DBContext {
 //
 //        return storeID;  // Trả về storeID của người dùng
 //    }
-
     public boolean insertUsers(Users user) {
         // Câu lệnh SQL không gán store_id nếu storeId là null
         String sql = "INSERT INTO users (username, password, image, name, phone, address, gender, dob, role, email, created_at, status"
