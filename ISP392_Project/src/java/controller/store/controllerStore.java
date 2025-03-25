@@ -29,7 +29,7 @@ public class controllerStore extends HttpServlet {
 
         // Kiểm tra phân quyền
         if ("admin".equals(role)) {
-            response.sendRedirect(request.getContextPath() + "/dashboard"); // Admin không được truy cập vào store
+            response.sendRedirect(request.getContextPath() + "/Users"); // Admin không được truy cập vào store
             return;
         }
 

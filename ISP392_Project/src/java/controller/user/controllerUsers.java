@@ -34,6 +34,7 @@ import utils.GlobalUtils;
 public class controllerUsers extends HttpServlet {
 
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
     userDAO userDAO = new userDAO();
 
@@ -139,6 +140,12 @@ public class controllerUsers extends HttpServlet {
 
             if (emailExists) {
                 request.setAttribute("emailError", "Email already exists.");
+                request.setAttribute("user", getUserFromRequest(request));
+                request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
+                return;
+            }
+            if (!EMAIL_PATTERN.matcher(email).matches()) {
+                request.setAttribute("emailError", "Invalid email format.");
                 request.setAttribute("user", getUserFromRequest(request));
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 return;
@@ -304,7 +311,19 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
                 return;
             }
-            
+
+            if (!EMAIL_PATTERN.matcher(email).matches()) {
+                request.setAttribute("emailError", "Invalid email format.");
+                request.setAttribute("name", name);
+                request.setAttribute("phone", phone);
+                request.setAttribute("email", email);
+                request.setAttribute("address", address);
+                request.setAttribute("gender", gender);
+                request.setAttribute("dob", dob);
+                request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
+                return;
+            }
+
             if (!phone.matches("^0\\d{9}$")) {
                 request.setAttribute("phoneError", "Invalid phone number format.");
                 request.setAttribute("name", name);
