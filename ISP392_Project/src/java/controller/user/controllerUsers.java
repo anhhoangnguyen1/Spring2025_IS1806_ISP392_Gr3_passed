@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.regex.Pattern;
 import utils.GlobalUtils;
@@ -36,14 +37,12 @@ public class controllerUsers extends HttpServlet {
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$");
 
     userDAO userDAO = new userDAO();
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        
-        
         String service = request.getParameter("service");
+        
         if (service == null) {
             service = "users";
         }
@@ -94,42 +93,46 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
                 break;
             }
-
-             case "searchUsersAjax": {
+ case "searchUsersAjax": {
                 String keyword = request.getParameter("searchUser");
                 if (keyword == null) {
                     keyword = "";
                 }
+
                 int index = 1;
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
                 } catch (NumberFormatException ignored) {
                 }
 
-                int pageSize = 5;
-                int total = userDAO.countUsers(keyword);
-                int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
-                List<Users> users = userDAO.searchUsers(keyword, index, pageSize, sortBy, sortOrder);
+                int pageSize = 5;  // Kích thước trang cố định là 5
+                int total = userDAO.countUsers(keyword);  // Đếm tổng số người dùng
+                int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;  // Tính số trang cuối
 
+                List<Users> users = userDAO.searchUsers(keyword, index, pageSize, sortBy, sortOrder);  // Tìm người dùng theo từ khóa và phân trang
+
+                // Trả về dữ liệu dưới dạng JSON
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 PrintWriter out = response.getWriter();
+
+                // Định dạng dữ liệu trả về dưới dạng JSON
                 out.print("{");
                 out.print("\"users\": [");
                 for (int i = 0; i < users.size(); i++) {
                     Users user = users.get(i);
                     out.print("{");
                     out.print("\"id\": " + user.getId() + ",");
-                    out.print("\"role\": " + user.getRole()+ ",");
+                    out.print("\"role\": \"" + user.getRole() + "\",");
                     out.print("\"name\": \"" + user.getName() + "\",");
                     out.print("\"phone\": \"" + user.getPhone() + "\",");
                     out.print("\"address\": \"" + user.getAddress() + "\",");
-                    out.print("\"gender\": \"" + user.getGender()+ "\",");
-                    out.print("\"dob\": \"" + user.getDob()+ "\",");
-                    out.print("\"email\": \"" + user.getEmail()+ "\",");
-                    out.print("\"status\": \"" + user.getStatus()+ "\"");
-
+                    out.print("\"gender\": \"" + user.getGender() + "\",");
+                    out.print("\"dob\": \"" + user.getDob() + "\",");
+                    out.print("\"email\": \"" + user.getEmail() + "\",");
+                    out.print("\"status\": \"" + user.getStatus() + "\"");
                     out.print("}");
+
                     if (i < users.size() - 1) {
                         out.print(",");
                     }
@@ -140,7 +143,6 @@ public class controllerUsers extends HttpServlet {
                 out.print("}");
                 out.flush();
                 break;
-
             }
             case "getUserById": {
                 int id = Integer.parseInt(request.getParameter("user_id"));

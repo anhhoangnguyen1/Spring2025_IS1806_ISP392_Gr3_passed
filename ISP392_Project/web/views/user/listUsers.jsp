@@ -82,7 +82,7 @@
 
                             </th>
                             <th class="resizable">Role</th>
-                           <th class="sortable" data-sort="name">
+                            <th class="sortable" data-sort="name">
                                 Name <i class="fa ${sortBy == 'name' && sortOrder == 'ASC' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
                             </th>
                             <th class="resizable">Phone</th>
@@ -129,9 +129,12 @@
                             </li>
                         </c:if>
 
+
+
                         <li class="page-item ${index == 1 ? 'active' : ''}">
                             <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}">1</a>
                         </li>
+
 
                         <c:if test="${index > 3}">
                             <li class="page-item disabled">
@@ -148,14 +151,11 @@
                                 </li>
                             </c:if>
                         </c:forEach>
-
-
                         <c:if test="${index < endPage - 2}">
                             <li class="page-item disabled">
                                 <span class="page-link">...</span>
                             </li>
                         </c:if>
-
 
                         <c:if test="${endPage > 1}">
                             <li class="page-item ${index == endPage ? 'active' : ''}">
@@ -168,7 +168,7 @@
 
                         <c:if test="${index < endPage}">
                             <li class="page-item">
-                                <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                <a class="page-link" href=""Users?service=users&searchUser=${searchUser}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
                                     <i class="fa fa-angle-right"></i>
                                 </a>
                             </li>
@@ -198,26 +198,19 @@
                         },
                         success: function (response) {
                             updateTable(response.users, response.endPage, response.index, keyword);
-
                             updatePagination(response.endPage, page, keyword);
                         },
                         error: function () {
-                            $('#userTablebody').html('<tr><td colspan="8">Error fetching users</td></tr>');
+                            $('#userTableBody').html('<tr><td colspan="10">Error fetching users</td></tr>');
                         }
                     });
                 }
-
-                function loadDefaultUsers() {
-                    const currentIndex = ${index};
-                    searchUsers('', currentIndex, currentSortBy, currentSortOrder);
-                }
-
 
                 function updateTable(users, endPage, currentIndex, keyword) {
                     const tbody = $('#userTableBody');
                     tbody.empty();
                     if (users.length === 0) {
-                        tbody.append('<tr><td colspan="10">Không tìm thấy người dùng</td></tr>');
+                        tbody.append('<tr><td colspan="10">No users found</td></tr>');
                     } else {
                         users.forEach(function (user) {
                             tbody.append(
@@ -233,7 +226,7 @@
                                     '<td>' + user.status + '</td>' +
                                     '<td class="sticky-col">' +
                                     '<a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=' + user.id + '" class="btn btn-outline-primary">Edit</a>' +
-                                    '<button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#">Ban</button>' +
+                                    '<button type="button" class="btn btn-outline-danger">Ban</button>' +
                                     '</td>' +
                                     '</tr>'
                                     );
@@ -241,26 +234,15 @@
                     }
                 }
 
-
-
-                function formatNumber(number) {
-                    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                }
-
-
                 function updatePagination(endPage, currentIndex, keyword) {
                     const pagination = $('.pagination');
                     pagination.empty();
 
                     if (currentIndex > 1) {
-                        pagination.append(
-                                '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex - 1) + '"><i class="fa fa-angle-left"></i></a></li>'
-                                );
+                        pagination.append('<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex - 1) + '"><i class="fa fa-angle-left"></i></a></li>');
                     }
 
-                    pagination.append(
-                            '<li class="page-item ' + (currentIndex === 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>'
-                            );
+                    pagination.append('<li class="page-item ' + (currentIndex === 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>');
 
                     if (currentIndex > 3) {
                         pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
@@ -280,16 +262,13 @@
 
                     if (endPage > 1) {
                         pagination.append(
-                                '<li class="page-item ' + (currentIndex == endPage ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + endPage + '">' + endPage + '</a></li>'
+                                '<li class="page-item ' + (currentIndex === endPage ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + endPage + '">' + endPage + '</a></li>'
                                 );
                     }
 
                     if (currentIndex < endPage) {
-                        pagination.append(
-                                '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex + 1) + '"><i class="fa fa-angle-right"></i></a></li>'
-                                );
+                        pagination.append('<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex + 1) + '"><i class="fa fa-angle-right"></i></a></li>');
                     }
-
 
                     $('.page-nav').on('click', function (e) {
                         e.preventDefault();
@@ -298,41 +277,7 @@
                     });
                 }
 
-                function addUser(user) {
-
-                    $('#userTableBody').append(
-                            '<tr>' +
-                            '<td>' + user.id + '</td>' +
-                            '<td>' + user.role + '</td>' +
-                            '<td>' + user.name + '</td>' +
-                            '<td>' + user.phone + '</td>' +
-                            '<td>' + user.address + '</td>' +
-                            '<td>' + user.gender + '</td>' +
-                            '<td>' + user.dob + '</td>' +
-                            '<td>' + user.email + '</td>' +
-                            '<td>' + user.status + '</td>' +
-                            '</tr>'
-                            );
-                }
-
-
-
-                function updateSortIcons() {
-                    $('.sortable').each(function () {
-                        const sortBy = $(this).data('sort');
-                        const icon = $(this).find('i');
-                        if (sortBy === currentSortBy) {
-                            icon.removeClass('fa-sort-up fa-sort-down');
-                            icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
-                        } else {
-                            icon.removeClass('fa-sort-up fa-sort-down');
-                            icon.addClass('fa-sort-down');
-                        }
-                    });
-                }
-
                 $(document).ready(function () {
-
                     $('#searchInput').on('keyup', function () {
                         clearTimeout(timeout);
                         const keyword = $(this).val().trim();
@@ -342,11 +287,9 @@
                         }, 300);
                     });
 
-
                     $('.sortable').on('click', function () {
                         const sortBy = $(this).data('sort');
                         const keyword = $('#searchInput').val().trim();
-
 
                         if (currentSortBy === sortBy) {
                             currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
@@ -355,25 +298,17 @@
                             currentSortOrder = 'ASC';
                         }
 
-
-                        updateSortIcons();
-
-
                         searchUsers(keyword, 1, currentSortBy, currentSortOrder);
                     });
 
-
-                    $('#clearBtn').on('click', function () {
-                        $('#searchInput').val('');
-                        loadDefaultUsers();
-                    });
-
-
-                    updateSortIcons();
-
-
                     loadDefaultUsers();
                 });
+
+                function loadDefaultUsers() {
+                    const currentIndex = ${index};
+                    searchUsers('', currentIndex, currentSortBy, currentSortOrder);
+                }
             </script>
+
     </body>
 </html>
