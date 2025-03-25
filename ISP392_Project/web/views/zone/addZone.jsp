@@ -44,30 +44,96 @@
                 </div>
             </div>
             <!-- Side Bar -->
+            <!--   === Side Bar Starts ===   -->
             <aside class="side-bar">
+                <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
-                    <li><a href="/ISP392_Project/dashboard"><span class="nav-icon"><i class="fa-solid fa-house"></i></span><span class="nav-text">Dashboard</span></a></li>
-                    <li><a href="/ISP392_Project/Products"><span class="nav-icon"><i class="fas fa-box"></i></span><span class="nav-text">Products</span></a></li>
-                    <li><a href="#"><span class="nav-icon"><i class="fa-solid fa-table"></i></span><span class="nav-text">Zones</span></a></li>
-                    <li><a href="#"><span class="nav-icon"><i class="fa-solid fa-user"></i></span><span class="nav-text">Customers</span></a></li>
-                    <li><a href="#"><span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span><span class="nav-text">Invoices</span></a></li>
-                    <li><a href="/ISP392_Project/Debts"><span class="nav-icon"><i class="fa-solid fa-money-bill"></i></span><span class="nav-text">Debts History</span></a></li>
+                    <li>
+                        <a href="/ISP392_Project/dashboard">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-house"></i>
+                            </span>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Products">
+                            <span class="nav-icon">
+                                <i class="fas fa-box"></i>
+                            </span>
+                            <span class="nav-text">Products</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="/ISP392_Project/zones">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-table"></i>
+                            </span>
+                            <span class="nav-text">Zones</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Customers">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <span class="nav-text">Customers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </span>
+                            <span class="nav-text">Invoices</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Debts">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-money-bill"></i>
+                            </span>
+                            <span class="nav-text">Debts History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Users">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-user-tie"></i>
+                            </span>
+                            <span class="nav-text">Staffs</span>
+                        </a>
+                    </li>
                 </ul>
-                <span class="menu-label">OWNER ZONE</span>
-                <ul class="navbar-links navbar-links-2">
-                    <li><a href="#"><span class="nav-icon"><i class="fa-solid fa-user-tie"></i></span><span class="nav-text">Staffs</span></a></li>
-                </ul>
+                <!--   === Nav Bar Links Ends ===   -->
+                <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
                     <div class="settings">
-                        <span class="gear-icon"><i class="fa-solid fa-gear"></i></span>
+                        <span class="gear-icon">
+                            <i class="fa-solid fa-gear"></i>
+                        </span>
                         <span class="text">Settings</span>
                     </div>
                     <div class="logoutBtn">
-                        <a href="/ISP392_Project/logout"><span class="logout-icon"><i class="fa-solid fa-right-from-bracket"></i></span><span class="text">Logout</span></a>
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
                     </div>
                 </div>
+                <!--   === Side Bar Footer Ends ===   -->
             </aside>
+            <!--   === Side Bar Ends ===   -->
             <!-- Main Content -->
             <div class="contents">
                 <div class="panel-bar1">

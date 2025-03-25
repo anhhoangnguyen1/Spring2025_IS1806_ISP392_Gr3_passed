@@ -44,8 +44,9 @@
             </div>
             <!--   *** Top Bar Ends ***   -->
 
-            <!--   === Side Bar Starts ===   -->
+           <!--   === Side Bar Starts ===   -->
             <aside class="side-bar">
+                <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
                     <li>
@@ -56,7 +57,7 @@
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="active">
                         <a href="/ISP392_Project/Products">
                             <span class="nav-icon">
                                 <i class="fas fa-box"></i>
@@ -65,7 +66,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/ISP392_Project/Zones">
+                        <a href="/ISP392_Project/zones">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-table"></i>
                             </span>
@@ -81,7 +82,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/ISP392_Project/Invoices">
+                        <a href="#">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
@@ -96,11 +97,16 @@
                             <span class="nav-text">Debts History</span>
                         </a>
                     </li>
-                </ul>
-                <span class="menu-label">OWNER ZONE</span>
-                <ul class="navbar-links navbar-links-2">
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Users">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user-tie"></i>
                             </span>
@@ -108,6 +114,8 @@
                         </a>
                     </li>
                 </ul>
+                <!--   === Nav Bar Links Ends ===   -->
+                <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
                     <div class="settings">
                         <span class="gear-icon">
@@ -116,12 +124,14 @@
                         <span class="text">Settings</span>
                     </div>
                     <div class="logoutBtn">
-                        <span class="logout-icon">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </span>
-                        <span class="text">Logout</span>
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
                     </div>
                 </div>
+                <!--   === Side Bar Footer Ends ===   -->
             </aside>
             <!--   === Side Bar Ends ===   -->
 
