@@ -70,7 +70,7 @@
                 <button type="submit">Send Mail</button>
             </form>
             <div style="text-align: right;">
-                <p><a href="/ISP392_Project/views/loginServlet" class="btn">Un-Forgot password?</a></p>
+                <p><a href="/ISP392_Project/views/loginServlet" class="btn">Never mind, take me back</a></p>
             </div>
         </div>
     </body>
