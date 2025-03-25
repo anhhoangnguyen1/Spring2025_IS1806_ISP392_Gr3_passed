@@ -68,7 +68,26 @@ public class userDAO extends DBContext {
         return 0;
     }
 
-//    
+    public void deactivateUser(int userId) {
+        String sql = "UPDATE users SET status = 'Deactive' WHERE id = ?";
+      try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, userId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+        public void activateUser(int userId) {
+        String sql = "UPDATE users SET status = 'Active' WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, userId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public List<Users> searchUsers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
         List<Users> list = new ArrayList<>();
         List<String> allowedSortColumns = List.of("id", "role", "name", "phone", "address", "gender", "dob", "email", "status");

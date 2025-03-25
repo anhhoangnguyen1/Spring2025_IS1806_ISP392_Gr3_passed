@@ -110,9 +110,15 @@
                                     <a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=${user.id}" class="btn btn-outline-primary">
                                         Edit
                                     </a>
-                                    <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#">
-                                        Ban
-                                    </button>
+
+                                    <c:if test="${sessionScope.role == 'owner'}">
+                                        <c:if test="${user.status == 'Deactive'}">
+                                            <a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=${user.id}" class="btn btn-outline-success">UnBan</a>
+                                        </c:if>
+                                        <c:if test="${user.status != 'Deactive'}">
+                                            <a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=${user.id}" class="btn btn-outline-danger">Ban</a>
+                                        </c:if>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -209,10 +215,24 @@
                 function updateTable(users, endPage, currentIndex, keyword) {
                     const tbody = $('#userTableBody');
                     tbody.empty();
+
                     if (users.length === 0) {
                         tbody.append('<tr><td colspan="10">No users found</td></tr>');
                     } else {
                         users.forEach(function (user) {
+                            let banButton = '';
+
+                            // Kiểm tra nếu người dùng có role = 'owner' và user có role = 'staff'
+                            if ('${sessionScope.role}' === 'owner') {
+                                if (user.status === 'Deactive') {
+                                    // Hiển thị nút UnBan nếu tài khoản có status = 'Deactive'
+                                    banButton = '<a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=' + user.id + '" class="btn btn-outline-success">UnBan</a>';
+                                } else if (user.status === 'Active' && user.role === 'staff') {
+                                    // Hiển thị nút Ban nếu tài khoản có role = 'staff' và status là 'Active'
+                                    banButton = '<a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=' + user.id + '" class="btn btn-outline-danger">Ban</a>';
+                                }
+                            }
+
                             tbody.append(
                                     '<tr>' +
                                     '<td>' + user.id + '</td>' +
@@ -226,13 +246,15 @@
                                     '<td>' + user.status + '</td>' +
                                     '<td class="sticky-col">' +
                                     '<a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=' + user.id + '" class="btn btn-outline-primary">Edit</a>' +
-                                    '<button type="button" class="btn btn-outline-danger">Ban</button>' +
+                                    // Hiển thị nút Ban hoặc UnBan tùy vào trạng thái
+                                    banButton +
                                     '</td>' +
                                     '</tr>'
                                     );
                         });
                     }
                 }
+
 
                 function updatePagination(endPage, currentIndex, keyword) {
                     const pagination = $('.pagination');
