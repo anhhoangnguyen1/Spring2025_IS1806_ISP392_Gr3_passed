@@ -139,7 +139,7 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <h5 class="card-title">Store Name: ${store.name}</h5>
-                                        <p class="card-text"><strong>Owner:</strong> ${user.name}</p>
+                                        <p class="card-text"><strong>Owner:</strong> ${store.createdBy}</p>
                                         <p class="card-text"><strong>Address:</strong> ${store.address}</p>
                                         <p class="card-text"><strong>Phone:</strong> ${store.phone}</p>
                                         <p class="card-text"><strong>Email:</strong> ${store.email}</p>
