@@ -15,7 +15,12 @@ import lombok.ToString;
 @NoArgsConstructor
 public class StockCheck {
 
-    private int stockCheckId, zoneId, productId, actualQuantity, recordedQuantity, discrepancy;
+    private int stockCheckId;
+    private int zoneId;
+    private int productId;
     private Date checkedDate;
+    private int actualQuantity;
+    private int recordedQuantity;
+    private int discrepancy;
     private String notes;
 }

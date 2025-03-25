@@ -16,82 +16,82 @@ import java.util.List;
  */
 public class stockCheckDAO extends DBContext {
 
-    // Create (Thêm mới bản ghi kiểm kho)
-    public void addStockCheck(StockCheck sc) throws SQLException {
+    // Create
+    public void createStockCheck(StockCheck stockCheck) throws SQLException {
         String sql = "INSERT INTO StockChecks (zoneId, productId, checkedDate, actualQuantity, recordedQuantity, discrepancy, notes) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, sc.getZoneId());
-        ps.setInt(2, sc.getProductId());
-        ps.setDate(3, new Date(sc.getCheckedDate().getTime()));
-        ps.setInt(4, sc.getActualQuantity());
-        ps.setInt(5, sc.getRecordedQuantity());
-        ps.setInt(6, sc.getDiscrepancy());
-        ps.setString(7, sc.getNotes());
-        ps.executeUpdate();
-    }
-
-    // Read (Lấy danh sách kiểm kho)
-    public List<StockCheck> getAllStockChecks() throws SQLException {
-        List<StockCheck> list = new ArrayList<>();
-        String sql = "SELECT * FROM StockChecks";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            StockCheck sc = new StockCheck();
-            sc.setStockCheckId(rs.getInt("stockCheckId"));
-            sc.setZoneId(rs.getInt("zoneId"));
-            sc.setProductId(rs.getInt("productId"));
-            sc.setCheckedDate(rs.getTimestamp("checkedDate"));
-            sc.setActualQuantity(rs.getInt("actualQuantity"));
-            sc.setRecordedQuantity(rs.getInt("recordedQuantity"));
-            sc.setDiscrepancy(rs.getInt("discrepancy"));
-            sc.setNotes(rs.getString("notes"));
-            list.add(sc);
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, stockCheck.getZoneId());
+            ps.setInt(2, stockCheck.getProductId());
+            ps.setDate(3, (Date) stockCheck.getCheckedDate());
+            ps.setInt(4, stockCheck.getActualQuantity());
+            ps.setInt(5, stockCheck.getRecordedQuantity());
+            ps.setInt(6, stockCheck.getDiscrepancy());
+            ps.setString(7, stockCheck.getNotes());
+            ps.executeUpdate();
         }
-        return list;
     }
 
-    // Update (Cập nhật bản ghi kiểm kho)
-    public void updateStockCheck(StockCheck sc) throws SQLException {
-        String sql = "UPDATE StockChecks SET zoneId=?, productId=?, checkedDate=?, actualQuantity=?, recordedQuantity=?, discrepancy=?, notes=? WHERE stockCheckId=?";
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, sc.getZoneId());
-        ps.setInt(2, sc.getProductId());
-        ps.setDate(3, new Date(sc.getCheckedDate().getTime()));
-        ps.setInt(4, sc.getActualQuantity());
-        ps.setInt(5, sc.getRecordedQuantity());
-        ps.setInt(6, sc.getDiscrepancy());
-        ps.setString(7, sc.getNotes());
-        ps.setInt(8, sc.getStockCheckId());
-        ps.executeUpdate();
+    // Read
+    public List<StockCheck> getAllStockChecks(String sortBy, String order, String search) throws SQLException {
+        List<StockCheck> stockChecks = new ArrayList<>();
+        String sql = "SELECT * FROM StockChecks WHERE notes LIKE ? ORDER BY " + sortBy + " " + order;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "%" + (search != null ? search : "") + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                StockCheck stockCheck = new StockCheck();
+                stockCheck.setStockCheckId(rs.getInt("stockCheckId"));
+                stockCheck.setZoneId(rs.getInt("zoneId"));
+                stockCheck.setProductId(rs.getInt("productId"));
+                stockCheck.setCheckedDate(rs.getTimestamp("checkedDate"));
+                stockCheck.setActualQuantity(rs.getInt("actualQuantity"));
+                stockCheck.setRecordedQuantity(rs.getInt("recordedQuantity"));
+                stockCheck.setDiscrepancy(rs.getInt("discrepancy"));
+                stockCheck.setNotes(rs.getString("notes"));
+                stockChecks.add(stockCheck);
+            }
+        }
+        return stockChecks;
     }
 
-    // Delete (Xóa bản ghi kiểm kho)
+    // Update (chỉ sửa notes)
+    public void updateStockCheck(StockCheck stockCheck) throws SQLException {
+        String sql = "UPDATE StockChecks SET notes = ? WHERE stockCheckId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, stockCheck.getNotes());
+            ps.setInt(2, stockCheck.getStockCheckId());
+            ps.executeUpdate();
+        }
+    }
+
+    // Delete
     public void deleteStockCheck(int stockCheckId) throws SQLException {
-        String sql = "DELETE FROM StockChecks WHERE stockCheckId=?";
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, stockCheckId);
-        ps.executeUpdate();
+        String sql = "DELETE FROM StockChecks WHERE stockCheckId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, stockCheckId);
+            ps.executeUpdate();
+        }
     }
 
-    // Lấy bản ghi theo ID
+    // Get by ID
     public StockCheck getStockCheckById(int stockCheckId) throws SQLException {
-        String sql = "SELECT * FROM StockChecks WHERE stockCheckId=?";
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, stockCheckId);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            StockCheck sc = new StockCheck();
-            sc.setStockCheckId(rs.getInt("stockCheckId"));
-            sc.setZoneId(rs.getInt("zoneId"));
-            sc.setProductId(rs.getInt("productId"));
-            sc.setCheckedDate(rs.getTimestamp("checkedDate"));
-            sc.setActualQuantity(rs.getInt("actualQuantity"));
-            sc.setRecordedQuantity(rs.getInt("recordedQuantity"));
-            sc.setDiscrepancy(rs.getInt("discrepancy"));
-            sc.setNotes(rs.getString("notes"));
-            return sc;
+        StockCheck stockCheck = null;
+        String sql = "SELECT * FROM StockChecks WHERE stockCheckId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, stockCheckId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                stockCheck = new StockCheck();
+                stockCheck.setStockCheckId(rs.getInt("stockCheckId"));
+                stockCheck.setZoneId(rs.getInt("zoneId"));
+                stockCheck.setProductId(rs.getInt("productId"));
+                stockCheck.setCheckedDate(rs.getTimestamp("checkedDate"));
+                stockCheck.setActualQuantity(rs.getInt("actualQuantity"));
+                stockCheck.setRecordedQuantity(rs.getInt("recordedQuantity"));
+                stockCheck.setDiscrepancy(rs.getInt("discrepancy"));
+                stockCheck.setNotes(rs.getString("notes"));
+            }
         }
-        return null;
+        return stockCheck;
     }
 }
