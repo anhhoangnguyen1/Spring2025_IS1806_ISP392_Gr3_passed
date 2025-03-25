@@ -78,7 +78,10 @@
                     <form id="zoneForm" action="${pageContext.request.contextPath}/zones" method="POST" onsubmit="confirmSave(event)">
                         <input type="hidden" name="service" value="editZone" />
                         <input type="hidden" name="zone_id" value="${zone.id}" />
-                        <input type="hidden" name="sortOrder" value="${param.sortOrder}" />
+                        <input type="hidden" name="index" value="${index}" />
+                        <input type="hidden" name="sortBy" value="${sortBy}" />
+                        <input type="hidden" name="sortOrder" value="${sortOrder}" />
+
                         <div class="form-group">
                             <label for="name">Name</label>
                             <input type="text" class="form-control" name="name" value="${zone.name}" required>
@@ -90,9 +93,9 @@
                         <!-- Xóa phần Store ID -->
                         <div class="form-group">
                             <label for="status">Status</label>
-                            <select class="form-control" name="status" required>
-                                <option value="Active" ${zone.status == 'Active' ? 'selected' : ''}>Active</option>
-                                <option value="Inactive" ${zone.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            <select class="form-control" id="status" name="status">
+                                <option value="Active" ${status == null ? (zone.status == 'Active' ? 'selected' : '') : (status == 'Active' ? 'selected' : '')}>Active</option>
+                                <option value="Inactive" ${status == null ? (zone.status == 'Inactive' ? 'selected' : '') : (status == 'Inactive' ? 'selected' : '')}>Inactive</option>
                             </select>
                         </div>
                         <input type="hidden" name="updateBy" value="${zone.createdBy}" />
@@ -127,13 +130,13 @@
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
             <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
             <script type="text/javascript">
-                document.getElementById('saveChangesBtn').onclick = function () {
-                    document.getElementById('zoneForm').submit();
-                }
-                function confirmSave(event) {
-                    event.preventDefault();
-                    $('#confirmModal').modal('show');
-                }
+                        document.getElementById('saveChangesBtn').onclick = function () {
+                            document.getElementById('zoneForm').submit();
+                        }
+                        function confirmSave(event) {
+                            event.preventDefault();
+                            $('#confirmModal').modal('show');
+                        }
             </script>
     </body>
 </html>

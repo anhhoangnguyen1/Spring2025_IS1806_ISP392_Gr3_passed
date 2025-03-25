@@ -27,6 +27,7 @@ import java.util.List;
 import dal.customerDAO;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.UUID;
 
 /**
  *
@@ -39,15 +40,6 @@ public class controllerDebts extends HttpServlet {
     customerDAO customerDAO = new customerDAO();
     private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList("image/jpeg", "image/png", "image/gif");
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -56,15 +48,6 @@ public class controllerDebts extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -109,18 +92,20 @@ public class controllerDebts extends HttpServlet {
 
             request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
         }
+        
         if (service.equals("searchDebts")) {
-            int id = Integer.parseInt(request.getParameter("browser"));
+            String name = request.getParameter("browser");
             try {
-                List<DebtNote> list = debts.searchDebts(id);
+                List<DebtNote> list = debts.searchDebts(name);
                 request.setAttribute("list", list);
+                request.setAttribute("name", name);
                 request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
             } catch (NumberFormatException e) {
             }
         }
         if (service.equals("debtHistory")) {
             String idStr = request.getParameter("id");
-            Integer sessionId = (Integer) request.getSession().getAttribute("id");
+            Integer sessionId = (Integer) request.getSession().getAttribute("customer_id");
 
             int id;
             if (sessionId != null) {
@@ -128,22 +113,303 @@ public class controllerDebts extends HttpServlet {
             } else if (idStr != null && !idStr.trim().isEmpty()) {
                 id = Integer.parseInt(idStr);
             } else {
-                request.getSession().setAttribute("Notification", "Debt ID is required.");
+                request.getSession().setAttribute("Notification", "Customer ID is required.");
                 response.sendRedirect("Debts?service=debtHistory");
                 return;
             }
 
-
             List<DebtNote> list = debts.getDebtByCustomerId(id);
+
             request.setAttribute("list", list);
-            request.getSession().removeAttribute("id");
             String notification = (String) request.getSession().getAttribute("Notification");
             if (notification != null) {
                 request.setAttribute("Notification", notification);
             }
+            request.getSession().setAttribute("customer_id", id);
 
             request.getRequestDispatcher("views/debtHistory/debtHistory.jsp").forward(request, response);
         }
+        if (service.equals("addDebtInDebtDetails")) {
+            String status = request.getParameter("status");
+            String type;
+
+            if (status == null || status.trim().isEmpty()) {
+                request.getSession().setAttribute("Notification", "Status is required.");
+                response.sendRedirect("Debts?service=debtHistory");
+                return;
+            }
+            if ("Customer borrows debt".equalsIgnoreCase(status) || "Owner repays debt".equalsIgnoreCase(status)) {
+                type = "+";
+            } else if ("Customer repays debt".equalsIgnoreCase(status) || "Owner borrows debt".equalsIgnoreCase(status)) {
+                type = "-";
+            } else {
+                request.getSession().setAttribute("Notification", "Status is required.");
+                response.sendRedirect("Debts?service=debtHistory");
+                return;
+            }
+
+            String amountStr = request.getParameter("amount");
+            BigDecimal amount = null;
+            if (amountStr == null || amountStr.trim().isEmpty()) {
+                request.getSession().setAttribute("Notification", "Amount is required.");
+                response.sendRedirect("Debts?service=debtHistory");
+                return; // Nếu amount rỗng, không tiếp tục xử lý
+            }
+            amount = new BigDecimal(amountStr);
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                request.getSession().setAttribute("Notification", "Amount must be greater than zero.");
+                response.sendRedirect("Debts?service=debtHistory");
+                return; // Nếu amount <= 0, không tiếp tục
+            }
+
+            // Nếu type là "-", thì cần đổi dấu của amount
+            if ("-".equals(type) && amount.compareTo(BigDecimal.ZERO) > 0) {
+                amount = amount.negate();
+            }
+
+            String customerIdStr = request.getParameter("customer_id");
+            int customer_id = Integer.parseInt(customerIdStr);
+
+            // Kiểm tra phần tệp tin ảnh (image upload)
+            Part file = request.getPart("image");
+            String imageFileName = null;
+            if (file != null && file.getSize() > 0) {
+                String fileType = file.getContentType();
+                List<String> ALLOWED_MIME_TYPES = List.of("image/jpeg", "image/png", "image/gif"); // Định nghĩa các loại mime cho phép
+                if (!ALLOWED_MIME_TYPES.contains(fileType)) {
+                    request.getSession().setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
+                    response.sendRedirect("Debts?service=debtHistory");
+                    return;
+                }
+
+                // Lấy tên file từ đối tượng Part
+                imageFileName = getSubmittedFileName(file);
+
+                // Đường dẫn để lưu tệp
+                String uploadDirectory = getServletContext().getRealPath("/") + "images";
+                File uploadDir = new File(uploadDirectory);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                // Đường dẫn lưu tệp
+                String uploadPath = uploadDirectory + File.separator + imageFileName;
+                try (FileOutputStream fos = new FileOutputStream(uploadPath); InputStream is = file.getInputStream()) {
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = is.read(buffer)) != -1) {
+                        fos.write(buffer, 0, bytesRead);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.getSession().setAttribute("Notification", "File upload failed.");
+                    response.sendRedirect("Debts?service=debtHistory");
+                    return;
+                }
+            } else {
+                imageFileName = null;
+            }
+
+            // Kiểm tra và chuyển đổi 'created_at'
+            String createdAtStr = request.getParameter("created_at");
+            LocalDateTime createdAt = null;
+            if (createdAtStr == null || createdAtStr.trim().isEmpty()) {
+                request.getSession().setAttribute("Notification", "Created date is required.");
+                response.sendRedirect("Debts?service=debtHistory");
+                return; // Nếu created_at rỗng, không tiếp tục xử lý
+            }
+
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+                createdAt = LocalDateTime.parse(createdAtStr, formatter);
+            } catch (DateTimeParseException e) {
+                request.getSession().setAttribute("Notification", "Invalid date format. Expected format: yyyy-MM-dd'T'HH:mm.");
+                response.sendRedirect("Debts?service=debtHistory");
+                return; // Nếu không thể chuyển đổi định dạng ngày, không tiếp tục
+            }
+
+            LocalDateTime updatedAt = LocalDateTime.now();
+            String description = request.getParameter("description");
+            String createdBy = request.getParameter("createdBy");
+
+            // Kiểm tra xem khách hàng đã có nợ hay chưa
+            BigDecimal totalDebtAmount = BigDecimal.ZERO;
+
+            // Nếu không có nợ cũ, thêm mới
+            DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customer_id, createdAt, updatedAt, createdBy, status);
+            boolean insert = debts.insertDebtInCustomer(newDebt);
+            if (insert) {
+                totalDebtAmount = totalDebtAmount.add(amount);
+                customerDAO.editCustomerBalance(totalDebtAmount, customer_id);
+                request.getSession().setAttribute("Notification", "Debt added successfully.");
+            } else {
+                request.getSession().setAttribute("Notification", "Debt added failed.");
+            }
+            response.sendRedirect("Debts?service=debtHistory");
+
+        }
+        if (service.equals("addDebt")) {
+            String redirectUrl = "Debts?service=debts";
+            try {
+                // Kiểm tra và xử lý status
+                String status = request.getParameter("status");
+                if (status == null || status.trim().isEmpty()) {
+                    request.getSession().setAttribute("Notification", "Status is required.");
+                    response.sendRedirect(redirectUrl);
+                    return;
+                }
+
+                String type;
+                switch (status.toLowerCase()) {
+                    case "customer borrows debt":
+                    case "owner repays debt":
+                        type = "+";
+                        break;
+                    case "customer repays debt":
+                    case "owner borrows debt":
+                        type = "-";
+                        break;
+                    default:
+                        request.getSession().setAttribute("Notification", "Invalid status.");
+                        response.sendRedirect(redirectUrl);
+                        return;
+                }
+
+                // Kiểm tra và xử lý amount
+                String amountStr = request.getParameter("amount");
+                if (amountStr == null || amountStr.trim().isEmpty()) {
+                    request.getSession().setAttribute("Notification", "Amount is required.");
+                    System.out.println("---start process: amountStr is " + amountStr + "--");
+                    response.sendRedirect(redirectUrl);
+                    return;
+                }
+
+                BigDecimal amount;
+                try {
+                    amount = new BigDecimal(amountStr);
+                    if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                        request.getSession().setAttribute("Notification", "Amount must be greater than zero.");
+
+                        response.sendRedirect(redirectUrl);
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    request.getSession().setAttribute("Notification", "Invalid amount format.");
+                    response.sendRedirect(redirectUrl);
+                    return;
+                }
+
+                if ("-".equals(type)) {
+                    amount = amount.negate();
+                }
+
+                // Xử lý upload hình ảnh
+                Part file = request.getPart("image");
+                String imageFileName = null;
+                if (file != null && file.getSize() > 0) {
+                    String fileType = file.getContentType();
+                    if (!ALLOWED_MIME_TYPES.contains(fileType)) {
+                        request.getSession().setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
+                        System.out.println("---start process: ALLOWED_MIME_TYPES is Error--");
+                        response.sendRedirect(redirectUrl);
+                        return;
+                    }
+
+                    imageFileName = UUID.randomUUID().toString() + "_" + getSubmittedFileName(file);
+                    String uploadDirectory = getServletContext().getRealPath("/") + "images";
+                    File uploadDir = new File(uploadDirectory);
+                    if (!uploadDir.exists()) {
+                        uploadDir.mkdirs();
+                    }
+
+                    String uploadPath = uploadDirectory + File.separator + imageFileName;
+                    try (FileOutputStream fos = new FileOutputStream(uploadPath); InputStream is = file.getInputStream()) {
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = is.read(buffer)) != -1) {
+                            fos.write(buffer, 0, bytesRead);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        request.getSession().setAttribute("Notification", "File upload failed.");
+                        response.sendRedirect(redirectUrl);
+                        return;
+                    }
+                }
+
+                // Xử lý created_at
+                String createdAtStr = request.getParameter("created_at");
+                LocalDateTime createdAt = null;
+                if (createdAtStr == null || createdAtStr.trim().isEmpty()) {
+                    request.getSession().setAttribute("Notification", "Created date is required.");
+                    response.sendRedirect(redirectUrl);
+                    return;
+                }
+
+                try {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+                    createdAt = LocalDateTime.parse(createdAtStr, formatter);
+                } catch (DateTimeParseException e) {
+                    request.getSession().setAttribute("Notification", "Invalid date format. Expected format: yyyy-MM-dd'T'HH:mm.");
+                    response.sendRedirect(redirectUrl);
+                    return;
+                }
+
+                LocalDateTime updatedAt = LocalDateTime.now();
+                String description = request.getParameter("description");
+                String createdBy = request.getParameter("createdBy");
+
+                // Xử lý khách hàng
+                Integer customerId = 0;
+                String phone = request.getParameter("phone");
+
+                if (phone != null && !phone.trim().isEmpty()) {
+                    boolean customerExists = customers.checkPhoneExists(phone, 0);
+
+                    if (!customerExists) {
+                        Customers newCustomer = new Customers();
+                        newCustomer.setName(request.getParameter("name"));
+                        newCustomer.setPhone(phone);
+                        newCustomer.setAddress(request.getParameter("address"));
+                        newCustomer.setBalance(0.00);
+                        newCustomer.setCreatedBy(request.getParameter("createdBy"));
+                        newCustomer.setDeleted(false);
+                        newCustomer.setStatus("active");
+                        customers.insertCustomer(newCustomer);
+                        customerId = customers.getCustomerIdByPhone(phone);
+
+                        if (customerId == null) {
+                            request.getSession().setAttribute("Notification", "Error retrieving customer ID.");
+                            response.sendRedirect(redirectUrl);
+                            return;
+                        }
+                    } else {
+                        customerId = customers.getCustomerIdByPhone(phone);
+                    }
+                }
+                System.out.println("----Start: DebtNote ");
+
+                // Tạo mới DebtNote
+                DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customerId, createdAt, updatedAt, createdBy, status);
+                boolean insert = debts.insertDebt(newDebt);
+
+                if (insert) {
+                    customers.editCustomerBalance(amount, customerId);
+                    request.getSession().setAttribute("Notification", "Debt added successfully.");
+                } else {
+                    request.getSession().setAttribute("Notification", "Debt added failed.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                request.getSession().setAttribute("Notification", "An error occurred while processing your request.");
+            } finally {
+                if (!response.isCommitted() && !request.getRequestURI().equals(redirectUrl)) {
+                    System.out.println("----Finnaly: done ");
+                    response.sendRedirect("Debts");
+                }
+            }
+        }
+
         if (service.equals("addDebtInCustomers")) {
             String status = request.getParameter("status");
             String type;
@@ -276,17 +542,10 @@ public class controllerDebts extends HttpServlet {
         return null;
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         doGet(request, response);
     }
 

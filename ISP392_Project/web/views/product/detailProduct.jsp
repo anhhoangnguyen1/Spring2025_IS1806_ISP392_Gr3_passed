@@ -165,6 +165,10 @@
             <div class="contents">
                 <div class="panel-bar1">
                     <h2>Product Details</h2>
+                    <button class="btn btn-outline-secondary" onclick="window.history.back();">
+                        <i class="fa-solid fa-arrow-left"></i> Back
+                    </button>
+
                     <c:forEach var="product" items="${list}">
 
                         <table>
@@ -179,9 +183,12 @@
                             <tr>
                                 <th style="width: 150px">Image</th>
                                 <td>
-                                    <img src="/ISP392_Project/views/product/images/${product.image}" class="product-image" alt="Product Image">
+                                    <img src="/ISP392_Project/views/product/images/${product.image}" class="myImg" 
+                                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;" 
+                                         alt="Product Image">
                                 </td>
                             </tr>
+
                             <tr>
                                 <th style="width: 70px">Price</th>
                                 <td>${product.price}</td>
@@ -206,21 +213,39 @@
                                 <th style="width: 150px">Status</th>
                                 <td>${product.status}</td>
                             </tr>
-                            <tr>
-                                <th style="width: 150px">Action</th>
-                                <td class="action-buttons">
-                                    <a href="editProduct.jsp?id=<%= request.getAttribute("id") %>" class="edit">Edit</a>
-                                    <a href="deleteProduct?id=<%= request.getAttribute("id") %>" class="delete" onclick="return confirm('Are you sure?')">Delete</a>
-                                </td>
-                            </tr>
+
                         </table>
                     </c:forEach>
                 </div>
             </div>
         </div>
+        <div id="myModal" class="modalImage">
+            <span class="close">&times;</span>
+            <img class="modalImage-content" id="img01">
+            <div id="caption"></div>
+        </div>
 
     </body>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+    <script>
+                        $(".myImg").on("click", function () {
+                            var modal = $("#myModal");
+                            var modalImg = $("#img01");
+                            var captionText = $("#caption");
+
+                            modal.show();
+                            modalImg.attr("src", this.src);
+                            captionText.text(this.alt);
+                        });
+
+                        // Đóng modal khi bấm vào nền đen
+                        $("#myModal").on("click", function (e) {
+                            if (e.target === this) {
+                                $(this).hide();
+                            }
+                        });
+    </script>
 </html>

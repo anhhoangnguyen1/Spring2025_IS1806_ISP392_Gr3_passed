@@ -1,9 +1,3 @@
-<%-- 
-    Document   : productsList
-    Created on : Jan 30, 2025, 6:03:10 PM
-    Author     : phamh
---%>
-
 
 <!DOCTYPE html>
 <html>
@@ -15,42 +9,59 @@
     </head>
     <body>
         <h1>Debts</h1>
-        <div class="search-box">
-            <input type="text" id="myInput" class="input-box" list="browsers" name="browser" id="browser" placeholder="Search for a product..."
-                   autocomplete="off"
-                   />
-            <button type="submit" class="search-btn">
-                <i class="fa-solid fa-search"></i>
-            </button>
-        </div>
+        <form action="${pageContext.request.contextPath}/Debts" method="POST">
+            <div class="search-box">
+                <input type="hidden" name="service" value="searchDebts" />
+                <input type="text" class="input-box" name="browser"
+                       placeholder="Search for products."
+                       value="${name}" autocomplete="off" />
+
+                <button type="button" class="clear-btn"
+                        onclick="window.location.href = '${pageContext.request.contextPath}/Debts'">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                <button type="submit" class="search-btn">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+            </div>
+        </form>
         <div class="action-bar d-flex align-items-center">
             <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#addDebtModal">
                 Add Debt
             </button>
         </div>
+        <c:remove var="customer_id" scope="session" />
+
         <br>
         <div class="table-container">
             <form action="Debts" method="POST">
-                <table class="table table-striped table-hover table-bordered" style="color: var(--heading-clr);">
+                <table id="myTable" class="table table-striped table-hover table-bordered" style="color: var(--heading-clr);">
                     <thead>
                         <tr>
                             <th style="width: 50px;" class="resizable" onclick="sortTable(0)">ID</th>
                             <th style="width: 150px;" class="resizable" onclick="sortTable(1)">Total amount</th>
-                            <th style="width: 150px;" class="resizable" onclick="sortTable(2)">Description</th>
-                            <th style="width: 150px;" class="resizable" onclick="sortTable(3)">Created At</th>
-                            <th style="width: 150px;" class="resizable" onclick="sortTable(4)">Updated At</th>
-                            <th style="width: 120px;" class="resizable" onclick="sortTable(5)">Created By</th>
+                            <th style="width: 50px;" class="resizable" onclick="sortTable(2)">Customer name</th>
+                            <th style="width: 50px;" class="resizable" onclick="sortTable(3)">Phone</th>
+                            <th style="width: 50px;" class="resizable" onclick="sortTable(4)">Address</th>
+                            <th style="width: 150px;" class="resizable" onclick="sortTable(5)">Description</th>
+                            <th style="width: 150px;" class="resizable" onclick="sortTable(6)">Created At</th>
+                            <th style="width: 150px;" class="resizable" onclick="sortTable(7)">Updated At</th>
+                            <th style="width: 120px;" class="resizable" onclick="sortTable(8)">Created By</th>
                             <th style="width: 120px;" class="resizable">Status</th>
                             <th class="sticky-col1">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="myTable">
+                    <tbody>
                         <c:forEach var="debt" items="${list}">
                             <tr>
                                 <td>${debt.getId()}</td>
                                 <td>
-                                   <fmt:formatNumber value="${debt.amount}" pattern="###,##0"/>
+                                    <fmt:formatNumber value="${debt.amount}" pattern="###,##0"/>
                                 </td>
+                                <td>${debt.name}</td>
+                                <td>${debt.phone}</td>
+                                <td>${debt.address}</td>
                                 <td style="white-space: normal; word-wrap: break-word; max-width: 200px;">
                                     ${debt.description}
                                 </td>
@@ -61,7 +72,7 @@
                                 <td class="sticky-col1">
                                     <div class="btn-group">
                                         <a class="btn btn-outline-info"
-                                           href="Debts?service=debtHistory&id=${debt.getId()}">
+                                           href="Debts?service=debtHistory&id=${debt.getCustomer_id()}">
                                             <i class="fas fa-info-circle"></i>
                                         </a>
 
@@ -98,7 +109,6 @@
                 </c:if>
             </ul>
         </div>
-
-
+        
     </body>
 </html>

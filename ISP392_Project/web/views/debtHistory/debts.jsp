@@ -154,7 +154,6 @@
                     <c:import url="listDebts.jsp" />
                 </div>
             </div>
-
         </div> 
         <c:import url="addDebt.jsp" />
         <div id="myModal" class="modalImage">
