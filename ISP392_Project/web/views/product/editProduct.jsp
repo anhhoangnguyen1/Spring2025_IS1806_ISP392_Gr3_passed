@@ -38,15 +38,11 @@
                                 </div>
 
                                 <div class="form-row">
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-6">
                                         <label>Price</label>
                                         <input type="number" step="0.01" class="form-control" name="price" value="${product.getPrice()}" required>
                                     </div>
-                                    <div class="form-group col-md-4">
-                                        <label>Quantity (kg)</label>
-                                        <input type="number" class="form-control" name="quantity" value="${product.getQuantity()}" required>
-                                    </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-6">
                                         <label>Zone name</label>
                                         <select class="form-control selectpicker" name="zoneName" multiple data-live-search="true">
                                             <c:forEach var="zone" items="${zoneName}">

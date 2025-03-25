@@ -139,7 +139,7 @@ public class productsDAO extends DBContext {
         try (PreparedStatement st = connection.prepareStatement(zoneQuery); ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 int productId = rs.getInt("product_id");
-                if (!rs.wasNull()) { // Chỉ thêm nếu product_id không null
+                if (!rs.wasNull()) { 
                     String zoneName = rs.getString("name");
 
                     zoneMap.putIfAbsent(productId, new ArrayList<>());
@@ -163,7 +163,7 @@ public class productsDAO extends DBContext {
                 while (rs.next()) {
                     int productId = rs.getInt("id");
                     List<String> zones = zoneMap.getOrDefault(productId, new ArrayList<>());
-                    String zoneNames = zones.isEmpty() ? "" : String.join(",", zones); // Nếu không có Zone Active, để trống
+                    String zoneNames = zones.isEmpty() ? "N/A" : String.join(",", zones); // Nếu không có Zone Active, để trống
 
                     Products product = new Products(
                             productId,
@@ -225,7 +225,7 @@ public class productsDAO extends DBContext {
                 while (rs.next()) {
                     int productId = rs.getInt("id");
                     List<String> zones = zoneMap.getOrDefault(productId, new ArrayList<>());
-                    String zoneNames = zones.isEmpty() ? "" : String.join(",", zones);
+                    String zoneNames = zones.isEmpty() ? "N/A" : String.join(",", zones);
 
                     Products product = new Products(
                             productId,

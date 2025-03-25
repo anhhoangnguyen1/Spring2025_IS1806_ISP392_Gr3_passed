@@ -78,6 +78,7 @@ public class controllerDebts extends HttpServlet {
 
             List<DebtNote> listDebts = debts.viewAllDebt(command, index, pageSize);
             List<String> listCustomer = customers.getAllCustomerNames();
+            request.setAttribute("totalDebts", count);
             request.setAttribute("listName", listCustomer);
             request.setAttribute("list", listDebts);
             request.setAttribute("endPage", endPage);
@@ -92,7 +93,7 @@ public class controllerDebts extends HttpServlet {
 
             request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
         }
-        
+
         if (service.equals("searchDebts")) {
             String name = request.getParameter("browser");
             try {
@@ -362,7 +363,11 @@ public class controllerDebts extends HttpServlet {
                 // Xử lý khách hàng
                 Integer customerId = 0;
                 String phone = request.getParameter("phone");
-
+                if (phone == null || phone.trim().isEmpty()) {
+                    request.getSession().setAttribute("Notification", "Phone number is required.");
+                    response.sendRedirect(redirectUrl);
+                    return;
+                }
                 if (phone != null && !phone.trim().isEmpty()) {
                     boolean customerExists = customers.checkPhoneExists(phone, 0);
 
@@ -387,9 +392,6 @@ public class controllerDebts extends HttpServlet {
                         customerId = customers.getCustomerIdByPhone(phone);
                     }
                 }
-                System.out.println("----Start: DebtNote ");
-
-                // Tạo mới DebtNote
                 DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customerId, createdAt, updatedAt, createdBy, status);
                 boolean insert = debts.insertDebt(newDebt);
 
