@@ -56,14 +56,15 @@ public class storeDAO extends DBContext {
 
     // Thêm mới cửa hàng và trả về ID được tạo
     public int createStore(Stores store) {
-        String sql = "INSERT INTO stores (name, address, phone, email, status, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
+        String sql = "INSERT INTO stores (name, address, phone, email, status, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())";
         try (PreparedStatement st = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             st.setString(1, store.getName());
             st.setString(2, store.getAddress());
             st.setString(3, store.getPhone());
             st.setString(4, store.getEmail());
             st.setString(5, store.getStatus());
-
+            st.setString(6, store.getCreatedBy());
+            
             int affectedRows = st.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = st.getGeneratedKeys()) {
