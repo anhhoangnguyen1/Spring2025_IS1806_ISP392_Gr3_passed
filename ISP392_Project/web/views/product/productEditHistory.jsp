@@ -193,43 +193,53 @@
                                     </tr>
                                 </thead>
                                 <tbody id="myTable">
-                                    <c:forEach var="product" items="${listHistory}">
-                                        <tr>
-                                            <td class="checkbox-column" style="display: none;">
-                                                <input type="checkbox" name="selectedProducts" value="${product.productId}" class="product-checkbox" />
-                                            </td>
-                                            <td>${product.productId}</td>  <!-- Corrected to use id -->
-                                            <td class="bold-row">${product.name}</td>  <!-- Corrected to use name -->
-                                            <td>
-                                                <img src="/ISP392_Project/views/product/images/${product.image}" class="myImg" style="width: 100px; height: 100px; object-fit: cover;" alt="Product Image" />
-                                            </td>
-                                            <td><fmt:formatNumber value="${product.price}" pattern="###,##0"/></td>
-                                            <td>${product.zoneName}</td>
-                                            <td>${product.quantity} Kg</td>
-                                            <td>${product.description}</td>
-                                            <td>${product.createdAt}</td>
-                                            <td>${product.updatedAt}</td>
-                                            <td>
-                                                <h5>
-                                                    <div class="badge rounded-pill bg-secondary" style="color: white">${product.status}</div>
-                                                </h5>
-                                            </td>
-                                            <td class="sticky-col1">
-                                                <div class="btn-group">
-                                                    <a class="btn btn-outline-info" href="Products?service=getProductById&product_id=${product.productId}">
-                                                        <i class="fas fa-info-circle"></i>
-                                                    </a>
-                                                    <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#editProductModal${product.productId}">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <a class="btn btn-outline-danger" href="Products?service=deleteProduct&id=${product.productId}" onclick="return doDelete(${product.productId})">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-
+                                    <c:choose>
+                                        <c:when test="${empty listHistory}">
+                                            <tr>
+                                                <td colspan="12" style="text-align: center; font-weight: bold; color: red;">
+                                                    No products found
+                                                </td>
+                                            </tr>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:forEach var="product" items="${listHistory}">
+                                                <tr>
+                                                    <td class="checkbox-column" style="display: none;">
+                                                        <input type="checkbox" name="selectedProducts" value="${product.productId}" class="product-checkbox" />
+                                                    </td>
+                                                    <td>${product.productId}</td>
+                                                    <td class="bold-row">${product.name}</td>
+                                                    <td>
+                                                        <img src="/ISP392_Project/views/product/images/${product.image}" class="myImg" style="width: 100px; height: 100px; object-fit: cover;" alt="Product Image" />
+                                                    </td>
+                                                    <td><fmt:formatNumber value="${product.price}" pattern="###,##0"/></td>
+                                                    <td>${product.zoneName}</td>
+                                                    <td>${product.quantity} Kg</td>
+                                                    <td>${product.description}</td>
+                                                    <td>${product.createdAt}</td>
+                                                    <td>${product.updatedAt}</td>
+                                                    <td>
+                                                        <h5>
+                                                            <div class="badge rounded-pill bg-secondary" style="color: white">${product.status}</div>
+                                                        </h5>
+                                                    </td>
+                                                    <td class="sticky-col1">
+                                                        <div class="btn-group">
+                                                            <a class="btn btn-outline-info" href="Products?service=getProductById&product_id=${product.productId}">
+                                                                <i class="fas fa-info-circle"></i>
+                                                            </a>
+                                                            <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#editProductModal${product.productId}">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <a class="btn btn-outline-danger" href="Products?service=deleteProduct&id=${product.productId}" onclick="return doDelete(${product.productId})">
+                                                                <i class="fas fa-trash"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </tbody>
                             </table>
 

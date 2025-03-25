@@ -223,7 +223,7 @@ public class controllerProducts extends HttpServlet {
                 Part file = request.getPart("image");
                 String currentImage = request.getParameter("current_image");
                 String imageFileName = (currentImage != null) ? currentImage : "";
-
+                int index = Integer.parseInt(request.getParameter("index"));
                 if (file != null && file.getSize() > 0) {
                     String fileType = file.getContentType();
                     if (!ALLOWED_MIME_TYPES.contains(fileType)) {
@@ -255,12 +255,7 @@ public class controllerProducts extends HttpServlet {
                     response.sendRedirect("Products");
                     return;
                 }
-                int quantity = Integer.parseInt(request.getParameter("quantity"));
-                if (quantity <= 0) {
-                    session.setAttribute("Notification", "Weight must be greater than 0.");
-                    response.sendRedirect("Products");
-                    return;
-                }
+                int quantity = 0;
                 String createBy = request.getParameter("createBy");
                 String deletedBy = request.getParameter("deletedBy");
                 String description = request.getParameter("description");
@@ -293,7 +288,7 @@ public class controllerProducts extends HttpServlet {
                 } else {
                     session.setAttribute("Notification", "Error updating product. Please try again.");
                 }
-                response.sendRedirect("Products");
+                response.sendRedirect("Products?service=products&index=" + index);
             } catch (NumberFormatException e) {
                 session.setAttribute("Notification", "Invalid number format.");
                 response.sendRedirect("Products");

@@ -53,38 +53,56 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="debt" items="${list}">
-                            <tr>
-                                <td>${debt.getId()}</td>
-                                <td>
-                                    <fmt:formatNumber value="${debt.amount}" pattern="###,##0"/>
-                                </td>
-                                <td>${debt.name}</td>
-                                <td>${debt.phone}</td>
-                                <td>${debt.address}</td>
-                                <td style="white-space: normal; word-wrap: break-word; max-width: 200px;">
-                                    ${debt.description}
-                                </td>
-                                <td>${debt.getCreatedAt()}</td>
-                                <td>${debt.getUpdatedAt()}</td>
-                                <td>${debt.getCreatedBy()}</td>
-                                <td>${debt.getStatus()}</td>
-                                <td class="sticky-col1">
-                                    <div class="btn-group">
-                                        <a class="btn btn-outline-info"
-                                           href="Debts?service=debtHistory&id=${debt.getCustomer_id()}">
-                                            <i class="fas fa-info-circle"></i>
-                                        </a>
-
-                                    </div>
-                                </td>
-                            </tr>
-                        </c:forEach>
+                        <c:choose>
+                            <c:when test="${not empty list}">
+                                <c:forEach var="debt" items="${list}">
+                                    <tr>
+                                        <td>${debt.getId()}</td>
+                                        <td>
+                                            <fmt:formatNumber value="${debt.amount}" pattern="###,##0"/>
+                                        </td>
+                                        <td>${debt.name}</td>
+                                        <td>${debt.phone}</td>
+                                        <td>${debt.address}</td>
+                                        <td style="white-space: normal; word-wrap: break-word; max-width: 200px;">
+                                            ${debt.description}
+                                        </td>
+                                        <td>${debt.getCreatedAt()}</td>
+                                        <td>${debt.getUpdatedAt()}</td>
+                                        <td>${debt.getCreatedBy()}</td>
+                                        <td>${debt.getStatus()}</td>
+                                        <td class="sticky-col1">
+                                            <div class="btn-group">
+                                                <a class="btn btn-outline-info"
+                                                   href="Debts?service=debtHistory&id=${debt.getCustomer_id()}">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:when>
+                            <c:otherwise>
+                                <tr>
+                                    <td colspan="11" class="text-center text-muted">No debts found</td>
+                                </tr>
+                            </c:otherwise>
+                        </c:choose>
                     </tbody>
                 </table>
             </form>
         </div>
-
+        <form action="${pageContext.request.contextPath}/Debts" method="POST">
+            <span class="mr-2">Showing:</span>
+            <input type="hidden" name="index" value="${index}" />
+            <select class="btn-outline-primary mr-lg-auto" id="pageSize" name="pageSize" onchange="this.form.submit()">
+                <option value="5" ${pageSize == 5 ? 'selected' : ''}>5</option>
+                <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                <option value="15" ${pageSize == 15 ? 'selected' : ''}>15</option>
+                <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+            </select>
+            <span>of ${totalDebts} debts</span>
+        </form>
         <div class="container d-flex justify-content-center mt-4">
             <ul class="pagination">
                 <!-- N�t Previous -->
@@ -109,6 +127,6 @@
                 </c:if>
             </ul>
         </div>
-        
+
     </body>
 </html>

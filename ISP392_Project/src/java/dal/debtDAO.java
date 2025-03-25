@@ -241,10 +241,11 @@ public class debtDAO extends DBContext {
             + "FROM Debt_note d "
             + "JOIN Customers c ON d.customers_id = c.id "
             + "WHERE d.created_at = (SELECT MAX(dn.created_at) FROM Debt_note dn WHERE dn.customers_id = d.customers_id) "
-            + "AND c.name LIKE ?";
+            + "AND (c.name LIKE ? OR c.phone LIKE ?)";
 
     try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
-        st.setString(1, "%" + name + "%");  // Tìm kiếm gần đúng theo tên khách hàng
+        st.setString(1, "%" + name + "%");  
+        st.setString(2, "%" + name + "%");  
 
         try (ResultSet rs = st.executeQuery()) {
             while (rs.next()) {

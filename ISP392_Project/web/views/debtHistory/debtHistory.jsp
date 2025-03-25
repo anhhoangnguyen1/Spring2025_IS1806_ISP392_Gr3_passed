@@ -171,7 +171,7 @@
                                 <p><strong>Address:</strong> ${customer.address}</p>
                             </div>
                         </c:if>
-
+                         
 
                         <div class="table-container">
                             <table class="table-bordered">
