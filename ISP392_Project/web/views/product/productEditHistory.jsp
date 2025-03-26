@@ -104,21 +104,24 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/ISP392_Project/Stores">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-store"></i>
-                            </span>
-                            <span class="nav-text">Stores</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Users">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-user-tie"></i>
-                            </span>
-                            <span class="nav-text">Staffs</span>
-                        </a>
-                    </li>
+                            <a href="/ISP392_Project/Stores">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-store"></i>
+                                </span>
+                                <span class="nav-text">Stores</span>
+                            </a>
+                        </li>
+                    <c:if test="${sessionScope.role == 'owner'}">
+                        
+                        <li>
+                            <a href="/ISP392_Project/Users">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </span>
+                                <span class="nav-text">Staffs</span>
+                            </a>
+                        </li>
+                    </c:if>
                 </ul>
                 <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
@@ -169,7 +172,7 @@
 
                     <div class="action-bar d-flex align-items-center justify-content-end">
                         <div class="btn-group">
-                            <!-- Nút Toggle Checkboxes -->
+                            <!-- Nï¿½t Toggle Checkboxes -->
                             <button type="button" class="btn btn-outline-primary" id="toggle-checkbox-btn" title="Show Checkboxes">
                                 <i class="fa-solid fa-list-check"></i>
                             </button>
@@ -256,6 +259,7 @@
                         </form>
 
                     </div>
+
                     <form action="${pageContext.request.contextPath}/Products" method="POST">
                         <input type="hidden" name="service" value="ProductsEditHistory" />
                         <input type="hidden" name="index" value="${index}" />

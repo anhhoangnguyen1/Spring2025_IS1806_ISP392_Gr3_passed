@@ -21,6 +21,7 @@ public class controllerZones extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");
@@ -51,7 +52,8 @@ public class controllerZones extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-
+        String storeIDStr = (String) session.getAttribute("storeID");
+        int storeID = Integer.parseInt(storeIDStr);
         String fullName = (String) session.getAttribute("fullName");
         if (fullName == null) {
             response.sendRedirect("login");
@@ -163,7 +165,7 @@ public class controllerZones extends HttpServlet {
                 session.setAttribute("showInactive", showInactive); // Cập nhật session
                 Integer storeId = storeIdStr != null ? Integer.parseInt(storeIdStr) : null;
 
-                int total = zoneDAO.countZones(keyword, showInactive, storeId);
+                int total = zoneDAO.countZones(keyword, showInactive, storeID);
                 int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
                 List<Zone> zones = zoneDAO.searchZones(keyword, index, pageSize, sortBy, sortOrder, showInactive, storeId);
                 System.out.println("AJAX zones list size for store " + storeId + ": " + zones.size());
@@ -477,7 +479,9 @@ public class controllerZones extends HttpServlet {
 
                     // Lấy thông tin sản phẩm hiện tại của zone
                     Products product = zone.getProductId();
-                    int systemQuantity = (product != null) ? productsDAO.getProductById(product.getProductId()).get(0).getQuantity() : 0;
+
+                    int systemQuantity = (product != null) ? productsDAO.getProductById(product.getProductId(), storeID).get(0).getQuantity() : 0;
+
 
                     request.setAttribute("zone", zone);
                     request.setAttribute("systemQuantity", systemQuantity);
@@ -594,12 +598,17 @@ public class controllerZones extends HttpServlet {
             zoneDAO.insertZone(zone);
 
             // Lấy showInactive từ request, mặc định là true
+
 // Lấy showInactive từ session thay vì request
             Boolean showInactive = (Boolean) session.getAttribute("showInactive");
             if (showInactive == null) {
                 showInactive = true; // Mặc định là true nếu chưa có
             }            // Chỉ đếm các zone thuộc store hiện tại
-            int total = zoneDAO.countZones("", showInactive, storeId); // Thêm storeId để lọc theo store
+            
+
+            boolean showInactive = request.getParameter("showInactive") != null ? "true".equalsIgnoreCase(request.getParameter("showInactive")) : true;
+            int total = zoneDAO.countZones("", showInactive, storeId); // Cập nhật để gọi đúng phương thức
+
             int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
 
             session.setAttribute("Notification", "Zone added successfully.");

@@ -135,21 +135,24 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/ISP392_Project/Stores">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-store"></i>
-                            </span>
-                            <span class="nav-text">Stores</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Users">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-user-tie"></i>
-                            </span>
-                            <span class="nav-text">Staffs</span>
-                        </a>
-                    </li>
+                            <a href="/ISP392_Project/Stores">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-store"></i>
+                                </span>
+                                <span class="nav-text">Stores</span>
+                            </a>
+                        </li>
+                    <c:if test="${sessionScope.role == 'owner'}">
+                        
+                        <li>
+                            <a href="/ISP392_Project/Users">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </span>
+                                <span class="nav-text">Staffs</span>
+                            </a>
+                        </li>
+                    </c:if>
                 </ul>
                 <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->

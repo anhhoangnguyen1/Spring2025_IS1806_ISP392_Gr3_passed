@@ -305,7 +305,7 @@ public class zoneDAO extends DBContext {
         if (!rs.wasNull()) {
             product = new Products();
             product.setProductId(productId);
-            product.setName(rs.getString("product_name"));
+            product.setName(rs.getString("name"));
         }
 
         String historyJson = rs.getString("history");
@@ -450,27 +450,27 @@ public class zoneDAO extends DBContext {
 
     // Phương thức main để test
     public static void main(String[] args) {
-//        zoneDAO dao = new zoneDAO();
-//
-//        // Test viewAllZones
-//        int pageIndex = 1;
-////        List<Zone> zones = dao.viewAllZones("id", pageIndex);
-//
-//        if (zones.isEmpty()) {
-//            System.out.println("Không có zone nào được tìm thấy!");
-//        } else {
-//            System.out.println("Danh sách zones:");
-//            for (Zone zone : zones) {
-//                System.out.println("------------------------------------------------------");
-//                System.out.println("Zone ID: " + zone.getId());
-//                System.out.println("Name: " + zone.getName());
-//                System.out.println("Created By: " + zone.getCreatedBy());
-//                System.out.println("Created At: " + zone.getCreatedAt());
-//                System.out.println("Store ID: " + (zone.getStoreId() != null ? zone.getStoreId().getId() : "null"));
-//                System.out.println("Status: " + zone.getStatus());
-//                System.out.println("History: " + zone.getHistory());
-//            }
-//        }
+        zoneDAO dao = new zoneDAO();
+
+        // Test viewAllZones
+        int pageIndex = 1;
+    List<Zone> zones = dao.viewAllZones("id", pageIndex,1);
+
+        if (zones.isEmpty()) {
+            System.out.println("Không có zone nào được tìm thấy!");
+        } else {
+            System.out.println("Danh sách zones:");
+            for (Zone zone : zones) {
+                System.out.println("------------------------------------------------------");
+                System.out.println("Zone ID: " + zone.getId());
+                System.out.println("Name: " + zone.getName());
+                System.out.println("Created By: " + zone.getCreatedBy());
+                System.out.println("Created At: " + zone.getCreatedAt());
+                System.out.println("Store ID: " + (zone.getStoreId() != null ? zone.getStoreId().getId() : "null"));
+                System.out.println("Status: " + zone.getStatus());
+                System.out.println("History: " + zone.getHistory());
+            }
+        }
 //        
 //        System.out.println("--------------------------------------");
 //        // 1. Test getAllZoneNames
