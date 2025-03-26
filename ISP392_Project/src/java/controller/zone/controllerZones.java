@@ -533,13 +533,6 @@ public class controllerZones extends HttpServlet {
             return;
         }
 
-        // Staff không được phép thực hiện bất kỳ POST nào
-        if ("staff".equals(role)) {
-            session.setAttribute("Notification", "You do not have permission to perform this action.");
-            response.sendRedirect("zones?service=zones");
-            return;
-        }
-
         // Lấy pageSize từ request, mặc định là 5
         int pageSize = 5;
         try {
@@ -551,6 +544,14 @@ public class controllerZones extends HttpServlet {
         }
 
         if ("addZone".equals(service)) {
+
+            // Staff không được phép thực hiện bất kỳ POST nào
+            if ("staff".equals(role)) {
+                session.setAttribute("Notification", "You do not have permission to perform this action.");
+                response.sendRedirect("zones?service=zones");
+                return;
+            }
+
             String name = request.getParameter("name");
             String description = request.getParameter("description");
 
@@ -617,6 +618,13 @@ public class controllerZones extends HttpServlet {
         }
 
         if ("editZone".equals(service)) {
+            // Staff không được phép thực hiện bất kỳ POST nào
+            if ("staff".equals(role)) {
+                session.setAttribute("Notification", "You do not have permission to perform this action.");
+                response.sendRedirect("zones?service=zones");
+                return;
+            }
+
             int zoneId = Integer.parseInt(request.getParameter("zone_id"));
             String name = request.getParameter("name");
             String description = request.getParameter("description");

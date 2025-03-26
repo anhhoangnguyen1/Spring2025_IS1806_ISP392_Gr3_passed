@@ -99,9 +99,7 @@
                             <th>Product Name</th>
                             <th>Created By</th>
                             <th>Status</th>
-                                <c:if test="${sessionScope.role == 'owner'}">
-                                <th>Actions</th>
-                                </c:if>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="zoneTableBody">
@@ -113,14 +111,16 @@
                                 <td>${zone.productId != null ? zone.productId.name : 'N/A'}</td>
                                 <td>${zone.createdBy}</td>
                                 <td>${zone.status}</td>
-                                <c:if test="${sessionScope.role == 'owner'}">
-                                    <td>
+                                <td>
+                                    <c:if test="${sessionScope.role == 'staff'}">
+                                        <a href="${pageContext.request.contextPath}/zones?service=stockCheck&zone_id=${zone.id}" class="btn btn-outline-success">Stock Check</a>
+                                    </c:if>
+                                    <c:if test="${sessionScope.role == 'owner'}">
                                         <a href="${pageContext.request.contextPath}/zones?service=getZoneById&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">View</a>
                                         <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">Edit</a>
-                                        <a href="${pageContext.request.contextPath}/zones?service=stockCheck&zone_id=${zone.id}" class="btn btn-outline-success">Stock Check</a>
                                         <a href="${pageContext.request.contextPath}/zones?service=viewStockCheckHistory&zone_id=${zone.id}" class="btn btn-outline-info">History</a>
-                                    </td>
-                                </c:if>
+                                    </c:if>
+                                </td>
                             </tr>
                         </c:forEach>
                     </tbody>
@@ -240,8 +240,14 @@
             row += '<td>' +
                     '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">View</a> ' +
                     '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">Edit</a>' +
-                    '<a href="<%= request.getContextPath() %>/zones?service=stockCheck&zone_id=' + zone.id" class="btn btn - outline - success">Stock Check</a> ' +
                     '<a href="<%= request.getContextPath() %>/zones?service=viewStockCheckHistory&zone_id=' + zone.id" class="btn btn - outline - info">History</a> ' +
+                    '</td>';
+            }
+            if (role === 'staff') {
+            row += '<td>' +
+                    '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">View</a> ' +
+                    '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">Edit</a>' +
+                    '<a href="<%= request.getContextPath() %>/zones?service=stockCheck&zone_id=' + zone.id" class="btn btn - outline - success">Stock Check</a> ' +
                     '</td>';
             }
             row += '</tr>';
