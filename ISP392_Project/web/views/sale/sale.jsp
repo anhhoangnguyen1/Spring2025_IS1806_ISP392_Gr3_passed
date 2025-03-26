@@ -266,8 +266,7 @@
                              data-product-name="${product.name}" 
                              data-product-price="${product.price}"
                              data-product-stockquantity="${product.quantity}">
-                            <img src="${not empty product.image ? product.image : 'https://via.placeholder.com/60'}" 
-                                 alt="${product.name}">
+                            <img src="/ISP392_Project/views/product/images/${product.image}" class="myImg" style="width: 100px; height: 100px; object-fit: cover;" alt="Product Image" />
                             <div class="product-card-name">${product.name}</div>
                             <div class="product-card-price">
                                 <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
