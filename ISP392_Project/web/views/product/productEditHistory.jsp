@@ -240,12 +240,6 @@
                                                             <a class="btn btn-outline-info" href="Products?service=getProductById&product_id=${product.productId}">
                                                                 <i class="fas fa-info-circle"></i>
                                                             </a>
-                                                            <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#editProductModal${product.productId}">
-                                                                <i class="fas fa-edit"></i>
-                                                            </button>
-                                                            <a class="btn btn-outline-danger" href="Products?service=deleteProduct&id=${product.productId}" onclick="return doDelete(${product.productId})">
-                                                                <i class="fas fa-trash"></i>
-                                                            </a>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -259,7 +253,7 @@
                         </form>
 
                     </div>
-
+                    
                     <form action="${pageContext.request.contextPath}/Products" method="POST">
                         <input type="hidden" name="service" value="ProductsEditHistory" />
                         <input type="hidden" name="index" value="${index}" />
@@ -315,7 +309,7 @@
                 </div>
             </div>
         </div>
-
+        
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>

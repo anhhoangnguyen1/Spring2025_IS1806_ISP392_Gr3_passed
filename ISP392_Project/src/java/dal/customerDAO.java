@@ -35,7 +35,7 @@ public class customerDAO extends DBContext {
         return list;
     }
 
-    public List<Customers> viewAllCustomersWithDebts(String command, int index) {
+    public List<Customers> viewAllCustomersWithDebts(String command, int index,int storeID) {
         List<Customers> customersList = new ArrayList<>();
         String sqlCustomers = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, deleteBy, store_id, status "
                 + "FROM customers "
@@ -48,7 +48,7 @@ public class customerDAO extends DBContext {
                 while (rs.next()) {
                     Customers customer = mapResultSetToCustomer(rs);
 
-                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("id", customer.getId(), 1);
+                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("id", customer.getId(), 1,storeID);
 
                     if (debts == null) {
                         debts = new ArrayList<>();
@@ -95,28 +95,92 @@ public class customerDAO extends DBContext {
         return 0;
     }
 
-    public List<Customers> searchCustomers(String query) {
-        List<Customers> customers = new ArrayList<>();
-        String sql = "SELECT * FROM Customers WHERE name LIKE ? OR phone LIKE ?";
-        
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setString(1, "%" + query + "%");
-            st.setString(2, "%" + query + "%");
-            
-            try (ResultSet rs = st.executeQuery()) {
-                while (rs.next()) {
-                    Customers customer = new Customers();
-                    
-                    customers.add(getFromResulset(rs));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return customers;
-    }
 
-    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
+//    public List<Customers> searchCustomers(String query) {
+//        List<Customers> customers = new ArrayList<>();
+//        String sql = "SELECT * FROM Customers WHERE name LIKE ? OR phone LIKE ?";
+//        
+//        try (PreparedStatement st = connection.prepareStatement(sql)) {
+//            st.setString(1, "%" + query + "%");
+//            st.setString(2, "%" + query + "%");
+//            
+//            try (ResultSet rs = st.executeQuery()) {
+//                while (rs.next()) {
+//                    Customers customer = new Customers();
+//                    
+//                    customers.add(getFromResulset(rs));
+ //               }
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return customers;
+//    }
+//
+//    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
+//    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
+//        List<Customers> list = new ArrayList<>();
+//
+//        if (sortBy == null || !sortBy.equals("balance")) {
+//            sortBy = "id";
+//        }
+//
+//        if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
+//            sortOrder = "ASC";
+//        }
+//
+//        String sql;
+//        if (keyword == null || keyword.trim().isEmpty()) {
+//            sql = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, status "
+//                    + "FROM customers "
+//                    + "ORDER BY " + sortBy + " " + sortOrder + " "
+//                    + "LIMIT ? OFFSET ?";
+//            try (PreparedStatement st = connection.prepareStatement(sql)) {
+//                st.setInt(1, pageSize);
+//                st.setInt(2, (pageIndex - 1) * pageSize);
+//                try (ResultSet rs = st.executeQuery()) {
+//                    while (rs.next()) {
+//                        Customers customer = mapResultSetToCustomer(rs);
+//
+//                        List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1);
+//                        customer.setDebtNotes(debts);
+//
+//                        list.add(customer);
+//                    }
+//                }
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        } else {
+//            sql = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, status "
+//                    + "FROM customers "
+//                    + "WHERE name LIKE ? OR phone LIKE ? "
+//                    + "ORDER BY " + sortBy + " " + sortOrder + " "
+//                    + "LIMIT ? OFFSET ?";
+//            try (PreparedStatement st = connection.prepareStatement(sql)) {
+//                String param = "%" + keyword + "%";
+//                st.setString(1, param);
+//                st.setString(2, param);
+//                st.setInt(3, pageSize);
+//                st.setInt(4, (pageIndex - 1) * pageSize);
+//                try (ResultSet rs = st.executeQuery()) {
+//                    while (rs.next()) {
+//                        Customers customer = mapResultSetToCustomer(rs);
+//
+//                        List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1);
+//                        customer.setDebtNotes(debts);
+//
+//                        list.add(customer);
+//                    }
+//                }
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        return list;
+//    }
+    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder,int storeID) {
         List<Customers> list = new ArrayList<>();
 
         // Chỉ cho phép sắp xếp theo các cột hợp lệ để tránh lỗi SQL Injection
@@ -154,7 +218,7 @@ public class customerDAO extends DBContext {
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     Customers customer = mapResultSetToCustomer(rs);
-                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1);
+                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1,storeID);
                     customer.setDebtNotes(debts);
                     list.add(customer);
                 }

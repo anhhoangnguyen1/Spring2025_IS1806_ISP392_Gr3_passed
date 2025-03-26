@@ -191,7 +191,6 @@
                                         <th>Images</th>
                                         <th class="resizable">Description</th>
                                         <th class="resizable">Created At</th>
-                                        <th class="resizable">Updated At</th>
                                         <th class="resizable">Created By</th>
                                         <th class="resizable">Status</th>
                                         <th class="sticky-col1">Action</th>
@@ -216,7 +215,6 @@
                                                 ${debt.description}
                                             </td>
                                             <td>${debt.createdAt}</td>
-                                            <td>${debt.updatedAt}</td>
                                             <td>${debt.createdBy}</td>
                                             <td>${debt.status}</td>
                                             <td class="sticky-col1">

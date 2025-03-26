@@ -462,6 +462,8 @@ public class controllerZones extends HttpServlet {
                 break;
             }
             case "stockCheck": {
+                String storeIDStr = (String) session.getAttribute("storeID");
+                int storeID = Integer.parseInt(storeIDStr);
                 String zoneIdParam = request.getParameter("zone_id");
                 if (zoneIdParam == null || zoneIdParam.trim().isEmpty()) {
                     session.setAttribute("Notification", "Invalid or missing zone ID.");
@@ -481,7 +483,6 @@ public class controllerZones extends HttpServlet {
                     Products product = zone.getProductId();
 
                     int systemQuantity = (product != null) ? productsDAO.getProductById(product.getProductId(), storeID).get(0).getQuantity() : 0;
-
 
                     request.setAttribute("zone", zone);
                     request.setAttribute("systemQuantity", systemQuantity);

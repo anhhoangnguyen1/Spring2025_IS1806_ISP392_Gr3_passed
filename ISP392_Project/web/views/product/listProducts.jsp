@@ -49,7 +49,7 @@
         </form>
 
         <!-- Other content comes after this -->
-
+       
         <div class="action-bar d-flex align-items-center">
             <c:if test="${sessionScope.role == 'owner'}">
                 <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#addProductModal">

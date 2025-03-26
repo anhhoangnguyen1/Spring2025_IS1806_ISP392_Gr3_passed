@@ -55,6 +55,8 @@ public class controllerDebts extends HttpServlet {
         String service = request.getParameter("service");
         customerDAO customers = new customerDAO();
         debtDAO debts = new debtDAO();
+        String storeIDStr = (String) session.getAttribute("storeID");
+        int storeID = Integer.parseInt(storeIDStr);
         if (service == null) {
             service = "debts";
         }
@@ -68,7 +70,7 @@ public class controllerDebts extends HttpServlet {
             int index = (indexPage != null) ? Integer.parseInt(indexPage) : 1;
             // Nếu `pageSize` có trong request, dùng giá trị đó; nếu không, mặc định là 10
             int pageSize = (pageSizeParam != null) ? Integer.parseInt(pageSizeParam) : 10;
-            int count = debts.countDebts();
+            int count = debts.countDebts(storeID);
             int endPage = (int) Math.ceil(count * 1.0 / pageSize); // Đảm bảo làm tròn lên
 
             // Nếu `index` lớn hơn `endPage`, đưa về `endPage`
@@ -76,7 +78,7 @@ public class controllerDebts extends HttpServlet {
                 index = endPage;
             }
 
-            List<DebtNote> listDebts = debts.viewAllDebt(command, index, pageSize);
+            List<DebtNote> listDebts = debts.viewAllDebt(command, index, pageSize,storeID);
             List<String> listCustomer = customers.getAllCustomerNames();
             request.setAttribute("totalDebts", count);
             request.setAttribute("listName", listCustomer);
@@ -97,7 +99,7 @@ public class controllerDebts extends HttpServlet {
         if (service.equals("searchDebts")) {
             String name = request.getParameter("browser");
             try {
-                List<DebtNote> list = debts.searchDebts(name);
+                List<DebtNote> list = debts.searchDebts(name,storeID);
                 request.setAttribute("list", list);
                 request.setAttribute("name", name);
                 request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
@@ -119,7 +121,7 @@ public class controllerDebts extends HttpServlet {
                 return;
             }
 
-            List<DebtNote> list = debts.getDebtByCustomerId(id);
+            List<DebtNote> list = debts.getDebtByCustomerId(id,storeID);
 
             request.setAttribute("list", list);
             String notification = (String) request.getSession().getAttribute("Notification");
@@ -238,7 +240,7 @@ public class controllerDebts extends HttpServlet {
 
             // Nếu không có nợ cũ, thêm mới
             DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customer_id, createdAt, updatedAt, createdBy, status);
-            boolean insert = debts.insertDebtInCustomer(newDebt);
+            boolean insert = debts.insertDebtInCustomer(newDebt,storeID);
             if (insert) {
                 totalDebtAmount = totalDebtAmount.add(amount);
                 customerDAO.editCustomerBalance(totalDebtAmount, customer_id);
@@ -393,7 +395,7 @@ public class controllerDebts extends HttpServlet {
                     }
                 }
                 DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customerId, createdAt, updatedAt, createdBy, status);
-                boolean insert = debts.insertDebt(newDebt);
+                boolean insert = debts.insertDebt(newDebt,storeID);
 
                 if (insert) {
                     customers.editCustomerBalance(amount, customerId);
@@ -520,7 +522,7 @@ public class controllerDebts extends HttpServlet {
 
             // Nếu không có nợ cũ, thêm mới
             DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customer_id, createdAt, updatedAt, createdBy, status);
-            boolean insert = debts.insertDebtInCustomer(newDebt);
+            boolean insert = debts.insertDebtInCustomer(newDebt,storeID);
             if (insert) {
                 totalDebtAmount = totalDebtAmount.add(amount);
                 customerDAO.editCustomerBalance(totalDebtAmount, customer_id);
