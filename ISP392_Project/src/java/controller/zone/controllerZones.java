@@ -57,6 +57,9 @@ public class controllerZones extends HttpServlet {
             response.sendRedirect("login");
             return;
         }
+        String role = (String) session.getAttribute("role");
+        String storeIdStr = (String) session.getAttribute("storeID");
+        System.out.println("Role: " + role + ", Store ID: " + storeIdStr);
 
         String service = request.getParameter("service");
         if (service == null) {
@@ -84,6 +87,13 @@ public class controllerZones extends HttpServlet {
             pageSize = 5; // Mặc định nếu không parse được
         }
 
+        // Giới hạn staff chỉ xem danh sách zones
+        if ("staff".equals(role) && !"zones".equals(service)) {
+            session.setAttribute("Notification", "You do not have permission to perform this action.");
+            response.sendRedirect("zones?service=zones");
+            return;
+        }
+
         switch (service) {
             case "zones": {
                 String keyword = request.getParameter("searchZone");
@@ -91,7 +101,6 @@ public class controllerZones extends HttpServlet {
                     keyword = "";
                 }
 
-                // Lấy showInactive từ request, mặc định là true (hiển thị Inactive)
                 boolean showInactive = request.getParameter("showInactive") != null ? "true".equalsIgnoreCase(request.getParameter("showInactive")) : true;
 
                 int index = 1;
@@ -103,14 +112,18 @@ public class controllerZones extends HttpServlet {
                 } catch (NumberFormatException ignored) {
                 }
 
-                int total = zoneDAO.countZones(keyword, showInactive);
+                Integer storeId = storeIdStr != null ? Integer.parseInt(storeIdStr) : null;
+
+                int total = zoneDAO.countZones(keyword, showInactive, storeId);
                 int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
 
                 if (index > endPage) {
                     index = endPage;
                 }
 
-                List<Zone> list = zoneDAO.searchZones(keyword, index, pageSize, sortBy, sortOrder, showInactive);
+                List<Zone> list = zoneDAO.searchZones(keyword, index, pageSize, sortBy, sortOrder, showInactive, storeId);
+                System.out.println("Initial zones list size for store " + storeId + ": " + list.size());
+
                 String notification = (String) session.getAttribute("Notification");
                 if (notification != null) {
                     request.setAttribute("Notification", notification);
@@ -125,12 +138,13 @@ public class controllerZones extends HttpServlet {
                 request.setAttribute("sortOrder", sortOrder);
                 request.setAttribute("pageSize", pageSize);
                 request.setAttribute("totalRecords", total);
-                request.setAttribute("showInactive", showInactive); // Truyền showInactive vào JSP
+                request.setAttribute("showInactive", showInactive);
 
                 request.getRequestDispatcher("views/zone/zones.jsp").forward(request, response);
                 break;
             }
             case "searchZonesAjax": {
+                System.out.println("Processing searchZonesAjax request...");
                 String keyword = request.getParameter("keyword");
                 if (keyword == null) {
                     keyword = "";
@@ -141,12 +155,14 @@ public class controllerZones extends HttpServlet {
                 } catch (NumberFormatException ignored) {
                 }
 
-                // Lấy showInactive từ request, mặc định là true (hiển thị Inactive)
                 boolean showInactive = request.getParameter("showInactive") != null ? "true".equalsIgnoreCase(request.getParameter("showInactive")) : true;
 
-                int total = zoneDAO.countZones(keyword, showInactive);
+                Integer storeId = storeIdStr != null ? Integer.parseInt(storeIdStr) : null;
+
+                int total = zoneDAO.countZones(keyword, showInactive, storeId);
                 int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
-                List<Zone> zones = zoneDAO.searchZones(keyword, index, pageSize, sortBy, sortOrder, showInactive);
+                List<Zone> zones = zoneDAO.searchZones(keyword, index, pageSize, sortBy, sortOrder, showInactive, storeId);
+                System.out.println("AJAX zones list size for store " + storeId + ": " + zones.size());
 
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -157,11 +173,11 @@ public class controllerZones extends HttpServlet {
                     Zone zone = zones.get(i);
                     out.print("{");
                     out.print("\"id\": " + zone.getId() + ",");
-                    out.print("\"name\": \"" + zone.getName() + "\",");
+                    out.print("\"name\": \"" + zone.getName().replace("\"", "\\\"") + "\",");
                     out.print("\"storeId\": " + (zone.getStoreId() != null ? "{\"id\": " + zone.getStoreId().getId() + "}" : "null") + ",");
-                    out.print("\"createdBy\": \"" + zone.getCreatedBy() + "\",");
+                    out.print("\"createdBy\": \"" + zone.getCreatedBy().replace("\"", "\\\"") + "\",");
                     out.print("\"status\": \"" + zone.getStatus() + "\",");
-                    out.print("\"productName\": \"" + (zone.getProductId() != null ? zone.getProductId().getName() : "N/A") + "\",");
+                    out.print("\"productName\": \"" + (zone.getProductId() != null ? zone.getProductId().getName().replace("\"", "\\\"") : "N/A") + "\",");
                     out.print("\"history\": " + (zone.getHistory() != null ? zone.getHistory().toString() : "[]"));
                     out.print("}");
                     if (i < zones.size() - 1) {
@@ -505,9 +521,18 @@ public class controllerZones extends HttpServlet {
         String service = request.getParameter("service");
         HttpSession session = request.getSession();
 
+        String role = (String) session.getAttribute("role");
+
         String fullName = (String) session.getAttribute("fullName");
         if (fullName == null) {
             response.sendRedirect("login");
+            return;
+        }
+
+        // Staff không được phép thực hiện bất kỳ POST nào
+        if ("staff".equals(role)) {
+            session.setAttribute("Notification", "You do not have permission to perform this action.");
+            response.sendRedirect("zones?service=zones");
             return;
         }
 

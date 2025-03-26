@@ -55,14 +55,23 @@ public class zoneDAO extends DBContext {
     }
 
     // Lấy tất cả zones, hỗ trợ phân trang
-    public List<Zone> viewAllZones(String sortBy, int index) {
+    public List<Zone> viewAllZones(String sortBy, int index, Integer storeId) {
         List<Zone> zonesList = new ArrayList<>();
         String sql = "SELECT id, name, description, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, store_id, status, product_id, history "
-                + "FROM Zones WHERE isDeleted = 0 "
-                + "ORDER BY " + (sortBy != null ? sortBy : "id") + " LIMIT 5 OFFSET ?";
+                + "FROM Zones WHERE isDeleted = 0 ";
+
+        if (storeId != null) {
+            sql += "AND store_id = ? ";
+        }
+
+        sql += "ORDER BY " + (sortBy != null ? sortBy : "id") + " LIMIT 5 OFFSET ?";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setInt(1, (index - 1) * 5);
+            int paramIndex = 1;
+            if (storeId != null) {
+                st.setInt(paramIndex++, storeId);
+            }
+            st.setInt(paramIndex, (index - 1) * 5);
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     Zone zone = mapResultSetToZone(rs);
@@ -77,16 +86,25 @@ public class zoneDAO extends DBContext {
     }
 
     // Đếm số lượng zones
-    public int countZones(String keyword, boolean showInactive) {
+    public int countZones(String keyword, boolean showInactive, Integer storeId) {
         String sql;
         if (keyword == null || keyword.trim().isEmpty()) {
             sql = "SELECT COUNT(*) FROM Zones WHERE isDeleted = 0";
             if (!showInactive) {
                 sql += " AND status = 'Active'";
             }
-            try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
+            if (storeId != null) {
+                sql += " AND store_id = ?";
+            }
+            try (PreparedStatement st = connection.prepareStatement(sql)) {
+                int paramIndex = 1;
+                if (storeId != null) {
+                    st.setInt(paramIndex++, storeId);
+                }
+                try (ResultSet rs = st.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -96,8 +114,15 @@ public class zoneDAO extends DBContext {
             if (!showInactive) {
                 sql += " AND status = 'Active'";
             }
+            if (storeId != null) {
+                sql += " AND store_id = ?";
+            }
             try (PreparedStatement st = connection.prepareStatement(sql)) {
-                st.setString(1, "%" + keyword + "%");
+                int paramIndex = 1;
+                st.setString(paramIndex++, "%" + keyword + "%");
+                if (storeId != null) {
+                    st.setInt(paramIndex++, storeId);
+                }
                 try (ResultSet rs = st.executeQuery()) {
                     if (rs.next()) {
                         return rs.getInt(1);
@@ -111,7 +136,7 @@ public class zoneDAO extends DBContext {
     }
 
     // Tìm kiếm zones theo từ khóa, hỗ trợ phân trang và sắp xếp
-    public List<Zone> searchZones(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, boolean showInactive) {
+    public List<Zone> searchZones(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, boolean showInactive, Integer storeId) {
         List<Zone> list = new ArrayList<>();
 
         List<String> allowedSortColumns = List.of("id", "name", "created_at", "updated_at");
@@ -135,6 +160,11 @@ public class zoneDAO extends DBContext {
             sql += "AND z.status = 'Active' ";
         }
 
+        // Lọc theo storeId (áp dụng cho cả owner và staff)
+        if (storeId != null) {
+            sql += "AND z.store_id = ? ";
+        }
+
         sql += "ORDER BY z." + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
@@ -142,6 +172,10 @@ public class zoneDAO extends DBContext {
 
             if (keyword != null && !keyword.trim().isEmpty()) {
                 st.setString(paramIndex++, "%" + keyword + "%");
+            }
+
+            if (storeId != null) {
+                st.setInt(paramIndex++, storeId);
             }
 
             st.setInt(paramIndex++, pageSize);
@@ -416,27 +450,27 @@ public class zoneDAO extends DBContext {
 
     // Phương thức main để test
     public static void main(String[] args) {
-        zoneDAO dao = new zoneDAO();
-
-        // Test viewAllZones
-        int pageIndex = 1;
-        List<Zone> zones = dao.viewAllZones("id", pageIndex);
-
-        if (zones.isEmpty()) {
-            System.out.println("Không có zone nào được tìm thấy!");
-        } else {
-            System.out.println("Danh sách zones:");
-            for (Zone zone : zones) {
-                System.out.println("------------------------------------------------------");
-                System.out.println("Zone ID: " + zone.getId());
-                System.out.println("Name: " + zone.getName());
-                System.out.println("Created By: " + zone.getCreatedBy());
-                System.out.println("Created At: " + zone.getCreatedAt());
-                System.out.println("Store ID: " + (zone.getStoreId() != null ? zone.getStoreId().getId() : "null"));
-                System.out.println("Status: " + zone.getStatus());
-                System.out.println("History: " + zone.getHistory());
-            }
-        }
+//        zoneDAO dao = new zoneDAO();
+//
+//        // Test viewAllZones
+//        int pageIndex = 1;
+////        List<Zone> zones = dao.viewAllZones("id", pageIndex);
+//
+//        if (zones.isEmpty()) {
+//            System.out.println("Không có zone nào được tìm thấy!");
+//        } else {
+//            System.out.println("Danh sách zones:");
+//            for (Zone zone : zones) {
+//                System.out.println("------------------------------------------------------");
+//                System.out.println("Zone ID: " + zone.getId());
+//                System.out.println("Name: " + zone.getName());
+//                System.out.println("Created By: " + zone.getCreatedBy());
+//                System.out.println("Created At: " + zone.getCreatedAt());
+//                System.out.println("Store ID: " + (zone.getStoreId() != null ? zone.getStoreId().getId() : "null"));
+//                System.out.println("Status: " + zone.getStatus());
+//                System.out.println("History: " + zone.getHistory());
+//            }
+//        }
 //        
 //        System.out.println("--------------------------------------");
 //        // 1. Test getAllZoneNames

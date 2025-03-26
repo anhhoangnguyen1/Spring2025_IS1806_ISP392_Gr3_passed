@@ -21,13 +21,12 @@
                 cursor: pointer;
             }
             .container.mt-4 {
-                position: relative; /* Đảm bảo container là phần tử cha để cố định search-box */
-                padding-top: 15px; /* Tạo khoảng trống cho search-box */
+                position: relative;
+                padding-top: 15px;
             }
-
             .search-box {
                 position: absolute;
-                top: 20px; /* Đặt cố định ở trên cùng của container */
+                top: 20px;
                 left: 50%;
                 transform: translateX(-50%);
                 width: 400px;
@@ -37,7 +36,7 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                z-index: 10; /* Đảm bảo search-box nằm trên các phần tử khác */
+                z-index: 10;
             }
             .showing-info {
                 margin-bottom: 10px;
@@ -62,12 +61,13 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div class="action-bar d-flex align-items-center">
-                <a href="${pageContext.request.contextPath}/zones?service=addZone" class="btn btn-outline-primary mr-lg-auto">
-                    Add Zone
-                </a>
-            </div>
-            <!-- Thêm dropdown chọn page size -->
+            <c:if test="${sessionScope.role == 'owner'}">
+                <div class="action-bar d-flex align-items-center">
+                    <a href="${pageContext.request.contextPath}/zones?service=addZone" class="btn btn-outline-primary mr-lg-auto">
+                        Add Zone
+                    </a>
+                </div>
+            </c:if>
             <div class="showing-info" style="margin-top: 10px; margin-bottom: -15px">
                 Showing: 
                 <select id="pageSizeSelect">
@@ -88,7 +88,7 @@
                                 Name <i class="fa ${sortBy == 'name' && sortOrder == 'ASC' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
                             </th>
                             <th>Store ID</th>
-                            <th>Product Name</th> <!-- Thêm cột Product Name -->
+                            <th>Product Name</th>
                             <th>Created By</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -100,12 +100,14 @@
                                 <td>${zone.id}</td>
                                 <td style="text-align: left;">${zone.name}</td>
                                 <td>${zone.storeId != null ? zone.storeId.id : 'null'}</td>
-                                <td>${zone.productId != null ? zone.productId.name : 'null'}</td> <!-- Hiển thị Product Name -->
+                                <td>${zone.productId != null ? zone.productId.name : 'null'}</td>
                                 <td>${zone.createdBy}</td>
                                 <td>${zone.status}</td>
                                 <td>
-                                    <a href="${pageContext.request.contextPath}/zones?service=getZoneById&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">View</a>
-                                    <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">Edit</a>
+                                    <c:if test="${sessionScope.role == 'owner'}">
+                                        <a href="${pageContext.request.contextPath}/zones?service=getZoneById&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">View</a>
+                                        <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">Edit</a>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -164,8 +166,9 @@
             let timeout = null;
             let currentSortBy = '${sortBy}';
             let currentSortOrder = '${sortOrder}';
-            let currentPageSize = ${pageSize != null ? pageSize : 5}; // Mặc định là 5 nếu không có giá trị
+            let currentPageSize = ${pageSize != null ? pageSize : 5};
             let totalRecords = ${totalRecords != null ? totalRecords : 0};
+            const role = '${sessionScope.role}';
 
             function searchZones(keyword, page, sortBy, sortOrder, pageSize) {
                 $.ajax({
@@ -177,57 +180,65 @@
                         index: page,
                         sortBy: sortBy,
                         sortOrder: sortOrder,
-                        pageSize: pageSize // Thêm pageSize vào request
+                        pageSize: pageSize
                     },
                     success: function (response) {
-                        totalRecords = response.totalRecords; // Cập nhật tổng số bản ghi
+                        console.log("AJAX response:", response);
+                        // Kiểm tra xem response có phải JSON hợp lệ không
+                        if (typeof response !== 'object' || !response.zones || !response.totalRecords) {
+                            console.error("Invalid JSON response:", response);
+                            $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">Error: Invalid response from server</td></tr>');
+                            return;
+                        }
+                        totalRecords = response.totalRecords;
                         updateTable(response.zones, response.endPage, response.index, keyword);
-                        // Cập nhật phân trang với page hiện tại
                         updatePagination(response.endPage, page, keyword);
-                        updateShowingInfo(pageSize, response.totalRecords); // Cập nhật thông tin hiển thị
+                        updateShowingInfo(pageSize, response.totalRecords);
                     },
-                    error: function () {
-                        $('#zoneTableBody').html('<tr><td colspan="6">Error fetching zones</td></tr>');
+                    error: function (xhr, status, error) {
+                        console.error("AJAX error:", status, error);
+                        $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">Error fetching zones</td></tr>');
                     }
                 });
             }
 
-            // [NOTE: Sửa tại đây] Định nghĩa hàm loadDefaultZones ngoài phạm vi $(document).ready()
             function loadDefaultZones() {
                 const currentIndex = ${index};
+                console.log("Loading default zones with index:", currentIndex);
                 searchZones('', currentIndex, currentSortBy, currentSortOrder, currentPageSize);
             }
 
-            // Hàm cập nhật bảng
             function updateTable(zones, endPage, currentIndex, keyword) {
+                console.log("Zones data:", zones);
                 const tbody = $('#zoneTableBody');
                 tbody.empty();
 
                 if (zones.length === 0) {
-                    tbody.append('<tr><td colspan="6">No zones found</td></tr>');
+                    tbody.append('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">No zones found</td></tr>');
                 } else {
                     zones.forEach(function (zone) {
-                        tbody.append(
-                                '<tr>' +
+                        console.log("Processing zone:", zone);
+                        let row = '<tr>' +
                                 '<td>' + zone.id + '</td>' +
                                 '<td style="text-align: left;">' + zone.name + '</td>' +
                                 '<td>' + (zone.storeId ? zone.storeId.id : 'null') + '</td>' +
-                                '<td>' + (zone.productName ? zone.productName : 'null') + '</td>' + // Hiển thị Product Name từ AJAX
+                                '<td>' + (zone.productName ? zone.productName : 'null') + '</td>' +
                                 '<td>' + zone.createdBy + '</td>' +
-                                '<td>' + zone.status + '</td>' +
-                                '<td>' +
-                                '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '" class="btn btn-outline-primary">View</a> ' +
-                                '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '" class="btn btn-outline-primary">Edit</a> ' +
-                                '</td>' +
-                                '</tr>'
-                                );
+                                '<td>' + zone.status + '</td>';
+                        if (role === 'owner') {
+                            row += '<td>' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">View</a> ' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">Edit</a>' +
+                                    '</td>';
+                        }
+                        row += '</tr>';
+                        tbody.append(row);
                     });
                 }
 
                 updatePagination(endPage, currentIndex, keyword);
             }
 
-            // Hàm cập nhật phân trang
             function updatePagination(endPage, currentIndex, keyword) {
                 const pagination = $('#pagination ul');
                 pagination.empty();
@@ -270,7 +281,6 @@
                             );
                 }
 
-                // [NOTE: Sửa tại đây] Gắn sự kiện click cho các liên kết phân trang bằng jQuery
                 $('.page-nav').on('click', function (e) {
                     e.preventDefault();
                     const page = $(this).data('page');
@@ -278,14 +288,12 @@
                 });
             }
 
-            // Hàm cập nhật thông tin "Showing: X of Y zones"
             function updateShowingInfo(pageSize, totalRecords) {
                 $('.showing-info').html('Showing: <select id="pageSizeSelect">' +
                         '<option value="5" ' + (pageSize == 5 ? 'selected' : '') + '>5</option>' +
                         '<option value="10" ' + (pageSize == 10 ? 'selected' : '') + '>10</option>' +
                         '<option value="20" ' + (pageSize == 20 ? 'selected' : '') + '>20</option>' +
                         '</select> of ' + totalRecords + ' zones');
-                // Gắn lại sự kiện cho dropdown mới
                 $('#pageSizeSelect').on('change', function () {
                     currentPageSize = parseInt($(this).val());
                     searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize);
@@ -301,42 +309,33 @@
                         icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
                     } else {
                         icon.removeClass('fa-sort-up fa-sort-down');
-                        icon.addClass('fa-sort-down'); // Mặc định là mũi tên xuống
+                        icon.addClass('fa-sort-down');
                     }
                 });
             }
 
             $(document).ready(function () {
-
-                // Xử lý tìm kiếm tự động bằng AJAX
                 $('#searchInput').on('keyup', function () {
                     clearTimeout(timeout);
                     const keyword = $(this).val().trim();
-
                     timeout = setTimeout(function () {
                         searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize);
                     }, 300);
                 });
 
-                // Xử lý sắp xếp khi nhấp vào cột
                 $('.sortable').on('click', function () {
                     const sortBy = $(this).data('sort');
                     const keyword = $('#searchInput').val().trim();
-
-                    // Đảo ngược sortOrder nếu nhấp lại vào cùng cột
                     if (currentSortBy === sortBy) {
                         currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
                     } else {
                         currentSortBy = sortBy;
-                        currentSortOrder = 'ASC'; // Mặc định ASC khi chọn cột mới
+                        currentSortOrder = 'ASC';
                     }
                     updateSortIcons();
                     searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize);
                 });
 
-
-
-                // Xử lý nút Clear
                 $('#clearBtn').on('click', function () {
                     $('#searchInput').val('');
                     loadDefaultZones();
@@ -350,9 +349,6 @@
                 updateSortIcons();
                 loadDefaultZones();
             });
-
-
-
         </script>
     </body>
 </html>

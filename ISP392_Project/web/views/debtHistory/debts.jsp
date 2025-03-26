@@ -59,7 +59,7 @@
                 <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
-                    <li >
+                    <li>
                         <a href="/ISP392_Project/dashboard">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-house"></i>
@@ -76,7 +76,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/zones">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-table"></i>
                             </span>
@@ -99,7 +99,6 @@
                             <span class="nav-text">Invoices</span>
                         </a>
                     </li>
-
                     <li class="active">
                         <a href="/ISP392_Project/Debts">
                             <span class="nav-icon">
@@ -108,9 +107,14 @@
                             <span class="nav-text">Debts History</span>
                         </a>
                     </li>
-                </ul>
-                <span class="menu-label">OWNER ZONE</span>
-                <ul class="navbar-links navbar-links-2">
+                    <li>
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
                     <li>
                         <a href="/ISP392_Project/Users">
                             <span class="nav-icon">
@@ -122,7 +126,6 @@
                 </ul>
                 <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
-
                 <div class="sidebar-footer">
                     <div class="settings">
                         <span class="gear-icon">
@@ -137,7 +140,10 @@
                             </span>
                             <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
                     </div>
+                </div>
+                <!--   === Side Bar Footer Ends ===   -->
             </aside>
+            <!--   === Side Bar Ends ===   -->
 
             <div class="contents">
                 <c:if test="${not empty sessionScope.Notification}">

@@ -97,7 +97,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/zones">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-table"></i>
                             </span>

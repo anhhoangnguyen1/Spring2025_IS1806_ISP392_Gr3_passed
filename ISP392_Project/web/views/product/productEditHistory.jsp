@@ -50,7 +50,9 @@
                 </div>
             </div>
 
+            <!--   === Side Bar Starts ===   -->
             <aside class="side-bar">
+                <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
                     <li>
@@ -61,7 +63,7 @@
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="#">
+                    <li class="active">
                         <a href="/ISP392_Project/Products">
                             <span class="nav-icon">
                                 <i class="fas fa-box"></i>
@@ -70,7 +72,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/zones">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-table"></i>
                             </span>
@@ -101,11 +103,16 @@
                             <span class="nav-text">Debts History</span>
                         </a>
                     </li>
-                </ul>
-                <span class="menu-label">OWNER ZONE</span>
-                <ul class="navbar-links navbar-links-2">
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Users">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-user-tie"></i>
                             </span>
@@ -113,6 +120,7 @@
                         </a>
                     </li>
                 </ul>
+                <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
                     <div class="settings">
@@ -131,6 +139,7 @@
                 </div>
                 <!--   === Side Bar Footer Ends ===   -->
             </aside>
+            <!--   === Side Bar Ends ===   -->
             <div class="contents">
                 <div class="panel-bar1">
                     <a href="/ISP392_Project/Products" class="btn btn-outline-secondary">
