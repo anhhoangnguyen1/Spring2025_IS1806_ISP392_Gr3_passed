@@ -90,6 +90,7 @@
                     </thead>
                     <tbody id = "customerTableBody">
                         <c:forEach var="customer" items="${list}">
+                             <c:if test="${(sessionScope.role == 'staff' && user.role == 'owner') || (sessionScope.role == 'owner' && user.storeId == sessionScope.storeId) || sessionScope.role == 'staff'}">
                             <tr>
                                 <td>${customer.id}</td>
                                 <td>${customer.name}</td>
@@ -117,6 +118,7 @@
                                     </a>
                                 </td>
                             </tr>
+                               </c:if>
                         </c:forEach>
                     </tbody>
                 </table>

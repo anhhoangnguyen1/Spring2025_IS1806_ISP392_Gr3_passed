@@ -31,6 +31,12 @@ public class controllerCustomers extends HttpServlet {
         HttpSession session = request.getSession();
         String role = (String) session.getAttribute("role");
 
+        if (role != null && role.equals("admin")) {
+            // Nếu là admin, không cho phép xem danh sách customer
+            response.sendRedirect("/dashboard.jsp");  // Redirect tới trang không có quyền truy cập
+            return;
+        }
+
         String service = request.getParameter("service");
         if (service == null) {
             service = "customers";
@@ -63,10 +69,10 @@ public class controllerCustomers extends HttpServlet {
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
                     if (index < 1) {
-                        index = 1; 
+                        index = 1;
                     }
                 } catch (NumberFormatException ignored) {
-                    
+
                 }
 
                 int total = customerDAO.countCustomers(keyword);
@@ -102,6 +108,14 @@ public class controllerCustomers extends HttpServlet {
             }
             case "searchCustomersAjax": {
                 String keyword = request.getParameter("searchCustomer");
+
+                if (role != null && role.equals("admin")) {
+                    // Nếu là admin, không cho phép xem dữ liệu
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);  // HTTP 403 Forbidden
+                    response.getWriter().write("{\"error\": \"Admin does not have access to customer data.\"}");
+                    return;
+                }
+
                 if (keyword == null) {
                     keyword = "";
                 }
@@ -182,7 +196,6 @@ public class controllerCustomers extends HttpServlet {
                 String fullName = (String) session.getAttribute("fullName");
                 request.setAttribute("fullName", fullName);
 
-         
                 request.setAttribute("sortBy", sortBy);
                 request.setAttribute("sortOrder", sortOrder);
                 request.setAttribute("searchCustomer", request.getParameter("searchCustomer"));
@@ -223,9 +236,8 @@ public class controllerCustomers extends HttpServlet {
             customerDAO.insertCustomer(customer);
 
             int total = customerDAO.countCustomers("");
-            int pageSize = 5; 
+            int pageSize = 5;
             int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
-        
 
             String sortBy = request.getParameter("sortBy");
             if (sortBy == null) {
@@ -233,9 +245,9 @@ public class controllerCustomers extends HttpServlet {
             }
             String sortOrder = request.getParameter("sortOrder");
             if (sortOrder == null) {
-                sortOrder = "ASC"; 
+                sortOrder = "ASC";
             }
-      
+
             session.setAttribute("successMessage", "Customer added successfully.");
             response.sendRedirect("Customers?service=customers&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage);
 
@@ -247,7 +259,7 @@ public class controllerCustomers extends HttpServlet {
             String phone = request.getParameter("phone");
             String searchCustomer = request.getParameter("searchCustomer");
             if (searchCustomer == null) {
-                searchCustomer = ""; 
+                searchCustomer = "";
             }
             if (customerDAO.checkPhoneExists(phone, customerId)) {
                 request.setAttribute("phoneError", "Phone number already exists.");
@@ -265,29 +277,28 @@ public class controllerCustomers extends HttpServlet {
             Customers customer = getCustomerFromRequest(request, false);
             customerDAO.editCustomer(customer);
 
-         
             String indexParam = request.getParameter("index");
-            int index = 1; 
+            int index = 1;
 
             if (indexParam != null && !indexParam.isEmpty()) {
                 try {
                     index = Integer.parseInt(indexParam);
                     if (index < 1) {
-                        index = 1; 
+                        index = 1;
                     }
                 } catch (NumberFormatException ignored) {
-                    
+
                 }
             }
             System.out.println("Index from request: " + request.getParameter("index"));
             System.out.println("Parsed index: " + index);
             String sortBy = request.getParameter("sortBy");
             if (sortBy == null) {
-                sortBy = "id"; 
+                sortBy = "id";
             }
             String sortOrder = request.getParameter("sortOrder");
             if (sortOrder == null) {
-                sortOrder = "ASC"; 
+                sortOrder = "ASC";
             }
 
             session.setAttribute("successMessage", "Customer updated successfully.");

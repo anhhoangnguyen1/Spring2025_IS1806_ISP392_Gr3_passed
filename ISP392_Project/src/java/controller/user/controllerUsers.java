@@ -88,8 +88,6 @@ public class controllerUsers extends HttpServlet {
                 }
 
                 List<Users> list = null;
-
-// Admin: chỉ hiển thị người dùng có role "owner"
                 if (role.equals("admin")) {
                     list = userDAO.searchUsersByRole("owner", keyword, index, 5, sortBy, sortOrder);
                 } else if (role.equals("owner")) {
