@@ -12,10 +12,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class controllerZones extends HttpServlet {
 
@@ -159,7 +162,7 @@ public class controllerZones extends HttpServlet {
                 } catch (NumberFormatException ignored) {
                 }
 
-// Sử dụng showInactive từ session nếu không có trong request
+                // Sử dụng showInactive từ session nếu không có trong request
                 showInactiveParam = request.getParameter("showInactive");
                 showInactive = showInactiveParam != null ? "true".equalsIgnoreCase(showInactiveParam) : (Boolean) session.getAttribute("showInactive");
                 session.setAttribute("showInactive", showInactive); // Cập nhật session
@@ -538,13 +541,6 @@ public class controllerZones extends HttpServlet {
             return;
         }
 
-        // Staff không được phép thực hiện bất kỳ POST nào
-        if ("staff".equals(role)) {
-            session.setAttribute("Notification", "You do not have permission to perform this action.");
-            response.sendRedirect("zones?service=zones");
-            return;
-        }
-
         // Lấy pageSize từ request, mặc định là 5
         int pageSize = 5;
         try {
@@ -556,6 +552,14 @@ public class controllerZones extends HttpServlet {
         }
 
         if ("addZone".equals(service)) {
+
+            // Staff không được phép thực hiện bất kỳ POST nào
+            if ("staff".equals(role)) {
+                session.setAttribute("Notification", "You do not have permission to perform this action.");
+                response.sendRedirect("zones?service=zones");
+                return;
+            }
+
             String name = request.getParameter("name");
             String description = request.getParameter("description");
 
@@ -627,6 +631,13 @@ public class controllerZones extends HttpServlet {
         }
 
         if ("editZone".equals(service)) {
+            // Staff không được phép thực hiện bất kỳ POST nào
+            if ("staff".equals(role)) {
+                session.setAttribute("Notification", "You do not have permission to perform this action.");
+                response.sendRedirect("zones?service=zones");
+                return;
+            }
+
             int zoneId = Integer.parseInt(request.getParameter("zone_id"));
             String name = request.getParameter("name");
             String description = request.getParameter("description");
@@ -717,26 +728,16 @@ public class controllerZones extends HttpServlet {
             String note = request.getParameter("note");
             String checkedBy = fullName;
 
-            // Kiểm tra các tham số
-            if (zoneIdParam == null || zoneIdParam.trim().isEmpty()
-                    || productIdParam == null || productIdParam.trim().isEmpty()
-                    || systemQuantityParam == null || systemQuantityParam.trim().isEmpty()
-                    || actualQuantityParam == null || actualQuantityParam.trim().isEmpty()) {
-                session.setAttribute("Notification", "Missing required fields.");
-                response.sendRedirect("zones?service=zones");
-                return;
-            }
-
             try {
                 int zoneId = Integer.parseInt(zoneIdParam);
                 int productId = Integer.parseInt(productIdParam);
                 int systemQuantity = Integer.parseInt(systemQuantityParam);
                 int actualQuantity = Integer.parseInt(actualQuantityParam);
 
-                // Thêm bản ghi kiểm kho
+                System.out.println("Submitting stock check: zoneId=" + zoneId + ", productId=" + productId + ", systemQuantity=" + systemQuantity + ", actualQuantity=" + actualQuantity);
+
                 zoneDAO.addStockCheck(zoneId, productId, systemQuantity, actualQuantity, checkedBy, note);
 
-                // Tùy chọn: Cập nhật số lượng sản phẩm
                 if (actualQuantity != systemQuantity) {
                     zoneDAO.updateProductQuantity(productId, actualQuantity);
                 }
@@ -744,8 +745,11 @@ public class controllerZones extends HttpServlet {
                 session.setAttribute("Notification", "Stock check completed successfully.");
                 response.sendRedirect("zones?service=viewStockCheckHistory&zone_id=" + zoneId);
             } catch (NumberFormatException e) {
-                session.setAttribute("Notification", "Invalid input format.");
+                session.setAttribute("Notification", "Invalid input format: " + e.getMessage());
                 response.sendRedirect("zones?service=zones");
+            } catch (SQLException e) {
+                session.setAttribute("Notification", "Error saving stock check: " + e.getMessage());
+                response.sendRedirect("zones?service=stockCheck&zone_id=" + zoneIdParam);
             }
         }
     }
