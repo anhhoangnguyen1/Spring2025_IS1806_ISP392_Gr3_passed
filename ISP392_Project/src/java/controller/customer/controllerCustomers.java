@@ -29,6 +29,8 @@ public class controllerCustomers extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
+        String storeIDStr = (String) session.getAttribute("storeID");
+        int storeID = Integer.parseInt(storeIDStr);
         String role = (String) session.getAttribute("role");
 
         String service = request.getParameter("service");
@@ -63,10 +65,10 @@ public class controllerCustomers extends HttpServlet {
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
                     if (index < 1) {
-                        index = 1; 
+                        index = 1;
                     }
                 } catch (NumberFormatException ignored) {
-                    
+
                 }
 
                 int total = customerDAO.countCustomers(keyword);
@@ -75,7 +77,7 @@ public class controllerCustomers extends HttpServlet {
                 if (index > endPage) {
                     index = endPage;
                 }
-                List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder);
+                List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder,storeID);
                 if ("staff".equals(role)) {
                     for (Customers customer : list) {
                         String phone = customer.getPhone();
@@ -101,6 +103,7 @@ public class controllerCustomers extends HttpServlet {
                 break;
             }
             case "searchCustomersAjax": {
+
                 String keyword = request.getParameter("searchCustomer");
                 if (keyword == null) {
                     keyword = "";
@@ -114,7 +117,7 @@ public class controllerCustomers extends HttpServlet {
                 int pageSize = 5;
                 int total = customerDAO.countCustomers(keyword);
                 int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
-                List<Customers> customers = customerDAO.searchCustomers(keyword, index, pageSize, sortBy, sortOrder);
+                List<Customers> customers = customerDAO.searchCustomers(keyword, index, pageSize, sortBy, sortOrder, storeID);
 
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -182,7 +185,6 @@ public class controllerCustomers extends HttpServlet {
                 String fullName = (String) session.getAttribute("fullName");
                 request.setAttribute("fullName", fullName);
 
-         
                 request.setAttribute("sortBy", sortBy);
                 request.setAttribute("sortOrder", sortOrder);
                 request.setAttribute("searchCustomer", request.getParameter("searchCustomer"));
@@ -223,9 +225,8 @@ public class controllerCustomers extends HttpServlet {
             customerDAO.insertCustomer(customer);
 
             int total = customerDAO.countCustomers("");
-            int pageSize = 5; 
+            int pageSize = 5;
             int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
-        
 
             String sortBy = request.getParameter("sortBy");
             if (sortBy == null) {
@@ -233,9 +234,9 @@ public class controllerCustomers extends HttpServlet {
             }
             String sortOrder = request.getParameter("sortOrder");
             if (sortOrder == null) {
-                sortOrder = "ASC"; 
+                sortOrder = "ASC";
             }
-      
+
             session.setAttribute("successMessage", "Customer added successfully.");
             response.sendRedirect("Customers?service=customers&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage);
 
@@ -247,7 +248,7 @@ public class controllerCustomers extends HttpServlet {
             String phone = request.getParameter("phone");
             String searchCustomer = request.getParameter("searchCustomer");
             if (searchCustomer == null) {
-                searchCustomer = ""; 
+                searchCustomer = "";
             }
             if (customerDAO.checkPhoneExists(phone, customerId)) {
                 request.setAttribute("phoneError", "Phone number already exists.");
@@ -265,29 +266,28 @@ public class controllerCustomers extends HttpServlet {
             Customers customer = getCustomerFromRequest(request, false);
             customerDAO.editCustomer(customer);
 
-         
             String indexParam = request.getParameter("index");
-            int index = 1; 
+            int index = 1;
 
             if (indexParam != null && !indexParam.isEmpty()) {
                 try {
                     index = Integer.parseInt(indexParam);
                     if (index < 1) {
-                        index = 1; 
+                        index = 1;
                     }
                 } catch (NumberFormatException ignored) {
-                    
+
                 }
             }
             System.out.println("Index from request: " + request.getParameter("index"));
             System.out.println("Parsed index: " + index);
             String sortBy = request.getParameter("sortBy");
             if (sortBy == null) {
-                sortBy = "id"; 
+                sortBy = "id";
             }
             String sortOrder = request.getParameter("sortOrder");
             if (sortOrder == null) {
-                sortOrder = "ASC"; 
+                sortOrder = "ASC";
             }
 
             session.setAttribute("successMessage", "Customer updated successfully.");

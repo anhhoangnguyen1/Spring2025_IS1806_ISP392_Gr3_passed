@@ -36,7 +36,7 @@ public class customerDAO extends DBContext {
         return list;
     }
 
-    public List<Customers> viewAllCustomersWithDebts(String command, int index) {
+    public List<Customers> viewAllCustomersWithDebts(String command, int index,int storeID) {
         List<Customers> customersList = new ArrayList<>();
         String sqlCustomers = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, deleteBy, store_id, status "
                 + "FROM customers "
@@ -49,7 +49,7 @@ public class customerDAO extends DBContext {
                 while (rs.next()) {
                     Customers customer = mapResultSetToCustomer(rs);
 
-                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("id", customer.getId(), 1);
+                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("id", customer.getId(), 1,storeID);
 
                     if (debts == null) {
                         debts = new ArrayList<>();
@@ -158,7 +158,7 @@ public class customerDAO extends DBContext {
 //
 //        return list;
 //    }
-    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
+    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder,int storeID) {
         List<Customers> list = new ArrayList<>();
 
         // Chỉ cho phép sắp xếp theo các cột hợp lệ để tránh lỗi SQL Injection
@@ -196,7 +196,7 @@ public class customerDAO extends DBContext {
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     Customers customer = mapResultSetToCustomer(rs);
-                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1);
+                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1,storeID);
                     customer.setDebtNotes(debts);
                     list.add(customer);
                 }

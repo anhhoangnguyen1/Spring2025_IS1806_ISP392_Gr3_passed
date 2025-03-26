@@ -59,6 +59,8 @@ public class controllerProducts extends HttpServlet {
             service = "products";
         }
         if (service.equals("products")) {
+            String storeIDStr = (String) session.getAttribute("storeID");
+            int storeID = Integer.parseInt(storeIDStr);
             String indexPage = request.getParameter("index");
             String pageSizeStr = request.getParameter("pageSize");
             String command = request.getParameter("command");
@@ -91,7 +93,7 @@ public class controllerProducts extends HttpServlet {
             int index = Integer.parseInt(indexPage);
 
             // Tính tổng số sản phẩm
-            int count = products.countProducts(null);
+            int count = products.countProducts(null,storeID);
 
             // Tính toán số trang dựa vào pageSize
             int endPage = count / pageSize;
@@ -100,7 +102,7 @@ public class controllerProducts extends HttpServlet {
             }
 
             // Lấy danh sách sản phẩm và Zone Active
-            List<Products> listProducts = products.viewAllProducts(command, index, pageSize);
+            List<Products> listProducts = products.viewAllProducts(command, index, pageSize,storeID);
             List<String> listZoneName = zonesDao.getActiveZoneNames(); // Thay đổi ở đây
 
             // Đặt các thuộc tính cho request
@@ -120,6 +122,8 @@ public class controllerProducts extends HttpServlet {
             // Chuyển hướng tới trang JSP
             request.getRequestDispatcher("views/product/products.jsp").forward(request, response);
         } else if (service.equals("ProductsEditHistory")) {
+            String storeIDStr = (String) session.getAttribute("storeID");
+            int storeID = Integer.parseInt(storeIDStr);
             String indexPage = request.getParameter("index");
             String pageSizeStr = request.getParameter("pageSize");
             String command = request.getParameter("command");
@@ -153,11 +157,11 @@ public class controllerProducts extends HttpServlet {
             int index = Integer.parseInt(indexPage);
 
             // Tính tổng số sản phẩm
-            int count = products.countProducts("updated_at IS NOT NULL");
+            int count = products.countProducts("updated_at IS NOT NULL",storeID);
             int endPage = (int) Math.ceil((double) count / pageSize);
 
             // Lấy danh sách sản phẩm với pageSize
-            List<Products> listProducts = products.viewAllProductsEditHistory(command, index, pageSize);
+            List<Products> listProducts = products.viewAllProductsEditHistory(command, index, pageSize,storeID);
             List<String> listZoneName = zonesDao.getAllZoneNames();
 
             // Đặt thuộc tính cho request
@@ -176,9 +180,11 @@ public class controllerProducts extends HttpServlet {
         }
 
         if (service.equals("searchProducts")) {
+            String storeIDStr = (String) session.getAttribute("storeID");
+            int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("browser");
             try {
-                List<Products> list = products.searchProducts(name, false);
+                List<Products> list = products.searchProducts(name, false,storeID);
                 request.setAttribute("list", list);
                 request.setAttribute("name", name);
                 request.getRequestDispatcher("views/product/products.jsp").forward(request, response);
@@ -186,9 +192,11 @@ public class controllerProducts extends HttpServlet {
             }
         }
         if (service.equals("searchProductsEditHistory")) {
+            String storeIDStr = (String) session.getAttribute("storeID");
+            int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("browser");
             try {
-                List<Products> list = products.searchProducts(name, true);
+                List<Products> list = products.searchProducts(name, true,storeID);
                 request.setAttribute("listHistory", list);
                 request.setAttribute("name", name);
                 request.getRequestDispatcher("views/product/productEditHistory.jsp").forward(request, response);
@@ -197,11 +205,13 @@ public class controllerProducts extends HttpServlet {
         }
 
         if (service.equals("getProductById")) {
+            String storeIDStr = (String) session.getAttribute("storeID");
+            int storeID = Integer.parseInt(storeIDStr);
             String id_raw = request.getParameter("product_id");
             int id;
             try {
                 id = Integer.parseInt(id_raw);
-                List<Products> product = products.getProductById(id);
+                List<Products> product = products.getProductById(id,storeID);
                 request.setAttribute("list", product);
                 request.getRequestDispatcher("views/product/detailProduct.jsp").forward(request, response);
             } catch (NumberFormatException e) {
@@ -209,14 +219,18 @@ public class controllerProducts extends HttpServlet {
         }
 
         if (service.equals("detailProduct")) {
+            String storeIDStr = (String) session.getAttribute("storeID");
+            int storeID = Integer.parseInt(storeIDStr);
             int id = Integer.parseInt(request.getParameter("product_id"));
-            List<Products> list = products.getProductById(id);
+            List<Products> list = products.getProductById(id,storeID);
             request.setAttribute("product", list);
             request.getRequestDispatcher("views/product/editProduct.jsp").forward(request, response);
 
         }
 
         if (service.equals("editProduct")) {
+            String storeIDStr = (String) session.getAttribute("storeID");
+            int storeID = Integer.parseInt(storeIDStr);
             try {
                 int productId = Integer.parseInt(request.getParameter("product_id"));
                 String name = request.getParameter("name");
@@ -281,7 +295,7 @@ public class controllerProducts extends HttpServlet {
 //                boolean success = products.editProduct(product, zones);
 
                 // Truyền fullName làm updatedBy
-                boolean success = products.editProduct(product, zones, fullName);
+                boolean success = products.editProduct(product, zones, fullName,storeID);
 
                 if (success) {
                     session.setAttribute("Notification", "Product updated successfully.");
@@ -298,6 +312,8 @@ public class controllerProducts extends HttpServlet {
             }
         }
         if (service.equals("addProduct")) {
+            String storeIDStr = (String) session.getAttribute("storeID");
+            int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("name");
             if (name == null || name.trim().isEmpty()) {
                 request.setAttribute("Notification", "Product name is required.");
@@ -395,7 +411,7 @@ public class controllerProducts extends HttpServlet {
                 }
             }
 
-            boolean success = products.insertProduct(product, zones, fullName);
+            boolean success = products.insertProduct(product, zones, fullName,storeID);
 
             if (success) {
                 request.setAttribute("Notification", "Product added successfully!");
