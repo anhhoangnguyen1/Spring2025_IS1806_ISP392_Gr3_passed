@@ -187,7 +187,7 @@
                         // Kiểm tra xem response có phải JSON hợp lệ không
                         if (typeof response !== 'object' || !response.zones || !response.totalRecords) {
                             console.error("Invalid JSON response:", response);
-                            $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">Error: Invalid response from server</td></tr>');
+                            $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">No zone found</td></tr>');
                             return;
                         }
                         totalRecords = response.totalRecords;

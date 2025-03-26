@@ -87,13 +87,6 @@ public class controllerZones extends HttpServlet {
             pageSize = 5; // Mặc định nếu không parse được
         }
 
-        // Giới hạn staff chỉ xem danh sách zones
-        if ("staff".equals(role) && !"zones".equals(service)) {
-            session.setAttribute("Notification", "You do not have permission to perform this action.");
-            response.sendRedirect("zones?service=zones");
-            return;
-        }
-
         switch (service) {
             case "zones": {
                 String keyword = request.getParameter("searchZone");
