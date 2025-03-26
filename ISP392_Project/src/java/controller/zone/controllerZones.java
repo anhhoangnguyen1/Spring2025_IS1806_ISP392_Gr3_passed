@@ -12,10 +12,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class controllerZones extends HttpServlet {
 
@@ -715,26 +718,16 @@ public class controllerZones extends HttpServlet {
             String note = request.getParameter("note");
             String checkedBy = fullName;
 
-            // Kiểm tra các tham số
-            if (zoneIdParam == null || zoneIdParam.trim().isEmpty()
-                    || productIdParam == null || productIdParam.trim().isEmpty()
-                    || systemQuantityParam == null || systemQuantityParam.trim().isEmpty()
-                    || actualQuantityParam == null || actualQuantityParam.trim().isEmpty()) {
-                session.setAttribute("Notification", "Missing required fields.");
-                response.sendRedirect("zones?service=zones");
-                return;
-            }
-
             try {
                 int zoneId = Integer.parseInt(zoneIdParam);
                 int productId = Integer.parseInt(productIdParam);
                 int systemQuantity = Integer.parseInt(systemQuantityParam);
                 int actualQuantity = Integer.parseInt(actualQuantityParam);
 
-                // Thêm bản ghi kiểm kho
+                System.out.println("Submitting stock check: zoneId=" + zoneId + ", productId=" + productId + ", systemQuantity=" + systemQuantity + ", actualQuantity=" + actualQuantity);
+
                 zoneDAO.addStockCheck(zoneId, productId, systemQuantity, actualQuantity, checkedBy, note);
 
-                // Tùy chọn: Cập nhật số lượng sản phẩm
                 if (actualQuantity != systemQuantity) {
                     zoneDAO.updateProductQuantity(productId, actualQuantity);
                 }
@@ -742,8 +735,11 @@ public class controllerZones extends HttpServlet {
                 session.setAttribute("Notification", "Stock check completed successfully.");
                 response.sendRedirect("zones?service=viewStockCheckHistory&zone_id=" + zoneId);
             } catch (NumberFormatException e) {
-                session.setAttribute("Notification", "Invalid input format.");
+                session.setAttribute("Notification", "Invalid input format: " + e.getMessage());
                 response.sendRedirect("zones?service=zones");
+            } catch (SQLException e) {
+                session.setAttribute("Notification", "Error saving stock check: " + e.getMessage());
+                response.sendRedirect("zones?service=stockCheck&zone_id=" + zoneIdParam);
             }
         }
     }

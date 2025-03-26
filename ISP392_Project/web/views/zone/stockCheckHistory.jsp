@@ -24,6 +24,7 @@
                     <th>Checked By</th>
                     <th>Check Date</th>
                     <th>Note</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,10 +38,11 @@
                         <td>${entry.checked_by}</td>
                         <td>${entry.check_date}</td>
                         <td>${entry.note}</td>
+                        <td>${entry.status}</td>
                     </tr>
                 </c:forEach>
                 <c:if test="${empty stockCheckHistory}">
-                    <tr><td colspan="8">No stock check history available.</td></tr>
+                    <tr><td colspan="9">No stock check history available.</td></tr>
                 </c:if>
             </tbody>
         </table>
@@ -50,4 +52,3 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
