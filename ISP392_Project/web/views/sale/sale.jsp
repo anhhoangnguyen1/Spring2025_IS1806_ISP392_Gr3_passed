@@ -205,18 +205,19 @@
                 </div>
 
                 <div class="cart-actions">
-<!--                    <button class="btn btn-secondary me-2 d-flex align-items-center">
-                        <i class="bi bi-lightning me-1"></i> Bán nhanh
-                    </button>-->
+                    <!--                    <button class="btn btn-secondary me-2 d-flex align-items-center">
+                                            <i class="bi bi-lightning me-1"></i> Bán nhanh
+                                        </button>
+                    -->
 
                     <button class="btn btn-primary me-2 d-flex align-items-center" id="checkoutBtn2">
                         <i class="bi bi-bag me-1"></i> Bán
                     </button>
 
-<!--                    <button class="btn btn-outline-secondary d-flex align-items-center">
-                        <i class="bi bi-truck me-1"></i> Bán giao hàng
-                    </button>
--->
+                    <!--                    <button class="btn btn-outline-secondary d-flex align-items-center">
+                                            <i class="bi bi-truck me-1"></i> Bán giao hàng
+                                        </button>
+                    -->
 
                     <!-- Thêm form ẩn để gửi dữ liệu thanh toán -->
                     <form id="checkoutForm2" action="sale" method="post" style="display: none;">
@@ -243,7 +244,7 @@
                                id="customerSearchInput" 
                                autocomplete="off">
                         <div id="customerSearchResults"></div>
-                        <button class="btn btn-outline-secondary">
+                        <button class="btn btn-outline-secondary" onclick="window.location.href = '${pageContext.request.contextPath}/Customers?service=addCustomer'">
                             <i class="bi bi-plus"></i>
                         </button>
                         <button class="btn btn-outline-secondary">
@@ -291,45 +292,45 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
         <script src="${pageContext.request.contextPath}/views/sale/script.js"></script>
-        
+
         <!-- Thêm thư viện iziToast -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
-        
+
         <!-- Toast message script using iziToast -->
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Toast message display
-                var toastMessage = "${sessionScope.toastMessage}";
-                var toastType = "${sessionScope.toastType}";
-                
-                if (toastMessage && toastMessage.trim() !== "") {
-                    console.log("Toast message found:", toastMessage, "Type:", toastType);
-                    
-                    // Use iziToast
-                    if (toastType === "success") {
-                        iziToast.success({
-                            title: 'Thành công',
-                            message: toastMessage,
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    } else {
-                        iziToast.error({
-                            title: 'Lỗi',
-                            message: toastMessage,
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }
-                    
-                    // Clear toast message from session
-                    fetch('${pageContext.request.contextPath}/sale?action=clearToast', {
-                        method: 'POST'
-                    }).catch(error => {
-                        console.error('Error clearing toast:', error);
-                    });
-                }
-            });
+                            document.addEventListener('DOMContentLoaded', function () {
+                                // Toast message display
+                                var toastMessage = "${sessionScope.toastMessage}";
+                                var toastType = "${sessionScope.toastType}";
+
+                                if (toastMessage && toastMessage.trim() !== "") {
+                                    console.log("Toast message found:", toastMessage, "Type:", toastType);
+
+                                    // Use iziToast
+                                    if (toastType === "success") {
+                                        iziToast.success({
+                                            title: 'Thành công',
+                                            message: toastMessage,
+                                            position: 'topRight',
+                                            timeout: 5000
+                                        });
+                                    } else {
+                                        iziToast.error({
+                                            title: 'Lỗi',
+                                            message: toastMessage,
+                                            position: 'topRight',
+                                            timeout: 5000
+                                        });
+                                    }
+
+                                    // Clear toast message from session
+                                    fetch('${pageContext.request.contextPath}/sale?action=clearToast', {
+                                        method: 'POST'
+                                    }).catch(error => {
+                                        console.error('Error clearing toast:', error);
+                                    });
+                                }
+                            });
         </script>
     </body>
 </html>
