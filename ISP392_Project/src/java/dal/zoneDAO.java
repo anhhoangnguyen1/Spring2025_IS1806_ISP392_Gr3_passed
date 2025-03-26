@@ -87,50 +87,31 @@ public class zoneDAO extends DBContext {
 
     // Đếm số lượng zones
     public int countZones(String keyword, boolean showInactive, Integer storeId) {
-        String sql;
-        if (keyword == null || keyword.trim().isEmpty()) {
-            sql = "SELECT COUNT(*) FROM Zones WHERE isDeleted = 0";
-            if (!showInactive) {
-                sql += " AND status = 'Active'";
-            }
+        String sql = "SELECT COUNT(*) "
+                + "FROM Zones z "
+                + "LEFT JOIN Products p ON z.product_id = p.id "
+                + "WHERE (LOWER(z.name) LIKE ? OR LOWER(p.name) LIKE ?) "
+                + (storeId != null ? "AND z.store_id = ? " : "")
+                + (showInactive ? "" : "AND z.status = 'Active'");
+        try {
+            connection = new DBContext().getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+
+            int paramIndex = 1;
+            // Chuẩn hóa từ khóa tìm kiếm thành chữ thường và thêm ký tự % cho LIKE
+            String searchKeyword = "%" + keyword.toLowerCase() + "%";
+            ps.setString(paramIndex++, searchKeyword); // Tìm kiếm Zone Name
+            ps.setString(paramIndex++, searchKeyword); // Tìm kiếm Product Name
             if (storeId != null) {
-                sql += " AND store_id = ?";
+                ps.setInt(paramIndex++, storeId);
             }
-            try (PreparedStatement st = connection.prepareStatement(sql)) {
-                int paramIndex = 1;
-                if (storeId != null) {
-                    st.setInt(paramIndex++, storeId);
-                }
-                try (ResultSet rs = st.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt(1);
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
             }
-        } else {
-            sql = "SELECT COUNT(*) FROM Zones WHERE name LIKE ? AND isDeleted = 0";
-            if (!showInactive) {
-                sql += " AND status = 'Active'";
-            }
-            if (storeId != null) {
-                sql += " AND store_id = ?";
-            }
-            try (PreparedStatement st = connection.prepareStatement(sql)) {
-                int paramIndex = 1;
-                st.setString(paramIndex++, "%" + keyword + "%");
-                if (storeId != null) {
-                    st.setInt(paramIndex++, storeId);
-                }
-                try (ResultSet rs = st.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt(1);
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return 0;
     }
@@ -153,7 +134,7 @@ public class zoneDAO extends DBContext {
                 + "WHERE z.isDeleted = 0 ";
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql += "AND z.name LIKE ? ";
+            sql += "AND (LOWER(z.name) LIKE ? OR LOWER(p.name) LIKE ?) ";
         }
 
         if (!showInactive) {
@@ -171,7 +152,9 @@ public class zoneDAO extends DBContext {
             int paramIndex = 1;
 
             if (keyword != null && !keyword.trim().isEmpty()) {
-                st.setString(paramIndex++, "%" + keyword + "%");
+                String searchKeyword = "%" + keyword.toLowerCase() + "%";
+                st.setString(paramIndex++, searchKeyword); // Tìm kiếm Zone Name
+                st.setString(paramIndex++, searchKeyword); // Tìm kiếm Product Name
             }
 
             if (storeId != null) {

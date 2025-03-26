@@ -808,6 +808,34 @@ public class productsDAO extends DBContext {
         }
     }
 
+    public Products getProductByIdSimple(int id) {
+        String sql = "SELECT * FROM Products WHERE id = ? AND isDeleted = 0";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return Products.builder()
+                        .productId(rs.getInt("id"))
+                        .name(rs.getString("name"))
+                        .image(rs.getString("image"))
+                        .price(rs.getBigDecimal("price"))
+                        .quantity(rs.getInt("quantity"))
+                        .description(rs.getString("description"))
+                        .createdAt(rs.getDate("created_at"))
+                        .createdBy(rs.getString("created_by"))
+                        .deleteAt(rs.getDate("deletedAt"))
+                        .deleteBy(rs.getString("deleteBy"))
+                        .isDeleted(rs.getBoolean("isDeleted"))
+                        .updatedAt(rs.getDate("updated_at"))
+                        .status(rs.getString("status"))
+                        .build();
+            }
+        } catch (SQLException e) {
+            logSevere("Error fetching product with ID: " + id, e);
+        }
+        return null;
+    }
+
     public static void main(String[] args) {
         productsDAO productsDAO = new productsDAO();
 

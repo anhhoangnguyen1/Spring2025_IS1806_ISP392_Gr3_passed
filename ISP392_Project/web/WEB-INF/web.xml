@@ -44,10 +44,6 @@
         <servlet-name>controllerZones</servlet-name>
         <servlet-class>controller.zone.controllerZones</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>controllerStockCheck</servlet-name>
-        <servlet-class>controller.stockcheck.controllerStockCheck</servlet-class>
-    </servlet>
     <servlet-mapping>
         <servlet-name>loginServlet</servlet-name>
         <url-pattern>/views/loginServlet</url-pattern>
@@ -75,9 +71,5 @@
     <servlet-mapping>
         <servlet-name>controllerZones</servlet-name>
         <url-pattern>/zones</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>controllerStockCheck</servlet-name>
-        <url-pattern>/stockcheck</url-pattern>
     </servlet-mapping>
 </web-app>

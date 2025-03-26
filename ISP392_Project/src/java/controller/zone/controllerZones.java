@@ -157,7 +157,7 @@ public class controllerZones extends HttpServlet {
                 } catch (NumberFormatException ignored) {
                 }
 
-// Sử dụng showInactive từ session nếu không có trong request
+                // Sử dụng showInactive từ session nếu không có trong request
                 showInactiveParam = request.getParameter("showInactive");
                 showInactive = showInactiveParam != null ? "true".equalsIgnoreCase(showInactiveParam) : (Boolean) session.getAttribute("showInactive");
                 session.setAttribute("showInactive", showInactive); // Cập nhật session
