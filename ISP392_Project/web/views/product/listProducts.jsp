@@ -49,7 +49,7 @@
         </form>
 
         <!-- Other content comes after this -->
-       
+
         <div class="action-bar d-flex align-items-center">
             <c:if test="${sessionScope.role == 'owner'}">
                 <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#addProductModal">
@@ -133,9 +133,12 @@
                                         </td>
                                         <td class="sticky-col1">
                                             <div class="btn-group">
-                                                <a class="btn btn-outline-info" href="Products?service=getProductById&product_id=${product.productId}">
-                                                    <i class="fas fa-info-circle"></i>
-                                                </a>
+                                                <c:if test="${sessionScope.role == 'owner' or sessionScope.role == 'staff'}">
+                                                    <a class="btn btn-outline-info" href="Products?service=getProductById&product_id=${product.productId}">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </a>
+                                                </c:if>
+
                                                 <c:if test="${sessionScope.role == 'owner'}">
                                                     <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#editProductModal${product.productId}">
                                                         <i class="fas fa-edit"></i>

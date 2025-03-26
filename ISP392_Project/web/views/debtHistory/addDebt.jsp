@@ -46,6 +46,7 @@
                                 <input type="text" oninput="formatNumber(event)" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="amount" required />
                             </div>
                             <input type="hidden" name="balance" value="0.0"/>
+                            
                             <div class="form-group">
                                 <label>Image</label>
                                 <input  type="file" name="image">
