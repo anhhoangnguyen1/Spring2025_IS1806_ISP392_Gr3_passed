@@ -465,8 +465,8 @@ public class controllerZones extends HttpServlet {
                 break;
             }
             case "stockCheck": {
-                String storeIDStr = (String) session.getAttribute("storeID");
-                int storeID = Integer.parseInt(storeIDStr);
+                storeIDStr = (String) session.getAttribute("storeID");
+                storeID = Integer.parseInt(storeIDStr);
                 String zoneIdParam = request.getParameter("zone_id");
                 if (zoneIdParam == null || zoneIdParam.trim().isEmpty()) {
                     session.setAttribute("Notification", "Invalid or missing zone ID.");
@@ -611,7 +611,6 @@ public class controllerZones extends HttpServlet {
             }            // Chỉ đếm các zone thuộc store hiện tại
             
 
-            boolean showInactive = request.getParameter("showInactive") != null ? "true".equalsIgnoreCase(request.getParameter("showInactive")) : true;
             int total = zoneDAO.countZones("", showInactive, storeId); // Cập nhật để gọi đúng phương thức
 
             int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
