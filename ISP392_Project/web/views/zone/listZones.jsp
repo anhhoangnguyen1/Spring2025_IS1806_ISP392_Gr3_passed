@@ -183,188 +183,184 @@
             const role = '${sessionScope.role}';
             let showInactive = ${requestScope.showInactive != null ? requestScope.showInactive : true};
             function searchZones(keyword, page, sortBy, sortOrder, pageSize, showInactive) {
-            $.ajax({
-            url: '<%= request.getContextPath() %>/zones',
+                $.ajax({
+                    url: '<%= request.getContextPath() %>/zones',
                     type: 'GET',
                     data: {
-                    service: 'searchZonesAjax',
-                            keyword: keyword,
-                            index: page,
-                            sortBy: sortBy,
-                            sortOrder: sortOrder,
-                            pageSize: pageSize,
-                            showInactive: showInactive
+                        service: 'searchZonesAjax',
+                        keyword: keyword,
+                        index: page,
+                        sortBy: sortBy,
+                        sortOrder: sortOrder,
+                        pageSize: pageSize,
+                        showInactive: showInactive
                     },
                     success: function (response) {
-                    console.log("AJAX response:", response);
-                    if (typeof response !== 'object' || !response.zones || !response.totalRecords) {
-                    console.error("Invalid JSON response:", response);
-                    $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">No zone found</td></tr>');
-                    return;
-                    }
-                    totalRecords = response.totalRecords;
-                    updateTable(response.zones, response.endPage, response.index, keyword);
-                    updatePagination(response.endPage, page, keyword);
-                    updateShowingInfo(pageSize, response.totalRecords);
+                        console.log("AJAX response:", response);
+                        if (typeof response !== 'object' || !response.zones || !response.totalRecords) {
+                            console.error("Invalid JSON response:", response);
+                            $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">No zone found</td></tr>');
+                            return;
+                        }
+                        totalRecords = response.totalRecords;
+                        updateTable(response.zones, response.endPage, response.index, keyword);
+                        updatePagination(response.endPage, page, keyword);
+                        updateShowingInfo(pageSize, response.totalRecords);
                     },
                     error: function (xhr, status, error) {
-                    console.error("AJAX error:", status, error);
-                    $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">Error fetching zones</td></tr>');
+                        console.error("AJAX error:", status, error);
+                        $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">Error fetching zones</td></tr>');
                     }
-            });
+                });
             }
 
             function loadDefaultZones() {
-            const currentIndex = ${index};
-            console.log("Loading default zones with index:", currentIndex);
-            searchZones('', currentIndex, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                const currentIndex = ${index};
+                console.log("Loading default zones with index:", currentIndex);
+                searchZones('', currentIndex, currentSortBy, currentSortOrder, currentPageSize, showInactive);
             }
 
             function updateTable(zones, endPage, currentIndex, keyword) {
-            console.log("Zones data:", zones);
-            const tbody = $('#zoneTableBody');
-            tbody.empty();
-            if (zones.length === 0) {
-            tbody.append('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">No zones found</td></tr>');
-            } else {
-            zones.forEach(function (zone) {
-            console.log("Processing zone:", zone);
-            let row = '<tr>' +
-                    '<td>' + zone.id + '</td>' +
-                    '<td style="text-align: left;">' + zone.name + '</td>' +
-                    '<td>' + (zone.storeId ? zone.storeId.id : 'null') + '</td>' +
-                    '<td>' + (zone.productName ? zone.productName : 'N/A') + '</td>' +
-                    '<td>' + zone.createdBy + '</td>' +
-                    '<td>' + zone.status + '</td>';
-            if (role === 'owner') {
-            row += '<td>' +
-                    '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">View</a> ' +
-                    '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">Edit</a>' +
-                    '<a href="<%= request.getContextPath() %>/zones?service=viewStockCheckHistory&zone_id=' + zone.id" class="btn btn - outline - info">History</a> ' +
-                    '</td>';
-            }
-            if (role === 'staff') {
-            row += '<td>' +
-                    '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">View</a> ' +
-                    '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">Edit</a>' +
-                    '<a href="<%= request.getContextPath() %>/zones?service=stockCheck&zone_id=' + zone.id" class="btn btn - outline - success">Stock Check</a> ' +
-                    '</td>';
-            }
-            row += '</tr>';
-            tbody.append(row);
-            });
-            }
+                console.log("Zones data:", zones);
+                const tbody = $('#zoneTableBody');
+                tbody.empty();
+                if (!zones || zones.length === 0) {
+                    tbody.append('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">No zones found</td></tr>');
+                } else {
+                    zones.forEach(function (zone) {
+                        console.log("Processing zone:", zone);
+                        let row = '<tr>' +
+                                '<td>' + (zone.id || '') + '</td>' +
+                                '<td style="text-align: left;">' + (zone.name || '') + '</td>' +
+                                '<td>' + (zone.storeId && zone.storeId.id ? zone.storeId.id : 'null') + '</td>' +
+                                '<td>' + (zone.productName ? zone.productName : 'N/A') + '</td>' +
+                                '<td>' + (zone.createdBy || '') + '</td>' +
+                                '<td>' + (zone.status || '') + '</td>';
 
-            updatePagination(endPage, currentIndex, keyword);
+                        if (role === 'owner') {
+                            row += '<td>' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + (zone.id || '') + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">View</a> ' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + (zone.id || '') + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">Edit</a> ' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=viewStockCheckHistory&zone_id=' + (zone.id || '') + '" class="btn btn-outline-info">History</a>' +
+                                    '</td>';
+                        } else if (role === 'staff') {
+                            row += '<td>' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=stockCheck&zone_id=' + (zone.id || '') + '" class="btn btn-outline-success">Stock Check</a>' +
+                                    '</td>';
+                        }
+                        row += '</tr>';
+                        tbody.append(row);
+                    });
+                }
+                updatePagination(endPage, currentIndex, keyword);
             }
-
             function updatePagination(endPage, currentIndex, keyword) {
-            const pagination = $('#pagination ul');
-            pagination.empty();
-            if (currentIndex > 1) {
-            pagination.append(
-                    '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex - 1) + '"><i class="fa fa-angle-left"></i></a></li>'
-                    );
-            }
+                const pagination = $('#pagination ul');
+                pagination.empty();
+                if (currentIndex > 1) {
+                    pagination.append(
+                            '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex - 1) + '"><i class="fa fa-angle-left"></i></a></li>'
+                            );
+                }
 
-            pagination.append(
-                    '<li class="page-item ' + (currentIndex === 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>'
-                    );
-            if (currentIndex > 3) {
-            pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-            }
+                pagination.append(
+                        '<li class="page-item ' + (currentIndex === 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>'
+                        );
+                if (currentIndex > 3) {
+                    pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                }
 
-            for (let page = currentIndex - 1; page <= currentIndex + 1; page++) {
-            if (page > 1 && page < endPage) {
-            pagination.append(
-                    '<li class="page-item ' + (currentIndex === page ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + page + '">' + page + '</a></li>'
-                    );
-            }
-            }
+                for (let page = currentIndex - 1; page <= currentIndex + 1; page++) {
+                    if (page > 1 && page < endPage) {
+                        pagination.append(
+                                '<li class="page-item ' + (currentIndex === page ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + page + '">' + page + '</a></li>'
+                                );
+                    }
+                }
 
-            if (currentIndex < endPage - 2) {
-            pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-            }
+                if (currentIndex < endPage - 2) {
+                    pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                }
 
-            if (endPage > 1) {
-            pagination.append(
-                    '<li class="page-item ' + (currentIndex === endPage ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + endPage + '">' + endPage + '</a></li>'
-                    );
-            }
+                if (endPage > 1) {
+                    pagination.append(
+                            '<li class="page-item ' + (currentIndex === endPage ? 'active' : '') + '"><a class="page-link page-nav" data-page="' + endPage + '">' + endPage + '</a></li>'
+                            );
+                }
 
-            if (currentIndex < endPage) {
-            pagination.append(
-                    '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex + 1) + '"><i class="fa fa-angle-right"></i></a></li>'
-                    );
-            }
+                if (currentIndex < endPage) {
+                    pagination.append(
+                            '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex + 1) + '"><i class="fa fa-angle-right"></i></a></li>'
+                            );
+                }
 
-            $('.page-nav').on('click', function (e) {
-            e.preventDefault();
-            const page = $(this).data('page');
-            searchZones(keyword, page, currentSortBy, currentSortOrder, currentPageSize, showInactive);
-            });
+                $('.page-nav').on('click', function (e) {
+                    e.preventDefault();
+                    const page = $(this).data('page');
+                    searchZones(keyword, page, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                });
             }
 
             function updateShowingInfo(pageSize, totalRecords) {
-            $('.showing-info').html('Showing: <select id="pageSizeSelect">' +
-                    '<option value="5" ' + (pageSize == 5 ? 'selected' : '') + '>5</option>' +
-                    '<option value="10" ' + (pageSize == 10 ? 'selected' : '') + '>10</option>' +
-                    '<option value="20" ' + (pageSize == 20 ? 'selected' : '') + '>20</option>' +
-                    '</select> of ' + totalRecords + ' zones');
-            $('#pageSizeSelect').on('change', function () {
-            currentPageSize = parseInt($(this).val());
-            searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
-            });
+                $('.showing-info').html('Showing: <select id="pageSizeSelect">' +
+                        '<option value="5" ' + (pageSize == 5 ? 'selected' : '') + '>5</option>' +
+                        '<option value="10" ' + (pageSize == 10 ? 'selected' : '') + '>10</option>' +
+                        '<option value="20" ' + (pageSize == 20 ? 'selected' : '') + '>20</option>' +
+                        '</select> of ' + totalRecords + ' zones');
+                $('#pageSizeSelect').on('change', function () {
+                    currentPageSize = parseInt($(this).val());
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                });
             }
 
             function updateSortIcons() {
-            $('.sortable').each(function () {
-            const sortBy = $(this).data('sort');
-            const icon = $(this).find('i');
-            if (sortBy === currentSortBy) {
-            icon.removeClass('fa-sort-up fa-sort-down');
-            icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
-            } else {
-            icon.removeClass('fa-sort-up fa-sort-down');
-            icon.addClass('fa-sort-down');
-            }
-            });
+                $('.sortable').each(function () {
+                    const sortBy = $(this).data('sort');
+                    const icon = $(this).find('i');
+                    if (sortBy === currentSortBy) {
+                        icon.removeClass('fa-sort-up fa-sort-down');
+                        icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
+                    } else {
+                        icon.removeClass('fa-sort-up fa-sort-down');
+                        icon.addClass('fa-sort-down');
+                    }
+                });
             }
 
             $(document).ready(function () {
-            $('#searchInput').on('keyup', function () {
-            clearTimeout(timeout);
-            const keyword = $(this).val().trim();
-            timeout = setTimeout(function () {
-            searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
-            }, 300);
-            });
-            $('.sortable').on('click', function () {
-            const sortBy = $(this).data('sort');
-            const keyword = $('#searchInput').val().trim();
-            if (currentSortBy === sortBy) {
-            currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
-            } else {
-            currentSortBy = sortBy;
-            currentSortOrder = 'ASC';
-            }
-            updateSortIcons();
-            searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
-            });
-            $('#clearBtn').on('click', function () {
-            $('#searchInput').val('');
-            searchZones('', 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
-            });
-            $('#pageSizeSelect').on('change', function () {
-            currentPageSize = parseInt($(this).val());
-            searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
-            });
-            $('#showInactive').on('change', function () {
-            showInactive = $(this).is(':checked');
-            searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
-            });
-            updateSortIcons();
-            loadDefaultZones();
+                $('#searchInput').on('keyup', function () {
+                    clearTimeout(timeout);
+                    const keyword = $(this).val().trim();
+                    timeout = setTimeout(function () {
+                        searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                    }, 300);
+                });
+                $('.sortable').on('click', function () {
+                    const sortBy = $(this).data('sort');
+                    const keyword = $('#searchInput').val().trim();
+                    if (currentSortBy === sortBy) {
+                        currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
+                    } else {
+                        currentSortBy = sortBy;
+                        currentSortOrder = 'ASC';
+                    }
+                    updateSortIcons();
+                    searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                });
+                $('#clearBtn').on('click', function () {
+                    $('#searchInput').val('');
+                    searchZones('', 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                });
+                $('#pageSizeSelect').on('change', function () {
+                    currentPageSize = parseInt($(this).val());
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                });
+                $('#showInactive').on('change', function () {
+                    showInactive = $(this).is(':checked');
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                });
+                updateSortIcons();
+                loadDefaultZones();
             });
         </script>
     </body>
