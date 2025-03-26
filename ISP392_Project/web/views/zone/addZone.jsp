@@ -151,15 +151,7 @@
                             <label for="description">Description</label>
                             <textarea class="form-control" name="description" rows="3">${requestScope.description}</textarea>
                         </div>
-                        <!-- Không cần trường Store ID -->
-                        <div class="form-group">
-                            <label for="status">Status</label>
-                            <select class="form-control" name="status" required>
-                                <option value="Active" ${requestScope.status == 'Active' ? 'selected' : ''}>Active</option>
-                                <option value="Inactive" ${requestScope.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
+                        <div class="form-group" style="display:  none">
                             <label for="createdBy">Created By</label>
                             <span class="form-control" id="createdBy">${fullName}</span>
                         </div>

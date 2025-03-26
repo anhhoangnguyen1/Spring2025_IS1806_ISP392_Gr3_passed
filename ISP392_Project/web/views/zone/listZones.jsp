@@ -42,6 +42,10 @@
                 margin-bottom: 10px;
                 font-size: 14px;
             }
+            .checkbox-container {
+                margin-top: 10px;
+                margin-bottom: -15px;
+            }
         </style>
     </head>
     <body>
@@ -68,6 +72,11 @@
                     </a>
                 </div>
             </c:if>
+            <!-- Checkbox Show Inactive Zones -->
+            <div class="checkbox-container">
+                <input type="checkbox" id="showInactive" name="showInactive" ${showInactive ? 'checked' : ''}>
+                <label for="showInactive">Show Inactive Zones</label>
+            </div>
             <div class="showing-info" style="margin-top: 10px; margin-bottom: -15px">
                 Showing: 
                 <select id="pageSizeSelect">
@@ -91,7 +100,9 @@
                             <th>Product Name</th>
                             <th>Created By</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <c:if test="${sessionScope.role == 'owner'}">
+                                <th>Actions</th>
+                            </c:if>
                         </tr>
                     </thead>
                     <tbody id="zoneTableBody">
@@ -103,12 +114,12 @@
                                 <td>${zone.productId != null ? zone.productId.name : 'null'}</td>
                                 <td>${zone.createdBy}</td>
                                 <td>${zone.status}</td>
-                                <td>
-                                    <c:if test="${sessionScope.role == 'owner'}">
+                                <c:if test="${sessionScope.role == 'owner'}">
+                                    <td>
                                         <a href="${pageContext.request.contextPath}/zones?service=getZoneById&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">View</a>
                                         <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">Edit</a>
-                                    </c:if>
-                                </td>
+                                    </td>
+                                </c:if>
                             </tr>
                         </c:forEach>
                     </tbody>
@@ -118,21 +129,21 @@
                 <ul class="pagination">
                     <c:if test="${index > 1}">
                         <li class="page-item">
-                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}">
+                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${showInactive}">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         </li>
                     </c:if>
                     <li class="page-item ${index == 1 ? 'active' : ''}">
-                        <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}">1</a>
+                        <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${showInactive}">1</a>
                     </li>
                     <c:if test="${index > 3}">
                         <li class="page-item disabled"><span class="page-link">...</span></li>
-                        </c:if>
-                        <c:forEach begin="${index - 1}" end="${index + 1}" var="page">
-                            <c:if test="${page > 1 && page < endPage}">
+                    </c:if>
+                    <c:forEach begin="${index - 1}" end="${index + 1}" var="page">
+                        <c:if test="${page > 1 && page < endPage}">
                             <li class="page-item ${index == page ? 'active' : ''}">
-                                <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}">
+                                <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${showInactive}">
                                     ${page}
                                 </a>
                             </li>
@@ -140,17 +151,17 @@
                     </c:forEach>
                     <c:if test="${index < endPage - 2}">
                         <li class="page-item disabled"><span class="page-link">...</span></li>
-                        </c:if>
-                        <c:if test="${endPage > 1}">
+                    </c:if>
+                    <c:if test="${endPage > 1}">
                         <li class="page-item ${index == endPage ? 'active' : ''}">
-                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}">
+                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${showInactive}">
                                 ${endPage}
                             </a>
                         </li>
                     </c:if>
                     <c:if test="${index < endPage}">
                         <li class="page-item">
-                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}">
+                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${showInactive}">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         </li>
@@ -169,8 +180,9 @@
             let currentPageSize = ${pageSize != null ? pageSize : 5};
             let totalRecords = ${totalRecords != null ? totalRecords : 0};
             const role = '${sessionScope.role}';
+            let showInactive = ${showInactive != null ? showInactive : true}; // Giá trị mặc định từ server
 
-            function searchZones(keyword, page, sortBy, sortOrder, pageSize) {
+            function searchZones(keyword, page, sortBy, sortOrder, pageSize, showInactive) {
                 $.ajax({
                     url: '<%= request.getContextPath() %>/zones',
                     type: 'GET',
@@ -180,11 +192,11 @@
                         index: page,
                         sortBy: sortBy,
                         sortOrder: sortOrder,
-                        pageSize: pageSize
+                        pageSize: pageSize,
+                        showInactive: showInactive
                     },
                     success: function (response) {
                         console.log("AJAX response:", response);
-                        // Kiểm tra xem response có phải JSON hợp lệ không
                         if (typeof response !== 'object' || !response.zones || !response.totalRecords) {
                             console.error("Invalid JSON response:", response);
                             $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">No zone found</td></tr>');
@@ -205,7 +217,7 @@
             function loadDefaultZones() {
                 const currentIndex = ${index};
                 console.log("Loading default zones with index:", currentIndex);
-                searchZones('', currentIndex, currentSortBy, currentSortOrder, currentPageSize);
+                searchZones('', currentIndex, currentSortBy, currentSortOrder, currentPageSize, showInactive);
             }
 
             function updateTable(zones, endPage, currentIndex, keyword) {
@@ -284,7 +296,7 @@
                 $('.page-nav').on('click', function (e) {
                     e.preventDefault();
                     const page = $(this).data('page');
-                    searchZones(keyword, page, currentSortBy, currentSortOrder, currentPageSize);
+                    searchZones(keyword, page, currentSortBy, currentSortOrder, currentPageSize, showInactive);
                 });
             }
 
@@ -296,7 +308,7 @@
                         '</select> of ' + totalRecords + ' zones');
                 $('#pageSizeSelect').on('change', function () {
                     currentPageSize = parseInt($(this).val());
-                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize);
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
                 });
             }
 
@@ -319,7 +331,7 @@
                     clearTimeout(timeout);
                     const keyword = $(this).val().trim();
                     timeout = setTimeout(function () {
-                        searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize);
+                        searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
                     }, 300);
                 });
 
@@ -333,17 +345,22 @@
                         currentSortOrder = 'ASC';
                     }
                     updateSortIcons();
-                    searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize);
+                    searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
                 });
 
                 $('#clearBtn').on('click', function () {
                     $('#searchInput').val('');
-                    loadDefaultZones();
+                    searchZones('', 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
                 });
 
                 $('#pageSizeSelect').on('change', function () {
                     currentPageSize = parseInt($(this).val());
-                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize);
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                });
+
+                $('#showInactive').on('change', function () {
+                    showInactive = $(this).is(':checked');
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
                 });
 
                 updateSortIcons();

@@ -76,6 +76,17 @@ public class controllerZones extends HttpServlet {
             sortOrder = "ASC";
         }
 
+        // Lấy giá trị showInactive từ request hoặc session
+        String showInactiveParam = request.getParameter("showInactive");
+        Boolean showInactive = (Boolean) session.getAttribute("showInactive");
+        if (showInactiveParam != null) {
+            showInactive = "true".equalsIgnoreCase(showInactiveParam);
+            session.setAttribute("showInactive", showInactive); // Lưu vào session
+        } else if (showInactive == null) {
+            showInactive = true; // Giá trị mặc định nếu chưa có trong session
+            session.setAttribute("showInactive", showInactive);
+        }
+
         // Lấy pageSize từ request, mặc định là 5
         int pageSize = 5;
         try {
@@ -93,8 +104,6 @@ public class controllerZones extends HttpServlet {
                 if (keyword == null) {
                     keyword = "";
                 }
-
-                boolean showInactive = request.getParameter("showInactive") != null ? "true".equalsIgnoreCase(request.getParameter("showInactive")) : true;
 
                 int index = 1;
                 try {
@@ -148,8 +157,10 @@ public class controllerZones extends HttpServlet {
                 } catch (NumberFormatException ignored) {
                 }
 
-                boolean showInactive = request.getParameter("showInactive") != null ? "true".equalsIgnoreCase(request.getParameter("showInactive")) : true;
-
+// Sử dụng showInactive từ session nếu không có trong request
+                showInactiveParam = request.getParameter("showInactive");
+                showInactive = showInactiveParam != null ? "true".equalsIgnoreCase(showInactiveParam) : (Boolean) session.getAttribute("showInactive");
+                session.setAttribute("showInactive", showInactive); // Cập nhật session
                 Integer storeId = storeIdStr != null ? Integer.parseInt(storeIdStr) : null;
 
                 int total = zoneDAO.countZones(keyword, showInactive, storeId);
@@ -583,8 +594,12 @@ public class controllerZones extends HttpServlet {
             zoneDAO.insertZone(zone);
 
             // Lấy showInactive từ request, mặc định là true
-            boolean showInactive = request.getParameter("showInactive") != null ? "true".equalsIgnoreCase(request.getParameter("showInactive")) : true;
-            int total = zoneDAO.countZones("", showInactive); // Cập nhật để gọi đúng phương thức
+// Lấy showInactive từ session thay vì request
+            Boolean showInactive = (Boolean) session.getAttribute("showInactive");
+            if (showInactive == null) {
+                showInactive = true; // Mặc định là true nếu chưa có
+            }            // Chỉ đếm các zone thuộc store hiện tại
+            int total = zoneDAO.countZones("", showInactive, storeId); // Thêm storeId để lọc theo store
             int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
 
             session.setAttribute("Notification", "Zone added successfully.");
