@@ -114,6 +114,7 @@ public class controllerStore extends HttpServlet {
         String username = (String) session.getAttribute("username");
         String service = request.getParameter("service");
         String role = (String) session.getAttribute("role");
+        String fullname = (String) session.getAttribute("fullName");
 
         // Kiểm tra phân quyền - chỉ owner mới có thể thực hiện các thao tác POST
         if (!"owner".equals(role)) {
@@ -203,6 +204,7 @@ public class controllerStore extends HttpServlet {
                 request.getRequestDispatcher("views/store/createStore.jsp").forward(request, response);
                 return;
             }
+            String creatorName = fullname; // Người tạo cửa hàng là username hiện tại
 
             // Tạo đối tượng store mới
             Stores store = new Stores();
@@ -211,6 +213,7 @@ public class controllerStore extends HttpServlet {
             store.setPhone(phone);
             store.setEmail(email);
             store.setStatus("Active");
+            store.setCreatedBy(creatorName); // Gán tên người tạo vào trường create_by
 
             // Thêm store vào database và lấy ID được tạo
             int newStoreId = storeDAO.createStore(store);

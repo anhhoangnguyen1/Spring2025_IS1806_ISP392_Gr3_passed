@@ -1,0 +1,317 @@
+<%-- 
+    Document   : productsList
+    Created on : Jan 30, 2025, 6:03:10 PM
+    Author     : phamh
+--%>
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css?v=1.0" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+        <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+        <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+        <div class="page-wrapper">
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <div class="hamburger-btn">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="logo">
+                        <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
+                    </div>
+                </div>
+
+
+                <div class="top-bar-right">
+                    <div class="mode-switch">
+                        <i class="fa-solid fa-moon"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+                    <div class="profile">
+                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
+                        <div class="profile-menu">
+                            <ul>
+                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
+                                <li><a href="/ISP392_Project/change-password"><i class="fa-solid fa-pen"></i> Change Password</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--   === Side Bar Starts ===   -->
+            <aside class="side-bar">
+                <!--   === Nav Bar Links Starts ===   -->
+                <span class="menu-label">MENU</span>
+                <ul class="navbar-links navbar-links-1">
+                    <li>
+                        <a href="/ISP392_Project/dashboard">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-house"></i>
+                            </span>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="/ISP392_Project/Products">
+                            <span class="nav-icon">
+                                <i class="fas fa-box"></i>
+                            </span>
+                            <span class="nav-text">Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/zones">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-table"></i>
+                            </span>
+                            <span class="nav-text">Zones</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Customers">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <span class="nav-text">Customers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="sale">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </span>
+                            <span class="nav-text">Invoices</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/ISP392_Project/Debts">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-money-bill"></i>
+                            </span>
+                            <span class="nav-text">Debts History</span>
+                        </a>
+                    </li>
+                    <li>
+                            <a href="/ISP392_Project/Stores">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-store"></i>
+                                </span>
+                                <span class="nav-text">Stores</span>
+                            </a>
+                        </li>
+                    <c:if test="${sessionScope.role == 'owner'}">
+                        
+                        <li>
+                            <a href="/ISP392_Project/Users">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </span>
+                                <span class="nav-text">Staffs</span>
+                            </a>
+                        </li>
+                    </c:if>
+                </ul>
+                <!--   === Nav Bar Links Ends ===   -->
+                <!--   === Side Bar Footer Starts ===   -->
+                <div class="sidebar-footer">
+                    <div class="settings">
+                        <span class="gear-icon">
+                            <i class="fa-solid fa-gear"></i>
+                        </span>
+                        <span class="text">Settings</span>
+                    </div>
+                    <div class="logoutBtn">
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
+                    </div>
+                </div>
+                <!--   === Side Bar Footer Ends ===   -->
+            </aside>
+            <!--   === Side Bar Ends ===   -->
+            <div class="contents">
+                <div class="panel-bar1">
+                    <a href="/ISP392_Project/Products" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-arrow-left"></i> Back
+                    </a>
+
+                    <h1>Products edit history</h1>
+                    <form action="${pageContext.request.contextPath}/Products" method="GET">
+                        <div class="search-box">
+                            <input type="hidden" name="service" value="searchProductsEditHistory" />
+                            <input type="text" class="input-box" name="browser"
+                                   placeholder="Search for products."
+                                   value="${name}" autocomplete="off" />
+
+                            <button type="button" class="clear-btn"
+                                    onclick="window.location.href = '${pageContext.request.contextPath}/Products?service=ProductsEditHistory'">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+
+                            <button type="submit" class="search-btn">
+                                <i class="fa-solid fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Other content comes after this -->
+
+                    <div class="action-bar d-flex align-items-center justify-content-end">
+                        <div class="btn-group">
+                            <!-- N�t Toggle Checkboxes -->
+                            <button type="button" class="btn btn-outline-primary" id="toggle-checkbox-btn" title="Show Checkboxes">
+                                <i class="fa-solid fa-list-check"></i>
+                            </button>
+                            <a class="btn btn-outline-danger checkbox-column" onclick="confirmDeleteSelected(event)" style="display: none;" title="Delete Selected">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <br>
+                    <div class="table-container">
+                        <form action="Products" method="POST">
+                            <table id="myTable" class="table table-striped table-hover table-bordered" style="color: var(--heading-clr);">
+                                <thead>
+                                    <tr>
+                                        <th class="checkbox-column" style="display: none; width: 20px">
+                                            <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" />
+                                        </th>
+                                        <th class="resizable" style="width: 50px" onclick="sortTable(1)">ID</th>
+                                        <th class="resizable" style="width: 150px" onclick="sortTable(2)">Name</th>
+                                        <th class="resizable" style="width: 150px" onclick="sortTable(3)">Image</th>
+                                        <th class="resizable" style="width: 70px" onclick="sortTable(4)">Price</th>
+                                        <th class="resizable" style="width: 70px" onclick="sortTable(5)">Zone name</th>
+                                        <th class="resizable" style="width: 85px" onclick="sortTable(6)">Quantity</th>
+                                        <th class="resizable" style="width: 400px" onclick="sortTable(7)">Description</th>
+                                        <th class="resizable" style="width: 150px" onclick="sortTable(8)">Created At</th>
+                                        <th class="resizable" style="width: 150px" onclick="sortTable(9)">Updated At</th>
+                                        <th class="resizable" style="width: 150px" onclick="sortTable(10)">Status</th>
+                                        <th class="sticky-col1">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myTable">
+                                    <c:choose>
+                                        <c:when test="${empty listHistory}">
+                                            <tr>
+                                                <td colspan="12" style="text-align: center; font-weight: bold; color: red;">
+                                                    No products found
+                                                </td>
+                                            </tr>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:forEach var="product" items="${listHistory}">
+                                                <tr>
+                                                    <td class="checkbox-column" style="display: none;">
+                                                        <input type="checkbox" name="selectedProducts" value="${product.productId}" class="product-checkbox" />
+                                                    </td>
+                                                    <td>${product.productId}</td>
+                                                    <td class="bold-row">${product.name}</td>
+                                                    <td>
+                                                        <img src="/ISP392_Project/views/product/images/${product.image}" class="myImg" style="width: 100px; height: 100px; object-fit: cover;" alt="Product Image" />
+                                                    </td>
+                                                    <td><fmt:formatNumber value="${product.price}" pattern="###,##0"/></td>
+                                                    <td>${product.zoneName}</td>
+                                                    <td>${product.quantity} Kg</td>
+                                                    <td>${product.description}</td>
+                                                    <td>${product.createdAt}</td>
+                                                    <td>${product.updatedAt}</td>
+                                                    <td>
+                                                        <h5>
+                                                            <div class="badge rounded-pill bg-secondary" style="color: white">${product.status}</div>
+                                                        </h5>
+                                                    </td>
+                                                    <td class="sticky-col1">
+                                                        <div class="btn-group">
+                                                            <a class="btn btn-outline-info" href="Products?service=getProductById&product_id=${product.productId}">
+                                                                <i class="fas fa-info-circle"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </tbody>
+                            </table>
+
+
+                        </form>
+
+                    </div>
+                    
+                    <form action="${pageContext.request.contextPath}/Products" method="POST">
+                        <input type="hidden" name="service" value="ProductsEditHistory" />
+                        <input type="hidden" name="index" value="${index}" />
+                        <span class="mr-2">Showing:</span>
+
+                        <select class="btn-outline-primary mr-lg-auto" id="pageSize" name="pageSize" onchange="this.form.submit()">
+                            <option value="5" ${pageSize == 5 ? 'selected' : ''}>5</option>
+                            <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                            <option value="15" ${pageSize == 15 ? 'selected' : ''}>15</option>
+                            <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+                        </select>
+
+                        <span>of ${totalProducts} products</span>
+                    </form>
+
+                    <div class="container d-flex justify-content-center mt-4" >
+                        <ul class="pagination" >
+                            <!-- Previous Page -->
+                            <c:if test="${index > 1}">
+                                <li class="page-item">
+                                    <form action="Products" method="POST" style="display: inline;">
+                                        <input type="hidden" name="service" value="ProductsEditHistory" />
+                                        <input type="hidden" name="index" value="${index - 1}" />
+                                        <button type="submit" class="page-link" ><<</button>
+                                    </form>
+                                </li>
+                            </c:if>
+
+                            <!-- Page Numbers -->
+
+                            <c:forEach begin="1" end="${endPage}" var="page">
+                                <li class="page-item ${index == page ? 'active' : ''}">
+                                    <form action="Products" method="POST" style="display: inline;">
+                                        <input type="hidden" name="service" value="ProductsEditHistory" />
+                                        <input type="hidden" name="index" value="${page}" />
+                                        <button type="submit" class="page-link">${page}</button>
+                                    </form>
+                                </li>
+                            </c:forEach>
+
+                            <!-- Next Page -->
+                            <c:if test="${index < endPage}">
+                                <li class="page-item">
+                                    <form action="Products" method="POST" style="display: inline;">
+                                        <input type="hidden" name="service" value="ProductsEditHistory" />
+                                        <input type="hidden" name="index" value="${index + 1}" />
+                                        <button type="submit" class="page-link">>></button>
+                                    </form>
+                                </li>
+                            </c:if>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+    </body>
+</html>

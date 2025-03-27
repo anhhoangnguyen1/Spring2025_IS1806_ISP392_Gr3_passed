@@ -155,20 +155,19 @@ const fileInput = document.getElementById("file");
 
 // Tìm kiếm trực quan
 $(document).ready(function () {
-    // Lưu trữ thời gian của sự kiện debounce
     var debounceTimeout;
     $("#myInput").on("keyup", function () {
         var value = $(this).val().toLowerCase();
-        // Hủy bỏ sự kiện cũ nếu còn đợi
         clearTimeout(debounceTimeout);
-        // Chạy sự kiện sau 500ms khi người dùng ngừng gõ
         debounceTimeout = setTimeout(function () {
-            $("#myTable tr").each(function () {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            $("#myTable tbody tr").each(function () {
+                var rowText = $(this).text().toLowerCase();
+                $(this).toggle(rowText.indexOf(value) > -1);
             });
-        }, 500);  // 500ms là thời gian debounce
+        }, 200); // Giảm debounce để phản hồi nhanh hơn
     });
 });
+
 
 function myFunction() {
     document.getElementById("myDropdown").classList.toggle("show");
@@ -266,50 +265,43 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-function sortTable(n) {
-    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    table = document.getElementById("myTable");
-    switching = true;
-    dir = "asc"; // Mặc định sắp xếp tăng dần
+function sortTable(columnIndex) {
+    var table = document.getElementById("myTable");
+    var tbody = table.getElementsByTagName("tbody")[0];
+    var rows = Array.from(tbody.rows);
 
-    // Lặp đến khi không còn phần tử cần hoán đổi
-    while (switching) {
-        switching = false;
-        rows = table.rows;
+    // Lấy trạng thái sắp xếp hiện tại
+    var dir = table.getAttribute("data-sort-dir-" + columnIndex) === "asc" ? "desc" : "asc";
 
-        // Lặp qua tất cả các hàng trừ hàng tiêu đề
-        for (i = 0; i < rows.length - 1; i++) {
-            shouldSwitch = false;
+    rows.sort(function (rowA, rowB) {
+        var cellA = rowA.cells[columnIndex]?.textContent.trim() || "";
+        var cellB = rowB.cells[columnIndex]?.textContent.trim() || "";
 
-            // Lấy dữ liệu của hai ô cần so sánh, bỏ qua cột đầu tiên (checkbox)
-            x = rows[i].getElementsByTagName("TD")[columnIndex];
-            y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
-
-            if (x && y) {
-                if (dir === "asc" && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                } else if (dir === "desc" && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
-            }
+        // Kiểm tra nếu là số
+        var numA = parseFloat(cellA.replace(/,/g, ""));
+        var numB = parseFloat(cellB.replace(/,/g, ""));
+        if (!isNaN(numA) && !isNaN(numB)) {
+            return dir === "asc" ? numA - numB : numB - numA;
         }
 
-        if (shouldSwitch) {
-            // Đổi chỗ hai hàng
-            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-            switching = true;
-            switchcount++;
-        } else {
-            if (switchcount === 0 && dir === "asc") {
-                dir = "desc";
-                switching = true;
-            }
+        // Kiểm tra nếu là ngày (YYYY-MM-DD hoặc DD/MM/YYYY)
+        var dateA = new Date(cellA);
+        var dateB = new Date(cellB);
+        if (!isNaN(dateA) && !isNaN(dateB)) {
+            return dir === "asc" ? dateA - dateB : dateB - dateA;
         }
-    }
+
+        // Sắp xếp chuỗi
+        return dir === "asc" ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+    });
+
+    // Xóa tbody cũ và thêm hàng đã sắp xếp
+    tbody.innerHTML = "";
+    rows.forEach(row => tbody.appendChild(row));
+
+    // Cập nhật trạng thái sắp xếp
+    table.setAttribute("data-sort-dir-" + columnIndex, dir);
 }
-
 
 
 function sortTable1(customerId, columnIndex) {

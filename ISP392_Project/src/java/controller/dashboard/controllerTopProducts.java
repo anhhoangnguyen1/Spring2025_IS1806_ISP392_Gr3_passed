@@ -121,7 +121,7 @@ public class controllerTopProducts extends HttpServlet {
         
         
         
-        int threshold = 1400; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
+        int threshold = 20; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
         List<Products> lowStockProducts = dao.getLowStockProducts(threshold);
         
         request.setAttribute("lowStockProducts", lowStockProducts);

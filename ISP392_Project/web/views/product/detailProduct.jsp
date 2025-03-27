@@ -81,7 +81,9 @@
                 </div>
             </div>
 
+            <!--   === Side Bar Starts ===   -->
             <aside class="side-bar">
+                <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
                     <li>
@@ -92,7 +94,7 @@
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="#">
+                    <li class="active">
                         <a href="/ISP392_Project/Products">
                             <span class="nav-icon">
                                 <i class="fas fa-box"></i>
@@ -101,7 +103,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/ISP392_Project/zones">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-table"></i>
                             </span>
@@ -117,7 +119,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="sale">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
@@ -132,18 +134,27 @@
                             <span class="nav-text">Debts History</span>
                         </a>
                     </li>
-                </ul>
-                <span class="menu-label">OWNER ZONE</span>
-                <ul class="navbar-links navbar-links-2">
                     <li>
-                        <a href="#">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-user-tie"></i>
-                            </span>
-                            <span class="nav-text">Staffs</span>
-                        </a>
-                    </li>
+                            <a href="/ISP392_Project/Stores">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-store"></i>
+                                </span>
+                                <span class="nav-text">Stores</span>
+                            </a>
+                        </li>
+                    <c:if test="${sessionScope.role == 'owner'}">
+                        
+                        <li>
+                            <a href="/ISP392_Project/Users">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </span>
+                                <span class="nav-text">Staffs</span>
+                            </a>
+                        </li>
+                    </c:if>
                 </ul>
+                <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
                     <div class="settings">
@@ -162,65 +173,92 @@
                 </div>
                 <!--   === Side Bar Footer Ends ===   -->
             </aside>
-            <div class="contents">
-                <div class="panel-bar1">
-                    <h2>Product Details</h2>
-                    <c:forEach var="product" items="${list}">
+            <!--   === Side Bar Ends ===   -->
+        </aside>
+        <div class="contents">
+            <div class="panel-bar1">
+                <h2>Product Details</h2>
+                <button class="btn btn-outline-secondary" onclick="window.history.back();">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
 
-                        <table>
-                            <tr>
-                                <th style="width: 50px">ID</th>
-                                <td>${product.productId}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Name</th>
-                                <td>${product.name}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Image</th>
-                                <td>
-                                    <img src="/ISP392_Project/views/product/images/${product.image}" class="product-image" alt="Product Image">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="width: 70px">Price</th>
-                                <td>${product.price}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 85px">Weight</th>
-                                <td>${product.quantity} Kg</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 400px">Description</th>
-                                <td>${product.description}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Created At</th>
-                                <td>${product.createdAt}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Updated At</th>
-                                <td>${product.updatedAt}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Status</th>
-                                <td>${product.status}</td>
-                            </tr>
-                            <tr>
-                                <th style="width: 150px">Action</th>
-                                <td class="action-buttons">
-                                    <a href="editProduct.jsp?id=<%= request.getAttribute("id") %>" class="edit">Edit</a>
-                                    <a href="deleteProduct?id=<%= request.getAttribute("id") %>" class="delete" onclick="return confirm('Are you sure?')">Delete</a>
-                                </td>
-                            </tr>
-                        </table>
-                    </c:forEach>
-                </div>
+                <c:forEach var="product" items="${list}">
+
+                    <table>
+                        <tr>
+                            <th style="width: 50px">ID</th>
+                            <td>${product.productId}</td>
+                        </tr>
+                        <tr>
+                            <th style="width: 150px">Name</th>
+                            <td>${product.name}</td>
+                        </tr>
+                        <tr>
+                            <th style="width: 150px">Image</th>
+                            <td>
+                                <img src="/ISP392_Project/views/product/images/${product.image}" class="myImg" 
+                                     style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;" 
+                                     alt="Product Image">
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th style="width: 70px">Price</th>
+                            <td>${product.price}</td>
+                        </tr>
+                        <tr>
+                            <th style="width: 85px">Weight</th>
+                            <td>${product.quantity} Kg</td>
+                        </tr>
+                        <tr>
+                            <th style="width: 400px">Description</th>
+                            <td>${product.description}</td>
+                        </tr>
+                        <tr>
+                            <th style="width: 150px">Created At</th>
+                            <td>${product.createdAt}</td>
+                        </tr>
+                        <tr>
+                            <th style="width: 150px">Updated At</th>
+                            <td>${product.updatedAt}</td>
+                        </tr>
+                        <tr>
+                            <th style="width: 150px">Status</th>
+                            <td>${product.status}</td>
+                        </tr>
+
+                    </table>
+                </c:forEach>
             </div>
         </div>
+    </div>
+    <div id="myModal" class="modalImage">
+        <span class="close">&times;</span>
+        <img class="modalImage-content" id="img01">
+        <div id="caption"></div>
+    </div>
 
-    </body>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+<script>
+                    $(".myImg").on("click", function () {
+                        var modal = $("#myModal");
+                        var modalImg = $("#img01");
+                        var captionText = $("#caption");
+
+                        modal.show();
+                        modalImg.attr("src", this.src);
+                        captionText.text(this.alt);
+                    });
+
+                    // Đóng modal khi bấm vào nền đen
+                    $("#myModal").on("click", function (e) {
+                        if (e.target === this) {
+                            $(this).hide();
+                        }
+                    });
+</script>
 </html>
