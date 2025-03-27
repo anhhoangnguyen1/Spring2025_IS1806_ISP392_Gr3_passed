@@ -17,29 +17,16 @@
                 width: 100%;
                 border-collapse: collapse;
             }
-            .btn-danger {
-                background-color: transparent;
-                color: red;
-                border: 1px solid red;
-                padding: 8px 16px;
-                text-align: center;
-            }
-            .btn-danger:hover {
-                background-color: red;
-                color: white;
-                border: 1px solid red;
-            }
             .sortable {
                 cursor: pointer;
             }
             .container.mt-4 {
-                position: relative; /* Đảm bảo container là phần tử cha để cố định search-box */
-                padding-top: 15px; /* Tạo khoảng trống cho search-box */
+                position: relative;
+                padding-top: 15px;
             }
-
             .search-box {
                 position: absolute;
-                top: 20px; /* Đặt cố định ở trên cùng của container */
+                top: 20px;
                 left: 50%;
                 transform: translateX(-50%);
                 width: 400px;
@@ -49,7 +36,15 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                z-index: 10; /* Đảm bảo search-box nằm trên các phần tử khác */
+                z-index: 10;
+            }
+            .showing-info {
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
+            .checkbox-container {
+                margin-top: 10px;
+                margin-bottom: -15px;
             }
         </style>
     </head>
@@ -65,15 +60,30 @@
             <div class="search-box">
                 <input type="hidden" name="service" value="zones" />
                 <input type="text" id="searchInput" class="input-box" name="searchZone"
-                       placeholder="Search for zones" value="${searchZone}" autocomplete="off" />
+                       placeholder="Search by Zone or Product Name" value="${searchZone}" autocomplete="off" />
                 <button type="button" class="clear-btn" id="clearBtn">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             <div class="action-bar d-flex align-items-center">
-                <a href="${pageContext.request.contextPath}/zones?service=addZone" class="btn btn-outline-primary mr-lg-auto">
-                    Add Zone
-                </a>
+                <c:if test="${sessionScope.role == 'owner'}">
+                    <a href="${pageContext.request.contextPath}/zones?service=addZone" class="btn btn-outline-primary mr-2">
+                        Add Zone
+                    </a>
+                </c:if>
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="showInactive" name="showInactive" ${requestScope.showInactive ? 'checked' : ''}>
+                <label for="showInactive">Show Inactive Zones</label>
+            </div>
+            <div class="showing-info" style="margin-top: 10px; margin-bottom: -15px">
+                Showing: 
+                <select id="pageSizeSelect">
+                    <option value="5" ${pageSize == 5 ? 'selected' : ''}>5</option>
+                    <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                    <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+                </select>
+                of ${totalRecords} zones
             </div>
             <div class="table-container mt-4">
                 <table class="table table-striped table-hover table-bordered" id="zoneTable">
@@ -86,7 +96,7 @@
                                 Name <i class="fa ${sortBy == 'name' && sortOrder == 'ASC' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
                             </th>
                             <th>Store ID</th>
-                            <th>Product Name</th> <!-- Thêm cột Product Name -->
+                            <th>Product Name</th>
                             <th>Created By</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -97,13 +107,19 @@
                             <tr>
                                 <td>${zone.id}</td>
                                 <td style="text-align: left;">${zone.name}</td>
-                                <td>${zone.storeId != null ? zone.storeId.id : 'N/A'}</td>
-                                <td>${zone.productId != null ? zone.productId.name : 'N/A'}</td> <!-- Hiển thị Product Name -->
+                                <td>${zone.storeId != null ? zone.storeId.id : 'null'}</td>
+                                <td>${zone.productId != null ? zone.productId.name : 'N/A'}</td>
                                 <td>${zone.createdBy}</td>
                                 <td>${zone.status}</td>
                                 <td>
-                                    <a href="${pageContext.request.contextPath}/zones?service=getZoneById&zone_id=${zone.id}" class="btn btn-outline-primary">View</a>
-                                    <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}" class="btn btn-outline-primary">Edit</a>
+                                    <c:if test="${sessionScope.role == 'staff'}">
+                                        <a href="${pageContext.request.contextPath}/zones?service=stockCheck&zone_id=${zone.id}" class="btn btn-outline-success">Stock Check</a>
+                                    </c:if>
+                                    <c:if test="${sessionScope.role == 'owner'}">
+                                        <a href="${pageContext.request.contextPath}/zones?service=getZoneById&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">View</a>
+                                        <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">Edit</a>
+                                        <a href="${pageContext.request.contextPath}/zones?service=viewStockCheckHistory&zone_id=${zone.id}" class="btn btn-outline-info">History</a>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -114,13 +130,13 @@
                 <ul class="pagination">
                     <c:if test="${index > 1}">
                         <li class="page-item">
-                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${requestScope.showInactive}">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         </li>
                     </c:if>
                     <li class="page-item ${index == 1 ? 'active' : ''}">
-                        <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}">1</a>
+                        <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${requestScope.showInactive}">1</a>
                     </li>
                     <c:if test="${index > 3}">
                         <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -128,7 +144,7 @@
                         <c:forEach begin="${index - 1}" end="${index + 1}" var="page">
                             <c:if test="${page > 1 && page < endPage}">
                             <li class="page-item ${index == page ? 'active' : ''}">
-                                <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${requestScope.showInactive}">
                                     ${page}
                                 </a>
                             </li>
@@ -139,14 +155,14 @@
                         </c:if>
                         <c:if test="${endPage > 1}">
                         <li class="page-item ${index == endPage ? 'active' : ''}">
-                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${requestScope.showInactive}">
                                 ${endPage}
                             </a>
                         </li>
                     </c:if>
                     <c:if test="${index < endPage}">
                         <li class="page-item">
-                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                            <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${requestScope.showInactive}">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         </li>
@@ -159,12 +175,14 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
         <script>
-
             let timeout = null;
-            let currentSortBy = '${sortBy}'; // Lưu giá trị sortBy hiện tại
-            let currentSortOrder = '${sortOrder}'; // Lưu giá trị sortOrder hiện tại
-            // [NOTE: Sửa tại đây] Định nghĩa hàm searchZones ngoài phạm vi $(document).ready() để nó trở thành hàm toàn cục
-            function searchZones(keyword, page, sortBy, sortOrder) {
+            let currentSortBy = '${sortBy}';
+            let currentSortOrder = '${sortOrder}';
+            let currentPageSize = ${pageSize != null ? pageSize : 5};
+            let totalRecords = ${totalRecords != null ? totalRecords : 0};
+            const role = '${sessionScope.role}';
+            let showInactive = ${requestScope.showInactive != null ? requestScope.showInactive : true};
+            function searchZones(keyword, page, sortBy, sortOrder, pageSize, showInactive) {
                 $.ajax({
                     url: '<%= request.getContextPath() %>/zones',
                     type: 'GET',
@@ -173,61 +191,72 @@
                         keyword: keyword,
                         index: page,
                         sortBy: sortBy,
-                        sortOrder: sortOrder
+                        sortOrder: sortOrder,
+                        pageSize: pageSize,
+                        showInactive: showInactive
                     },
                     success: function (response) {
+                        console.log("AJAX response:", response);
+                        if (typeof response !== 'object' || !response.zones || !response.totalRecords) {
+                            console.error("Invalid JSON response:", response);
+                            $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">No zone found</td></tr>');
+                            return;
+                        }
+                        totalRecords = response.totalRecords;
                         updateTable(response.zones, response.endPage, response.index, keyword);
-                        // Cập nhật phân trang với page hiện tại
                         updatePagination(response.endPage, page, keyword);
+                        updateShowingInfo(pageSize, response.totalRecords);
                     },
-                    error: function () {
-                        $('#zoneTableBody').html('<tr><td colspan="6">Error fetching zones</td></tr>');
+                    error: function (xhr, status, error) {
+                        console.error("AJAX error:", status, error);
+                        $('#zoneTableBody').html('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">Error fetching zones</td></tr>');
                     }
                 });
             }
 
-            // [NOTE: Sửa tại đây] Định nghĩa hàm loadDefaultZones ngoài phạm vi $(document).ready()
             function loadDefaultZones() {
-                const currentIndex = ${index}; // Lấy index từ server
-                searchZones('', currentIndex, currentSortBy, currentSortOrder);
+                const currentIndex = ${index};
+                console.log("Loading default zones with index:", currentIndex);
+                searchZones('', currentIndex, currentSortBy, currentSortOrder, currentPageSize, showInactive);
             }
 
-            // Hàm cập nhật bảng
             function updateTable(zones, endPage, currentIndex, keyword) {
+                console.log("Zones data:", zones);
                 const tbody = $('#zoneTableBody');
                 tbody.empty();
-
-                if (zones.length === 0) {
-                    tbody.append('<tr><td colspan="6">No zones found</td></tr>');
+                if (!zones || zones.length === 0) {
+                    tbody.append('<tr><td colspan="' + (role === 'owner' ? 7 : 6) + '">No zones found</td></tr>');
                 } else {
                     zones.forEach(function (zone) {
-                        tbody.append(
-                                '<tr>' +
-                                '<td>' + zone.id + '</td>' +
-                                '<td style="text-align: left;">' + zone.name + '</td>' +
-                                '<td>' + (zone.storeId ? zone.storeId.id : 'N/A') + '</td>' +
-                                '<td>' + (zone.productName ? zone.productName : 'N/A') + '</td>' + // Hiển thị Product Name từ AJAX
-                                '<td>' + zone.createdBy + '</td>' +
-                                '<td>' + zone.status + '</td>' +
-                                '<td>' +
-                                '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + zone.id + '" class="btn btn-outline-primary">View</a> ' +
-                                '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + zone.id + '" class="btn btn-outline-primary">Edit</a> ' +
-                                '<a href="<%= request.getContextPath() %>/zones?service=deleteZone&zone_id=' + zone.id + '" ' +
-                                'class="btn btn-danger" onclick="return confirm(\'Are you sure you want to delete this zone?\');">Ban</a>' +
-                                '</td>' +
-                                '</tr>'
-                                );
+                        console.log("Processing zone:", zone);
+                        let row = '<tr>' +
+                                '<td>' + (zone.id || '') + '</td>' +
+                                '<td style="text-align: left;">' + (zone.name || '') + '</td>' +
+                                '<td>' + (zone.storeId && zone.storeId.id ? zone.storeId.id : 'null') + '</td>' +
+                                '<td>' + (zone.productName ? zone.productName : 'N/A') + '</td>' +
+                                '<td>' + (zone.createdBy || '') + '</td>' +
+                                '<td>' + (zone.status || '') + '</td>';
+
+                        if (role === 'owner') {
+                            row += '<td>' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + (zone.id || '') + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">View</a> ' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + (zone.id || '') + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">Edit</a> ' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=viewStockCheckHistory&zone_id=' + (zone.id || '') + '" class="btn btn-outline-info">History</a>' +
+                                    '</td>';
+                        } else if (role === 'staff') {
+                            row += '<td>' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=stockCheck&zone_id=' + (zone.id || '') + '" class="btn btn-outline-success">Stock Check</a>' +
+                                    '</td>';
+                        }
+                        row += '</tr>';
+                        tbody.append(row);
                     });
                 }
-
                 updatePagination(endPage, currentIndex, keyword);
             }
-
-            // Hàm cập nhật phân trang
             function updatePagination(endPage, currentIndex, keyword) {
                 const pagination = $('#pagination ul');
                 pagination.empty();
-
                 if (currentIndex > 1) {
                     pagination.append(
                             '<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex - 1) + '"><i class="fa fa-angle-left"></i></a></li>'
@@ -237,7 +266,6 @@
                 pagination.append(
                         '<li class="page-item ' + (currentIndex === 1 ? 'active' : '') + '"><a class="page-link page-nav" data-page="1">1</a></li>'
                         );
-
                 if (currentIndex > 3) {
                     pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
                 }
@@ -266,15 +294,25 @@
                             );
                 }
 
-                // [NOTE: Sửa tại đây] Gắn sự kiện click cho các liên kết phân trang bằng jQuery
                 $('.page-nav').on('click', function (e) {
                     e.preventDefault();
                     const page = $(this).data('page');
-                    searchZones(keyword, page, currentSortBy, currentSortOrder);
+                    searchZones(keyword, page, currentSortBy, currentSortOrder, currentPageSize, showInactive);
                 });
             }
 
-            // Hàm cập nhật biểu tượng sắp xếp
+            function updateShowingInfo(pageSize, totalRecords) {
+                $('.showing-info').html('Showing: <select id="pageSizeSelect">' +
+                        '<option value="5" ' + (pageSize == 5 ? 'selected' : '') + '>5</option>' +
+                        '<option value="10" ' + (pageSize == 10 ? 'selected' : '') + '>10</option>' +
+                        '<option value="20" ' + (pageSize == 20 ? 'selected' : '') + '>20</option>' +
+                        '</select> of ' + totalRecords + ' zones');
+                $('#pageSizeSelect').on('change', function () {
+                    currentPageSize = parseInt($(this).val());
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                });
+            }
+
             function updateSortIcons() {
                 $('.sortable').each(function () {
                     const sortBy = $(this).data('sort');
@@ -284,60 +322,46 @@
                         icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
                     } else {
                         icon.removeClass('fa-sort-up fa-sort-down');
-                        icon.addClass('fa-sort-down'); // Mặc định là mũi tên xuống
+                        icon.addClass('fa-sort-down');
                     }
                 });
             }
 
             $(document).ready(function () {
-
-                // Xử lý tìm kiếm tự động bằng AJAX
                 $('#searchInput').on('keyup', function () {
                     clearTimeout(timeout);
                     const keyword = $(this).val().trim();
-
                     timeout = setTimeout(function () {
-                        searchZones(keyword, 1, currentSortBy, currentSortOrder); // Bắt đầu từ trang 1 khi tìm kiếm
+                        searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
                     }, 300);
                 });
-
-                // Xử lý sắp xếp khi nhấp vào cột
                 $('.sortable').on('click', function () {
                     const sortBy = $(this).data('sort');
                     const keyword = $('#searchInput').val().trim();
-
-                    // Đảo ngược sortOrder nếu nhấp lại vào cùng cột
                     if (currentSortBy === sortBy) {
                         currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
                     } else {
                         currentSortBy = sortBy;
-                        currentSortOrder = 'ASC'; // Mặc định ASC khi chọn cột mới
+                        currentSortOrder = 'ASC';
                     }
-
-                    // Cập nhật biểu tượng sắp xếp
                     updateSortIcons();
-
-                    // Tải lại dữ liệu với sắp xếp mới
-                    searchZones(keyword, 1, currentSortBy, currentSortOrder);
+                    searchZones(keyword, 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
                 });
-
-
-
-                // Xử lý nút Clear
                 $('#clearBtn').on('click', function () {
-                    $('#searchInput').val(''); // Xóa nội dung ô tìm kiếm
-                    loadDefaultZones(); // Gọi loadDefaultZones để làm mới toàn bộ danh sách và phân trang
+                    $('#searchInput').val('');
+                    searchZones('', 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
                 });
-
-                // Khởi tạo biểu tượng sắp xếp ban đầu
+                $('#pageSizeSelect').on('change', function () {
+                    currentPageSize = parseInt($(this).val());
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                });
+                $('#showInactive').on('change', function () {
+                    showInactive = $(this).is(':checked');
+                    searchZones($('#searchInput').val().trim(), 1, currentSortBy, currentSortOrder, currentPageSize, showInactive);
+                });
                 updateSortIcons();
-
-                // [NOTE: Sửa tại đây] Tải danh sách mặc định khi trang load
                 loadDefaultZones();
             });
-
-
-
         </script>
     </body>
 </html>

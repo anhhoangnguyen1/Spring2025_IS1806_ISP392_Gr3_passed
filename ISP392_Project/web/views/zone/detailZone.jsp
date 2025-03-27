@@ -39,13 +39,31 @@
                 <div class="zone-detail"><label>Name:</label><span>${zone.name}</span></div>
                 <div class="zone-detail"><label>Description:</label><span>${zone.description != null ? zone.description : 'N/A'}</span></div>
                 <div class="zone-detail"><label>Store ID:</label><span>${zone.storeId != null ? zone.storeId.id : 'N/A'}</span></div>
-                <div class="zone-detail"><label>Product Name:</label><span>${zone.productId != null ? zone.productId.name : 'N/A'}</span></div> <!-- Thêm Product Name -->
+                <div class="zone-detail"><label>Product Name:</label><span>${zone.productId != null ? zone.productId.name : 'N/A'}</span></div>
                 <div class="zone-detail"><label>Created By:</label><span>${zone.createdBy}</span></div>
                 <div class="zone-detail"><label>Status:</label><span>${zone.status}</span></div>
-                <div style="display: flex; gap: 20px;">
-                    <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}" class="btn btn-outline-warning">Edit Zone</a>
+                <div class="zone-detail">
+                    <label>History:</label>
+                    <span>
+                        <c:choose>
+                            <c:when test="${empty zone.historyList}">
+                                N/A
+                            </c:when>
+                            <c:otherwise>
+                                <ul>
+                                    <c:forEach var="entry" items="${zone.historyList}">
+                                        <li>${entry['productName']} (From ${entry['startDate']} to ${entry['endDate'] != null ? entry['endDate'] : 'Now'})</li>
+                                    </c:forEach>
+                                </ul>
+                            </c:otherwise>
+                        </c:choose>
+                    </span>
                 </div>
-                <a href="zones?service=zones" class="btn btn-outline-secondary">Exit</a>
+                <div style="display: flex; gap: 20px;">
+                    <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}&index=${param.index}&sortBy=${param.sortBy}&sortOrder=${param.sortOrder}" class="btn btn-outline-warning">Edit Zone</a>
+                    <a href="zones?service=viewZoneHistory&zone_id=${zone.id}&index=${param.index}&sortBy=${param.sortBy}&sortOrder=${param.sortOrder}" class="btn btn-outline-info">View Zone History</a>
+                    <a href="zones?service=zones&index=${param.index}&sortBy=${param.sortBy}&sortOrder=${param.sortOrder}" class="btn btn-outline-secondary">Exit</a>
+                </div>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>

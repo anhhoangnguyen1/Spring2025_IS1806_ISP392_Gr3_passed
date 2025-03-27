@@ -29,6 +29,8 @@ public class controllerCustomers extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
+        String storeIDStr = (String) session.getAttribute("storeID");
+        int storeID = Integer.parseInt(storeIDStr);
         String role = (String) session.getAttribute("role");
 
         if (role != null && role.equals("admin")) {
@@ -81,7 +83,7 @@ public class controllerCustomers extends HttpServlet {
                 if (index > endPage) {
                     index = endPage;
                 }
-                List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder);
+                List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder,storeID);
                 if ("staff".equals(role)) {
                     for (Customers customer : list) {
                         String phone = customer.getPhone();
@@ -107,6 +109,7 @@ public class controllerCustomers extends HttpServlet {
                 break;
             }
             case "searchCustomersAjax": {
+
                 String keyword = request.getParameter("searchCustomer");
 
                 if (role != null && role.equals("admin")) {
@@ -128,7 +131,7 @@ public class controllerCustomers extends HttpServlet {
                 int pageSize = 5;
                 int total = customerDAO.countCustomers(keyword);
                 int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
-                List<Customers> customers = customerDAO.searchCustomers(keyword, index, pageSize, sortBy, sortOrder);
+                List<Customers> customers = customerDAO.searchCustomers(keyword, index, pageSize, sortBy, sortOrder, storeID);
 
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");

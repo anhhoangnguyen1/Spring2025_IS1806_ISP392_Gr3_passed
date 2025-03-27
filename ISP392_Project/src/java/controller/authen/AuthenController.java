@@ -12,7 +12,7 @@ import java.io.IOException;
 import utils.EmailUtils;
 import utils.GlobalUtils;
 
-@WebServlet(name = "AuthenController", urlPatterns = {"/authen", "/forgotpw", "/verifyOTP", "/newPassword", "/resendOTP", "/remove-toast"})
+@WebServlet(name = "AuthenController", urlPatterns = {"/authen", "/forgotpw", "/verifyOTP", "/newPassword", "/resendOTP"})
 public class AuthenController extends HttpServlet {
 
     private AccountDAO accDAO;

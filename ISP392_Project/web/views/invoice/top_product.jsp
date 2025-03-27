@@ -104,7 +104,7 @@ bsd12418 --%> <%@page contentType="text/html" pageEncoding="UTF-8"%>
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="sale">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
