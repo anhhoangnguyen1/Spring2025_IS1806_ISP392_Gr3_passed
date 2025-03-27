@@ -26,6 +26,15 @@
             .sortable {
                 cursor: pointer;
             }
+            .alert .close {
+                position: absolute;
+                top: 10px; /* Điều chỉnh vị trí của nút tắt */
+                right: 10px; /* Điều chỉnh khoảng cách từ cạnh phải */
+                padding: 0; /* Xóa bỏ padding của nút */
+                border: none; /* Loại bỏ border */
+                background: transparent; /* Loại bỏ nền */
+                font-size: 30px; /* Điều chỉnh kích thước của nút */
+            }
         </style>
     </head>
     <body>
@@ -41,8 +50,12 @@
                 <c:remove var="Notification" scope="session" />
             </c:if>
             <c:if test="${not empty sessionScope.successMessage}">
-                <div class="alert alert-success">
+
+                <div class="alert alert-success alert-dismissible fade show">
                     <strong>Success!</strong> ${sessionScope.successMessage}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <c:set var="successMessage" value="${sessionScope.successMessage}" />
                 <c:remove var="successMessage" />
@@ -90,35 +103,35 @@
                     </thead>
                     <tbody id = "customerTableBody">
                         <c:forEach var="customer" items="${list}">
-                             <c:if test="${(sessionScope.role == 'staff' && user.role == 'owner') || (sessionScope.role == 'owner' && user.storeId == sessionScope.storeId) || sessionScope.role == 'staff'}">
-                            <tr>
-                                <td>${customer.id}</td>
-                                <td>${customer.name}</td>
-                                <td>
-                                    <c:if test="${sessionScope.role == 'owner'}">
-                                        ${customer.phone} 
-                                    </c:if>
-                                    <c:if test="${sessionScope.role == 'staff'}">
-                                        ${customer.phone.substring(0, 3)}xxxxx${customer.phone.substring(customer.phone.length() - 2)} <!-- Hiển thị số điện thoại ẩn nếu là staff -->
-                                    </c:if>
-                                </td>
-                                <td>${customer.address}</td>
-                                <td><fmt:formatNumber value="${customer.balance}" type="number" pattern="#,###" /></td>
-                                <td>${customer.createdAt}</td>
-                                <td>${customer.createdBy}</td>
-                                <td class="sticky-col" >
-                                    <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#">
-                                        View
-                                    </button>
-                                    <button type="button" class="btn btn-outline-danger mr-lg-auto" data-toggle="modal" data-target="#debtListModal${customer.id}">
-                                        Debt note
-                                    </button>
-                                    <a href="${pageContext.request.contextPath}/Customers?service=editCustomer&customer_id=${customer.id}" class="btn btn-outline-primary">
-                                        Edit
-                                    </a>
-                                </td>
-                            </tr>
-                               </c:if>
+                            <c:if test="${(sessionScope.role == 'staff' && user.role == 'owner') || (sessionScope.role == 'owner' && user.storeId == sessionScope.storeId) || sessionScope.role == 'staff'}">
+                                <tr>
+                                    <td>${customer.id}</td>
+                                    <td>${customer.name}</td>
+                                    <td>
+                                        <c:if test="${sessionScope.role == 'owner'}">
+                                            ${customer.phone} 
+                                        </c:if>
+                                        <c:if test="${sessionScope.role == 'staff'}">
+                                            ${customer.phone.substring(0, 3)}xxxxx${customer.phone.substring(customer.phone.length() - 2)} <!-- Hiển thị số điện thoại ẩn nếu là staff -->
+                                        </c:if>
+                                    </td>
+                                    <td>${customer.address}</td>
+                                    <td><fmt:formatNumber value="${customer.balance}" type="number" pattern="#,###" /></td>
+                                    <td>${customer.createdAt}</td>
+                                    <td>${customer.createdBy}</td>
+                                    <td class="sticky-col" >
+                                        <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#">
+                                            View
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger mr-lg-auto" data-toggle="modal" data-target="#debtListModal${customer.id}">
+                                            Debt note
+                                        </button>
+                                        <a href="${pageContext.request.contextPath}/Customers?service=editCustomer&customer_id=${customer.id}" class="btn btn-outline-primary">
+                                            Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                            </c:if>
                         </c:forEach>
                     </tbody>
                 </table>
@@ -186,7 +199,7 @@
             <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
             <script type="text/javascript">
                 let timeout = null;
-                let currentSortBy = '${sortBy}'; 
+                let currentSortBy = '${sortBy}';
                 let currentSortOrder = '${sortOrder}';
 
                 function searchCustomers(keyword, page, sortBy, sortOrder) {
@@ -202,7 +215,7 @@
                         },
                         success: function (response) {
                             updateTable(response.customers, response.endPage, response.index, keyword);
-                      
+
                             updatePagination(response.endPage, page, keyword);
                         },
                         error: function () {
@@ -212,11 +225,11 @@
                 }
 
                 function loadDefaultCustomers() {
-                    const currentIndex = ${index}; 
+                    const currentIndex = ${index};
                     searchCustomers('', currentIndex, currentSortBy, currentSortOrder);
                 }
 
-          
+
                 function updateTable(customers, endPage, currentIndex, keyword) {
                     const tbody = $('#customerTableBody');
                     tbody.empty();
@@ -250,12 +263,12 @@
                     }
                 }
 
-    
+
                 function formatNumber(number) {
                     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 }
 
-            
+
                 function updatePagination(endPage, currentIndex, keyword) {
                     const pagination = $('.pagination');
                     pagination.empty();
@@ -298,7 +311,7 @@
                                 );
                     }
 
-             
+
                     $('.page-nav').on('click', function (e) {
                         e.preventDefault();
                         const page = $(this).data('page');
@@ -307,7 +320,7 @@
                 }
 
                 function addCustomer(customer) {
-              
+
                     $('#customerTableBody').append(
                             '<tr>' +
                             '<td>' + customer.id + '</td>' +
@@ -322,7 +335,7 @@
                 }
 
 
-          
+
                 function updateSortIcons() {
                     $('.sortable').each(function () {
                         const sortBy = $(this).data('sort');
@@ -332,52 +345,52 @@
                             icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
                         } else {
                             icon.removeClass('fa-sort-up fa-sort-down');
-                            icon.addClass('fa-sort-down'); 
+                            icon.addClass('fa-sort-down');
                         }
                     });
                 }
 
                 $(document).ready(function () {
-                
+
                     $('#searchInput').on('keyup', function () {
                         clearTimeout(timeout);
                         const keyword = $(this).val().trim();
 
                         timeout = setTimeout(function () {
-                            searchCustomers(keyword, 1, currentSortBy, currentSortOrder); 
+                            searchCustomers(keyword, 1, currentSortBy, currentSortOrder);
                         }, 300);
                     });
 
-       
+
                     $('.sortable').on('click', function () {
                         const sortBy = $(this).data('sort');
                         const keyword = $('#searchInput').val().trim();
 
-                     
+
                         if (currentSortBy === sortBy) {
                             currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
                         } else {
                             currentSortBy = sortBy;
-                            currentSortOrder = 'ASC'; 
+                            currentSortOrder = 'ASC';
                         }
 
-                    
+
                         updateSortIcons();
 
-                       
+
                         searchCustomers(keyword, 1, currentSortBy, currentSortOrder);
                     });
 
-              
+
                     $('#clearBtn').on('click', function () {
-                        $('#searchInput').val(''); 
-                        loadDefaultCustomers(); 
+                        $('#searchInput').val('');
+                        loadDefaultCustomers();
                     });
 
-                 
+
                     updateSortIcons();
 
-                   
+
                     loadDefaultCustomers();
                 });
             </script>
