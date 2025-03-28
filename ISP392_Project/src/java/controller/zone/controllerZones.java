@@ -112,11 +112,15 @@ public class controllerZones extends HttpServlet {
 
                 int index = 1;
                 try {
-                    index = Integer.parseInt(request.getParameter("index"));
-                    if (index < 1) {
-                        index = 1;
+                    String indexParam = request.getParameter("index");
+                    if (indexParam != null && !indexParam.trim().isEmpty()) {
+                        index = Integer.parseInt(indexParam);
+                        if (index < 1) {
+                            index = 1;
+                        }
                     }
                 } catch (NumberFormatException ignored) {
+                    index = 1;
                 }
 
                 Integer storeId = storeIdStr != null ? Integer.parseInt(storeIdStr) : null;
@@ -158,8 +162,15 @@ public class controllerZones extends HttpServlet {
                 }
                 int index = 1;
                 try {
-                    index = Integer.parseInt(request.getParameter("index"));
+                    String indexParam = request.getParameter("index");
+                    if (indexParam != null && !indexParam.trim().isEmpty()) {
+                        index = Integer.parseInt(indexParam);
+                        if (index < 1) {
+                            index = 1;
+                        }
+                    }
                 } catch (NumberFormatException ignored) {
+                    index = 1;
                 }
 
                 // Sử dụng showInactive từ session nếu không có trong request
@@ -183,7 +194,7 @@ public class controllerZones extends HttpServlet {
                     out.print("{");
                     out.print("\"id\": " + zone.getId() + ",");
                     out.print("\"name\": \"" + zone.getName().replace("\"", "\\\"") + "\",");
-                    out.print("\"storeId\": " + (zone.getStoreId() != null ? "{\"id\": " + zone.getStoreId().getId() + "}" : "null") + ",");
+                    out.print("\"description\": \"" + zone.getDescription().replace("\"", "\\\"") + "\",");
                     out.print("\"createdBy\": \"" + zone.getCreatedBy().replace("\"", "\\\"") + "\",");
                     out.print("\"status\": \"" + zone.getStatus() + "\",");
                     out.print("\"productName\": \"" + (zone.getProductId() != null ? zone.getProductId().getName().replace("\"", "\\\"") : "N/A") + "\",");
@@ -229,12 +240,15 @@ public class controllerZones extends HttpServlet {
 
                 int historyPageIndex = 1;
                 try {
-                    historyPageIndex = Integer.parseInt(request.getParameter("historyPageIndex"));
-                    if (historyPageIndex < 1) {
-                        historyPageIndex = 1;
+                    String historyPageIndexParam = request.getParameter("historyPageIndex");
+                    if (historyPageIndexParam != null && !historyPageIndexParam.trim().isEmpty()) {
+                        historyPageIndex = Integer.parseInt(historyPageIndexParam);
+                        if (historyPageIndex < 1) {
+                            historyPageIndex = 1;
+                        }
                     }
                 } catch (NumberFormatException ignored) {
-                    historyPageIndex = 1; // Giá trị mặc định nếu parse thất bại
+                    historyPageIndex = 1;
                 }
 
                 // Lọc và sắp xếp historyList
@@ -338,11 +352,15 @@ public class controllerZones extends HttpServlet {
 
                 int historyPageIndex = 1;
                 try {
-                    historyPageIndex = Integer.parseInt(request.getParameter("historyPageIndex"));
-                    if (historyPageIndex < 1) {
-                        historyPageIndex = 1;
+                    String historyPageIndexParam = request.getParameter("historyPageIndex");
+                    if (historyPageIndexParam != null && !historyPageIndexParam.trim().isEmpty()) {
+                        historyPageIndex = Integer.parseInt(historyPageIndexParam);
+                        if (historyPageIndex < 1) {
+                            historyPageIndex = 1;
+                        }
                     }
                 } catch (NumberFormatException ignored) {
+                    historyPageIndex = 1;
                 }
 
                 // Lọc và sắp xếp historyList
@@ -602,18 +620,12 @@ public class controllerZones extends HttpServlet {
 
             zoneDAO.insertZone(zone);
 
-            // Lấy showInactive từ request, mặc định là true
-
-// Lấy showInactive từ session thay vì request
+            // Lấy showInactive từ session thay vì request
             Boolean showInactive = (Boolean) session.getAttribute("showInactive");
             if (showInactive == null) {
                 showInactive = true; // Mặc định là true nếu chưa có
-            }            // Chỉ đếm các zone thuộc store hiện tại
-            
+            }
 
-            int total = zoneDAO.countZones("", showInactive, storeId); // Cập nhật để gọi đúng phương thức
-
-            int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
 
             session.setAttribute("Notification", "Zone added successfully.");
 
@@ -625,7 +637,7 @@ public class controllerZones extends HttpServlet {
             if (sortOrder == null) {
                 sortOrder = "ASC";
             }
-            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + endPage + "&pageSize=" + pageSize + "&showInactive=" + showInactive);
+            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=1&pageSize=" + pageSize + "&showInactive=" + showInactive);
             return;
         }
 
