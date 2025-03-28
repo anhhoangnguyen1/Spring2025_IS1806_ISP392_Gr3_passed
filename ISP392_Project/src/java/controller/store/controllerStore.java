@@ -135,7 +135,6 @@ public class controllerStore extends HttpServlet {
 
                 break;
             }
-
             case "createStore": {
                 // Chỉ admin mới có thể tạo store
                 if (!"admin".equals(role)) {
@@ -145,6 +144,122 @@ public class controllerStore extends HttpServlet {
                 }
 
                 request.getRequestDispatcher("views/store/createStore.jsp").forward(request, response);
+                break;
+            }
+            case "searchStore": {
+                // Chỉ admin có thể truy cập chức năng tìm kiếm
+                if (!"admin".equals(role)) {
+                    session.setAttribute("errorMessage", "You do not have permission to search stores.");
+                    response.sendRedirect("Home");
+                    return;
+                }
+                // Lấy từ khóa tìm kiếm từ request
+                String searchTerm = request.getParameter("searchStore");
+                // Gọi phương thức tìm kiếm từ storeDAO (giả sử đã được cài đặt)
+                List<Stores> storeList = storeDAO.searchStores(searchTerm);
+                request.setAttribute("storeList", storeList);
+                // Lấy thông tin owner cho từng cửa hàng tìm được
+                List<Map<String, Object>> ownerDetails = new ArrayList<>();
+                for (Stores store : storeList) {
+                    Users owner = userDAO.getOwnerByStoreId(store.getId());
+                    Map<String, Object> ownerData = new HashMap<>();
+                    if (owner != null) {
+                        ownerData.put("storeId", store.getId());
+                        ownerData.put("ownerName", owner.getName());
+                    } else {
+                        ownerData.put("storeId", store.getId());
+                        ownerData.put("ownerName", "No owner");
+                    }
+                    ownerDetails.add(ownerData);
+                }
+                request.setAttribute("ownerDetails", ownerDetails);
+                request.getRequestDispatcher("views/store/listStores.jsp").forward(request, response);
+                break;
+            }
+            case "filterStoreByDate": {
+                if (!"admin".equals(role)) {
+                    session.setAttribute("errorMessage", "You do not have permission to filter stores.");
+                    response.sendRedirect("Home");
+                    return;
+                }
+                String fromDate = request.getParameter("fromDate");
+                String toDate = request.getParameter("toDate");
+                // Gọi hàm lọc theo ngày tạo
+                List<Stores> storeList = storeDAO.filterStoresByDate(fromDate, toDate);
+                request.setAttribute("storeList", storeList);
+                // Xử lý owner cho từng store
+                List<Map<String, Object>> ownerDetails = new ArrayList<>();
+                for (Stores store : storeList) {
+                    Users owner = userDAO.getOwnerByStoreId(store.getId());
+                    Map<String, Object> ownerData = new HashMap<>();
+                    if (owner != null) {
+                        ownerData.put("storeId", store.getId());
+                        ownerData.put("ownerName", owner.getName());
+                    } else {
+                        ownerData.put("storeId", store.getId());
+                        ownerData.put("ownerName", "No owner");
+                    }
+                    ownerDetails.add(ownerData);
+                }
+                request.setAttribute("ownerDetails", ownerDetails);
+                request.getRequestDispatcher("views/store/listStores.jsp").forward(request, response);
+                break;
+            }
+            case "toggleBan": {
+                String storeIdParam = request.getParameter("store_id");
+                if (storeIdParam != null) {
+                    try {
+                        int storeId = Integer.parseInt(storeIdParam);
+                        Stores store = storeDAO.getStoreById(storeId);
+                        if (store != null) {
+                            String newStatus;
+                            // Nếu cửa hàng đang Active thì chuyển thành Inactive, ngược lại chuyển thành Active
+                            if ("Active".equalsIgnoreCase(store.getStatus())) {
+                                newStatus = "Inactive";
+                            } else if ("Inactive".equalsIgnoreCase(store.getStatus())) {
+                                newStatus = "Active";
+                            } else {
+                                // Nếu trạng thái không xác định, có thể đặt mặc định là Active
+                                newStatus = "Active";
+                            }
+                            // Gọi hàm cập nhật trạng thái
+                            boolean updateSuccess = storeDAO.updateStoreStatus(storeId, newStatus);
+                            if (updateSuccess) {
+                                session.setAttribute("successMessage", "Store status updated successfully.");
+                            } else {
+                                session.setAttribute("errorMessage", "Failed to update store status.");
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid store ID: " + storeIdParam);
+                    }
+                }
+                response.sendRedirect("Stores?service=storeList");
+                break;
+            }
+            case "filterStoreByStatus": {
+                String status = request.getParameter("status");
+
+                // Gọi hàm lọc cửa hàng theo status
+                List<Stores> storeList = storeDAO.filterStoresByStatus(status);
+                request.setAttribute("storeList", storeList);
+
+                // Xử lý owner cho từng store
+                List<Map<String, Object>> ownerDetails = new ArrayList<>();
+                for (Stores store : storeList) {
+                    Users owner = userDAO.getOwnerByStoreId(store.getId());
+                    Map<String, Object> ownerData = new HashMap<>();
+                    if (owner != null) {
+                        ownerData.put("storeId", store.getId());
+                        ownerData.put("ownerName", owner.getName());
+                    } else {
+                        ownerData.put("storeId", store.getId());
+                        ownerData.put("ownerName", "No owner");
+                    }
+                    ownerDetails.add(ownerData);
+                }
+                request.setAttribute("ownerDetails", ownerDetails);
+                request.getRequestDispatcher("views/store/listStores.jsp").forward(request, response);
                 break;
             }
             case "storeList": {

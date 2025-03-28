@@ -24,6 +24,82 @@ public class storeDAO extends DBContext {
         return storeList;  // Trả về danh sách cửa hàng
     }
 
+    public List<Stores> searchStores(String searchTerm) {
+        List<Stores> storeList = new ArrayList<>();
+        String sql = "SELECT * FROM stores WHERE name LIKE ? AND isDeleted = false";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, "%" + searchTerm + "%"); // Tìm kiếm theo từ khóa
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Stores store = mapResultSetToStore(rs);
+                    storeList.add(store);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return storeList;
+    }
+
+    // Method lọc cửa hàng theo trạng thái
+    public List<Stores> filterStoresByStatus(String status) {
+        List<Stores> storeList = new ArrayList<>();
+        String sql = "SELECT * FROM stores WHERE isDeleted = false";
+
+        // Thêm điều kiện lọc theo trạng thái nếu có
+        if (status != null && !status.isEmpty()) {
+            sql += " AND status = ?";
+        }
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            if (status != null && !status.isEmpty()) {
+                st.setString(1, status);
+            }
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Stores store = mapResultSetToStore(rs);
+                    storeList.add(store);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return storeList;
+    }
+
+    // Lọc cửa hàng theo ngày tạo (created_at)
+    public List<Stores> filterStoresByDate(String fromDate, String toDate) {
+        List<Stores> storeList = new ArrayList<>();
+        String sql = "SELECT * FROM stores WHERE isDeleted = false";
+
+        if (fromDate != null && !fromDate.isEmpty()) {
+            sql += " AND created_at >= ?";
+        }
+        if (toDate != null && !toDate.isEmpty()) {
+            sql += " AND created_at <= ?";
+        }
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            int index = 1;
+            if (fromDate != null && !fromDate.isEmpty()) {
+                st.setString(index++, fromDate);
+            }
+            if (toDate != null && !toDate.isEmpty()) {
+                st.setString(index++, toDate);
+            }
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Stores store = mapResultSetToStore(rs);
+                    storeList.add(store);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return storeList;
+    }
+
     // Lấy thông tin cửa hàng theo ID
     public Stores getStoreById(int storeId) {
         String sql = "SELECT * FROM stores WHERE id = ?";
@@ -68,6 +144,19 @@ public class storeDAO extends DBContext {
             int rowsUpdated = st.executeUpdate();
             System.out.println("Rows updated: " + rowsUpdated);  // Log number of rows affected
 
+            return rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateStoreStatus(int storeId, String status) {
+        String sql = "UPDATE stores SET status = ?, updated_at = NOW() WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, status);
+            st.setInt(2, storeId);
+            int rowsUpdated = st.executeUpdate();
             return rowsUpdated > 0;
         } catch (SQLException e) {
             e.printStackTrace();

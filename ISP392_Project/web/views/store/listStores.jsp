@@ -155,12 +155,59 @@
                         <c:remove var="successMessage" />
                     </c:if>
 
+                    <form action="${pageContext.request.contextPath}/Stores" method="get">
+                        <div class="search-box">
+                            <input type="hidden" name="service" value="searchStore" />
+                            <input type="text" id="searchInput" class="input-box" name="searchStore"
+                                   placeholder="Search for store name."
+                                   value="${searchStore}" autocomplete="off" />
+                            <button type="submit" class="search-btn">
+                                <i class="fa-solid fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
                     <div class="action-bar d-flex align-items-center mb-4">
                         <a href="${pageContext.request.contextPath}/Stores?service=createStore" class="btn btn-outline-primary mr-lg-auto">
                             Add Store
                         </a>
-                    </div>
 
+                        <!-- Lọc theo trạng thái -->
+                        <form action="${pageContext.request.contextPath}/Stores" method="get" id="filterByStatusForm" class="d-flex align-items-center">
+                            <input type="hidden" name="service" value="filterStoreByStatus" />
+
+                            <!-- Lọc theo trạng thái -->
+                            <select class="form-control" name="status" id="statusFilter" onchange="this.form.submit()" style="white-space: nowrap; width: auto; max-width: 200px; height: 35px; font-size: 16px; padding: 5px 10px; margin-right: 10px;">
+                                <option value="">All</option>
+                                <option value="Active" ${param.status == 'Active' ? 'selected' : ''}>Active</option>
+                                <option value="Inactive" ${param.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            </select>
+                        </form>
+                        <!-- Form lọc cửa hàng theo ngày tạo -->
+                        <form action="${pageContext.request.contextPath}/Stores" method="get" id="filterByDateForm" class="d-flex align-items-center">
+                            <input type="hidden" name="service" value="filterStoreByDate" />
+
+                            <!-- Lọc theo ngày -->
+                            <input type="date" id="fromDate" class="form-control form-control-sm" name="fromDate" 
+                                   value="${param.fromDate}" placeholder="From Date" 
+                                   style="max-width: 150px; margin-right: 5px; height: 35px; font-size: 16px;" />
+
+                            <input type="date" id="toDate" class="form-control form-control-sm" name="toDate" 
+                                   value="${param.toDate}" placeholder="To Date" 
+                                   style="max-width: 150px; margin-right: 10px; height: 35px; font-size: 16px;" />
+
+                            <!-- Nút Filter -->
+                            <button type="submit" class="btn btn-outline-primary btn-sm" style="white-space: nowrap; margin-right: 5px; height: 35px; font-size: 16px;">
+                                Filter by Date
+                            </button>
+
+                            <!-- Nút x (clear) để xóa các ô ngày -->
+                            <button type="button" class="btn btn-outline-danger btn-sm" id="clearDateBtn" 
+                                    style="height: 35px; font-size: 16px;">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>  
+                        </form>
+                    </div>
                     <!-- Table Container -->
                     <div class="table-container mt-4">
                         <table class="table table-striped table-hover table-bordered" id="storeTable">
@@ -196,64 +243,80 @@
                                         <td>${store.status}</td>
                                         <td class="sticky-col">
                                             <a href="${pageContext.request.contextPath}/Stores?service=editStore&store_id=${store.id}" class="btn btn-outline-primary">Edit</a>
-                                            <a href="${pageContext.request.contextPath}/Stores?service=deleteStore&store_id=${store.id}" class="btn btn-outline-danger">Delete</a>
+                                            <a href="${pageContext.request.contextPath}/Stores?service=toggleBan&store_id=${store.id}"
+                                               class="btn
+                                               <c:if test='${store.status eq "Active"}'>btn-outline-danger</c:if>
+                                               <c:if test='${store.status eq "Inactive"}'>btn-outline-success</c:if>">
+                                                <c:choose>
+                                                    <c:when test="${store.status eq 'Active'}">Ban</c:when>
+                                                    <c:otherwise>Unban</c:otherwise>
+                                                </c:choose>
+                                            </a>
                                         </td>
                                     </tr>
                                 </c:forEach>
                             </tbody>
                         </table>
                     </div>
+
+
+                    <div class="container d-flex justify-content-center mt-4" id="pagination">
+                        <ul class="pagination">
+                            <c:if test="${index > 1}">
+                                <li class="page-item">
+                                    <a class="page-link" href="Stores?service=storeList&index=${index - 1}">
+                                        <i class="fa fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            </c:if>
+
+                            <li class="page-item ${index == 1 ? 'active' : ''}">
+                                <a class="page-link" href="Stores?service=storeList&index=1">1</a>
+                            </li>
+
+                            <c:if test="${index > 3}">
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            </c:if>
+
+                            <c:if test="${index < endPage - 2}">
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            </c:if>
+
+                            <c:if test="${endPage > 1}">
+                                <li class="page-item ${index == endPage ? 'active' : ''}">
+                                    <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                        ${endPage}
+                                    </a>
+                                </li>
+                            </c:if>
+
+                            <c:if test="${index < endPage}">
+                                <li class="page-item">
+                                    <a class="page-link" href=""Users?service=users&searchUser=${searchUser}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                        <i class="fa fa-angle-right"></i>
+                                    </a>
+                                </li>
+                            </c:if>
+                        </ul>
+                    </div>
                 </div>
             </div>
-
-            <div class="container d-flex justify-content-center mt-4" id="pagination">
-                <ul class="pagination">
-                    <c:if test="${index > 1}">
-                        <li class="page-item">
-                            <a class="page-link" href="Stores?service=storeList&index=${index - 1}">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-                        </li>
-                    </c:if>
-
-                    <li class="page-item ${index == 1 ? 'active' : ''}">
-                        <a class="page-link" href="Stores?service=storeList&index=1">1</a>
-                    </li>
-
-                    <c:if test="${index > 3}">
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
-                    </c:if>
-
-                    <c:if test="${index < endPage - 2}">
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
-                    </c:if>
-
-                    <c:if test="${endPage > 1}">
-                        <li class="page-item ${index == endPage ? 'active' : ''}">
-                            <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
-                                ${endPage}
-                            </a>
-                        </li>
-                    </c:if>
-
-                    <c:if test="${index < endPage}">
-                        <li class="page-item">
-                            <a class="page-link" href=""Users?service=users&searchUser=${searchUser}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-                        </li>
-                    </c:if>
-                </ul>
-            </div>
         </div>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
-
+                                
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
+        <script>
+                                // Khi bấm icon x của form lọc theo ngày,
+                                // xóa giá trị ở hai ô ngày và submit lại form để hiển thị toàn bộ danh sách.
+                                document.getElementById('clearDateBtn').addEventListener('click', function () {
+                                    document.getElementById('fromDate').value = '';
+                                    document.getElementById('toDate').value = '';
+                                    document.getElementById('filterByDateForm').submit();
+                                });
+        </script>

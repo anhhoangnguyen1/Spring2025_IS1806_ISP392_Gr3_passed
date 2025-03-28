@@ -5,6 +5,7 @@
 package controller.authen;
 
 import dal.AccountDAO;
+import dal.storeDAO;
 import entity.*;
 import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
@@ -33,32 +34,50 @@ public class loginServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        request.getRequestDispatcher("/views/login.jsp").forward(request, response);
-    }
-
-    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String username = request.getParameter("username");
         String password = GlobalUtils.getMd5(request.getParameter("password"));
 
+        // Ghi log thông tin người dùng đang đăng nhập
+        System.out.println("Attempting login for username: " + username);
+
         Users login = AccountDAO.INSTANCE.getUser(username, password);
 
-        //if authenticate success 
-         if (login != null) {
-             
-             if ("Deactive".equals(login.getStatus())) {
-            // Nếu tài khoản bị ban, từ chối đăng nhập và thông báo lỗi
-            request.setAttribute("error", "Your account is deactivated. Please contact admin.");
-            request.getRequestDispatcher("/views/login.jsp").forward(request, response);
-            return;
-        }
-              Stores store = login.getStoreId();  // Lấy đối tượng Stores
-            String storeID = store != null ? String.valueOf(store.getId()) : null;  // Lấy storeID từ đối tượng Stores
+        // Nếu xác thực thành công
+        if (login != null) {
+            System.out.println("Login successful for username: " + username);
 
-            
+            // Kiểm tra trạng thái tài khoản người dùng
+            if ("Deactive".equalsIgnoreCase(login.getStatus())) {
+                System.out.println("User account is deactivated: " + username);
+                request.setAttribute("error", "Your account is deactivated. Please contact admin.");
+                request.getRequestDispatcher("/views/login.jsp").forward(request, response);
+                return;
+            }
+
+            // Kiểm tra nếu người dùng là admin
+            if (!"admin".equalsIgnoreCase(login.getRole())) {
+                // Nếu không phải admin, kiểm tra cửa hàng (store)
+                Stores store = login.getStoreId();
+                storeDAO storeDAO = new storeDAO();
+                if (store != null) {
+                    System.out.println("User's store found with ID: " + store.getId());
+                    store = storeDAO.getStoreById(store.getId());  // Lấy cửa hàng mới nhất từ database
+
+                    // Kiểm tra trạng thái của cửa hàng (store)
+                    if ("Inactive".equalsIgnoreCase(store.getStatus())) {
+                        System.out.println("Store with ID " + store.getId() + " is deactivated (Inactive). Login denied.");
+                        request.setAttribute("error", "Your Store is inactive. Please contact admin.");
+                        request.getRequestDispatcher("/views/login.jsp").forward(request, response);
+                        return;
+                    }
+                    System.out.println("Store with ID " + store.getId() + " is active. Proceeding with login.");
+                }
+            }
+
+            // Nếu mọi thứ ổn, lưu thông tin vào session và tiếp tục với đăng nhập
+            String storeID = login.getStoreId() != null ? String.valueOf(login.getStoreId().getId()) : null;
             HttpSession session = request.getSession();
             session.setAttribute("userId", login.getId());
             session.setAttribute("user", login);
@@ -66,15 +85,19 @@ public class loginServlet extends HttpServlet {
             session.setAttribute("fullName", login.getName());
             session.setAttribute("storeID", storeID);
             session.setAttribute("role", login.getRole());
-            session.setMaxInactiveInterval(30 * 60);
+            session.setMaxInactiveInterval(30 * 60);  // Session hết hạn sau 30 phút
 
+            // Lưu tên người dùng vào cookie (thời gian sống 30 phút)
             Cookie userCookie = new Cookie("username", login.getUsername());
             userCookie.setMaxAge(30 * 60);
             response.addCookie(userCookie);
 
+            // Chuyển hướng đến trang quản lý cửa hàng (Stores)
+            System.out.println("Redirecting user " + username + " to /Stores.");
             response.sendRedirect(request.getContextPath() + "/Stores");
-        } else {// if authenticate fail
-            RequestDispatcher rd = getServletContext().getRequestDispatcher("/views/login.jsp");
+        } else {
+            // Nếu xác thực thất bại (username hoặc password sai)
+            System.out.println("Invalid login attempt for username: " + username);
             request.setAttribute("error", "Your username or password is wrong");
             request.getRequestDispatcher("/views/login.jsp").forward(request, response);
         }
