@@ -10,7 +10,100 @@
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
     </head>
+    <style>
+        .debt-filter-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
+        .debt-filter-form {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 180px;
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            height: 38px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0,123,255,0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            border: 1px solid #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border: 1px solid #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            border-color: #545b62;
+        }
+
+        .btn-outline-success {
+            border: 1px solid #28a745;
+            color: #28a745;
+            background: transparent;
+        }
+
+        .btn-outline-success:hover {
+            background: #28a745;
+            color: white;
+        }
+    </style>
     <body>
         <div class="page-wrapper">
             <!--   *** Top Bar Starts ***   -->
@@ -101,15 +194,15 @@
                         </a>
                     </li>
                     <li>
-                            <a href="/ISP392_Project/Stores">
-                                <span class="nav-icon">
-                                    <i class="fa-solid fa-store"></i>
-                                </span>
-                                <span class="nav-text">Stores</span>
-                            </a>
-                        </li>
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
                     <c:if test="${sessionScope.role == 'owner'}">
-                        
+
                         <li>
                             <a href="/ISP392_Project/Users">
                                 <span class="nav-icon">
@@ -153,6 +246,9 @@
                 </c:if>
                 <div class="panel-bar1">
                     <div class="container">
+                        <a href="/ISP392_Project/Debts" class="text-secondary show-arrow">
+                            <i class="fa-solid fa-arrow-left"></i> Debts history
+                        </a>/ Debt list
                         <h2 class="text-center">Debt List</h2>
                         <c:if test="${not empty sessionScope.Notification}">
                             <div class="alert alert-warning alert-dismissible">
@@ -165,12 +261,9 @@
                         </c:if>
 
 
-                        <div class="d-flex justify-content-between mb-3">
-                            <a href="/ISP392_Project/Debts" class="btn btn-outline-primary">Back to debt</a>
-                            <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#DebtModal">
-                                <i class="fas fa-plus"></i> Add Debt
-                            </button>
-                        </div>
+
+
+
                         <c:if test="${not empty list}">
                             <c:set var="customer" value="${list[0]}" />
                             <div class="customer-info border p-3 rounded">
@@ -180,7 +273,42 @@
                                 <p><strong>Address:</strong> ${customer.address}</p>
                             </div>
                         </c:if>
-                         
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <!-- Bộ lọc ngày -->
+                            <div class="debt-filter-container">
+                                <form action="Debts" method="POST" class="debt-filter-form">
+                                    <input type="hidden" name="service" value="debtHistory" />
+                                    <input type="hidden" name="customer_id" value="${listName.id}" />
+
+                                    <div class="form-group">
+                                        <label for="startDate" class="form-label">From date:</label>
+                                        <input type="date" id="startDate" name="startDate" 
+                                               class="form-control" value="${startDate}">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="endDate" class="form-label">To date:</label>
+                                        <input type="date" id="endDate" name="endDate" 
+                                               class="form-control" value="${endDate}">
+                                    </div>
+
+                                    <div class="button-group">
+                                        <button type="submit" class="btn btn-primary">Filter</button>
+                                        <a href="Debts?service=debtHistory&customer_id=${listName.id}" 
+                                           class="btn btn-secondary">Reset</a>
+                                        <button type="button" class="btn btn-outline-success" 
+                                                data-toggle="modal" data-target="#DebtModal${listName.id}">
+                                            <i class="fas fa-plus"></i> Add
+                                        </button>
+                                    </div>
+                                </form>
+
+
+                            </div>
+
+                            <!-- Nút "Add" -->
+
+                        </div>
 
                         <div class="table-container">
                             <table class="table-bordered">

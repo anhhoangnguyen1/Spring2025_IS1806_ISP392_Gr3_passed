@@ -8,7 +8,7 @@
         <title>JSP Page</title>
     </head>
     <body>
-        <h1>Debts</h1>
+        <h1>Debts History</h1>
         <form action="${pageContext.request.contextPath}/Debts" method="POST">
             <div class="search-box">
                 <input type="hidden" name="service" value="searchDebts" />

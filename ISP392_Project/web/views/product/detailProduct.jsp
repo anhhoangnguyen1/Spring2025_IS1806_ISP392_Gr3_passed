@@ -45,6 +45,15 @@
                 background-color: #dc3545;
                 color: white;
             }
+            .show-arrow i {
+                opacity: 0; /* Ẩn mũi tên */
+                transition: opacity 0.3s ease-in-out;
+            }
+
+            .show-arrow:hover i {
+                opacity: 1; /* Hiện mũi tên khi trỏ vào */
+            }
+     
         </style>
     </head>
     <body>
@@ -177,10 +186,9 @@
         </aside>
         <div class="contents">
             <div class="panel-bar1">
-                <h2>Product Details</h2>
-                <button class="btn btn-outline-secondary" onclick="window.history.back();">
-                    <i class="fa-solid fa-arrow-left"></i> Back
-                </button>
+                <a href="/ISP392_Project/Products" class="text-secondary show-arrow">
+                        <i class="fa-solid fa-arrow-left"></i> Products
+                    </a>/ Product details
 
                 <c:forEach var="product" items="${list}">
 
