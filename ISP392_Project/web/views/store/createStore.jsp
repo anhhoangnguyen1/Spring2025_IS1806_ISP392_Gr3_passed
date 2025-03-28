@@ -183,7 +183,7 @@
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save</button>
-                            <a href="${pageContext.request.contextPath}/Stores?service=storeInfo" class="btn btn-secondary">Back</a>
+                            <a href="${pageContext.request.contextPath}/Stores?service=storeList" class="btn btn-secondary">Back</a>
                         </div>
                     </form>
                 </div>

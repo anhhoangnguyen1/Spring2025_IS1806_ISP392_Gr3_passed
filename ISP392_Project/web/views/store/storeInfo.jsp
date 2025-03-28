@@ -143,41 +143,26 @@
                 <div class="panel-bar1">
                     <input type="hidden" name="service" value="storeInfo">
                     <!-- Check if storeID exists in session -->
-                    <c:choose>
-                        <c:when test="${not empty store}">
-                            <div class="panel-bar1">
-                                <h2>Store Information</h2>
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Store Name: ${store.name}</h5>
-                                        <p class="card-text"><strong>Owner:</strong> ${store.createdBy}</p>
-                                        <p class="card-text"><strong>Address:</strong> ${store.address}</p>
-                                        <p class="card-text"><strong>Phone:</strong> ${store.phone}</p>
-                                        <p class="card-text"><strong>Email:</strong> ${store.email}</p>
-                                        <p class="card-text"><strong>Created At:</strong> ${store.createdAt}</p>
-                                        <p class="card-text"><strong>Updated At:</strong> ${store.updatedAt}</p>
-                                        <c:if test="${userRole eq 'owner'}">
-                                            <a href="${pageContext.request.contextPath}/Stores?service=editStore&store_id=${store.id}" class="btn btn-outline-primary">Edit</a>
-                                        </c:if>
-                                        <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-outline-primary">Dashboard</a>
-
-                                    </div>
+                    <c:if test="${not empty store}">
+                        <div class="panel-bar1">
+                            <h2>Store Information</h2>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Store Name: ${store.name}</h5>
+                                    <p class="card-text"><strong>Owner:</strong> ${owner != null ? owner.name : 'No owner'}</p>
+                                    <p class="card-text"><strong>Address:</strong> ${store.address}</p>
+                                    <p class="card-text"><strong>Phone:</strong> ${store.phone}</p>
+                                    <p class="card-text"><strong>Email:</strong> ${store.email}</p>
+                                    <p class="card-text"><strong>Created At:</strong> ${store.createdAt}</p>
+                                    <p class="card-text"><strong>Updated At:</strong> ${store.updatedAt}</p>
+                                    <c:if test="${userRole eq 'owner'}">
+                                        <a href="${pageContext.request.contextPath}/Stores?service=editStore&store_id=${store.id}" class="btn btn-outline-primary">Edit</a>
+                                    </c:if>
+                                    <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-outline-primary">Dashboard</a>
                                 </div>
-
                             </div>
-                        </c:when>
-                        <c:otherwise>
-                            <!-- If no storeID in session, redirect to create store page -->
-                            <div class="d-flex justify-content-center">
-                                <form action="${pageContext.request.contextPath}/Stores" method="POST" enctype="multipart/form-data">
-                                    <input type="hidden" name="service" value="createStore"/>
-                                    <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#createStoreModal" style="background: #007bff">
-                                        Click here to create a store
-                                    </button>
-                                </form>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
+                        </div>
+                    </c:if>
                 </div>
 
             </div>

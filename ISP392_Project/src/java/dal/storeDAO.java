@@ -7,6 +7,23 @@ import java.util.List;
 
 public class storeDAO extends DBContext {
 
+    public List<Stores> getAllStores() {
+        List<Stores> storeList = new ArrayList<>();
+        String sql = "SELECT * FROM stores WHERE isDeleted = false";  // Lọc cửa hàng chưa bị xóa (nếu có điều kiện như vậy)
+
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+
+            while (rs.next()) {
+                Stores store = mapResultSetToStore(rs);  // Sử dụng hàm mapResultSetToStore để ánh xạ dữ liệu
+                storeList.add(store);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return storeList;  // Trả về danh sách cửa hàng
+    }
+
     // Lấy thông tin cửa hàng theo ID
     public Stores getStoreById(int storeId) {
         String sql = "SELECT * FROM stores WHERE id = ?";
@@ -41,13 +58,17 @@ public class storeDAO extends DBContext {
 
     // Sửa thông tin cửa hàng
     public boolean editStore(Stores store) {
-        String sql = "UPDATE stores SET name = ?, address = ?, phone = ?, updated_at = NOW() WHERE id = ?";
+        String sql = "UPDATE stores SET name = ?, address = ?, phone = ?, email = ?, updated_at = NOW() WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, store.getName());
             st.setString(2, store.getAddress());
             st.setString(3, store.getPhone());
-            st.setInt(4, store.getId());
-            return st.executeUpdate() > 0;
+            st.setString(4, store.getEmail());
+            st.setInt(5, store.getId());
+            int rowsUpdated = st.executeUpdate();
+            System.out.println("Rows updated: " + rowsUpdated);  // Log number of rows affected
+
+            return rowsUpdated > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -64,7 +85,7 @@ public class storeDAO extends DBContext {
             st.setString(4, store.getEmail());
             st.setString(5, store.getStatus());
             st.setString(6, store.getCreatedBy());
-            
+
             int affectedRows = st.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = st.getGeneratedKeys()) {
@@ -195,6 +216,22 @@ public class storeDAO extends DBContext {
 
         // Giả sử chúng ta muốn lấy cửa hàng có ID = 1
         int storeId = 1;
+//        String name1 = "anh";
+//        String add = "a0";
+//        String phone = "0248754984";
+//        String email = "email";
+//
+//        Stores store1 = new Stores();
+//        store1.setId(storeId);
+//        store1.setName(name1);
+//        store1.setAddress(add);
+//        store1.setPhone(phone);
+//        store1.setEmail(email);
+//        dao.editStore(store1);
+//        System.out.println("Name: " + store1.getName());
+//        System.out.println("Address: " + store1.getAddress());
+//        System.out.println("Phone: " + store1.getPhone());
+//        System.out.println("Email: " + store1.getEmail());
 
         // Gọi hàm getStoreById để lấy thông tin cửa hàng
         Stores store = dao.getStoreById(storeId);

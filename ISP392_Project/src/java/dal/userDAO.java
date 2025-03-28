@@ -70,7 +70,7 @@ public class userDAO extends DBContext {
 
     public void deactivateUser(int userId) {
         String sql = "UPDATE users SET status = 'Deactive' WHERE id = ?";
-      try (PreparedStatement st = connection.prepareStatement(sql)) {
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, userId);
             st.executeUpdate();
         } catch (SQLException e) {
@@ -78,7 +78,7 @@ public class userDAO extends DBContext {
         }
     }
 
-        public void activateUser(int userId) {
+    public void activateUser(int userId) {
         String sql = "UPDATE users SET status = 'Active' WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, userId);
@@ -390,6 +390,42 @@ public class userDAO extends DBContext {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public Users getOwnerByStoreId(int storeId) {
+        Users owner = null;
+        String sql = "SELECT * FROM users WHERE store_id = ? AND role = 'owner'";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, storeId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                owner = new Users();
+                owner.setId(rs.getInt("id"));
+                owner.setName(rs.getString("name"));
+                // set other fields as needed...
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return owner;
+    }
+
+    public List<Users> getOwnersWithoutStore() {
+        List<Users> owners = new ArrayList<>();
+        String sql = "SELECT * FROM users WHERE store_id IS NULL AND role = 'owner'";
+
+        try (PreparedStatement pst = connection.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                Users user = new Users();
+                user.setId(rs.getInt("id"));
+                user.setName(rs.getString("name"));
+                owners.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return owners;
     }
 
     private Users mapResultSetToUser(ResultSet rs) throws SQLException {
