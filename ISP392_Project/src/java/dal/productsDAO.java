@@ -1,10 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dal;
 
-import dal.zoneDAO;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,23 +8,23 @@ import java.util.ArrayList;
 import java.util.List;
 import entity.Products;
 import entity.Zone;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Vector;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- *
- * @author phamh
- */
 public class productsDAO extends DBContext {
-
+    
+    private static final Logger LOGGER = Logger.getLogger(productsDAO.class.getName());
+    private static final String RED_COLOR = "\u001B[31m";
+    private static final String RESET_COLOR = "\u001B[0m";
     zoneDAO zones = new zoneDAO();
 
     // Lấy productId hiện tại của Zone
@@ -281,6 +276,105 @@ public class productsDAO extends DBContext {
             e.printStackTrace();
         }
         return 0;
+    }
+    
+    public List<Products> getProductById(int id) {
+        List<Products> products = new ArrayList<>();
+        String sql = "SELECT * FROM products WHERE id = ?";
+        Map<Integer, List<String>> zoneMap = new HashMap<>();
+        String zoneQuery = "SELECT product_id, name FROM zones WHERE product_id = ?";  // Filter zones by product_id
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, id);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    int productId = rs.getInt("id");
+
+                    // Fetching zone names for the product
+                    try (PreparedStatement zoneSt = connection.prepareStatement(zoneQuery)) {
+                        zoneSt.setInt(1, productId);
+                        try (ResultSet zoneRs = zoneSt.executeQuery()) {
+                            List<String> zones = new ArrayList<>();
+                            while (zoneRs.next()) {
+                                zones.add(zoneRs.getString("name"));
+                            }
+                            zoneMap.put(productId, zones);
+                        }
+                    }
+
+                    // Getting zone names or default value
+                    List<String> zones = zoneMap.getOrDefault(productId, List.of("Unknown"));
+                    String zoneNames = String.join(",", zones);
+
+                    Products product = new Products(
+                            productId,
+                            rs.getString("name"),
+                            rs.getString("image"),
+                            rs.getBigDecimal("price"),
+                            rs.getInt("quantity"),
+                            rs.getString("description"),
+                            rs.getDate("created_at"),
+                            rs.getString("created_by"),
+                            rs.getDate("deletedAt"),
+                            rs.getString("deleteBy"),
+                            rs.getBoolean("isDeleted"),
+                            rs.getDate("updated_at"),
+                            rs.getString("status"),
+                            zoneNames // Adding the zone names to the product
+                    );
+
+                    products.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+    
+    public List<Products> searchProductsByName(String name) {
+        List<Products> products = new ArrayList<>();
+
+        // Ensure connection is open
+        if (connection == null) {
+            logSevere("Error: Cannot connect to database!");
+            return products;
+        }
+
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        String sql = "SELECT * FROM Products WHERE name LIKE ? AND isDeleted = false";
+
+        try {
+            pst = connection.prepareStatement(sql);
+            pst.setString(1, "%" + name + "%");
+            rs = pst.executeQuery();
+
+            while (rs.next()) {
+                products.add(getFromResultSet(rs));
+            }
+        } catch (SQLException ex) {
+            logSevere("Error searching products by name: " + name, ex);
+        } finally {
+            // Close ResultSet and PreparedStatement
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
+            } catch (SQLException ex) {
+                logSevere("Error closing ResultSet or PreparedStatement", ex);
+            }
+        }
+
+        return products;
+    }
+    
+    public Products getProductById02(int id) {
+        List<Products> list = getProductById(id);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     public List<Products> searchProducts(String name, boolean onlyEdited, int storeId) {
