@@ -22,8 +22,8 @@ import dal.*;
 import entity.Customers;
 import java.util.Map;
 import jakarta.servlet.http.HttpSession;
-import entity.Order;
-import entity.OrderDetail;
+import entity.Orders;
+import entity.OrderDetails;
 import entity.Products;
 import entity.Users;
 import java.util.HashMap;
@@ -36,8 +36,8 @@ public class SaleController extends HttpServlet {
     
     private static final Logger LOGGER = Logger.getLogger(SaleController.class.getName());
     private productsDAO daoProduct;
-    private OrderDAO daoOrder;
-    private OrderDetailDAO daoOrderDetails;
+    private OrdersDAO daoOrder;
+    private OrderDetailsDAO daoOrderDetails;
     private customerDAO daoCustomer;
     private userDAO daoAccount;
     
@@ -49,17 +49,14 @@ public class SaleController extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         daoProduct = new productsDAO();
-        daoOrder = new OrderDAO();
-        daoOrderDetails = new OrderDetailDAO();
+        daoOrder = new OrdersDAO();
+        daoOrderDetails = new OrderDetailsDAO();
         daoCustomer = new customerDAO();
         daoAccount = new userDAO();
     }
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession();
-        String storeIDStr = (String) session.getAttribute("storeID");
-        int storeID = Integer.parseInt(storeIDStr);
         try {
             String action = req.getParameter("action");
             
@@ -391,7 +388,7 @@ public class SaleController extends HttpServlet {
             } 
             
             // Tạo đối tượng Order
-            Order order = Order.builder()
+            Orders order = Orders.builder()
                     .orderDate(new Date())
                     .totalAmount(totalInt)
                     .customerID(customerIdInt)
@@ -466,7 +463,7 @@ public class SaleController extends HttpServlet {
                     }
                     
                     // Tạo chi tiết đơn hàng
-                    OrderDetail orderDetail = OrderDetail.builder()
+                    OrderDetails orderDetail = OrderDetails.builder()
                             .orderID(orderId)
                             .productID(productId)
                             .quantity(quantity)
@@ -807,7 +804,11 @@ public class SaleController extends HttpServlet {
                 jsonBuilder.append("\"productName\":\"").append(product.getName().replace("\"", "\\\"")).append("\",");
                 jsonBuilder.append("\"price\":").append(product.getPrice()).append(",");
                 jsonBuilder.append("\"stockQuantity\":").append(product.getQuantity()).append(",");
-                jsonBuilder.append("\"imageURL\":\"").append(product.getImage()!= null ? product.getImage().replace("\"", "\\\"") : "").append("\"");
+                jsonBuilder.append("\"imageURL\":\"")
+                .append(product.getImage() != null 
+                    ? "/ISP392_Project/views/product/images/" + product.getImage().replace("\"", "\\\"") 
+                    : "")
+                .append("\"");
                 jsonBuilder.append("}");
                 
                 if (i < products.size() - 1) {

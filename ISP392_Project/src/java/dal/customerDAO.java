@@ -19,6 +19,24 @@ public class customerDAO extends DBContext {
 
     debtDAO debtDao = new debtDAO();
 
+    public List<Customers> findAll() {
+        List<Customers> customersList = new ArrayList<>();
+        String sql = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, deleteBy, store_id, status FROM customers";
+
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+
+            while (rs.next()) {
+                Customers customer = mapResultSetToCustomer(rs);
+                customersList.add(customer);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return customersList;
+    }
+
     public List<String> getAllCustomerNames() {
         List<String> list = new ArrayList<>();
         String sql = "SELECT name FROM Customers";

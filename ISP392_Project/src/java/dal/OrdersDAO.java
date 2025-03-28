@@ -1,6 +1,6 @@
 package dal;
 
-import entity.Order;
+import entity.Orders;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,16 +15,16 @@ import java.sql.Statement;
 /**
  * Data Access Object for Order
  */
-public class OrderDAO extends DBContext {
-    
-    private static final Logger LOGGER = Logger.getLogger(OrderDAO.class.getName());
+public class OrdersDAO extends DBContext {
+
+    private static final Logger LOGGER = Logger.getLogger(OrdersDAO.class.getName());
     private static final String RED_COLOR = "\u001B[31m";
     private static final String RESET_COLOR = "\u001B[0m";
-    
+
     /**
      * Constructor
      */
-    public OrderDAO() {
+    public OrdersDAO() {
         super();
     }
 
@@ -40,11 +40,12 @@ public class OrderDAO extends DBContext {
 
     /**
      * Get all orders from database
+     *
      * @return List containing all orders
      */
-    public List<Order> getAllOrders() {
-        List<Order> orders = new ArrayList<>();
-        
+    public List<Orders> getAllOrders() {
+        List<Orders> orders = new ArrayList<>();
+
         // Ensure connection is open
         if (connection == null) {
             logSevere("Error: Cannot connect to database!");
@@ -53,8 +54,8 @@ public class OrderDAO extends DBContext {
 
         PreparedStatement pst = null;
         ResultSet rs = null;
-        String sql = "SELECT * FROM Orders";
-        
+        String sql = "SELECT * FROM Orders ORDER BY ID DESC";
+
         try {
             pst = connection.prepareStatement(sql);
             rs = pst.executeQuery();
@@ -65,15 +66,15 @@ public class OrderDAO extends DBContext {
                 Integer totalAmount = rs.getInt("TotalAmount");
                 Integer customerId = rs.getInt("CustomerID");
                 Integer employeeId = rs.getInt("EmployeesID");
-                
-                Order order = Order.builder()
+
+                Orders order = Orders.builder()
                         .orderID(id)
                         .orderDate(orderDate)
                         .totalAmount(totalAmount)
                         .customerID(customerId)
                         .employeeID(employeeId)
                         .build();
-                
+
                 orders.add(order);
             }
         } catch (SQLException ex) {
@@ -81,8 +82,12 @@ public class OrderDAO extends DBContext {
         } finally {
             // Close ResultSet and PreparedStatement
             try {
-                if (rs != null) rs.close();
-                if (pst != null) pst.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
             } catch (SQLException ex) {
                 logSevere("Error closing ResultSet or PreparedStatement", ex);
             }
@@ -91,13 +96,70 @@ public class OrderDAO extends DBContext {
         return orders;
     }
 
+    public List<Orders> getOrdersWithPagination(int start, int recordsPerPage) {
+        List<Orders> orders = new ArrayList<>();
+
+        // Ensure connection is open
+        if (connection == null) {
+            logSevere("Error: Cannot connect to database!");
+            return orders;
+        }
+
+        String query = "SELECT * FROM Orders ORDER BY ID DESC LIMIT ?, ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, start);
+            ps.setInt(paramIndex++, recordsPerPage);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Orders order = Orders.builder()
+                            .orderID(rs.getInt("ID"))
+                            .orderDate(rs.getDate("OrderDate"))
+                            .totalAmount(rs.getInt("TotalAmount"))
+                            .customerID(rs.getInt("CustomerID"))
+                            .employeeID(rs.getInt("EmployeesID"))
+                            .build();
+                    orders.add(order);
+                }
+            }
+        } catch (SQLException e) {
+            logSevere("Error retrieving paginated orders", e);
+        }
+        return orders;
+    }
+
+    public int getTotalOrderCount() {
+        int totalOrders = 0;
+        String sql = "SELECT COUNT(*) FROM Orders"; // No status filtering
+
+        // Ensure connection is open
+        if (connection == null) {
+            logSevere("Error: Cannot connect to database!");
+            return totalOrders;
+        }
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                totalOrders = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            logSevere("Error retrieving total order count", e);
+        }
+
+        return totalOrders;
+    }
+
     /**
      * Get order information by ID
+     *
      * @param orderId ID of the order to retrieve
      * @return Order object or null if not found
      */
-    public Order getOrderById(Integer orderId) {
-        Order order = null;
+    public Orders getOrderById(Integer orderId) {
+        Orders order = null;
         String sql = "SELECT * FROM Orders WHERE ID = ?";
 
         // Ensure connection is open
@@ -108,11 +170,11 @@ public class OrderDAO extends DBContext {
 
         PreparedStatement pst = null;
         ResultSet rs = null;
-        
+
         try {
             pst = connection.prepareStatement(sql);
             pst.setInt(1, orderId);  // Set parameter for PreparedStatement
-            
+
             rs = pst.executeQuery();
             if (rs.next()) {
                 Integer id = rs.getInt("ID");
@@ -120,8 +182,8 @@ public class OrderDAO extends DBContext {
                 Integer totalAmount = rs.getInt("TotalAmount");
                 Integer customerId = rs.getInt("CustomerID");
                 Integer employeeId = rs.getInt("EmployeesID");
-                
-                order = Order.builder()
+
+                order = Orders.builder()
                         .orderID(id)
                         .orderDate(orderDate)
                         .totalAmount(totalAmount)
@@ -134,8 +196,12 @@ public class OrderDAO extends DBContext {
         } finally {
             // Close ResultSet and PreparedStatement
             try {
-                if (rs != null) rs.close();
-                if (pst != null) pst.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
             } catch (SQLException ex) {
                 logSevere("Error closing ResultSet or PreparedStatement", ex);
             }
@@ -143,35 +209,36 @@ public class OrderDAO extends DBContext {
 
         return order;
     }
-    
+
     /**
      * Add new order to database
+     *
      * @param order Order object to add
      * @return true if successful, false if failed
      */
-    public boolean addOrder(Order order) {
+    public boolean addOrder(Orders order) {
         String sql = "INSERT INTO Orders (OrderDate, TotalAmount, CustomerID, EmployeesID) "
-                   + "VALUES (?, ?, ?, ?)";
-        
+                + "VALUES (?, ?, ?, ?)";
+
         // Ensure connection is open
         if (connection == null) {
             logSevere("Error: Cannot connect to database!");
             return false;
         }
-        
+
         PreparedStatement pst = null;
-        
+
         try {
             pst = connection.prepareStatement(sql);
-            
+
             // Convert java.util.Date to java.sql.Date
             java.sql.Date sqlDate = new java.sql.Date(order.getOrderDate().getTime());
-            
+
             pst.setDate(1, sqlDate);
             pst.setInt(2, order.getTotalAmount());
             pst.setInt(3, order.getCustomerID());
             pst.setInt(4, order.getEmployeeID());
-            
+
             int rowsAffected = pst.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException ex) {
@@ -180,42 +247,45 @@ public class OrderDAO extends DBContext {
         } finally {
             // Close PreparedStatement
             try {
-                if (pst != null) pst.close();
+                if (pst != null) {
+                    pst.close();
+                }
             } catch (SQLException ex) {
                 logSevere("Error closing PreparedStatement", ex);
             }
         }
     }
-    
+
     /**
      * Update order information
+     *
      * @param order Order object to update
      * @return true if successful, false if failed
      */
-    public boolean updateOrder(Order order) {
+    public boolean updateOrder(Orders order) {
         String sql = "UPDATE Orders SET OrderDate = ?, TotalAmount = ?, CustomerID = ?, "
-                   + "EmployeesID = ? WHERE ID = ?";
-        
+                + "EmployeesID = ? WHERE ID = ?";
+
         // Ensure connection is open
         if (connection == null) {
             logSevere("Error: Cannot connect to database!");
             return false;
         }
-        
+
         PreparedStatement pst = null;
-        
+
         try {
             pst = connection.prepareStatement(sql);
-            
+
             // Convert java.util.Date to java.sql.Date
             java.sql.Date sqlDate = new java.sql.Date(order.getOrderDate().getTime());
-            
+
             pst.setDate(1, sqlDate);
             pst.setInt(2, order.getTotalAmount());
             pst.setInt(3, order.getCustomerID());
             pst.setInt(4, order.getEmployeeID());
             pst.setInt(5, order.getOrderID());
-            
+
             int rowsAffected = pst.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException ex) {
@@ -224,33 +294,36 @@ public class OrderDAO extends DBContext {
         } finally {
             // Close PreparedStatement
             try {
-                if (pst != null) pst.close();
+                if (pst != null) {
+                    pst.close();
+                }
             } catch (SQLException ex) {
                 logSevere("Error closing PreparedStatement", ex);
             }
         }
     }
-    
+
     /**
      * Delete order from database
+     *
      * @param orderId ID of the order to delete
      * @return true if successful, false if failed
      */
     public boolean deleteOrder(Integer orderId) {
         String sql = "DELETE FROM Orders WHERE ID = ?";
-        
+
         // Ensure connection is open
         if (connection == null) {
             logSevere("Error: Cannot connect to database!");
             return false;
         }
-        
+
         PreparedStatement pst = null;
-        
+
         try {
             pst = connection.prepareStatement(sql);
             pst.setInt(1, orderId);
-            
+
             int rowsAffected = pst.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException ex) {
@@ -259,51 +332,54 @@ public class OrderDAO extends DBContext {
         } finally {
             // Close PreparedStatement
             try {
-                if (pst != null) pst.close();
+                if (pst != null) {
+                    pst.close();
+                }
             } catch (SQLException ex) {
                 logSevere("Error closing PreparedStatement", ex);
             }
         }
     }
-    
+
     /**
      * Get orders by customer ID
+     *
      * @param customerId ID of the customer
      * @return List containing orders for the customer
      */
-    public List<Order> getOrdersByCustomerId(Integer customerId) {
-        List<Order> orders = new ArrayList<>();
+    public List<Orders> getOrdersByCustomerId(Integer customerId) {
+        List<Orders> orders = new ArrayList<>();
         String sql = "SELECT * FROM Orders WHERE CustomerID = ?";
-        
+
         // Ensure connection is open
         if (connection == null) {
             logSevere("Error: Cannot connect to database!");
             return orders;
         }
-        
+
         PreparedStatement pst = null;
         ResultSet rs = null;
-        
+
         try {
             pst = connection.prepareStatement(sql);
             pst.setInt(1, customerId);
-            
+
             rs = pst.executeQuery();
-            
+
             while (rs.next()) {
                 Integer id = rs.getInt("ID");
                 Date orderDate = rs.getDate("OrderDate");
                 Integer totalAmount = rs.getInt("TotalAmount");
                 Integer employeeId = rs.getInt("EmployeesID");
-                
-                Order order = Order.builder()
+
+                Orders order = Orders.builder()
                         .orderID(id)
                         .orderDate(orderDate)
                         .totalAmount(totalAmount)
                         .customerID(customerId)
                         .employeeID(employeeId)
                         .build();
-                
+
                 orders.add(order);
             }
         } catch (SQLException ex) {
@@ -311,18 +387,23 @@ public class OrderDAO extends DBContext {
         } finally {
             // Close ResultSet and PreparedStatement
             try {
-                if (rs != null) rs.close();
-                if (pst != null) pst.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
             } catch (SQLException ex) {
                 logSevere("Error closing ResultSet or PreparedStatement", ex);
             }
         }
-        
+
         return orders;
     }
-    
+
     /**
      * Get orders for report with filtering options
+     *
      * @param fromDate Start date for filtering
      * @param toDate End date for filtering
      * @param orderIdSearch Order ID to search for
@@ -330,12 +411,12 @@ public class OrderDAO extends DBContext {
      * @param employeeSearch Employee name to search for
      * @return List of filtered orders
      */
-    public List<Order> getOrdersForReport(Date fromDate, Date toDate, String orderIdSearch, String customerSearch, String employeeSearch) {
-        List<Order> orders = new ArrayList<>();
-        String sql = "SELECT o.* FROM Orders o " +
-                     "LEFT JOIN Customer c ON o.CustomerID = c.ID " +
-                     "LEFT JOIN Employees e ON o.EmployeesID = e.ID " +
-                     "WHERE 1=1 ";
+    public List<Orders> getOrdersForReport(Date fromDate, Date toDate, String orderIdSearch, String customerSearch, String employeeSearch) {
+        List<Orders> orders = new ArrayList<>();
+        String sql = "SELECT o.* FROM Orders o "
+                + "LEFT JOIN Customer c ON o.CustomerID = c.ID "
+                + "LEFT JOIN Employees e ON o.EmployeesID = e.ID "
+                + "WHERE 1=1 ";
 
         List<Object> params = new ArrayList<>();
 
@@ -371,10 +452,10 @@ public class OrderDAO extends DBContext {
 
         PreparedStatement pst = null;
         ResultSet rs = null;
-        
+
         try {
             pst = connection.prepareStatement(sql);
-            
+
             // Set parameters for the query
             for (int i = 0; i < params.size(); i++) {
                 Object param = params.get(i);
@@ -389,7 +470,7 @@ public class OrderDAO extends DBContext {
 
             rs = pst.executeQuery();
             while (rs.next()) {
-                Order order = Order.builder()
+                Orders order = Orders.builder()
                         .orderID(rs.getInt("ID"))
                         .orderDate(rs.getDate("OrderDate"))
                         .totalAmount(rs.getInt("TotalAmount"))
@@ -402,8 +483,12 @@ public class OrderDAO extends DBContext {
             logSevere("Error getting orders for report", ex);
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (pst != null) pst.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
             } catch (SQLException ex) {
                 logSevere("Error closing ResultSet or PreparedStatement", ex);
             }
@@ -413,36 +498,37 @@ public class OrderDAO extends DBContext {
 
     /**
      * Insert order into database and return the generated ID
+     *
      * @param order Order object to insert
      * @return ID of the inserted order, or 0 if insertion failed
      */
-    public int insertOrder(Order order) {
+    public int insertOrder(Orders order) {
         int generatedId = 0;
         String sql = "INSERT INTO Orders (OrderDate, TotalAmount, CustomerID, EmployeesID) "
-                   + "VALUES (?, ?, ?, ?)";
-        
+                + "VALUES (?, ?, ?, ?)";
+
         // Ensure connection is open
         if (connection == null) {
             logSevere("Error: Cannot connect to database!");
             return 0;
         }
-        
+
         PreparedStatement pst = null;
         ResultSet rs = null;
-        
+
         try {
             pst = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            
+
             // Convert java.util.Date to java.sql.Date
             java.sql.Date sqlDate = new java.sql.Date(order.getOrderDate().getTime());
-            
+
             pst.setDate(1, sqlDate);
             pst.setInt(2, order.getTotalAmount());
             pst.setObject(3, order.getCustomerID());
             pst.setInt(4, order.getEmployeeID());
-            
+
             int affectedRows = pst.executeUpdate();
-            
+
             if (affectedRows > 0) {
                 rs = pst.getGeneratedKeys();
                 if (rs.next()) {
@@ -450,28 +536,32 @@ public class OrderDAO extends DBContext {
                     order.setOrderID(generatedId);
                 }
             }
-            
+
         } catch (SQLException ex) {
             logSevere("Error inserting order", ex);
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (pst != null) pst.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
             } catch (SQLException ex) {
                 logSevere("Error closing ResultSet or PreparedStatement", ex);
             }
         }
-        
+
         return generatedId;
     }
-    
+
     /**
      * Main method to test the DAO
      */
     public static void main(String[] args) {
-        OrderDAO daoOrder = new OrderDAO();
-        List<Order> orders = daoOrder.getAllOrders();
-        for (Order order : orders) {
+        OrdersDAO daoOrder = new OrdersDAO();
+        List<Orders> orders = daoOrder.getAllOrders();
+        for (Orders order : orders) {
             System.out.println(order);
         }
     }

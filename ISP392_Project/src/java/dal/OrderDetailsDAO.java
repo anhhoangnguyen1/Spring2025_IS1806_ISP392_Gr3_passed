@@ -1,6 +1,6 @@
 package dal;
 
-import entity.OrderDetail;
+import entity.OrderDetails;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,16 +12,16 @@ import java.util.logging.Logger;
 /**
  * Data Access Object for OrderDetail
  */
-public class OrderDetailDAO extends DBContext {
+public class OrderDetailsDAO extends DBContext {
     
-    private static final Logger LOGGER = Logger.getLogger(OrderDetailDAO.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(OrderDetailsDAO.class.getName());
     private static final String RED_COLOR = "\u001B[31m";
     private static final String RESET_COLOR = "\u001B[0m";
     
     /**
      * Constructor
      */
-    public OrderDetailDAO() {
+    public OrderDetailsDAO() {
         super();
     }
 
@@ -41,8 +41,8 @@ public class OrderDetailDAO extends DBContext {
      * @return OrderDetail object
      * @throws SQLException if a database access error occurs
      */
-    private OrderDetail getFromResultSet(ResultSet rs) throws SQLException {
-        return OrderDetail.builder()
+    private OrderDetails getFromResultSet(ResultSet rs) throws SQLException {
+        return OrderDetails.builder()
                 .orderDetailID(rs.getInt("ID"))
                 .quantity(rs.getInt("Quantity"))
                 .price(rs.getInt("Price"))
@@ -55,48 +55,48 @@ public class OrderDetailDAO extends DBContext {
      * Get all order details from database
      * @return List containing all order details
      */
-    public List<OrderDetail> getAllOrderDetails() {
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        
-        // Ensure connection is open
-        if (connection == null) {
-            logSevere("Error: Cannot connect to database!");
+        public List<OrderDetails> getAllOrderDetails() {
+            List<OrderDetails> orderDetails = new ArrayList<>();
+
+            // Ensure connection is open
+            if (connection == null) {
+                logSevere("Error: Cannot connect to database!");
+                return orderDetails;
+            }
+
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            String sql = "SELECT * FROM OrderDetails";
+
+            try {
+                pst = connection.prepareStatement(sql);
+                rs = pst.executeQuery();
+
+                while (rs.next()) {
+                    orderDetails.add(getFromResultSet(rs));
+                }
+            } catch (SQLException ex) {
+                logSevere("Error retrieving order detail list", ex);
+            } finally {
+                // Close ResultSet and PreparedStatement
+                try {
+                    if (rs != null) rs.close();
+                    if (pst != null) pst.close();
+                } catch (SQLException ex) {
+                    logSevere("Error closing ResultSet or PreparedStatement", ex);
+                }
+            }
+
             return orderDetails;
         }
-
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        String sql = "SELECT * FROM OrderDetails";
-        
-        try {
-            pst = connection.prepareStatement(sql);
-            rs = pst.executeQuery();
-
-            while (rs.next()) {
-                orderDetails.add(getFromResultSet(rs));
-            }
-        } catch (SQLException ex) {
-            logSevere("Error retrieving order detail list", ex);
-        } finally {
-            // Close ResultSet and PreparedStatement
-            try {
-                if (rs != null) rs.close();
-                if (pst != null) pst.close();
-            } catch (SQLException ex) {
-                logSevere("Error closing ResultSet or PreparedStatement", ex);
-            }
-        }
-
-        return orderDetails;
-    }
 
     /**
      * Get order detail information by ID
      * @param orderDetailId ID of the order detail to retrieve
      * @return OrderDetail object or null if not found
      */
-    public OrderDetail getOrderDetailById(Integer orderDetailId) {
-        OrderDetail orderDetail = null;
+    public OrderDetails getOrderDetailById(Integer orderDetailId) {
+        OrderDetails orderDetail = null;
         String sql = "SELECT * FROM OrderDetails WHERE ID = ?";
 
         // Ensure connection is open
@@ -136,7 +136,7 @@ public class OrderDetailDAO extends DBContext {
      * @param orderDetail OrderDetail object to add
      * @return true if successful, false if failed
      */
-    public boolean addOrderDetail(OrderDetail orderDetail) {
+    public boolean addOrderDetail(OrderDetails orderDetail) {
         String sql = "INSERT INTO OrderDetails (Quantity, Price, OrdersID, ProductsID) "
                    + "VALUES (?, ?, ?, ?)";
         
@@ -176,7 +176,7 @@ public class OrderDetailDAO extends DBContext {
      * @param orderDetail OrderDetail object to update
      * @return true if successful, false if failed
      */
-    public boolean updateOrderDetail(OrderDetail orderDetail) {
+    public boolean updateOrderDetail(OrderDetails orderDetail) {
         String sql = "UPDATE OrderDetails SET Quantity = ?, Price = ?, OrdersID = ?, "
                    + "ProductsID = ? WHERE ID = ?";
         
@@ -252,8 +252,8 @@ public class OrderDetailDAO extends DBContext {
      * @param orderId ID of the order
      * @return List containing order details for the order
      */
-    public List<OrderDetail> getOrderDetailsByOrderId(Integer orderId) {
-        List<OrderDetail> orderDetails = new ArrayList<>();
+    public List<OrderDetails> getOrderDetailsByOrderId(Integer orderId) {
+        List<OrderDetails> orderDetails = new ArrayList<>();
         String sql = "SELECT * FROM OrderDetails WHERE OrdersID = ?";
         
         // Ensure connection is open
@@ -294,8 +294,8 @@ public class OrderDetailDAO extends DBContext {
      * @param productId ID of the product
      * @return List containing order details for the product
      */
-    public List<OrderDetail> getOrderDetailsByProductId(Integer productId) {
-        List<OrderDetail> orderDetails = new ArrayList<>();
+    public List<OrderDetails> getOrderDetailsByProductId(Integer productId) {
+        List<OrderDetails> orderDetails = new ArrayList<>();
         String sql = "SELECT * FROM OrderDetails WHERE ProductsID = ?";
         
         // Ensure connection is open
@@ -336,14 +336,14 @@ public class OrderDetailDAO extends DBContext {
      * @param orderDetails List of OrderDetail objects to insert
      * @return true if all insertions were successful, false otherwise
      */
-    public boolean insertOrderDetails(List<OrderDetail> orderDetails) {
+    public boolean insertOrderDetails(List<OrderDetails> orderDetails) {
         if (orderDetails == null || orderDetails.isEmpty()) {
             return false;
         }
         
         boolean allSuccessful = true;
         
-        for (OrderDetail detail : orderDetails) {
+        for (OrderDetails detail : orderDetails) {
             if (!addOrderDetail(detail)) {
                 allSuccessful = false;
             }
@@ -356,9 +356,9 @@ public class OrderDetailDAO extends DBContext {
      * Main method to test the DAO
      */
     public static void main(String[] args) {
-        OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
-        List<OrderDetail> orderDetails = orderDetailDAO.getAllOrderDetails();
-        for (OrderDetail orderDetail : orderDetails) {
+        OrderDetailsDAO orderDetailDAO = new OrderDetailsDAO();
+        List<OrderDetails> orderDetails = orderDetailDAO.getAllOrderDetails();
+        for (OrderDetails orderDetail : orderDetails) {
             System.out.println(orderDetail);
         }
     }

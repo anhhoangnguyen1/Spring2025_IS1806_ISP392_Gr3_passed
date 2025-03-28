@@ -18,6 +18,23 @@ import java.util.List;
 
 public class userDAO extends DBContext {
 
+    public List<Users> findAll() {
+        List<Users> usersList = new ArrayList<>();
+        String sqlUsers = "SELECT * FROM users";
+
+        try (PreparedStatement st = connection.prepareStatement(sqlUsers); ResultSet rs = st.executeQuery()) {
+
+            while (rs.next()) {
+                Users user = mapResultSetToUser(rs);
+                usersList.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return usersList;
+    }
+
     public List<Users> viewAllUsers(int index) {
         List<Users> usersList = new ArrayList<>();
         String sqlUsers = "SELECT * FROM users ORDER BY id LIMIT 10 OFFSET ?";

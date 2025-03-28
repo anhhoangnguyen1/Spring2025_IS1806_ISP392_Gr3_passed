@@ -102,6 +102,54 @@ function confirmDeleteSelected(event) {
     }
 }
 
+function toggleSelectAll(source) {
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = source.checked;
+    });
+}
+
+function deleteSelected() {
+
+    const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
+
+    if (selectedCheckboxes.length === 0) {
+        alert('No products selected.');
+        return;
+    }
+
+    let query = 'Products?service=deleteProduct';
+    selectedCheckboxes.forEach((checkbox, index) => {
+        query += `&id=${checkbox.value}`;
+    });
+
+    window.location.href = query;
+}
+
+document.getElementById("toggle-checkbox-btn").addEventListener("click", function () {
+    const checkboxColumns = document.querySelectorAll('.checkbox-column');
+
+    if (checkboxColumns.length === 0)
+        return;
+
+    const isHidden = checkboxColumns[0].style.display === 'none' || checkboxColumns[0].style.display === '';
+
+    checkboxColumns.forEach(column => {
+        column.style.display = isHidden ? 'table-cell' : 'none';
+    });
+    const icon = this.querySelector("i");
+    if (icon) {
+        icon.classList.toggle("fa-list-check");
+        icon.classList.toggle("fa-eye-slash");
+    }
+});
+//Check box tất cả sản phẩm
+function toggleSelectAll(source) {
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = source.checked;
+    });
+}
 const dropArea = document.getElementById("dropArea");
 const fileInput = document.getElementById("file");
 

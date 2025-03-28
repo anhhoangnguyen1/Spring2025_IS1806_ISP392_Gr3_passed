@@ -707,6 +707,45 @@ public class productsDAO extends DBContext {
         return products;
     }
 
+    public List<Products> findAllAsList() {
+        List<Products> products = new ArrayList<>();
+
+        // Ensure connection is open
+        if (connection == null) {
+            logSevere("Error: Cannot connect to database!");
+            return products;
+        }
+
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        String sql = "SELECT * FROM Products WHERE isDeleted = false";
+
+        try {
+            pst = connection.prepareStatement(sql);
+            rs = pst.executeQuery();
+
+            while (rs.next()) {
+                products.add(getFromResultSet(rs));
+            }
+        } catch (SQLException ex) {
+            logSevere("Error retrieving products list", ex);
+        } finally {
+            // Close ResultSet and PreparedStatement
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
+            } catch (SQLException ex) {
+                logSevere("Error closing ResultSet or PreparedStatement", ex);
+            }
+        }
+
+        return products;
+    }
+
     public Vector<Products> findAll() {
         Vector<Products> products = new Vector<>();
 
