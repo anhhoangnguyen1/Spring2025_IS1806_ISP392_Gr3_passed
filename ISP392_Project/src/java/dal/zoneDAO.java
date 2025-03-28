@@ -64,7 +64,12 @@ public class zoneDAO extends DBContext {
             sql += "AND store_id = ? ";
         }
 
-        sql += "ORDER BY " + (sortBy != null ? sortBy : "id") + " LIMIT 5 OFFSET ?";
+        // Mặc định sắp xếp theo ID tăng dần
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            sortBy = "id";
+        }
+
+        sql += "ORDER BY " + sortBy + " ASC LIMIT 5 OFFSET ?";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             int paramIndex = 1;
@@ -134,14 +139,13 @@ public class zoneDAO extends DBContext {
                 + "WHERE z.isDeleted = 0 ";
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql += "AND (LOWER(z.name) LIKE ? OR LOWER(p.name) LIKE ?) ";
+            sql += "AND (LOWER(z.name) LIKE ? OR LOWER(p.name) LIKE ? OR LOWER(z.description) LIKE ?) ";
         }
 
         if (!showInactive) {
             sql += "AND z.status = 'Active' ";
         }
 
-        // Lọc theo storeId (áp dụng cho cả owner và staff)
         if (storeId != null) {
             sql += "AND z.store_id = ? ";
         }
@@ -153,8 +157,9 @@ public class zoneDAO extends DBContext {
 
             if (keyword != null && !keyword.trim().isEmpty()) {
                 String searchKeyword = "%" + keyword.toLowerCase() + "%";
-                st.setString(paramIndex++, searchKeyword); // Tìm kiếm Zone Name
-                st.setString(paramIndex++, searchKeyword); // Tìm kiếm Product Name
+                st.setString(paramIndex++, searchKeyword);
+                st.setString(paramIndex++, searchKeyword);
+                st.setString(paramIndex++, searchKeyword);
             }
 
             if (storeId != null) {
@@ -196,25 +201,59 @@ public class zoneDAO extends DBContext {
     }
 
     public void insertZone(Zone zone) {
-        String sql = "INSERT INTO Zones (name, description, store_id, created_at, created_by, status, history) "
-                + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, '[]')";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setString(1, zone.getName());
-            if (zone.getDescription() != null) {
-                st.setString(2, zone.getDescription());
-            } else {
-                st.setNull(2, java.sql.Types.VARCHAR);
+        try {
+            connection.setAutoCommit(false);
+            
+            // Lấy ID lớn nhất hiện tại
+            String maxIdSql = "SELECT MAX(id) FROM Zones WHERE isDeleted = 0";
+            int maxId = 0;
+            try (PreparedStatement st = connection.prepareStatement(maxIdSql)) {
+                ResultSet rs = st.executeQuery();
+                if (rs.next()) {
+                    maxId = rs.getInt(1);
+                }
             }
-            if (zone.getStoreId() != null) {
-                st.setInt(3, zone.getStoreId().getId());
-            } else {
-                st.setNull(3, java.sql.Types.INTEGER);
+            
+            // Đẩy tất cả các zone hiện tại xuống một đơn vị
+            String updateSql = "UPDATE Zones SET id = id + 1 WHERE isDeleted = 0 ORDER BY id DESC";
+            try (PreparedStatement st = connection.prepareStatement(updateSql)) {
+                st.executeUpdate();
             }
-            st.setString(4, zone.getCreatedBy());
-            st.setString(5, zone.getStatus());
-            st.executeUpdate();
+            
+            // Thêm zone mới với ID = 1
+            String insertSql = "INSERT INTO Zones (id, name, description, store_id, created_at, created_by, status, history) "
+                    + "VALUES (1, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, '[]')";
+            try (PreparedStatement st = connection.prepareStatement(insertSql)) {
+                st.setString(1, zone.getName());
+                if (zone.getDescription() != null) {
+                    st.setString(2, zone.getDescription());
+                } else {
+                    st.setNull(2, java.sql.Types.VARCHAR);
+                }
+                if (zone.getStoreId() != null) {
+                    st.setInt(3, zone.getStoreId().getId());
+                } else {
+                    st.setNull(3, java.sql.Types.INTEGER);
+                }
+                st.setString(4, zone.getCreatedBy());
+                st.setString(5, zone.getStatus());
+                st.executeUpdate();
+            }
+            
+            connection.commit();
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             e.printStackTrace();
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException autoCommitEx) {
+                autoCommitEx.printStackTrace();
+            }
         }
     }
 
