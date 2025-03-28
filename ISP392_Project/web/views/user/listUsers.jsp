@@ -18,6 +18,7 @@
             .table-container {
                 overflow-x: auto;
                 max-width: 100%;
+                flex-grow: 1;
             }
             .table {
                 width: 100%;
@@ -26,6 +27,38 @@
             .sortable {
                 cursor: pointer;
             }
+            .alert .close {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                padding: 0;
+                border: none;
+                background: transparent;
+                font-size: 30px;
+
+
+            }
+            #pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .page-select {
+                display: flex;
+                align-items: center;
+            }
+
+            .page-select label {
+                margin-right: 10px;
+            }
+
+            .page-select select {
+                width: 100px;
+                padding: 5px;
+            }
+
         </style>
     </head>
     <body>
@@ -41,13 +74,16 @@
                 <c:remove var="Notification" scope="session" />
             </c:if>
             <c:if test="${not empty sessionScope.successMessage}">
-                <div class="alert alert-success">
+
+                <div class="alert alert-success alert-dismissible fade show">
                     <strong>Success!</strong> ${sessionScope.successMessage}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <c:set var="successMessage" value="${sessionScope.successMessage}" />
                 <c:remove var="successMessage" />
             </c:if>
-
 
 
             <div class="search-box">
@@ -55,9 +91,7 @@
                 <input type="text" id="searchInput" class="input-box" name="searchUser"
                        placeholder="Search for information."
                        value="${searchUser}" autocomplete="off" />
-                <button type="button" class="clear-btn" id="clearBtn">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+
                 <button type="button" class="search-btn">
                     <i class="fa-solid fa-search"></i>
                 </button>
@@ -96,94 +130,102 @@
                     </thead>
                     <tbody id = "userTableBody">
                         <c:forEach var="user" items="${list}">
-                              <c:if test="${(sessionScope.role == 'admin' && user.role == 'owner') || (sessionScope.role == 'owner' && user.storeId == sessionScope.storeId) || sessionScope.role == 'admin'}">
-                            <tr>
-                                <td>${user.id}</td>
-                                <td>${user.role}</td>
-                                <td>${user.name}</td>
-                                <td>${user.phone}</td>
-                                <td>${user.address}</td>
-                                <td>${user.gender}</td>
-                                <td>${user.dob}</td>
-                                <td>${user.email}</td>
-                                <td>${user.status}</td>
-                                <td class="sticky-col">
-                                    <a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=${user.id}" class="btn btn-outline-primary">
-                                        Edit
-                                    </a>
+                            <c:if test="${(sessionScope.role == 'admin' && user.role == 'owner') || (sessionScope.role == 'owner' && user.storeId == sessionScope.storeId) || sessionScope.role == 'admin'}">
+                                <tr>
+                                    <td>${user.id}</td>
+                                    <td>${user.role}</td>
+                                    <td>${user.name}</td>
+                                    <td>${user.phone}</td>
+                                    <td>${user.address}</td>
+                                    <td>${user.gender}</td>
+                                    <td>${user.dob}</td>
+                                    <td>${user.email}</td>
+                                    <td>${user.status}</td>
+                                    <td class="sticky-col">
+                                        <a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=${user.id}" class="btn btn-outline-primary">
+                                            Edit
+                                        </a>
 
-                                    <c:if test="${sessionScope.role == 'owner'}">
-                                        <c:if test="${user.status == 'Deactive'}">
-                                            <a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=${user.id}" class="btn btn-outline-success">UnBan</a>
+                                        <c:if test="${sessionScope.role == 'owner'}">
+                                            <c:if test="${user.status == 'Deactive'}">
+                                                <a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=${user.id}" class="btn btn-outline-success">UnBan</a>
+                                            </c:if>
+                                            <c:if test="${user.status != 'Deactive'}">
+                                                <a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=${user.id}" class="btn btn-outline-danger">Ban</a>
+                                            </c:if>
                                         </c:if>
-                                        <c:if test="${user.status != 'Deactive'}">
-                                            <a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=${user.id}" class="btn btn-outline-danger">Ban</a>
-                                        </c:if>
-                                    </c:if>
-                                </td>
-                            </tr>
-                              </c:if>
+                                    </td>
+                                </tr>
+                            </c:if>
                         </c:forEach>
                     </tbody>
                 </table>
-                <div class="container d-flex justify-content-center mt-4" id="pagination">
-                    <ul class="pagination">
-
-                        <c:if test="${index > 1}">
-                            <li class="page-item">
-                                <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
-                                    <i class="fa fa-angle-left"></i>
-                                </a>
-                            </li>
-                        </c:if>
-
-
-
-                        <li class="page-item ${index == 1 ? 'active' : ''}">
-                            <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}">1</a>
+            </div>
+            <div class="container d-flex justify-content-center mt-4" id="pagination">
+                <ul class="pagination">
+                    <c:if test="${index > 1}">
+                        <li class="page-item">
+                            <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
                         </li>
+                    </c:if>
 
+                    <li class="page-item ${index == 1 ? 'active' : ''}">
+                        <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}">1</a>
+                    </li>
 
-                        <c:if test="${index > 3}">
-                            <li class="page-item disabled">
-                                <span class="page-link">...</span>
+                    <c:if test="${index > 3}">
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    </c:if>
+
+                    <c:forEach var="user" items="${list}" begin="${index > 0 ? index : 1}">
+                        <c:if test="${page > 1 && page < endPage}">
+                            <li class="page-item ${index == page ? 'active' : ''}">
+                                <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                    ${page}
+                                </a>
                             </li>
                         </c:if>
+                    </c:forEach>
 
-                        <c:forEach var="user" items="${list}" begin="${index > 0 ? index : 1}">
-                            <c:if test="${page > 1 && page < endPage}">
-                                <li class="page-item ${index == page ? 'active' : ''}">
-                                    <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}">
-                                        ${page}
-                                    </a>
-                                </li>
-                            </c:if>
+                    <c:if test="${index < endPage - 2}">
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${endPage > 1}">
+                        <li class="page-item ${index == endPage ? 'active' : ''}">
+                            <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                ${endPage}
+                            </a>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${index < endPage}">
+                        <li class="page-item">
+                            <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        </li>
+                    </c:if>
+                </ul>
+
+                <!-- Dropdown Go to page -->
+                <div class="page-select">
+                    <label for="pageSelect" class="mr-2">Go to page: </label>
+                    <select id="pageSelect" class="form-control w-auto">
+                        <c:forEach var="page" begin="1" end="${endPage}">
+                            <option value="${page}" ${page == index ? 'selected' : ''}>${page}</option>
                         </c:forEach>
-                        <c:if test="${index < endPage - 2}">
-                            <li class="page-item disabled">
-                                <span class="page-link">...</span>
-                            </li>
-                        </c:if>
-
-                        <c:if test="${endPage > 1}">
-                            <li class="page-item ${index == endPage ? 'active' : ''}">
-                                <a class="page-link" href="Users?service=users&searchUser=${searchUser}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
-                                    ${endPage}
-                                </a>
-                            </li>
-                        </c:if>
-
-
-                        <c:if test="${index < endPage}">
-                            <li class="page-item">
-                                <a class="page-link" href=""Users?service=users&searchUser=${searchUser}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
-                                    <i class="fa fa-angle-right"></i>
-                                </a>
-                            </li>
-                        </c:if>
-                    </ul>
+                    </select>
                 </div>
             </div>
+
+
 
             <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
@@ -193,6 +235,12 @@
                 let currentSortBy = '${sortBy}';
                 let currentSortOrder = '${sortOrder}';
 
+                $('#pageSelect').on('change', function () {
+                    const selectedPage = $(this).val();
+                    const keyword = $('#searchInput').val().trim();
+                    searchUsers(keyword, selectedPage, currentSortBy, currentSortOrder);
+                });
+                
                 function searchUsers(keyword, page, sortBy, sortOrder) {
                     $.ajax({
                         url: '<%= request.getContextPath() %>/Users',
@@ -224,13 +272,11 @@
                         users.forEach(function (user) {
                             let banButton = '';
 
-                            // Kiểm tra nếu người dùng có role = 'owner' và user có role = 'staff'
+                            // Hiển thị các nút Ban/UnBan tùy thuộc vào trạng thái
                             if ('${sessionScope.role}' === 'owner') {
                                 if (user.status === 'Deactive') {
-                                    // Hiển thị nút UnBan nếu tài khoản có status = 'Deactive'
                                     banButton = '<a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=' + user.id + '" class="btn btn-outline-success">UnBan</a>';
                                 } else if (user.status === 'Active' && user.role === 'staff') {
-                                    // Hiển thị nút Ban nếu tài khoản có role = 'staff' và status là 'Active'
                                     banButton = '<a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=' + user.id + '" class="btn btn-outline-danger">Ban</a>';
                                 }
                             }
@@ -248,7 +294,6 @@
                                     '<td>' + user.status + '</td>' +
                                     '<td class="sticky-col">' +
                                     '<a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=' + user.id + '" class="btn btn-outline-primary">Edit</a>' +
-                                    // Hiển thị nút Ban hoặc UnBan tùy vào trạng thái
                                     banButton +
                                     '</td>' +
                                     '</tr>'
@@ -256,7 +301,6 @@
                         });
                     }
                 }
-
 
                 function updatePagination(endPage, currentIndex, keyword) {
                     const pagination = $('.pagination');
@@ -294,10 +338,23 @@
                         pagination.append('<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex + 1) + '"><i class="fa fa-angle-right"></i></a></li>');
                     }
 
+                    // Cập nhật dropdown số trang
+                    $('#pageSelect').empty();
+                    for (let page = 1; page <= endPage; page++) {
+                        $('#pageSelect').append('<option value="' + page + '" ' + (currentIndex === page ? 'selected' : '') + '>' + page + '</option>');
+                    }
+
                     $('.page-nav').on('click', function (e) {
                         e.preventDefault();
                         const page = $(this).data('page');
                         searchUsers(keyword, page, currentSortBy, currentSortOrder);
+                    });
+
+                    // Lắng nghe sự kiện thay đổi trên dropdown để chọn trang
+                    $('#pageSelect').on('change', function () {
+                        const selectedPage = $(this).val();  // Lấy số trang được chọn
+                        const keyword = $('#searchInput').val().trim();
+                        searchUsers(keyword, selectedPage, currentSortBy, currentSortOrder);
                     });
                 }
 
@@ -332,6 +389,7 @@
                     const currentIndex = ${index};
                     searchUsers('', currentIndex, currentSortBy, currentSortOrder);
                 }
+
             </script>
 
     </body>

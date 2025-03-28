@@ -18,6 +18,7 @@
             .table-container {
                 overflow-x: auto;
                 max-width: 100%;
+                flex-grow: 1;
             }
             .table {
                 width: 100%;
@@ -28,13 +29,35 @@
             }
             .alert .close {
                 position: absolute;
-                top: 10px; /* Điều chỉnh vị trí của nút tắt */
-                right: 10px; /* Điều chỉnh khoảng cách từ cạnh phải */
-                padding: 0; /* Xóa bỏ padding của nút */
-                border: none; /* Loại bỏ border */
-                background: transparent; /* Loại bỏ nền */
-                font-size: 30px; /* Điều chỉnh kích thước của nút */
+                top: 10px;
+                right: 10px;
+                padding: 0;
+                border: none;
+                background: transparent;
+                font-size: 30px;
             }
+            #pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center; 
+                gap: 10px; 
+            }
+
+            .page-select {
+                display: flex;
+                align-items: center;  
+            }
+
+            .page-select label {
+                margin-right: 10px; 
+            }
+
+            .page-select select {
+                width: 100px; 
+                padding: 5px;
+            }
+
+
         </style>
     </head>
     <body>
@@ -65,10 +88,7 @@
                 <input type="hidden" name="service" value="customers" />
                 <input type="text" id="searchInput" class="input-box" name="searchCustomer"
                        placeholder="Search for information."
-                       value="${searchCustomer}" autocomplete="off" />
-                <button type="button" class="clear-btn" id="clearBtn">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                       value="${searchCustomer}" autocomplete="off" />              
                 <button type="button" class="search-btn">
                     <i class="fa-solid fa-search"></i>
                 </button>
@@ -90,7 +110,7 @@
                             <th class="sortable" data-sort="id">
                                 ID <i class="fa ${sortBy == 'id' && sortOrder == 'ASC' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
                             </th>
-                            <th class="sortable" data-sort="name">Name <i class="fa fa-sort-down"></i></th>
+                            <th class="resizable" data-sort="name">Name</th>
                             <th class="resizable">Phone</th>
                             <th class="resizable">Address</th>
                             <th class="sortable" data-sort="balance">
@@ -135,64 +155,73 @@
                         </c:forEach>
                     </tbody>
                 </table>
-                <div class="container d-flex justify-content-center mt-4" id="pagination">
-                    <ul class="pagination">
+            </div>
+            <div class="container d-flex justify-content-center mt-4" id="pagination">
+                <ul class="pagination">
 
-                        <c:if test="${index > 1}">
-                            <li class="page-item">
-                                <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
-                                    <i class="fa fa-angle-left"></i>
-                                </a>
-                            </li>
-                        </c:if>
-
-                        <li class="page-item ${index == 1 ? 'active' : ''}">
-                            <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}">1</a>
+                    <c:if test="${index > 1}">
+                        <li class="page-item">
+                            <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${index - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
                         </li>
+                    </c:if>
 
-                        <c:if test="${index > 3}">
-                            <li class="page-item disabled">
-                                <span class="page-link">...</span>
+                    <li class="page-item ${index == 1 ? 'active' : ''}">
+                        <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=1&sortBy=${sortBy}&sortOrder=${sortOrder}">1</a>
+                    </li>
+
+                    <c:if test="${index > 3}">
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    </c:if>
+                    <c:forEach var="customer" items="${list}" begin="${index > 0 ? index : 1}">
+                        <c:if test="${page > 1 && page < endPage}">
+                            <li class="page-item ${index == page ? 'active' : ''}">
+                                <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                    ${page}
+                                </a>
                             </li>
                         </c:if>
-                        <c:forEach var="customer" items="${list}" begin="${index > 0 ? index : 1}">
-                            <c:if test="${page > 1 && page < endPage}">
-                                <li class="page-item ${index == page ? 'active' : ''}">
-                                    <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}">
-                                        ${page}
-                                    </a>
-                                </li>
-                            </c:if>
+                    </c:forEach>
+
+
+                    <c:if test="${index < endPage - 2}">
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    </c:if>
+
+
+                    <c:if test="${endPage > 1}">
+                        <li class="page-item ${index == endPage ? 'active' : ''}">
+                            <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                ${endPage}
+                            </a>
+                        </li>
+                    </c:if>
+
+
+                    <c:if test="${index < endPage}">
+                        <li class="page-item">
+                            <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        </li>
+                    </c:if>
+                </ul>
+          
+                <div class="page-select">
+                    <label for="pageSelect">Go to page: </label>
+                    <select id="pageSelect" class="form-control w-auto">
+                        <c:forEach var="page" begin="1" end="${endPage}">
+                            <option value="${page}" ${page == index ? 'selected' : ''}>${page}</option>
                         </c:forEach>
-
-
-                        <c:if test="${index < endPage - 2}">
-                            <li class="page-item disabled">
-                                <span class="page-link">...</span>
-                            </li>
-                        </c:if>
-
-
-                        <c:if test="${endPage > 1}">
-                            <li class="page-item ${index == endPage ? 'active' : ''}">
-                                <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}">
-                                    ${endPage}
-                                </a>
-                            </li>
-                        </c:if>
-
-
-                        <c:if test="${index < endPage}">
-                            <li class="page-item">
-                                <a class="page-link" href="Customers?service=customers&searchCustomer=${searchCustomer}&index=${index + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}">
-                                    <i class="fa fa-angle-right"></i>
-                                </a>
-                            </li>
-                        </c:if>
-                    </ul>
-
+                    </select>
                 </div>
             </div>
+
 
             <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
@@ -201,6 +230,14 @@
                 let timeout = null;
                 let currentSortBy = '${sortBy}';
                 let currentSortOrder = '${sortOrder}';
+
+
+                $('#pageSelect').on('change', function () {
+                    const selectedPage = $(this).val();  
+                    const keyword = $('#searchInput').val().trim();
+                    searchCustomers(keyword, selectedPage, currentSortBy, currentSortOrder);  
+                });
+
 
                 function searchCustomers(keyword, page, sortBy, sortOrder) {
                     $.ajax({
@@ -235,7 +272,7 @@
                     tbody.empty();
 
                     if (customers.length === 0) {
-                        tbody.append('<tr><td colspan="8">Không tìm thấy khách hàng</td></tr>');
+                        tbody.append('<tr><td colspan="8">No customers found</td></tr>');
                     } else {
                         customers.forEach(function (customer) {
                             let phoneDisplay = customer.phone;
@@ -311,6 +348,11 @@
                                 );
                     }
 
+                    
+                    $('#pageSelect').empty();
+                    for (let page = 1; page <= endPage; page++) {
+                        $('#pageSelect').append('<option value="' + page + '" ' + (currentIndex == page ? 'selected' : '') + '>' + page + '</option>');
+                    }
 
                     $('.page-nav').on('click', function (e) {
                         e.preventDefault();
@@ -318,6 +360,7 @@
                         searchCustomers(keyword, page, currentSortBy, currentSortOrder);
                     });
                 }
+
 
                 function addCustomer(customer) {
 
