@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import utils.GlobalUtils;
@@ -42,12 +43,11 @@ public class controllerUsers extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-           String role = (String) session.getAttribute("role");
+        String role = (String) session.getAttribute("role");
 
-        
         if (role == null || !role.equals("owner") && !role.equals("admin")) {
-            
-            response.sendRedirect("/dashboard.jsp");  
+
+            response.sendRedirect("/dashboard.jsp");
             return;
         }
         String service = request.getParameter("service");
@@ -87,7 +87,18 @@ public class controllerUsers extends HttpServlet {
                     index = endPage;
                 }
 
-                List<Users> list = userDAO.searchUsers(keyword, index, 5, sortBy, sortOrder);
+                List<Users> list = null;
+
+// Admin: chỉ hiển thị người dùng có role "owner"
+                if (role.equals("admin")) {
+                    list = userDAO.searchUsersByRole("owner", keyword, index, 5, sortBy, sortOrder);
+                } else if (role.equals("owner")) {
+                    // Owner có thể thấy danh sách người dùng nhưng không lọc theo role
+                    list = userDAO.searchUsers(keyword, index, 5, sortBy, sortOrder); // Đảm bảo gán kết quả trả về vào list
+                } else {
+                    // Staff: không hiển thị người dùng nào
+                    list = new ArrayList<>();
+                }
 
                 String notification = (String) request.getSession().getAttribute("Notification");
                 if (notification != null) {
@@ -118,7 +129,20 @@ public class controllerUsers extends HttpServlet {
                 int total = userDAO.countUsers(keyword);  // Đếm tổng số người dùng
                 int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;  // Tính số trang cuối
 
-                List<Users> users = userDAO.searchUsers(keyword, index, pageSize, sortBy, sortOrder);  // Tìm người dùng theo từ khóa và phân trang
+                List<Users> users = new ArrayList<>();
+
+              
+                // Phân quyền dựa trên role
+                if ("admin".equals(role)) {
+                    // Admin chỉ xem users có role "owner"
+                    users = userDAO.searchUsersByRole("owner", keyword, index, pageSize, sortBy, sortOrder);
+                } else if ("owner".equals(role)) {
+                    // Owner có thể xem tất cả người dùng nhưng lọc theo storeId
+                    users = userDAO.searchUsers(keyword, index, pageSize, sortBy, sortOrder);
+                } else {
+                    // Staff không xem được người dùng
+                    users = new ArrayList<>();
+                }
 
                 // Trả về dữ liệu dưới dạng JSON
                 response.setContentType("application/json");
@@ -182,7 +206,7 @@ public class controllerUsers extends HttpServlet {
                 break;
 
             }
-              case "banUser": {
+            case "banUser": {
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users user = userDAO.getUserById(userId);
 
@@ -416,7 +440,6 @@ public class controllerUsers extends HttpServlet {
                 return;
             }
 
-
             if (!EMAIL_PATTERN.matcher(email).matches()) {
                 request.setAttribute("emailError", "Invalid email format.");
                 request.setAttribute("name", name);
@@ -428,7 +451,6 @@ public class controllerUsers extends HttpServlet {
                 request.getRequestDispatcher("views/user/addInforUser.jsp").forward(request, response);
                 return;
             }
-
 
             if (!phone.matches("^0\\d{9}$")) {
                 request.setAttribute("phoneError", "Invalid phone number format.");

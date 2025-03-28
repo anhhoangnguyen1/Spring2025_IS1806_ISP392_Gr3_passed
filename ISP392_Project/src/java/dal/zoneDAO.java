@@ -288,7 +288,7 @@ public class zoneDAO extends DBContext {
         if (!rs.wasNull()) {
             product = new Products();
             product.setProductId(productId);
-            product.setName(rs.getString("name"));
+            product.setName(rs.getString("product_name"));
         }
 
         String historyJson = rs.getString("history");

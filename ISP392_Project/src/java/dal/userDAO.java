@@ -125,6 +125,57 @@ public class userDAO extends DBContext {
 
         return list;
     }
+public List<Users> searchUsersByRole(String role, String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
+    List<Users> list = new ArrayList<>();
+    List<String> allowedSortColumns = List.of("id", "role", "name", "phone", "address", "gender", "dob", "email", "status");
+    
+    if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
+        sortBy = "id";
+    }
+
+    if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
+        sortOrder = "ASC";
+    }
+
+    // SQL truy vấn với điều kiện lọc theo role
+    String sql = "SELECT * FROM users WHERE role = ? ";
+    
+    // Nếu có keyword, thêm điều kiện tìm kiếm theo tên hoặc số điện thoại
+    if (keyword != null && !keyword.trim().isEmpty()) {
+        sql += "AND (name LIKE ? OR phone LIKE ?) ";
+    }
+    
+    // Sắp xếp theo cột và thứ tự
+    sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
+
+    try (PreparedStatement st = connection.prepareStatement(sql)) {
+        int paramIndex = 1;
+        
+        // Gán giá trị cho role và keyword (nếu có)
+        st.setString(paramIndex++, role);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String param = "%" + keyword + "%";
+            st.setString(paramIndex++, param);
+            st.setString(paramIndex++, param);
+        }
+        
+        // Gán giá trị cho pageSize và OFFSET (cho phân trang)
+        st.setInt(paramIndex++, pageSize);
+        st.setInt(paramIndex, (pageIndex - 1) * pageSize);
+
+        try (ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                Users user = mapResultSetToUser(rs);  // Hàm này giả sử đã được định nghĩa để chuyển ResultSet thành đối tượng User
+                list.add(user);
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
+
 
     public Users getUserById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
