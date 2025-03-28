@@ -34,8 +34,8 @@ public class controllerCustomers extends HttpServlet {
         String role = (String) session.getAttribute("role");
 
         if (role != null && role.equals("admin")) {
-            // Nếu là admin, không cho phép xem danh sách customer
-            response.sendRedirect("/dashboard.jsp");  // Redirect tới trang không có quyền truy cập
+           
+            response.sendRedirect("/dashboard.jsp");  
             return;
         }
 
@@ -69,7 +69,7 @@ public class controllerCustomers extends HttpServlet {
                 // Lấy giá trị bộ lọc balance từ request
                 String balanceFilter = request.getParameter("balanceFilter");
                 if (balanceFilter == null) {
-                    balanceFilter = "all";  // Mặc định là không lọc
+                    balanceFilter = "all"; 
                 }
 
                 int index = 1;
@@ -90,7 +90,7 @@ public class controllerCustomers extends HttpServlet {
                     index = endPage;
                 }
 
-                // Truyền balanceFilter vào hàm searchCustomers
+   
                 List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder, storeID, balanceFilter);
 
                 if ("staff".equals(role)) {
@@ -132,10 +132,10 @@ public class controllerCustomers extends HttpServlet {
                     keyword = "";
                 }
 
-                // Lấy giá trị bộ lọc balance từ request
+               
                 String balanceFilter = request.getParameter("balanceFilter");
                 if (balanceFilter == null) {
-                    balanceFilter = "all";  // Mặc định là không lọc
+                    balanceFilter = "all";  
                 }
 
                 int index = 1;
@@ -253,7 +253,7 @@ public class controllerCustomers extends HttpServlet {
             String fullName = (String) session.getAttribute("fullName");
             Customers customer = getCustomerFromRequest(request, true);
             customer.setCreatedBy(fullName);
-            customer.setBalance(0.0);
+            customer.setBalance(0);
             customerDAO.insertCustomer(customer);
             String storeIDStr = (String) session.getAttribute("storeID");
             int storeID = Integer.parseInt(storeIDStr);

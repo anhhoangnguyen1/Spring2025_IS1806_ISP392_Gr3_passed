@@ -91,7 +91,6 @@
                 <input type="text" id="searchInput" class="input-box" name="searchUser"
                        placeholder="Search for information."
                        value="${searchUser}" autocomplete="off" />
-
                 <button type="button" class="search-btn">
                     <i class="fa-solid fa-search"></i>
                 </button>
@@ -99,13 +98,21 @@
 
 
             <div class="action-bar d-flex align-items-center">
-
                 <a href="${pageContext.request.contextPath}/Users?service=createAccount" class="btn btn-outline-primary mr-lg-auto">
                     Add Staff
                 </a>
+                <div class="filter-box">
+                    <label for="statusFilter">Status Filter: </label>
+                    <select id="statusFilter" name="statusFilter" class="form-control w-auto">
+                        <option value="all" ${statusFilter == 'all' ? 'selected' : ''}>All</option>
+                        <option value="Active" ${statusFilter == 'Active' ? 'selected' : ''}>Active</option>
+                        <option value="Inactive" ${statusFilter == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                    </select>
+                </div>
+
 
             </div>
-            <!-- Table Container -->
+
             <div class="table-container mt-4">
 
                 <table class="table table-striped table-hover table-bordered" id="userTable">
@@ -146,14 +153,17 @@
                                             Edit
                                         </a>
 
-                                        <c:if test="${sessionScope.role == 'owner'}">
-                                            <c:if test="${user.status == 'Deactive'}">
-                                                <a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=${user.id}" class="btn btn-outline-success">UnBan</a>
-                                            </c:if>
-                                            <c:if test="${user.status != 'Deactive'}">
-                                                <a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=${user.id}" class="btn btn-outline-danger">Ban</a>
-                                            </c:if>
+                                        <c:if test="${sessionScope.role == 'owner' && user.role == 'staff'}">
+                                            <c:choose>
+                                                <c:when test="${user.status == 'Inactive'}">
+                                                    <a href="Users?service=unBanUser&user_id=${user.id}" class="btn btn-outline-success">UnBan</a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <a href="Users?service=banUser&user_id=${user.id}" class="btn btn-outline-danger">Ban</a>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </c:if>
+
                                     </td>
                                 </tr>
                             </c:if>
@@ -234,14 +244,23 @@
                 let timeout = null;
                 let currentSortBy = '${sortBy}';
                 let currentSortOrder = '${sortOrder}';
+                let storeID = '${storeID}';
+                let statusFilter = '${statusFilter}';
+
+                $('#statusFilter').on('change', function () {
+                    statusFilter = $(this).val();
+                    const keyword = $('#searchInput').val().trim();
+                    searchUsers(keyword, 1, currentSortBy, currentSortOrder, storeID, statusFilter);
+                });
+
 
                 $('#pageSelect').on('change', function () {
                     const selectedPage = $(this).val();
                     const keyword = $('#searchInput').val().trim();
-                    searchUsers(keyword, selectedPage, currentSortBy, currentSortOrder);
+                    searchUsers(keyword, selectedPage, currentSortBy, currentSortOrder, storeID, statusFilter);
                 });
-                
-                function searchUsers(keyword, page, sortBy, sortOrder) {
+
+                function searchUsers(keyword, page, sortBy, sortOrder, storeID, statusFilter) {
                     $.ajax({
                         url: '<%= request.getContextPath() %>/Users',
                         type: 'GET',
@@ -250,7 +269,9 @@
                             searchUser: keyword,
                             index: page,
                             sortBy: sortBy,
-                            sortOrder: sortOrder
+                            sortOrder: sortOrder,
+                            storeID: storeID,
+                            statusFilter: statusFilter
                         },
                         success: function (response) {
                             updateTable(response.users, response.endPage, response.index, keyword);
@@ -274,12 +295,13 @@
 
                             // Hiển thị các nút Ban/UnBan tùy thuộc vào trạng thái
                             if ('${sessionScope.role}' === 'owner') {
-                                if (user.status === 'Deactive') {
+                                if (user.status === 'Inactive') {
                                     banButton = '<a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=' + user.id + '" class="btn btn-outline-success">UnBan</a>';
                                 } else if (user.status === 'Active' && user.role === 'staff') {
                                     banButton = '<a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=' + user.id + '" class="btn btn-outline-danger">Ban</a>';
                                 }
                             }
+
 
                             tbody.append(
                                     '<tr>' +
@@ -338,7 +360,7 @@
                         pagination.append('<li class="page-item"><a class="page-link page-nav" data-page="' + (currentIndex + 1) + '"><i class="fa fa-angle-right"></i></a></li>');
                     }
 
-                    // Cập nhật dropdown số trang
+
                     $('#pageSelect').empty();
                     for (let page = 1; page <= endPage; page++) {
                         $('#pageSelect').append('<option value="' + page + '" ' + (currentIndex === page ? 'selected' : '') + '>' + page + '</option>');
@@ -347,14 +369,14 @@
                     $('.page-nav').on('click', function (e) {
                         e.preventDefault();
                         const page = $(this).data('page');
-                        searchUsers(keyword, page, currentSortBy, currentSortOrder);
+                        searchUsers(keyword, page, currentSortBy, currentSortOrder, storeID, statusFilter);
                     });
 
-                    // Lắng nghe sự kiện thay đổi trên dropdown để chọn trang
+
                     $('#pageSelect').on('change', function () {
-                        const selectedPage = $(this).val();  // Lấy số trang được chọn
+                        const selectedPage = $(this).val();
                         const keyword = $('#searchInput').val().trim();
-                        searchUsers(keyword, selectedPage, currentSortBy, currentSortOrder);
+                        searchUsers(keyword, selectedPage, currentSortBy, currentSortOrder, storeID, statusFilter);
                     });
                 }
 
@@ -364,7 +386,7 @@
                         const keyword = $(this).val().trim();
 
                         timeout = setTimeout(function () {
-                            searchUsers(keyword, 1, currentSortBy, currentSortOrder);
+                            searchUsers(keyword, 1, currentSortBy, currentSortOrder, storeID, statusFilter);
                         }, 300);
                     });
 
@@ -379,7 +401,7 @@
                             currentSortOrder = 'ASC';
                         }
 
-                        searchUsers(keyword, 1, currentSortBy, currentSortOrder);
+                        searchUsers(keyword, 1, currentSortBy, currentSortOrder, storeID, statusFilter);
                     });
 
                     loadDefaultUsers();
@@ -387,7 +409,7 @@
 
                 function loadDefaultUsers() {
                     const currentIndex = ${index};
-                    searchUsers('', currentIndex, currentSortBy, currentSortOrder);
+                    searchUsers('', currentIndex, currentSortBy, currentSortOrder, storeID, statusFilter);
                 }
 
             </script>

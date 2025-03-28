@@ -104,56 +104,6 @@ public class customerDAO extends DBContext {
     return 0;
 }
 
-
-//    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder,int storeID) {
-//        List<Customers> list = new ArrayList<>();
-//
-//        List<String> allowedSortColumns = List.of("id", "name", "phone", "balance", "created_at", "updated_at");
-//        if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
-//            sortBy = "id";
-//        }
-//
-//        if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
-//            sortOrder = "ASC";
-//        }
-//
-//        String sql = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, deleteBy, store_id, status "
-//                + "FROM customers ";
-//
-//     
-//        if (keyword != null && !keyword.trim().isEmpty()) {
-//            sql += "WHERE name LIKE ? OR phone LIKE ? ";
-//        }
-//
-//        
-//        sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
-//
-//        try (PreparedStatement st = connection.prepareStatement(sql)) {
-//            int paramIndex = 1;
-//
-//            if (keyword != null && !keyword.trim().isEmpty()) {
-//                String param = "%" + keyword + "%";
-//                st.setString(paramIndex++, param);
-//                st.setString(paramIndex++, param);
-//            }
-//
-//            st.setInt(paramIndex++, pageSize);
-//            st.setInt(paramIndex, (pageIndex - 1) * pageSize);
-//
-//            try (ResultSet rs = st.executeQuery()) {
-//                while (rs.next()) {
-//                    Customers customer = mapResultSetToCustomer(rs);
-//                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1,storeID);
-//                    customer.setDebtNotes(debts);
-//                    list.add(customer);
-//                }
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return list;
-//    }
    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, int storeID, String balanceFilter) {
     List<Customers> list = new ArrayList<>();
     List<String> allowedSortColumns = List.of("id", "name", "phone", "balance", "created_at", "updated_at");
@@ -192,7 +142,7 @@ public class customerDAO extends DBContext {
     try (PreparedStatement st = connection.prepareStatement(sql.toString())) {
         int paramIndex = 1;
 
-        st.setInt(paramIndex++, storeID); // store_id
+        st.setInt(paramIndex++, storeID); 
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             String param = "%" + keyword + "%";

@@ -46,17 +46,16 @@ public class loginServlet extends HttpServlet {
 
         Users login = AccountDAO.INSTANCE.getUser(username, password);
 
-        //if authenticate success 
          if (login != null) {
              
-             if ("Deactive".equals(login.getStatus())) {
-            // Nếu tài khoản bị ban, từ chối đăng nhập và thông báo lỗi
-            request.setAttribute("error", "Your account is deactivated. Please contact admin.");
+             if ("Inactive".equalsIgnoreCase(login.getStatus())) {
+        
+            request.setAttribute("error", "Your account is inactive. Please contact admin.");
             request.getRequestDispatcher("/views/login.jsp").forward(request, response);
             return;
         }
-              Stores store = login.getStoreId();  // Lấy đối tượng Stores
-            String storeID = store != null ? String.valueOf(store.getId()) : null;  // Lấy storeID từ đối tượng Stores
+              Stores store = login.getStoreId(); 
+            String storeID = store != null ? String.valueOf(store.getId()) : null;  
 
             
             HttpSession session = request.getSession();
