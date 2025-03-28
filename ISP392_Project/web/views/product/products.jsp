@@ -113,15 +113,15 @@
                         </a>
                     </li>
                     <li>
-                            <a href="/ISP392_Project/Stores">
-                                <span class="nav-icon">
-                                    <i class="fa-solid fa-store"></i>
-                                </span>
-                                <span class="nav-text">Stores</span>
-                            </a>
-                        </li>
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
                     <c:if test="${sessionScope.role == 'owner'}">
-                        
+
                         <li>
                             <a href="/ISP392_Project/Users">
                                 <span class="nav-icon">
@@ -184,6 +184,14 @@
             <div id="caption"></div>
         </div>
         <script>
+            setTimeout(() => {
+                let alert = document.querySelector(".alert");
+                if (alert) {
+                    alert.style.opacity = "0";
+                    setTimeout(() => alert.remove(), 500);
+                }
+            }, 3000);
+
             $(".myImg").on("click", function () {
                 var modal = $("#myModal");
                 var modalImg = $("#img01");
@@ -200,6 +208,7 @@
                     $(this).hide();
                 }
             });
+            
         </script> 
         <c:import url="editProduct.jsp" />
         <!--   === java script ===   -->

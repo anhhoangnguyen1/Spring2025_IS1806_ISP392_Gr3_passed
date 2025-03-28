@@ -52,18 +52,12 @@
                                         </select>
                                     </div>
                                 </div>
-                                        <input type="hidden" name="index" value="${index}">
+                                <input type="hidden" name="index" value="${index}">
                                 <div class="form-group">
                                     <label>Description</label>
                                     <textarea class="form-control" name="description" rows="4" >${product.getDescription()}</textarea>
                                 </div>
-                                <div class="form-group">
-                                    <label>Status</label>
-                                    <select class="form-control" name="status" required>
-                                        <option value="Available" ${product.getStatus() == 'Available' ? 'selected' : ''}>Available</option>
-                                        <option value="Out of Stock" ${product.getStatus() == 'Out of Stock' ? 'selected' : ''}>Out of Stock</option>
-                                    </select>
-                                </div>
+
                             </div>
 
                             <!-- Modal Footer -->
