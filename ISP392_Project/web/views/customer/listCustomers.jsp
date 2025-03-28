@@ -39,21 +39,21 @@
             #pagination {
                 display: flex;
                 justify-content: center;
-                align-items: center; 
-                gap: 10px; 
+                align-items: center;
+                gap: 10px;
             }
 
             .page-select {
                 display: flex;
-                align-items: center;  
+                align-items: center;
             }
 
             .page-select label {
-                margin-right: 10px; 
+                margin-right: 10px;
             }
 
             .page-select select {
-                width: 100px; 
+                width: 100px;
                 padding: 5px;
             }
 
@@ -100,6 +100,16 @@
                 <a href="${pageContext.request.contextPath}/Customers?service=addCustomer" class="btn btn-outline-primary mr-lg-auto">
                     Add Customer
                 </a>
+
+                <div class="filter-box">
+                    <label for="balanceFilter">Balance Filter: </label>
+                    <select id="balanceFilter" class="form-control w-auto">
+                        <option value="all" ${balanceFilter == 'all' ? 'selected' : ''}>All</option>
+                        <option value="0" ${balanceFilter == '0' ? 'selected' : ''}>No debt (balance = 0)</option>
+                        <option value="positive" ${balanceFilter == 'positive' ? 'selected' : ''}>Positive balance (balance > 0)</option>
+                        <option value="negative" ${balanceFilter == 'negative' ? 'selected' : ''}>Negative balance (balance < 0)</option>
+                    </select>
+                </div>
             </div>
             <!-- Table Container -->
             <div class="table-container mt-4">
@@ -211,7 +221,7 @@
                         </li>
                     </c:if>
                 </ul>
-          
+
                 <div class="page-select">
                     <label for="pageSelect">Go to page: </label>
                     <select id="pageSelect" class="form-control w-auto">
@@ -230,16 +240,26 @@
                 let timeout = null;
                 let currentSortBy = '${sortBy}';
                 let currentSortOrder = '${sortOrder}';
+                let storeID = '${storeID}';
+                let balanceFilter = '${balanceFilter}';
 
 
-                $('#pageSelect').on('change', function () {
-                    const selectedPage = $(this).val();  
+
+
+                $('#balanceFilter').on('change', function () {
+                    balanceFilter = $(this).val();
                     const keyword = $('#searchInput').val().trim();
-                    searchCustomers(keyword, selectedPage, currentSortBy, currentSortOrder);  
+                    searchCustomers(keyword, 1, currentSortBy, currentSortOrder, storeID, balanceFilter);
                 });
 
 
-                function searchCustomers(keyword, page, sortBy, sortOrder) {
+                $('#pageSelect').on('change', function () {
+                    const selectedPage = $(this).val();
+                    const keyword = $('#searchInput').val().trim();
+                    searchCustomers(keyword, selectedPage, currentSortBy, currentSortOrder, storeID, balanceFilter);
+                });
+
+                function searchCustomers(keyword, page, sortBy, sortOrder, storeID, balanceFilter) {
                     $.ajax({
                         url: '<%= request.getContextPath() %>/Customers',
                         type: 'GET',
@@ -248,7 +268,9 @@
                             searchCustomer: keyword,
                             index: page,
                             sortBy: sortBy,
-                            sortOrder: sortOrder
+                            sortOrder: sortOrder,
+                            storeID: storeID,
+                            balanceFilter: balanceFilter
                         },
                         success: function (response) {
                             updateTable(response.customers, response.endPage, response.index, keyword);
@@ -263,7 +285,7 @@
 
                 function loadDefaultCustomers() {
                     const currentIndex = ${index};
-                    searchCustomers('', currentIndex, currentSortBy, currentSortOrder);
+                    searchCustomers('', currentIndex, currentSortBy, currentSortOrder, storeID, balanceFilter);
                 }
 
 
@@ -348,7 +370,7 @@
                                 );
                     }
 
-                    
+
                     $('#pageSelect').empty();
                     for (let page = 1; page <= endPage; page++) {
                         $('#pageSelect').append('<option value="' + page + '" ' + (currentIndex == page ? 'selected' : '') + '>' + page + '</option>');
@@ -357,7 +379,8 @@
                     $('.page-nav').on('click', function (e) {
                         e.preventDefault();
                         const page = $(this).data('page');
-                        searchCustomers(keyword, page, currentSortBy, currentSortOrder);
+                        searchCustomers(keyword, page, currentSortBy, currentSortOrder, storeID, balanceFilter);
+
                     });
                 }
 

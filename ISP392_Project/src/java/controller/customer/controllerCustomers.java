@@ -58,13 +58,18 @@ public class controllerCustomers extends HttpServlet {
 
                 String debtAction = request.getParameter("debtAction");
                 if (debtAction != null && !debtAction.trim().isEmpty()) {
-
                     request.setAttribute("Notification", "Debt added successfully.");
                 }
 
                 String keyword = request.getParameter("searchCustomer");
                 if (keyword == null) {
                     keyword = "";
+                }
+
+                // Lấy giá trị bộ lọc balance từ request
+                String balanceFilter = request.getParameter("balanceFilter");
+                if (balanceFilter == null) {
+                    balanceFilter = "all";  // Mặc định là không lọc
                 }
 
                 int index = 1;
@@ -77,13 +82,17 @@ public class controllerCustomers extends HttpServlet {
 
                 }
 
-                int total = customerDAO.countCustomers(keyword);
+                int total = customerDAO.countCustomers(keyword, balanceFilter, storeID);
+
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
                 if (index > endPage) {
                     index = endPage;
                 }
-                List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder,storeID);
+
+                // Truyền balanceFilter vào hàm searchCustomers
+                List<Customers> list = customerDAO.searchCustomers(keyword, index, 5, sortBy, sortOrder, storeID, balanceFilter);
+
                 if ("staff".equals(role)) {
                     for (Customers customer : list) {
                         String phone = customer.getPhone();
@@ -102,6 +111,7 @@ public class controllerCustomers extends HttpServlet {
                 request.setAttribute("endPage", endPage);
                 request.setAttribute("index", index);
                 request.setAttribute("searchCustomer", keyword);
+                request.setAttribute("balanceFilter", balanceFilter); // Thêm bộ lọc balance vào request
                 request.setAttribute("sortBy", sortBy);
                 request.setAttribute("sortOrder", sortOrder);
 
@@ -113,8 +123,7 @@ public class controllerCustomers extends HttpServlet {
                 String keyword = request.getParameter("searchCustomer");
 
                 if (role != null && role.equals("admin")) {
-                    // Nếu là admin, không cho phép xem dữ liệu
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);  // HTTP 403 Forbidden
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.getWriter().write("{\"error\": \"Admin does not have access to customer data.\"}");
                     return;
                 }
@@ -122,6 +131,13 @@ public class controllerCustomers extends HttpServlet {
                 if (keyword == null) {
                     keyword = "";
                 }
+
+                // Lấy giá trị bộ lọc balance từ request
+                String balanceFilter = request.getParameter("balanceFilter");
+                if (balanceFilter == null) {
+                    balanceFilter = "all";  // Mặc định là không lọc
+                }
+
                 int index = 1;
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
@@ -129,9 +145,10 @@ public class controllerCustomers extends HttpServlet {
                 }
 
                 int pageSize = 5;
-                int total = customerDAO.countCustomers(keyword);
+                int total = customerDAO.countCustomers(keyword, balanceFilter, storeID);
+
                 int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
-                List<Customers> customers = customerDAO.searchCustomers(keyword, index, pageSize, sortBy, sortOrder, storeID);
+                List<Customers> customers = customerDAO.searchCustomers(keyword, index, pageSize, sortBy, sortOrder, storeID, balanceFilter);
 
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -160,8 +177,8 @@ public class controllerCustomers extends HttpServlet {
                 out.print("}");
                 out.flush();
                 break;
-
             }
+
             case "getCustomerById": {
 
                 int id = Integer.parseInt(request.getParameter("customer_id"));
@@ -213,6 +230,7 @@ public class controllerCustomers extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         String service = request.getParameter("service");
 
         if ("addCustomer".equals(service)) {
@@ -237,8 +255,11 @@ public class controllerCustomers extends HttpServlet {
             customer.setCreatedBy(fullName);
             customer.setBalance(0.0);
             customerDAO.insertCustomer(customer);
+            String storeIDStr = (String) session.getAttribute("storeID");
+            int storeID = Integer.parseInt(storeIDStr);
 
-            int total = customerDAO.countCustomers("");
+            int total = customerDAO.countCustomers("", "all", storeID);
+
             int pageSize = 5;
             int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
 
