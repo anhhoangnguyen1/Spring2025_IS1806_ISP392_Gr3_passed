@@ -109,9 +109,9 @@
                                     <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#">
                                         View
                                     </button>
-                                    <button type="button" class="btn btn-outline-danger mr-lg-auto" data-toggle="modal" data-target="#debtListModal${customer.id}">
+                                    <a href="${pageContext.request.contextPath}/Debts?service=debtInCustomers&customer_id=${customer.id}" class="btn btn-outline-danger mr-lg-auto" >
                                         Debt note
-                                    </button>
+                                    </a>
                                     <a href="${pageContext.request.contextPath}/Customers?service=editCustomer&customer_id=${customer.id}" class="btn btn-outline-primary">
                                         Edit
                                     </a>
@@ -183,8 +183,9 @@
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
             <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
             <script type="text/javascript">
+
                 let timeout = null;
-                let currentSortBy = '${sortBy}'; 
+                let currentSortBy = '${sortBy}';
                 let currentSortOrder = '${sortOrder}';
 
                 function searchCustomers(keyword, page, sortBy, sortOrder) {
@@ -200,7 +201,7 @@
                         },
                         success: function (response) {
                             updateTable(response.customers, response.endPage, response.index, keyword);
-                      
+
                             updatePagination(response.endPage, page, keyword);
                         },
                         error: function () {
@@ -210,11 +211,11 @@
                 }
 
                 function loadDefaultCustomers() {
-                    const currentIndex = ${index}; 
+                    const currentIndex = ${index};
                     searchCustomers('', currentIndex, currentSortBy, currentSortOrder);
                 }
 
-          
+
                 function updateTable(customers, endPage, currentIndex, keyword) {
                     const tbody = $('#customerTableBody');
                     tbody.empty();
@@ -239,7 +240,7 @@
                                     '<td>' + customer.createdBy + '</td>' +
                                     '<td class="sticky-col">' +
                                     '<button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#">View</button> ' +
-                                    '<button type="button" class="btn btn-outline-danger mr-lg-auto" data-toggle="modal" data-target="#debtListModal' + customer.id + '">Debt note</button> ' +
+                                    '<a href="${pageContext.request.contextPath}/Debts?service=debtInCustomers&customer_id=' + customer.id + '" class="btn btn-outline-danger mr-lg-auto">Debt note</a> ' +
                                     '<a href="${pageContext.request.contextPath}/Customers?service=editCustomer&customer_id=' + customer.id + '" class="btn btn-outline-primary">Edit</a>' +
                                     '</td>' +
                                     '</tr>'
@@ -248,12 +249,20 @@
                     }
                 }
 
-    
+
                 function formatNumber(number) {
                     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 }
 
-            
+                $(".openDebtModal").on("click", function () {
+                    let currentPage = sessionStorage.getItem("customerPageIndex") || 1;
+                    sessionStorage.setItem("prevCustomerPageIndex", currentPage); // Lưu trang trước đó
+                });
+                document.addEventListener("DOMContentLoaded", function () {
+                    let savedIndex = sessionStorage.getItem("prevCustomerPageIndex") || 1;
+                    searchCustomers('', savedIndex, 'name', 'asc'); // Load trang đã xem trước đó
+                });
+
                 function updatePagination(endPage, currentIndex, keyword) {
                     const pagination = $('.pagination');
                     pagination.empty();
@@ -296,7 +305,7 @@
                                 );
                     }
 
-             
+
                     $('.page-nav').on('click', function (e) {
                         e.preventDefault();
                         const page = $(this).data('page');
@@ -305,7 +314,7 @@
                 }
 
                 function addCustomer(customer) {
-              
+
                     $('#customerTableBody').append(
                             '<tr>' +
                             '<td>' + customer.id + '</td>' +
@@ -320,7 +329,7 @@
                 }
 
 
-          
+
                 function updateSortIcons() {
                     $('.sortable').each(function () {
                         const sortBy = $(this).data('sort');
@@ -330,52 +339,52 @@
                             icon.addClass(currentSortOrder === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
                         } else {
                             icon.removeClass('fa-sort-up fa-sort-down');
-                            icon.addClass('fa-sort-down'); 
+                            icon.addClass('fa-sort-down');
                         }
                     });
                 }
 
                 $(document).ready(function () {
-                
+
                     $('#searchInput').on('keyup', function () {
                         clearTimeout(timeout);
                         const keyword = $(this).val().trim();
 
                         timeout = setTimeout(function () {
-                            searchCustomers(keyword, 1, currentSortBy, currentSortOrder); 
+                            searchCustomers(keyword, 1, currentSortBy, currentSortOrder);
                         }, 300);
                     });
 
-       
+
                     $('.sortable').on('click', function () {
                         const sortBy = $(this).data('sort');
                         const keyword = $('#searchInput').val().trim();
 
-                     
+
                         if (currentSortBy === sortBy) {
                             currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
                         } else {
                             currentSortBy = sortBy;
-                            currentSortOrder = 'ASC'; 
+                            currentSortOrder = 'ASC';
                         }
 
-                    
+
                         updateSortIcons();
 
-                       
+
                         searchCustomers(keyword, 1, currentSortBy, currentSortOrder);
                     });
 
-              
+
                     $('#clearBtn').on('click', function () {
-                        $('#searchInput').val(''); 
-                        loadDefaultCustomers(); 
+                        $('#searchInput').val('');
+                        loadDefaultCustomers();
                     });
 
-                 
+
                     updateSortIcons();
 
-                   
+
                     loadDefaultCustomers();
                 });
             </script>

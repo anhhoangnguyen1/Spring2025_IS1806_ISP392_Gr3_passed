@@ -35,26 +35,19 @@ public class customerDAO extends DBContext {
         return list;
     }
 
-    public List<Customers> viewAllCustomersWithDebts(String command, int index,int storeID) {
+    public List<Customers> viewAllCustomersWithDebts(String command, int index, int storeID) {
         List<Customers> customersList = new ArrayList<>();
         String sqlCustomers = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, deleteBy, store_id, status "
                 + "FROM customers "
-                + " ORDER BY " + "id" + " LIMIT 5 OFFSET ?";
+                + "WHERE store_id = ? ORDER BY id LIMIT 5 OFFSET ?";
 
         try (PreparedStatement st = connection.prepareStatement(sqlCustomers)) {
-            st.setInt(1, (index - 1) * 5);
+            st.setInt(1, storeID);
+            st.setInt(2, (index - 1) * 5);
 
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     Customers customer = mapResultSetToCustomer(rs);
-
-                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("id", customer.getId(), 1,storeID);
-
-                    if (debts == null) {
-                        debts = new ArrayList<>();
-                    }
-                    customer.setDebtNotes(debts);
-
                     customersList.add(customer);
                 }
             }
@@ -95,7 +88,6 @@ public class customerDAO extends DBContext {
         return 0;
     }
 
-
 //    public List<Customers> searchCustomers(String query) {
 //        List<Customers> customers = new ArrayList<>();
 //        String sql = "SELECT * FROM Customers WHERE name LIKE ? OR phone LIKE ?";
@@ -109,7 +101,7 @@ public class customerDAO extends DBContext {
 //                    Customers customer = new Customers();
 //                    
 //                    customers.add(getFromResulset(rs));
- //               }
+    //               }
 //            }
 //        } catch (SQLException e) {
 //            e.printStackTrace();
@@ -180,7 +172,7 @@ public class customerDAO extends DBContext {
 //
 //        return list;
 //    }
-    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder,int storeID) {
+    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, int storeID) {
         List<Customers> list = new ArrayList<>();
 
         // Chỉ cho phép sắp xếp theo các cột hợp lệ để tránh lỗi SQL Injection
@@ -194,17 +186,18 @@ public class customerDAO extends DBContext {
         }
 
         String sql = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, deleteBy, store_id, status "
-                + "FROM customers ";
+                + "FROM customers WHERE store_id = ? ";
 
         // Nếu có từ khóa, thêm điều kiện tìm kiếm
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql += "WHERE name LIKE ? OR phone LIKE ? ";
+            sql += "AND (name LIKE ? OR phone LIKE ?) ";
         }
 
         sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             int paramIndex = 1;
+            st.setInt(paramIndex++, storeID);
 
             if (keyword != null && !keyword.trim().isEmpty()) {
                 String param = "%" + keyword + "%";
@@ -218,8 +211,6 @@ public class customerDAO extends DBContext {
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     Customers customer = mapResultSetToCustomer(rs);
-                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1,storeID);
-                    customer.setDebtNotes(debts);
                     list.add(customer);
                 }
             }
@@ -244,6 +235,8 @@ public class customerDAO extends DBContext {
         }
         return null;
     }
+
+
 
     public void insertCustomer(Customers customer) {
         String sql = "INSERT INTO Customers (name, phone, address, balance, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, updated_by, store_id, status) "
@@ -382,70 +375,47 @@ public class customerDAO extends DBContext {
     public static void main(String[] args) {
 //        customerDAO dao = new customerDAO();
 //
-//        int pageIndex = 1;
-//        List<Customers> customers = dao.viewAllCustomersWithDebts("id", pageIndex);
-//
-//        if (customers.isEmpty()) {
-//            System.out.println("Không có khách hàng nào được tìm thấy!");
-//        } else {
-//            System.out.println("Danh sách khách hàng:");
-//            for (Customers customer : customers) {
-//                System.out.println("------------------------------------------------------");
-//                System.out.println("Customer ID: " + customer.getId());
-//                System.out.println("Name: " + customer.getName());
-//                System.out.println("Phone: " + customer.getPhone());
-//                System.out.println("Address: " + customer.getAddress());
-//                System.out.println("Balance: " + customer.getBalance());
-//                System.out.println("Created By: " + customer.getCreatedBy());
-//                System.out.println("Created At: " + customer.getCreatedAt());
-//
-//                List<DebtNote> debts = customer.getDebtNotes();
-//                if (debts.isEmpty()) {
-//                    System.out.println(" Không có khoản nợ nào.");
-//                } else {
-//                    System.out.println("Danh sách khoản nợ:");
-//                    for (DebtNote debt : debts) {
-//                        System.out.println("    + Debt ID: " + debt.getId()
-//                                + ", Type: " + debt.getType()
-//                                + ", Amount: " + debt.getAmount()
-//                                + ", Status: " + debt.getStatus());
-//                    }
-//                }
-//            }
-//        }
 
+        customerDAO dao = new customerDAO();
+        List<Customers> customers = dao.searchCustomers("", 1, 5, "name", "ASC", 1);
+
+        System.out.println("Danh sách khách hàng tìm thấy:");
+        for (Customers customer : customers) {
+            System.out.println(customer);
+        }
 
     }
 
     private Customers getFromResulset(ResultSet rs) throws SQLException {
         return Customers.builder()
-            .id(rs.getInt("id"))
-            .name(rs.getString("name"))
-            .phone(rs.getString("phone"))
-            .address(rs.getString("address"))
-            .balance(rs.getDouble("balance"))
-            .createdAt(rs.getDate("created_at"))
-            .createdBy(rs.getString("created_by"))
-            .deleteAt(rs.getDate("deletedAt"))
-            .deleteBy(rs.getString("deleteBy"))
-            .isDeleted(rs.getBoolean("isDeleted"))
-            .updatedAt(rs.getDate("updated_at"))
-            .updateBy(rs.getString("updated_by"))
-            .storeId(Stores.builder().id(rs.getInt("store_id")).build())
-            .status(rs.getString("status"))
-            .invoices(new ArrayList<>())
-            .debtNotes(new ArrayList<>())
-            .build();
+                .id(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .phone(rs.getString("phone"))
+                .address(rs.getString("address"))
+                .balance(rs.getDouble("balance"))
+                .createdAt(rs.getDate("created_at"))
+                .createdBy(rs.getString("created_by"))
+                .deleteAt(rs.getDate("deletedAt"))
+                .deleteBy(rs.getString("deleteBy"))
+                .isDeleted(rs.getBoolean("isDeleted"))
+                .updatedAt(rs.getDate("updated_at"))
+                .updateBy(rs.getString("updated_by"))
+                .storeId(Stores.builder().id(rs.getInt("store_id")).build())
+                .status(rs.getString("status"))
+                .invoices(new ArrayList<>())
+                .debtNotes(new ArrayList<>())
+                .build();
     }
 
     /**
      * Search customers by name
+     *
      * @param query The name to search for
      * @return List of customers matching the search criteria
      */
     public List<Customers> searchCustomersByName(String query) {
         List<Customers> customers = new ArrayList<>();
-        
+
         // Ensure connection is open
         if (connection == null) {
             System.err.println("Error: Cannot connect to database!");
@@ -455,7 +425,7 @@ public class customerDAO extends DBContext {
         PreparedStatement pst = null;
         ResultSet rs = null;
         String sql = "SELECT * FROM Customers WHERE name LIKE ? AND isDeleted = false";
-        
+
         try {
             pst = connection.prepareStatement(sql);
             pst.setString(1, "%" + query + "%");
@@ -469,8 +439,12 @@ public class customerDAO extends DBContext {
         } finally {
             // Close ResultSet and PreparedStatement
             try {
-                if (rs != null) rs.close();
-                if (pst != null) pst.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
             } catch (SQLException ex) {
                 System.err.println("Error closing ResultSet or PreparedStatement: " + ex.getMessage());
             }
@@ -478,7 +452,7 @@ public class customerDAO extends DBContext {
 
         return customers;
     }
-    
+
     public Integer getCustomerIdByPhone(String phone) {
         String sql = "SELECT id FROM Customers WHERE phone = ?";
 

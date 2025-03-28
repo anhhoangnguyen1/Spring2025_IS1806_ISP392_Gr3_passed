@@ -12,7 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Date;
 
 /**
  *
@@ -20,31 +23,57 @@ import java.time.LocalDateTime;
  */
 public class debtDAO extends DBContext {
 
-    public List<DebtNote> viewAllDebtInCustomer(String command, int customerId, int storeId, int index) {
+    public List<DebtNote> viewAllDebtInCustomer(String command, int customerId, int storeId, String startDate, String endDate, int index, int pageSize) {
         List<DebtNote> list = new ArrayList<>();
-        String sqlDebt = "SELECT id, type, amount, image, description, created_at, updated_at, created_by, status "
-                + "FROM Debt_note "
-                + "WHERE customers_id = ? AND store_id = ? "
-                + "ORDER BY " + command + " DESC "
-                + "LIMIT ?";
 
-        try (PreparedStatement st = connection.prepareStatement(sqlDebt)) {
-            st.setInt(1, customerId);
-            st.setInt(2, storeId);
-            int limitValue = Math.max(10, (index - 1) * 10); // Đảm bảo limit >= 10
-            st.setInt(3, limitValue);
+        // Xác thực command hợp lệ để tránh SQL Injection
+        List<String> validColumns = Arrays.asList("id", "amount", "created_at", "updated_at", "created_by", "status");
+        if (!validColumns.contains(command)) {
+            command = "id"; // Giá trị mặc định nếu command không hợp lệ
+        }
+
+        // Xây dựng câu lệnh SQL với bộ lọc ngày
+        StringBuilder sqlDebt = new StringBuilder("""
+        SELECT id, type, amount, image, description, created_at, updated_at, created_by, status 
+        FROM Debt_note 
+        WHERE customers_id = ? AND store_id = ?
+    """);
+
+        if (startDate != null && !startDate.isEmpty()) {
+            sqlDebt.append(" AND created_at >= ? ");
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            sqlDebt.append(" AND created_at <= ? ");
+        }
+
+        sqlDebt.append(" ORDER BY ").append(command).append(" DESC LIMIT ? OFFSET ?");
+
+        try (PreparedStatement st = connection.prepareStatement(sqlDebt.toString())) {
+            int paramIndex = 1;
+            st.setInt(paramIndex++, customerId);
+            st.setInt(paramIndex++, storeId);
+
+            if (startDate != null && !startDate.isEmpty()) {
+                st.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+            }
+            if (endDate != null && !endDate.isEmpty()) {
+                st.setDate(paramIndex++, java.sql.Date.valueOf(endDate));
+            }
+
+            st.setInt(paramIndex++, pageSize);
+            st.setInt(paramIndex, (index - 1) * pageSize);
 
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     BigDecimal amount = rs.getBigDecimal("amount");
                     String type = rs.getString("type");
                     if ("-".equals(type)) {
-                        amount = amount.negate();  // Thêm dấu âm nếu cần
+                        amount = amount.negate();
                     }
 
                     DebtNote debt = new DebtNote(
                             rs.getInt("id"),
-                            rs.getString("type"),
+                            type,
                             amount,
                             rs.getString("image"),
                             rs.getString("description"),
@@ -65,7 +94,7 @@ public class debtDAO extends DBContext {
         return list;
     }
 
-    public List<DebtNote> viewAllDebt(String command, int index, int pageSize,int storeID) {
+    public List<DebtNote> viewAllDebt(String command, int index, int pageSize, int storeID) {
         List<DebtNote> list = new ArrayList<>();
         int offset = (index - 1) * pageSize;
 
@@ -117,35 +146,48 @@ public class debtDAO extends DBContext {
         return list;
     }
 
-    public List<DebtNote> getDebtByCustomerId(int customerId, int storeId) {
+    public List<DebtNote> getDebtByCustomerId(int customerId, int storeId, LocalDate startDate, LocalDate endDate) {
         List<DebtNote> debts = new ArrayList<>();
 
         String sql = "SELECT d.id, d.type, d.amount, d.image, d.description, d.created_at, d.updated_at, "
                 + "d.created_by, d.status, c.name, c.phone, c.address "
                 + "FROM Debt_note d "
                 + "JOIN Customers c ON d.customers_id = c.id "
-                + "WHERE d.customers_id = ? AND d.store_id = ?"; // 🔹 Lọc theo store_id
+                + "WHERE d.customers_id = ? AND d.store_id = ?";
+
+        // 🔹 Nếu có khoảng thời gian, thêm điều kiện lọc theo ngày
+        if (startDate != null) {
+            sql += " AND d.created_at >= ?";
+        }
+        if (endDate != null) {
+            sql += " AND d.created_at <= ?";
+        }
+
+        sql += " ORDER BY d.created_at DESC"; // 🔹 Sắp xếp theo thời gian giảm dần
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, customerId);
-            st.setInt(2, storeId); // 🔹 Thêm điều kiện lọc cửa hàng
+            st.setInt(2, storeId);
+
+            int index = 3;
+            if (startDate != null) {
+                st.setDate(index++, java.sql.Date.valueOf(startDate)); // ✅ Đúng cú pháp
+            }
+
+            if (endDate != null) {
+                st.setDate(index++, java.sql.Date.valueOf(endDate)); // ✅ Đúng cú pháp
+            }
 
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
                     BigDecimal amount = rs.getBigDecimal("amount");
                     String type = rs.getString("type");
 
-                    // Nếu type là "-", thì đổi dấu số tiền
+                    // Nếu type là "-", đổi dấu số tiền
                     if ("-".equals(type)) {
                         amount = amount.negate();
                     }
 
-                    // Lấy thông tin khách hàng
-                    String customerName = rs.getString("name");
-                    String customerPhone = rs.getString("phone");
-                    String customerAddress = rs.getString("address");
-
-                    // Tạo đối tượng DebtNote và thêm vào danh sách
                     DebtNote debt = new DebtNote(
                             rs.getInt("id"),
                             type,
@@ -153,9 +195,9 @@ public class debtDAO extends DBContext {
                             rs.getString("image"),
                             rs.getString("description"),
                             customerId,
-                            customerName,
-                            customerPhone,
-                            customerAddress,
+                            rs.getString("name"),
+                            rs.getString("phone"),
+                            rs.getString("address"),
                             rs.getObject("created_at", LocalDateTime.class),
                             rs.getObject("updated_at", LocalDateTime.class),
                             rs.getString("created_by"),
@@ -172,19 +214,45 @@ public class debtDAO extends DBContext {
         return debts;
     }
 
-    public int countDebts(int storeId) {
+    public int countDebts(int storeId, int customerId, String startDate, String endDate) {
         int count = 0;
-        String sqlCount = """
-        SELECT COUNT(*) FROM Debt_note 
-        WHERE store_id = ? 
-        AND ((customers_id IS NOT NULL 
-            AND id = (SELECT MAX(id) FROM Debt_note dn WHERE dn.customers_id = Debt_note.customers_id AND dn.store_id = ?)) 
-        OR customers_id IS NULL)
-    """;
+        StringBuilder sqlCount = new StringBuilder("SELECT COUNT(*) FROM Debt_note WHERE store_id = ? ");
 
-        try (PreparedStatement stCount = connection.prepareStatement(sqlCount)) {
-            stCount.setInt(1, storeId);
-            stCount.setInt(2, storeId); // Áp dụng store_id vào subquery
+        if (customerId > 0) {
+            sqlCount.append(" AND customers_id = ? ");
+        } else {
+            sqlCount.append("""
+            AND ((customers_id IS NOT NULL 
+                AND id = (SELECT MAX(id) FROM Debt_note dn WHERE dn.customers_id = Debt_note.customers_id AND dn.store_id = ?)) 
+            OR customers_id IS NULL)
+        """);
+        }
+
+        // Thêm điều kiện lọc theo ngày nếu có
+        if (startDate != null && !startDate.isEmpty()) {
+            sqlCount.append(" AND created_at >= ? ");
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            sqlCount.append(" AND created_at <= ? ");
+        }
+
+        try (PreparedStatement stCount = connection.prepareStatement(sqlCount.toString())) {
+            int paramIndex = 1;
+            stCount.setInt(paramIndex++, storeId);
+
+            if (customerId > 0) {
+                stCount.setInt(paramIndex++, customerId);
+            } else {
+                stCount.setInt(paramIndex++, storeId);
+            }
+
+            if (startDate != null && !startDate.isEmpty()) {
+                stCount.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+            }
+            if (endDate != null && !endDate.isEmpty()) {
+                stCount.setDate(paramIndex++, java.sql.Date.valueOf(endDate));
+            }
+
             try (ResultSet rsCount = stCount.executeQuery()) {
                 if (rsCount.next()) {
                     count = rsCount.getInt(1);
@@ -252,9 +320,9 @@ public class debtDAO extends DBContext {
         return list;
     }
 
-    public boolean insertDebt(DebtNote debts,int storeID) {
-        String insertQuery = "INSERT INTO Debt_note (type, amount, image, description, customers_id, created_at, updated_at, created_by, status, store_id) \n" +
-"        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    public boolean insertDebt(DebtNote debts, int storeID) {
+        String insertQuery = "INSERT INTO Debt_note (type, amount, image, description, customers_id, created_at, updated_at, created_by, status, store_id) \n"
+                + "        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, debts.getType());
@@ -287,9 +355,9 @@ public class debtDAO extends DBContext {
         return false; // Không đóng connection ở đây
     }
 
-    public boolean insertDebtInCustomer(DebtNote debts,int storeID) {
-        String insertQuery = "INSERT INTO Debt_note (type, amount, image, description, customers_id, created_at, updated_at, created_by, status, store_id) \n" +
-"        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    public boolean insertDebtInCustomer(DebtNote debts, int storeID) {
+        String insertQuery = "INSERT INTO Debt_note (type, amount, image, description, customers_id, created_at, updated_at, created_by, status, store_id) \n"
+                + "        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
             // Set dữ liệu cho INSERT
@@ -325,13 +393,10 @@ public class debtDAO extends DBContext {
 
     public static void main(String[] args) {
         // Initialize the DAO (Data Access Object)
-        String command = "c.id";
+        String command = "created_at";
         int index = 1;
         int pageSize = 10;
         debtDAO dao = new debtDAO();
-        List<DebtNote> debts = dao.viewAllDebt(command, 1, 10,1);
-        for (DebtNote debtObj : debts) {
-            System.out.println(debtObj);
-        }
+
     }
 }

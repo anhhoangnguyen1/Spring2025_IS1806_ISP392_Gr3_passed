@@ -57,6 +57,9 @@ public class SaleController extends HttpServlet {
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        String storeIDStr = (String) session.getAttribute("storeID");
+        int storeID = Integer.parseInt(storeIDStr);
         try {
             String action = req.getParameter("action");
             

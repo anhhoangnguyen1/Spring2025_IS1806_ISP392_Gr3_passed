@@ -609,7 +609,6 @@ public class controllerZones extends HttpServlet {
             if (showInactive == null) {
                 showInactive = true; // Mặc định là true nếu chưa có
             }            // Chỉ đếm các zone thuộc store hiện tại
-            
 
             int total = zoneDAO.countZones("", showInactive, storeId); // Cập nhật để gọi đúng phương thức
 

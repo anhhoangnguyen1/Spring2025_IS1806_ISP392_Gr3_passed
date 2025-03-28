@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import dal.customerDAO;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.UUID;
@@ -70,7 +71,7 @@ public class controllerDebts extends HttpServlet {
             int index = (indexPage != null) ? Integer.parseInt(indexPage) : 1;
             // Nếu `pageSize` có trong request, dùng giá trị đó; nếu không, mặc định là 10
             int pageSize = (pageSizeParam != null) ? Integer.parseInt(pageSizeParam) : 10;
-            int count = debts.countDebts(storeID);
+            int count = debts.countDebts(storeID, 0, null, null);
             int endPage = (int) Math.ceil(count * 1.0 / pageSize); // Đảm bảo làm tròn lên
 
             // Nếu `index` lớn hơn `endPage`, đưa về `endPage`
@@ -78,7 +79,7 @@ public class controllerDebts extends HttpServlet {
                 index = endPage;
             }
 
-            List<DebtNote> listDebts = debts.viewAllDebt(command, index, pageSize,storeID);
+            List<DebtNote> listDebts = debts.viewAllDebt(command, index, pageSize, storeID);
             List<String> listCustomer = customers.getAllCustomerNames();
             request.setAttribute("totalDebts", count);
             request.setAttribute("listName", listCustomer);
@@ -95,11 +96,52 @@ public class controllerDebts extends HttpServlet {
 
             request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
         }
+        if (service.equals("debtInCustomers")) {
+            int customer_id = Integer.parseInt(request.getParameter("customer_id"));
+            String indexPage = request.getParameter("index");
+            int index = (indexPage != null && !indexPage.isEmpty()) ? Integer.parseInt(indexPage) : 1;
+
+            // Lấy số lượng hiển thị trên mỗi trang (pageSize)
+            String pageSizeParam = request.getParameter("pageSize");
+            int pageSize = (pageSizeParam != null && !pageSizeParam.isEmpty()) ? Integer.parseInt(pageSizeParam) : 10;
+
+            // Lấy ngày bắt đầu và ngày kết thúc từ request
+            String startDate = request.getParameter("startDate");
+            String endDate = request.getParameter("endDate");
+            String command = null;
+            if (command == null || command.isEmpty()) {
+                command = "id desc"; // Giá trị mặc định
+            }
+            // Đếm tổng số nợ theo bộ lọc ngày
+            int count = debts.countDebts(storeID, customer_id, startDate, endDate);
+            int endPage = (int) Math.ceil(count * 1.0 / pageSize);
+
+            // Kiểm tra nếu index vượt quá số trang hiện có
+            if (index > endPage && endPage > 0) {
+                index = endPage;
+            }
+
+            // Lọc danh sách nợ theo bộ lọc ngày
+            List<DebtNote> listDebts = debts.viewAllDebtInCustomer(command, customer_id, storeID, startDate, endDate, index, pageSize);
+            Customers customer = customers.getCustomerById(customer_id);
+
+            // Gửi dữ liệu về JSP
+            request.setAttribute("totalDebts", count);
+            request.setAttribute("listName", customer);
+            request.setAttribute("list", listDebts);
+            request.setAttribute("endPage", endPage);
+            request.setAttribute("index", index);
+            request.setAttribute("pageSize", pageSize);
+            request.setAttribute("startDate", startDate);
+            request.setAttribute("endDate", endDate);
+
+            request.getRequestDispatcher("views/customer/debtHistory.jsp").forward(request, response);
+        }
 
         if (service.equals("searchDebts")) {
             String name = request.getParameter("browser");
             try {
-                List<DebtNote> list = debts.searchDebts(name,storeID);
+                List<DebtNote> list = debts.searchDebts(name, storeID);
                 request.setAttribute("list", list);
                 request.setAttribute("name", name);
                 request.getRequestDispatcher("views/debtHistory/debts.jsp").forward(request, response);
@@ -108,6 +150,26 @@ public class controllerDebts extends HttpServlet {
         }
         if (service.equals("debtHistory")) {
             String idStr = request.getParameter("id");
+            String startDateStr = request.getParameter("startDate");
+            String endDateStr = request.getParameter("endDate");
+
+            LocalDate startDate = null;
+            LocalDate endDate = null;
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            try {
+                if (startDateStr != null && !startDateStr.isEmpty()) {
+                    startDate = LocalDate.parse(startDateStr, formatter);
+                }
+                if (endDateStr != null && !endDateStr.isEmpty()) {
+                    endDate = LocalDate.parse(endDateStr, formatter);
+                }
+            } catch (DateTimeParseException e) {
+                request.getSession().setAttribute("Notification", "Invalid date format.");
+                response.sendRedirect("Debts?service=debtHistory");
+                return;
+            }
             Integer sessionId = (Integer) request.getSession().getAttribute("customer_id");
 
             int id;
@@ -121,7 +183,7 @@ public class controllerDebts extends HttpServlet {
                 return;
             }
 
-            List<DebtNote> list = debts.getDebtByCustomerId(id,storeID);
+            List<DebtNote> list = debts.getDebtByCustomerId(id, storeID,startDate, endDate);
 
             request.setAttribute("list", list);
             String notification = (String) request.getSession().getAttribute("Notification");
@@ -240,7 +302,7 @@ public class controllerDebts extends HttpServlet {
 
             // Nếu không có nợ cũ, thêm mới
             DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customer_id, createdAt, updatedAt, createdBy, status);
-            boolean insert = debts.insertDebtInCustomer(newDebt,storeID);
+            boolean insert = debts.insertDebtInCustomer(newDebt, storeID);
             if (insert) {
                 totalDebtAmount = totalDebtAmount.add(amount);
                 customerDAO.editCustomerBalance(totalDebtAmount, customer_id);
@@ -313,7 +375,6 @@ public class controllerDebts extends HttpServlet {
                     String fileType = file.getContentType();
                     if (!ALLOWED_MIME_TYPES.contains(fileType)) {
                         request.getSession().setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
-                        System.out.println("---start process: ALLOWED_MIME_TYPES is Error--");
                         response.sendRedirect(redirectUrl);
                         return;
                     }
@@ -395,7 +456,7 @@ public class controllerDebts extends HttpServlet {
                     }
                 }
                 DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customerId, createdAt, updatedAt, createdBy, status);
-                boolean insert = debts.insertDebt(newDebt,storeID);
+                boolean insert = debts.insertDebt(newDebt, storeID);
 
                 if (insert) {
                     customers.editCustomerBalance(amount, customerId);
@@ -417,10 +478,11 @@ public class controllerDebts extends HttpServlet {
         if (service.equals("addDebtInCustomers")) {
             String status = request.getParameter("status");
             String type;
-
+            String customerIdStr = request.getParameter("customer_id");
+            int customer_id = Integer.parseInt(customerIdStr);
             if (status == null || status.trim().isEmpty()) {
                 request.getSession().setAttribute("Notification", "Status is required.");
-                response.sendRedirect("Customers?service=customers");
+                response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
                 return;
             }
             if ("Customer borrows debt".equalsIgnoreCase(status) || "Owner repays debt".equalsIgnoreCase(status)) {
@@ -429,7 +491,7 @@ public class controllerDebts extends HttpServlet {
                 type = "-";
             } else {
                 request.getSession().setAttribute("Notification", "Status is required.");
-                response.sendRedirect("Customers?service=customers");
+                response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
                 return;
             }
 
@@ -437,13 +499,13 @@ public class controllerDebts extends HttpServlet {
             BigDecimal amount = null;
             if (amountStr == null || amountStr.trim().isEmpty()) {
                 request.getSession().setAttribute("Notification", "Amount is required.");
-                response.sendRedirect("Customers?service=customers");
+                response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
                 return; // Nếu amount rỗng, không tiếp tục xử lý
             }
             amount = new BigDecimal(amountStr);
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
                 request.getSession().setAttribute("Notification", "Amount must be greater than zero.");
-                response.sendRedirect("Customers?service=customers");
+                response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
                 return; // Nếu amount <= 0, không tiếp tục
             }
 
@@ -451,9 +513,6 @@ public class controllerDebts extends HttpServlet {
             if ("-".equals(type) && amount.compareTo(BigDecimal.ZERO) > 0) {
                 amount = amount.negate();
             }
-
-            String customerIdStr = request.getParameter("customer_id");
-            int customer_id = Integer.parseInt(customerIdStr);
 
             // Kiểm tra phần tệp tin ảnh (image upload)
             Part file = request.getPart("image");
@@ -463,7 +522,7 @@ public class controllerDebts extends HttpServlet {
                 List<String> ALLOWED_MIME_TYPES = List.of("image/jpeg", "image/png", "image/gif"); // Định nghĩa các loại mime cho phép
                 if (!ALLOWED_MIME_TYPES.contains(fileType)) {
                     request.getSession().setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
-                    response.sendRedirect("Customers?service=customers");
+                    response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
                     return;
                 }
 
@@ -488,7 +547,7 @@ public class controllerDebts extends HttpServlet {
                 } catch (Exception e) {
                     e.printStackTrace();
                     request.getSession().setAttribute("Notification", "File upload failed.");
-                    response.sendRedirect("Customers?service=customers");
+                    response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
                     return;
                 }
             } else {
@@ -500,7 +559,7 @@ public class controllerDebts extends HttpServlet {
             LocalDateTime createdAt = null;
             if (createdAtStr == null || createdAtStr.trim().isEmpty()) {
                 request.getSession().setAttribute("Notification", "Created date is required.");
-                response.sendRedirect("Customers?service=customers");
+                response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
                 return; // Nếu created_at rỗng, không tiếp tục xử lý
             }
 
@@ -509,7 +568,7 @@ public class controllerDebts extends HttpServlet {
                 createdAt = LocalDateTime.parse(createdAtStr, formatter);
             } catch (DateTimeParseException e) {
                 request.getSession().setAttribute("Notification", "Invalid date format. Expected format: yyyy-MM-dd'T'HH:mm.");
-                response.sendRedirect("Customers?service=customers");
+                response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
                 return; // Nếu không thể chuyển đổi định dạng ngày, không tiếp tục
             }
 
@@ -522,7 +581,7 @@ public class controllerDebts extends HttpServlet {
 
             // Nếu không có nợ cũ, thêm mới
             DebtNote newDebt = new DebtNote(0, type, amount, imageFileName, description, customer_id, createdAt, updatedAt, createdBy, status);
-            boolean insert = debts.insertDebtInCustomer(newDebt,storeID);
+            boolean insert = debts.insertDebtInCustomer(newDebt, storeID);
             if (insert) {
                 totalDebtAmount = totalDebtAmount.add(amount);
                 customerDAO.editCustomerBalance(totalDebtAmount, customer_id);
@@ -530,7 +589,7 @@ public class controllerDebts extends HttpServlet {
             } else {
                 request.getSession().setAttribute("Notification", "Debt added failed.");
             }
-            response.sendRedirect("Customers?service=customers");
+            response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
 
         }
 
