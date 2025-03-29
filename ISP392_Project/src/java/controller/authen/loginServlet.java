@@ -46,15 +46,7 @@ public class loginServlet extends HttpServlet {
 
 //<<<<<<< HEAD
          if (login != null) {
-             
-             if ("Inactive".equalsIgnoreCase(login.getStatus())) {
-        
-            request.setAttribute("error", "Your account is inactive. Please contact admin.");
-            request.getRequestDispatcher("/views/login.jsp").forward(request, response);
-            return;
-        }
-              Stores store = login.getStoreId(); 
-            String storeID = store != null ? String.valueOf(store.getId()) : null;  
+
 //=======
 //        // Nếu xác thực thành công
 //        if (login != null) {
@@ -62,7 +54,7 @@ public class loginServlet extends HttpServlet {
 //>>>>>>> origin/master
 
             // Kiểm tra trạng thái tài khoản người dùng
-            if ("Deactive".equalsIgnoreCase(login.getStatus())) {
+            if ("Inactive".equalsIgnoreCase(login.getStatus())) {
                 System.out.println("User account is deactivated: " + username);
                 request.setAttribute("error", "Your account is deactivated. Please contact admin.");
                 request.getRequestDispatcher("/views/login.jsp").forward(request, response);
