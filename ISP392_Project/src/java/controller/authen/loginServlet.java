@@ -53,21 +53,6 @@ public class loginServlet extends HttpServlet {
             request.getRequestDispatcher("/views/login.jsp").forward(request, response);
             return;
         }
-              Stores store = login.getStoreId(); 
-            String storeID = store != null ? String.valueOf(store.getId()) : null;  
-//=======
-//        // Nếu xác thực thành công
-//        if (login != null) {
-//            System.out.println("Login successful for username: " + username);
-//>>>>>>> origin/master
-
-            // Kiểm tra trạng thái tài khoản người dùng
-            if ("Deactive".equalsIgnoreCase(login.getStatus())) {
-                System.out.println("User account is deactivated: " + username);
-                request.setAttribute("error", "Your account is deactivated. Please contact admin.");
-                request.getRequestDispatcher("/views/login.jsp").forward(request, response);
-                return;
-            }
 
             // Kiểm tra nếu người dùng là admin
             if (!"admin".equalsIgnoreCase(login.getRole())) {

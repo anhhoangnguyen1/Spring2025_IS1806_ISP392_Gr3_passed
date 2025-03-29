@@ -67,12 +67,6 @@ public class customerDAO extends DBContext {
                 while (rs.next()) {
                     Customers customer = mapResultSetToCustomer(rs);
 
-                    List<DebtNote> debts = debtDao.viewAllDebtInCustomer("id", customer.getId(), 1, storeID);
-
-                    if (debts == null) {
-                        debts = new ArrayList<>();
-                    }
-                    customer.setDebtNotes(debts);
 
                     customersList.add(customer);
                 }
@@ -175,8 +169,7 @@ public class customerDAO extends DBContext {
         try (ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 Customers customer = mapResultSetToCustomer(rs);
-                List<DebtNote> debts = debtDao.viewAllDebtInCustomer("created_at", customer.getId(), 1, storeID);
-                customer.setDebtNotes(debts);
+                
                 list.add(customer);
             }
         }
