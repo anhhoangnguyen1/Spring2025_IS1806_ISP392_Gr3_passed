@@ -15,6 +15,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import dal.debtDAO;
+import entity.DebtNote;
+import jakarta.servlet.http.HttpSession;
 
 /**
  *
@@ -119,10 +124,131 @@ public class controllerTopProducts extends HttpServlet {
         request.setAttribute("revenueToday", revenueToday);
         request.setAttribute("invoiceCountToday", invoiceCountToday);
         
+        // Tính tổng tiền vào/ra từ nợ
+        debtDAO debtDAO = new debtDAO();
+        BigDecimal totalMoneyIn = BigDecimal.ZERO;
+        BigDecimal totalMoneyOut = BigDecimal.ZERO;
         
+        // Lấy storeID từ session
+        HttpSession session = request.getSession();
+        String storeIDStr = (String) session.getAttribute("storeID");
+        int storeID = Integer.parseInt(storeIDStr);
         
-        int threshold = 20; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
-        List<Products> lowStockProducts = dao.getLowStockProducts(threshold);
+        // Lấy ngày hiện tại
+        LocalDate today = LocalDate.now();
+        
+        // Lấy tất cả các giao dịch nợ của ngày hôm nay
+        List<DebtNote> todayDebts = debtDAO.getAllDebtsByDateRange(today, today, storeID);
+        
+        // Tính toán tổng thu và tổng chi cho ngày hôm nay
+        for (DebtNote debt : todayDebts) {
+            if ("+".equals(debt.getType())) {
+                totalMoneyIn = totalMoneyIn.add(debt.getAmount().abs());
+            } else if ("-".equals(debt.getType())) {
+                totalMoneyOut = totalMoneyOut.add(debt.getAmount().abs());
+            }
+        }
+        
+        // Cộng thêm doanh thu từ đơn hàng vào totalMoneyIn
+        totalMoneyIn = totalMoneyIn.add(BigDecimal.valueOf(revenueToday));
+        
+        // Tính lợi nhuận thực tế (Net Profit)
+        BigDecimal netProfit = totalMoneyIn.subtract(totalMoneyOut);
+        
+        // Set các giá trị vào request
+        request.setAttribute("todayDebts", todayDebts);
+        request.setAttribute("totalMoneyIn", totalMoneyIn);
+        request.setAttribute("totalMoneyOut", totalMoneyOut);
+        request.setAttribute("netProfit", netProfit);
+        
+        // Xử lý lọc theo thời gian cho lịch sử dòng tiền
+        String timeRange = request.getParameter("timeRange");
+        if (timeRange == null) {
+            timeRange = "last7days"; // Mặc định là 7 ngày gần nhất
+        }
+        
+        // Xử lý phân trang
+        int page = 1;
+        int recordsPerPage = 10;
+        String pageStr = request.getParameter("page");
+        if (pageStr != null) {
+            try {
+                page = Integer.parseInt(pageStr);
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+        
+        // Tính toán vị trí bắt đầu
+        int start = (page - 1) * recordsPerPage;
+        
+        // Lấy tổng số bản ghi để tính số trang
+        int totalRecords = debtDAO.getTotalDebtCount(storeID);
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+        
+        // Lấy dữ liệu theo khoảng thời gian
+        List<DebtNote> debtHistory;
+        BigDecimal periodTotalIn = BigDecimal.ZERO;
+        BigDecimal periodTotalOut = BigDecimal.ZERO;
+        
+        LocalDate startDate;
+        LocalDate endDate = LocalDate.now();
+        
+        switch (timeRange) {
+            case "today":
+                startDate = endDate;
+                break;
+            case "yesterday":
+                startDate = endDate.minusDays(1);
+                endDate = startDate;
+                break;
+            case "last7days":
+                startDate = endDate.minusDays(7);
+                break;
+            case "thismonth":
+                startDate = endDate.withDayOfMonth(1);
+                break;
+            case "lastmonth":
+                startDate = endDate.minusMonths(1).withDayOfMonth(1);
+                endDate = startDate.plusMonths(1).minusDays(1);
+                break;
+            default:
+                startDate = endDate.minusDays(7);
+                break;
+        }
+        
+        // Lấy dữ liệu phân trang và tính tổng tiền trong khoảng thời gian
+        debtHistory = debtDAO.getDebtsByDateRange(startDate, endDate, start, recordsPerPage, storeID);
+        List<DebtNote> allDebtsInRange = debtDAO.getAllDebtsByDateRange(startDate, endDate, storeID);
+        
+        // Tính toán tổng thu và tổng chi
+        for (DebtNote debt : allDebtsInRange) {
+            if ("+".equals(debt.getType())) {
+                periodTotalIn = periodTotalIn.add(debt.getAmount().abs());
+            } else if ("-".equals(debt.getType())) {
+                periodTotalOut = periodTotalOut.add(debt.getAmount().abs());
+            }
+        }
+        
+        // Thêm doanh thu từ đơn hàng vào periodTotalIn nếu đang xem ngày hôm nay
+        if ("today".equals(timeRange)) {
+            periodTotalIn = periodTotalIn.add(BigDecimal.valueOf(revenueToday));
+        }
+        
+        // Đặt các thuộc tính cho view
+        request.setAttribute("timeRange", timeRange);
+        request.setAttribute("debtHistory", debtHistory);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("periodTotalIn", periodTotalIn);
+        request.setAttribute("periodTotalOut", periodTotalOut);
+        
+        // Lấy ngưỡng low stock từ session, nếu không có thì dùng giá trị mặc định là 20
+        Integer lowStockThreshold = (Integer) session.getAttribute("lowStockThreshold");
+        if (lowStockThreshold == null) {
+            lowStockThreshold = 20;
+        }
+        List<Products> lowStockProducts = dao.getLowStockProducts(lowStockThreshold);
         
         request.setAttribute("lowStockProducts", lowStockProducts);
         request.getRequestDispatcher("views/dashboard/dashboard.jsp").forward(request, response);

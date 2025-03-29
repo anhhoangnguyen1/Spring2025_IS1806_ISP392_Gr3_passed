@@ -419,22 +419,22 @@ public class productsDAO extends DBContext {
 
     public List<String[]> getTopSellingProductNamesOfMonth() {
         List<String[]> topProducts = new ArrayList<>();
-        String sql = "SELECT p.name, SUM(idt.quantity) AS total_quantity_sold "
-                + "FROM Invoice_detail idt "
-                + "JOIN Invoice i ON idt.invoice_id = i.id "
-                + "JOIN Products p ON idt.product_id = p.id "
-                + "WHERE i.type = 'export' "
-                + "AND MONTH(i.created_at) = MONTH(CURRENT_DATE()) "
-                + "AND YEAR(i.created_at) = YEAR(CURRENT_DATE()) "
-                + "GROUP BY p.name "
+        String sql = "SELECT p.name, p.image, SUM(od.Quantity) AS total_quantity_sold "
+                + "FROM OrderDetails od "
+                + "JOIN Orders o ON od.OrdersID = o.ID "
+                + "JOIN Products p ON od.ProductsID = p.id "
+                + "WHERE MONTH(o.OrderDate) = MONTH(CURRENT_DATE()) "
+                + "AND YEAR(o.OrderDate) = YEAR(CURRENT_DATE()) "
+                + "GROUP BY p.name, p.image "
                 + "ORDER BY total_quantity_sold DESC "
-                + "LIMIT 3";
+                + "LIMIT 10";
 
         try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 String name = rs.getString("name");
+                String image = rs.getString("image");
                 int totalQuantitySold = rs.getInt("total_quantity_sold");
-                topProducts.add(new String[]{name, String.valueOf(totalQuantitySold)});
+                topProducts.add(new String[]{name, String.valueOf(totalQuantitySold), image});
             }
         } catch (SQLException e) {
             e.printStackTrace();

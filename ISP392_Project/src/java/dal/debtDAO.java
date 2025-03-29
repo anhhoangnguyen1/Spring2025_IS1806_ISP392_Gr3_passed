@@ -391,6 +391,78 @@ public class debtDAO extends DBContext {
         return false; // Nếu có lỗi hoặc không insert thành công thì trả về false
     }
 
+    public int getTotalDebtCount(int storeID) {
+        String sql = "SELECT COUNT(*) FROM Debt_note WHERE store_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeID);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("getTotalDebtCount: " + e.getMessage());
+        }
+        return 0;
+    }
+    
+    public List<DebtNote> getDebtsByDateRange(LocalDate startDate, LocalDate endDate, int offset, int limit, int storeID) {
+        List<DebtNote> list = new ArrayList<>();
+        String sql = "SELECT id, type, amount, description, created_at, status FROM Debt_note " +
+                    "WHERE store_id = ? AND DATE(created_at) BETWEEN ? AND ? " +
+                    "ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeID);
+            st.setString(2, startDate.toString());
+            st.setString(3, endDate.toString());
+            st.setInt(4, limit);
+            st.setInt(5, offset);
+            
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                DebtNote debt = new DebtNote();
+                debt.setId(rs.getInt("id"));
+                debt.setAmount(rs.getBigDecimal("amount"));
+                debt.setType(rs.getString("type"));
+                debt.setDescription(rs.getString("description"));
+                debt.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                debt.setStatus(rs.getString("status"));
+                list.add(debt);
+            }
+        } catch (SQLException e) {
+            System.out.println("getDebtsByDateRange: " + e.getMessage());
+        }
+        return list;
+    }
+    
+    public List<DebtNote> getAllDebtsByDateRange(LocalDate startDate, LocalDate endDate, int storeID) {
+        List<DebtNote> list = new ArrayList<>();
+        String sql = "SELECT id, type, amount, description, created_at, status FROM Debt_note " +
+                    "WHERE store_id = ? AND DATE(created_at) BETWEEN ? AND ? " +
+                    "ORDER BY created_at DESC";
+        
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeID);
+            st.setString(2, startDate.toString());
+            st.setString(3, endDate.toString());
+            
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                DebtNote debt = new DebtNote();
+                debt.setId(rs.getInt("id"));
+                debt.setAmount(rs.getBigDecimal("amount"));
+                debt.setType(rs.getString("type"));
+                debt.setDescription(rs.getString("description"));
+                debt.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                debt.setStatus(rs.getString("status"));
+                list.add(debt);
+            }
+        } catch (SQLException e) {
+            System.out.println("getAllDebtsByDateRange: " + e.getMessage());
+        }
+        return list;
+    }
+
     public static void main(String[] args) {
         // Initialize the DAO (Data Access Object)
         String command = "created_at";
