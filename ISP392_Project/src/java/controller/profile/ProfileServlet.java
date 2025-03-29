@@ -19,32 +19,32 @@ import jakarta.servlet.http.HttpSession;
  * @author THC
  */
 public class ProfileServlet extends HttpServlet {
+    
 
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        Integer userId = (Integer) session.getAttribute("userId");
-
-
-        if (userId == null) {
-            response.sendRedirect(request.getContextPath() + "/login.html");
-            return;
-        }
-
-        Users user = profileDAO.INSTANCE.getUserById(userId);
-
-        if (user == null) {
-            request.setAttribute("errorMessage", "User not found!");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
-            return;
-        }
-
-
-        request.setAttribute("user", user);
-        request.getRequestDispatcher("/views/profile/profile.jsp").forward(request, response);
+   @Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    HttpSession session = request.getSession();
+    Integer userId = (Integer) session.getAttribute("userId");
+    
+    if (userId == null) {
+        response.sendRedirect("login.jsp");
+        return;
     }
+    
+    // Always get fresh data from database
+    Users user = profileDAO.INSTANCE.getUserById(userId);
+    if (user == null) {
+        request.setAttribute("errorMessage", "User not found!");
+        request.getRequestDispatcher("/error.jsp").forward(request, response);
+        return;
+    }
+    
+    // Update the session with fresh data
+    session.setAttribute("user", user);
+    request.setAttribute("user", user);
+    request.getRequestDispatcher("/views/profile/profile.jsp").forward(request, response);
+}
 
 
     @Override
