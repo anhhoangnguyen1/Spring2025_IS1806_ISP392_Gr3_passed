@@ -85,7 +85,15 @@
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
-                            <span class="nav-text">Invoices</span>
+                            <span class="nav-text">Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="orders">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </span>
+                            <span class="nav-text">Orders History</span>
                         </a>
                     </li>
                     <li>
@@ -96,7 +104,7 @@
                             <span class="nav-text">Debts History</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="active">
                         <a href="/ISP392_Project/Stores">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-store"></i>
@@ -104,14 +112,16 @@
                             <span class="nav-text">Stores</span>
                         </a>
                     </li>
-                    <li class="active">
-                        <a href="/ISP392_Project/Users">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-user-tie"></i>
-                            </span>
-                            <span class="nav-text">Staffs</span>
-                        </a>
-                    </li>
+                    <c:if test="${sessionScope.role == 'owner'}">
+                        <li>
+                            <a href="/ISP392_Project/Users">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </span>
+                                <span class="nav-text">Staffs</span>
+                            </a>
+                        </li>
+                    </c:if>
                 </ul>
                 <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
@@ -306,7 +316,7 @@
                 </div>
             </div>
         </div>
-                                
+
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

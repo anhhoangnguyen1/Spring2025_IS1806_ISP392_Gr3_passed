@@ -82,11 +82,19 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="sale">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
-                            <span class="nav-text">Invoices</span>
+                            <span class="nav-text">Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="orders">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </span>
+                            <span class="nav-text">Orders History</span>
                         </a>
                     </li>
                     <li>
@@ -98,15 +106,15 @@
                         </a>
                     </li>
                     <li>
-                            <a href="/ISP392_Project/Stores">
-                                <span class="nav-icon">
-                                    <i class="fa-solid fa-store"></i>
-                                </span>
-                                <span class="nav-text">Stores</span>
-                            </a>
-                        </li>
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
                     <c:if test="${sessionScope.role == 'owner'}">
-                        
+
                         <li>
                             <a href="/ISP392_Project/Users">
                                 <span class="nav-icon">

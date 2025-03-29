@@ -112,7 +112,7 @@
                         </a>
                     </li>
                     <li class="active">
-                        <a href="order">
+                        <a href="orders">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>

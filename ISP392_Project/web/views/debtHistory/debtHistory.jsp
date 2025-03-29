@@ -182,7 +182,15 @@
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
-                            <span class="nav-text">Invoices</span>
+                            <span class="nav-text">Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="orders">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </span>
+                            <span class="nav-text">Orders History</span>
                         </a>
                     </li>
                     <li class="active">
