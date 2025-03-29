@@ -38,50 +38,38 @@ public class userDAO extends DBContext {
         return usersList;
     }
 
-    public int countUsers(String keyword, String statusFilter, int storeID) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE store_id = ?");
-
-        // Thêm điều kiện tìm kiếm nếu có từ khóa
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append(" AND (name LIKE ? OR phone LIKE ?)");
-        }
-
-        // Thêm bộ lọc trạng thái
-        if (statusFilter != null && !statusFilter.equals("all")) {
-            sql.append(" AND status = ?");
-        }
-
-        try (PreparedStatement st = connection.prepareStatement(sql.toString())) {
-            int paramIndex = 1;
-            st.setInt(paramIndex++, storeID);
-
-            // Nếu có từ khóa, thêm tham số tìm kiếm vào PreparedStatement
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                String param = "%" + keyword + "%";
-                st.setString(paramIndex++, param);
-                st.setString(paramIndex++, param);
-            }
-
-            // Nếu có bộ lọc trạng thái, thêm tham số vào PreparedStatement
-            if (statusFilter != null && !statusFilter.equals("all")) {
-                st.setString(paramIndex++, statusFilter);
-            }
-
-            // Thực thi câu lệnh SQL và lấy kết quả
-            try (ResultSet rs = st.executeQuery()) {
+    public int countUsers(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            String sql = "SELECT COUNT(*) FROM users";
+            try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } else {
 
+            String sql = "SELECT COUNT(*) FROM users WHERE name LIKE ? OR phone LIKE ?";
+            try (PreparedStatement st = connection.prepareStatement(sql)) {
+                String param = "%" + keyword + "%";
+                st.setString(1, param);
+                st.setString(2, param);
+
+                try (ResultSet rs = st.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
         return 0;
     }
 
     public void deactivateUser(int userId) {
-        String sql = "UPDATE users SET status = 'Inactive' WHERE id = ?";
+        String sql = "UPDATE users SET status = 'Deactive' WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, userId);
             st.executeUpdate();
@@ -100,63 +88,34 @@ public class userDAO extends DBContext {
         }
     }
 
-    public List<Users> searchUsers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, int storeID, String statusFilter) {
+    public List<Users> searchUsers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
         List<Users> list = new ArrayList<>();
         List<String> allowedSortColumns = List.of("id", "role", "name", "phone", "address", "gender", "dob", "email", "status");
-
-        // Kiểm tra cột sắp xếp hợp lệ
         if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
             sortBy = "id";
         }
 
-        // Kiểm tra thứ tự sắp xếp hợp lệ
         if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
             sortOrder = "ASC";
         }
-
-        // Bắt đầu câu lệnh SQL
-        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE store_id = ?");
-
-        // Thêm điều kiện tìm kiếm nếu có từ khóa
+        String sql = "SELECT * FROM users ";
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append(" AND (name LIKE ? OR phone LIKE ?)");
+            sql += "WHERE name LIKE ? OR phone LIKE ? ";
         }
-
-        // Thêm bộ lọc trạng thái
-        if (statusFilter != null && !statusFilter.equals("all")) {
-            sql.append(" AND status = ?");
-        }
-
-        // Thêm phần sắp xếp và phân trang
-        sql.append(" ORDER BY ").append(sortBy).append(" ").append(sortOrder);
-        sql.append(" LIMIT ? OFFSET ?");
-
-        try (PreparedStatement st = connection.prepareStatement(sql.toString())) {
+        sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
             int paramIndex = 1;
-
-            // Gán giá trị cho storeID
-            st.setInt(paramIndex++, storeID);
-
-            // Nếu có từ khóa, thêm tham số tìm kiếm vào PreparedStatement
             if (keyword != null && !keyword.trim().isEmpty()) {
                 String param = "%" + keyword + "%";
                 st.setString(paramIndex++, param);
                 st.setString(paramIndex++, param);
             }
-
-            // Nếu có bộ lọc trạng thái, thêm tham số vào PreparedStatement
-            if (statusFilter != null && !statusFilter.equals("all")) {
-                st.setString(paramIndex++, statusFilter);
-            }
-
-            // Thêm tham số phân trang
             st.setInt(paramIndex++, pageSize);
             st.setInt(paramIndex, (pageIndex - 1) * pageSize);
 
-            // Thực thi câu lệnh và xử lý kết quả
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
-                    Users user = mapResultSetToUser(rs);  // Hàm này giả sử đã được định nghĩa để chuyển ResultSet thành đối tượng User
+                    Users user = mapResultSetToUser(rs);
                     list.add(user);
                 }
             }
@@ -166,126 +125,57 @@ public class userDAO extends DBContext {
 
         return list;
     }
-
-    // Method to count users by specific role
-    public int countUsersByRole(String role, String keyword, String statusFilter) {
-        int count = 0;
-        try {
-            String sql = "SELECT COUNT(*) FROM Users u WHERE 1=1 ";
-
-            // Add role filter
-            sql += " AND u.role = ? ";
-
-            // Add keyword filter if not empty
-            if (!keyword.isEmpty()) {
-                sql += " AND (u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?) ";
-            }
-
-            // Add status filter
-            if (!"all".equals(statusFilter)) {
-                sql += " AND u.status = ? ";
-            }
-
-            PreparedStatement ps = connection.prepareStatement(sql);
-            int paramIndex = 1;
-
-            // Set role parameter
-            ps.setString(paramIndex++, role);
-
-            // Set keyword parameters if not empty
-            if (!keyword.isEmpty()) {
-                String searchParam = "%" + keyword + "%";
-                ps.setString(paramIndex++, searchParam);
-                ps.setString(paramIndex++, searchParam);
-                ps.setString(paramIndex++, searchParam);
-            }
-
-            // Set status parameter
-            if (!"all".equals(statusFilter)) {
-                ps.setString(paramIndex++, statusFilter);
-            }
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
+public List<Users> searchUsersByRole(String role, String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
+    List<Users> list = new ArrayList<>();
+    List<String> allowedSortColumns = List.of("id", "role", "name", "phone", "address", "gender", "dob", "email", "status");
+    
+    if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
+        sortBy = "id";
     }
 
-// Modify existing searchUsersByRole method or add a new one
-    public List<Users> searchUsersByRole(String role, String keyword, int index, int pageSize,
-            String sortBy, String sortOrder, int storeId, String statusFilter) {
-        List<Users> list = new ArrayList<>();
-        try {
-            String sql = "SELECT u.* FROM Users u WHERE 1=1 ";
+    if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
+        sortOrder = "ASC";
+    }
 
-            // Add role filter
-            sql += " AND u.role = ? ";
+    // SQL truy vấn với điều kiện lọc theo role
+    String sql = "SELECT * FROM users WHERE role = ? ";
+    
+    // Nếu có keyword, thêm điều kiện tìm kiếm theo tên hoặc số điện thoại
+    if (keyword != null && !keyword.trim().isEmpty()) {
+        sql += "AND (name LIKE ? OR phone LIKE ?) ";
+    }
+    
+    // Sắp xếp theo cột và thứ tự
+    sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
 
-            // Add keyword filter if not empty
-            if (!keyword.isEmpty()) {
-                sql += " AND (u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?) ";
-            }
+    try (PreparedStatement st = connection.prepareStatement(sql)) {
+        int paramIndex = 1;
+        
+        // Gán giá trị cho role và keyword (nếu có)
+        st.setString(paramIndex++, role);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String param = "%" + keyword + "%";
+            st.setString(paramIndex++, param);
+            st.setString(paramIndex++, param);
+        }
+        
+        // Gán giá trị cho pageSize và OFFSET (cho phân trang)
+        st.setInt(paramIndex++, pageSize);
+        st.setInt(paramIndex, (pageIndex - 1) * pageSize);
 
-            // Add status filter
-            if (!"all".equals(statusFilter)) {
-                sql += " AND u.status = ? ";
-            }
-
-            // Add sorting
-            sql += " ORDER BY " + (sortBy.equals("name") ? "u.name" : "u.id") + " " + sortOrder;
-
-            // Add pagination
-            sql += " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-
-            PreparedStatement ps = connection.prepareStatement(sql);
-            int paramIndex = 1;
-
-            // Set role parameter
-            ps.setString(paramIndex++, role);
-
-            // Set keyword parameters if not empty
-            if (!keyword.isEmpty()) {
-                String searchParam = "%" + keyword + "%";
-                ps.setString(paramIndex++, searchParam);
-                ps.setString(paramIndex++, searchParam);
-                ps.setString(paramIndex++, searchParam);
-            }
-
-            // Set status parameter
-            if (!"all".equals(statusFilter)) {
-                ps.setString(paramIndex++, statusFilter);
-            }
-
-            // Set pagination parameters
-            ps.setInt(paramIndex++, (index - 1) * pageSize);
-            ps.setInt(paramIndex++, pageSize);
-
-            ResultSet rs = ps.executeQuery();
+        try (ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
-                Users user = new Users();
-                // Populate user object from ResultSet
-                user.setId(rs.getInt("id"));
-                user.setUsername(rs.getString("username"));
-                user.setName(rs.getString("name"));
-                user.setEmail(rs.getString("email"));
-                user.setPhone(rs.getString("phone"));
-                user.setAddress(rs.getString("address"));
-                user.setGender(rs.getString("gender"));
-                user.setDob(rs.getDate("dob"));
-                user.setRole(rs.getString("role"));
-                user.setStatus(rs.getString("status"));
-
+                Users user = mapResultSetToUser(rs);  // Hàm này giả sử đã được định nghĩa để chuyển ResultSet thành đối tượng User
                 list.add(user);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return list;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+
+    return list;
+}
+
 
     public Users getUserById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
@@ -362,6 +252,28 @@ public class userDAO extends DBContext {
         return null;
     }
 
+//    public String getStoreIDByUser(int userId) {
+//        String storeID = null;
+//        String sql = "SELECT store_id FROM users WHERE user_id = ?";
+//
+//        try (PreparedStatement st = connection.prepareStatement(sql)) {
+//
+//            // Set giá trị cho parameter user_id
+//            st.setInt(1, userId);
+//
+//            // Thực thi truy vấn
+//            ResultSet rs = st.executeQuery();
+//
+//            // Nếu có kết quả, lấy storeID
+//            if (rs.next()) {
+//                storeID = rs.getString("store_id");  // Lấy store_id từ kết quả
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();  // Bạn có thể xử lý lỗi theo cách của riêng bạn
+//        }
+//
+//        return storeID;  // Trả về storeID của người dùng
+//    }
     public boolean insertUsers(Users user) {
         // Câu lệnh SQL không gán store_id nếu storeId là null
         String sql = "INSERT INTO users (username, password, image, name, phone, address, gender, dob, role, email, created_at, status"
@@ -386,10 +298,12 @@ public class userDAO extends DBContext {
             st.setString(10, user.getEmail());
             st.setString(11, user.getStatus());
 
+            // Gán store_id nếu storeId không phải null
             if (user.getStoreId() != null) {
-                st.setInt(12, user.getStoreId().getId());
+                st.setInt(12, user.getStoreId().getId());  // Gọi getId() của storeId nếu nó không phải null
             }
 
+            // Thực thi câu lệnh SQL
             int rowAffected = st.executeUpdate();
             return rowAffected > 0;
         } catch (SQLException e) {
@@ -401,19 +315,19 @@ public class userDAO extends DBContext {
     public boolean updateUser(Users user) {
         String sql = "UPDATE users SET store_id = ? WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
-
+            // Kiểm tra nếu storeId có giá trị, nếu không thì gán NULL
             if (user.getStoreId() != null) {
-                st.setInt(1, user.getStoreId().getId());
+                st.setInt(1, user.getStoreId().getId());  // Lấy store ID nếu có
             } else {
-                st.setNull(1, java.sql.Types.INTEGER);
+                st.setNull(1, java.sql.Types.INTEGER);  // Gán NULL nếu không có store
             }
-            st.setInt(2, user.getId());
+            st.setInt(2, user.getId());  // Lấy ID của người dùng
 
-            return st.executeUpdate() > 0;
+            return st.executeUpdate() > 0;  // Kiểm tra xem có cập nhật thành công không
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace();  // In lỗi nếu có
         }
-        return false;
+        return false;  // Nếu có lỗi hoặc không cập nhật thành công
     }
 
     public boolean isStoreIdValid(int storeId) {
@@ -422,13 +336,13 @@ public class userDAO extends DBContext {
             st.setInt(1, storeId);
             try (ResultSet rs = st.executeQuery()) {
                 if (rs.next() && rs.getInt(1) > 0) {
-                    return true;
+                    return true; // Nếu có kết quả trả về, tức là store_id hợp lệ
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false;
+        return false; // Nếu không có kết quả, tức là store_id không hợp lệ
     }
 
     public boolean editUser(Users user) {
@@ -481,12 +395,13 @@ public class userDAO extends DBContext {
         return false;
     }
 
+    // Kiểm tra xem tên người dùng đã tồn tại chưa
     public boolean checkUsernameExists(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
+                return rs.next(); // Nếu có kết quả trả về thì username đã tồn tại
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -494,12 +409,13 @@ public class userDAO extends DBContext {
         return false;
     }
 
+    // Kiểm tra xem email đã tồn tại chưa
     public boolean checkEmailExists(String email) {
         String sql = "SELECT * FROM users WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
+                return rs.next(); // Nếu có kết quả trả về thì email đã tồn tại
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -515,8 +431,8 @@ public class userDAO extends DBContext {
             st.setString(3, user.getEmail());
             st.setString(4, user.getAddress());
             st.setString(5, user.getGender());
-            st.setDate(6, new java.sql.Date(user.getDob().getTime()));
-            st.setString(7, user.getImage());
+            st.setDate(6, new java.sql.Date(user.getDob().getTime())); // Chuyển đổi từ java.util.Date sang java.sql.Date
+            st.setString(7, user.getImage()); // Lưu tên ảnh nếu có
             st.setInt(8, user.getId());
 
             int rowAffected = st.executeUpdate();
@@ -559,6 +475,28 @@ public class userDAO extends DBContext {
 
     public static void main(String[] args) {
         userDAO dao = new userDAO();
+//
+//        int pageIndex = 1;
+//        String keyword = null;
+//        List<Users> users = dao.searchUsers(keyword, pageIndex, pageIndex);
+//
+//        if (users.isEmpty()) {
+//            System.out.println("Không có người dùng nào được tìm thấy!");
+//        } else {
+//            System.out.println("Danh sách người dùng:");
+//            for (Users user : users) {
+//                System.out.println("------------------------------------------------------");
+//                System.out.println("User ID: " + user.getId());
+//
+//                System.out.println("Name: " + user.getName());
+//                System.out.println("Phone: " + user.getPhone());
+//                System.out.println("Address: " + user.getAddress());
+//                System.out.println("Email: " + user.getEmail());
+//                System.out.println("Role: " + user.getRole());
+//                System.out.println("Status: " + user.getStatus());
+//                System.out.println("Created At: " + user.getCreatedAt());
+//            }
+//        }
 
     }
 }

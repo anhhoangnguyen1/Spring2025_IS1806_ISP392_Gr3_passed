@@ -45,29 +45,16 @@ public class controllerUsers extends HttpServlet {
         HttpSession session = request.getSession();
         String role = (String) session.getAttribute("role");
 
-        // Added null check and special handling for admin role
-        int storeID = -1; // Default value for admin
         if (role == null || !role.equals("owner") && !role.equals("admin")) {
+
             response.sendRedirect("/dashboard.jsp");
             return;
         }
-
-        // For admin, set a default storeID or skip storeID-related logic
-        if (!"admin".equals(role)) {
-            String storeIDStr = (String) session.getAttribute("storeID");
-            if (storeIDStr == null) {
-                response.sendRedirect("/dashboard.jsp");
-                return;
-            }
-            storeID = Integer.parseInt(storeIDStr);
-        }
-
         String service = request.getParameter("service");
 
         if (service == null) {
             service = "users";
         }
-
         String sortBy = request.getParameter("sortBy");
         if (sortBy == null || !sortBy.equals("name")) {
             sortBy = "id";
@@ -84,12 +71,6 @@ public class controllerUsers extends HttpServlet {
                 if (keyword == null) {
                     keyword = "";
                 }
-
-                String statusFilter = request.getParameter("statusFilter");
-                if (statusFilter == null) {
-                    statusFilter = "all";
-                }
-
                 int index = 1;
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
@@ -97,26 +78,24 @@ public class controllerUsers extends HttpServlet {
                         index = 1;
                     }
                 } catch (NumberFormatException ignored) {
-                }
 
-                // For admin, specifically search for users with "owner" role
-                List<Users> list = null;
-                int total = 0;
-                if (role.equals("admin")) {
-                    // Chỉ tìm kiếm các tài khoản có role là 'owner' cho admin
-                    total = userDAO.countUsersByRole("owner", keyword, statusFilter);
-                    list = userDAO.searchUsersByRole("owner", keyword, index, 5, sortBy, sortOrder, -1, statusFilter);
-                } else if (role.equals("owner")) {
-                    total = userDAO.countUsers(keyword, statusFilter, storeID);
-                    list = userDAO.searchUsers(keyword, index, 5, sortBy, sortOrder, storeID, statusFilter);
-                } else {
-                    list = new ArrayList<>();
                 }
-
+                int total = userDAO.countUsers(keyword);
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
                 if (index > endPage) {
                     index = endPage;
+                }
+
+                List<Users> list = null;
+                if (role.equals("admin")) {
+                    list = userDAO.searchUsersByRole("owner", keyword, index, 5, sortBy, sortOrder);
+                } else if (role.equals("owner")) {
+                    // Owner có thể thấy danh sách người dùng nhưng không lọc theo role
+                    list = userDAO.searchUsers(keyword, index, 5, sortBy, sortOrder); // Đảm bảo gán kết quả trả về vào list
+                } else {
+                    // Staff: không hiển thị người dùng nào
+                    list = new ArrayList<>();
                 }
 
                 String notification = (String) request.getSession().getAttribute("Notification");
@@ -129,7 +108,6 @@ public class controllerUsers extends HttpServlet {
                 request.setAttribute("searchUser", keyword);
                 request.setAttribute("sortBy", sortBy);
                 request.setAttribute("sortOrder", sortOrder);
-                request.setAttribute("statusFilter", statusFilter);
                 request.getRequestDispatcher("views/user/users.jsp").forward(request, response);
                 break;
             }
@@ -139,35 +117,37 @@ public class controllerUsers extends HttpServlet {
                     keyword = "";
                 }
 
-                String statusFilter = request.getParameter("statusFilter");
-                if (statusFilter == null) {
-                    statusFilter = "all";
-                }
-
                 int index = 1;
                 try {
                     index = Integer.parseInt(request.getParameter("index"));
                 } catch (NumberFormatException ignored) {
                 }
 
-                int pageSize = 5;
-                int total = userDAO.countUsers(keyword, statusFilter, storeID);
-                int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
+                int pageSize = 5;  // Kích thước trang cố định là 5
+                int total = userDAO.countUsers(keyword);  // Đếm tổng số người dùng
+                int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;  // Tính số trang cuối
 
                 List<Users> users = new ArrayList<>();
 
+              
+                // Phân quyền dựa trên role
                 if ("admin".equals(role)) {
-                    users = userDAO.searchUsersByRole("owner", keyword, index, pageSize, sortBy, sortOrder, storeID, statusFilter);
+                    // Admin chỉ xem users có role "owner"
+                    users = userDAO.searchUsersByRole("owner", keyword, index, pageSize, sortBy, sortOrder);
                 } else if ("owner".equals(role)) {
-                    users = userDAO.searchUsers(keyword, index, pageSize, sortBy, sortOrder, storeID, statusFilter);
+                    // Owner có thể xem tất cả người dùng nhưng lọc theo storeId
+                    users = userDAO.searchUsers(keyword, index, pageSize, sortBy, sortOrder);
                 } else {
+                    // Staff không xem được người dùng
                     users = new ArrayList<>();
                 }
 
+                // Trả về dữ liệu dưới dạng JSON
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 PrintWriter out = response.getWriter();
 
+                // Định dạng dữ liệu trả về dưới dạng JSON
                 out.print("{");
                 out.print("\"users\": [");
                 for (int i = 0; i < users.size(); i++) {
@@ -195,11 +175,11 @@ public class controllerUsers extends HttpServlet {
                 out.flush();
                 break;
             }
-
             case "getUserById": {
                 int id = Integer.parseInt(request.getParameter("user_id"));
                 Users user = userDAO.getUserById(id);
                 request.setAttribute("user", user);
+
                 request.getRequestDispatcher("views/user/detailUser.jsp").forward(request, response);
                 break;
             }
@@ -228,13 +208,15 @@ public class controllerUsers extends HttpServlet {
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users user = userDAO.getUserById(userId);
 
+                // Chỉ cho phép ban tài khoản có role "staff"
                 if (user != null && "staff".equals(user.getRole())) {
-                    userDAO.deactivateUser(userId);
+                    userDAO.deactivateUser(userId);  // Thực hiện ban tài khoản (deactivate)
                     session.setAttribute("successMessage", "User has been banned successfully.");
                 } else {
                     session.setAttribute("errorMessage", "You can only ban users with 'staff' role.");
                 }
 
+                // Chuyển hướng lại trang danh sách người dùng sau khi ban
                 response.sendRedirect("Users?service=users");
                 break;
             }
@@ -243,14 +225,15 @@ public class controllerUsers extends HttpServlet {
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users user = userDAO.getUserById(userId);
 
-                if (user != null && "Inactive".equalsIgnoreCase(user.getStatus())) {
-
-                    userDAO.activateUser(userId);
+                // Chỉ cho phép unban tài khoản có status là "Deactive"
+                if (user != null && "Deactive".equals(user.getStatus())) {
+                    userDAO.activateUser(userId);  // Thực hiện unban tài khoản (active)
                     session.setAttribute("successMessage", "User has been unbanned successfully.");
                 } else {
-                    session.setAttribute("errorMessage", "You can only unban users with 'Inactive' status.");
+                    session.setAttribute("errorMessage", "You can only unban users with 'Deactive' status.");
                 }
 
+                // Chuyển hướng lại trang danh sách người dùng sau khi unban
                 response.sendRedirect("Users?service=users");
                 break;
             }
@@ -422,8 +405,6 @@ public class controllerUsers extends HttpServlet {
             HttpSession session = request.getSession();
             int userId = (int) session.getAttribute("userId");
 
-            String storeIDStr = (String) session.getAttribute("storeID");
-            int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("name");
             String phone = request.getParameter("phone");
             String email = request.getParameter("email");
@@ -508,7 +489,7 @@ public class controllerUsers extends HttpServlet {
 
             userDAO.updateUserInfo(user);
             session.removeAttribute("userId");
-            int total = userDAO.countUsers("", "all", storeID);
+            int total = userDAO.countUsers("");
             int pageSize = 5;
             int endPage = (total % pageSize == 0) ? total / pageSize : (total / pageSize) + 1;
 
