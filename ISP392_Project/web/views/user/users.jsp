@@ -57,8 +57,8 @@
                 <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
-                    <c:if test="${sessionScope.role == 'owner' or sessionScope.role == 'staff'}">
-                        <li>
+                    <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'staff'}">
+                        <li class="active">
                             <a href="/ISP392_Project/dashboard">
                                 <span class="nav-icon">
                                     <i class="fa-solid fa-house"></i>
@@ -66,6 +66,7 @@
                                 <span class="nav-text">Dashboard</span>
                             </a>
                         </li>
+
                         <li>
                             <a href="/ISP392_Project/Products">
                                 <span class="nav-icon">
@@ -107,41 +108,36 @@
                             </a>
                         </li>
                         <li>
-                            <a href="/ISP392_Project/Debts">
+                            <a href="/ISP392_Project/Imports">
                                 <span class="nav-icon">
-                                    <i class="fa-solid fa-money-bill"></i>
+                                    <i class="fa-solid fa-file-invoice"></i>
                                 </span>
-                                <span class="nav-text">Debts History</span>
+                                <span class="nav-text">Imports</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="/ISP392_Project/Stores">
-                                <span class="nav-icon">
-                                    <i class="fa-solid fa-store"></i>
-                                </span>
-                                <span class="nav-text">Stores</span>
-                            </a>
-                        </li> 
                     </c:if>
-
-                    <li class="active">
-                        <a href="/ISP392_Project/Users">
+                    <li>
+                        <a href="/ISP392_Project/Stores">
                             <span class="nav-icon">
-                                <i class="fa-solid fa-user-tie"></i>
+                                <i class="fa-solid fa-store"></i>
                             </span>
-                            <span class="nav-text">Staffs</span>
+                            <span class="nav-text">Stores</span>
                         </a>
                     </li>
+                    <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'admin'}">
+                        <li>
+                            <a href="/ISP392_Project/Users">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </span>
+                                <span class="nav-text">Staffs</span>
+                            </a>
+                        </li>
+                    </c:if>
                 </ul>
                 <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
-                    <div class="settings">
-                        <span class="gear-icon">
-                            <i class="fa-solid fa-gear"></i>
-                        </span>
-                        <span class="text">Settings</span>
-                    </div>
                     <div class="logoutBtn">
                         <a href="/ISP392_Project/logout">
                             <span class="logout-icon">

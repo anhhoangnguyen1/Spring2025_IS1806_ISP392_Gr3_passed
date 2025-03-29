@@ -45,69 +45,73 @@
                     </div>
                 </div>
             </div>
+            <!--   *** Top Bar Ends ***   -->
 
             <!--   === Side Bar Starts ===   -->
             <aside class="side-bar">
                 <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
+                    <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'staff'}">
+                        <li class="active">
+                            <a href="/ISP392_Project/dashboard">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-house"></i>
+                                </span>
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/ISP392_Project/Products">
+                                <span class="nav-icon">
+                                    <i class="fas fa-box"></i>
+                                </span>
+                                <span class="nav-text">Products</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/zones">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-table"></i>
+                                </span>
+                                <span class="nav-text">Zones</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/Customers">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <span class="nav-text">Customers</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="sale">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="orders">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders History</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/Imports">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Imports</span>
+                            </a>
+                        </li>
+                    </c:if>
                     <li>
-                        <a href="/ISP392_Project/dashboard">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-house"></i>
-                            </span>
-                            <span class="nav-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Products">
-                            <span class="nav-icon">
-                                <i class="fas fa-box"></i>
-                            </span>
-                            <span class="nav-text">Products</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/zones">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-table"></i>
-                            </span>
-                            <span class="nav-text">Zones</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Customers">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-user"></i>
-                            </span>
-                            <span class="nav-text">Customers</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="sale">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Orders</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="orders">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Orders History</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Debts">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-money-bill"></i>
-                            </span>
-                            <span class="nav-text">Debts History</span>
-                        </a>
-                    </li>
-                    <li class="active">
                         <a href="/ISP392_Project/Stores">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-store"></i>
@@ -115,8 +119,7 @@
                             <span class="nav-text">Stores</span>
                         </a>
                     </li>
-                    <c:if test="${sessionScope.role == 'owner'}">
-                        
+                    <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'admin'}">
                         <li>
                             <a href="/ISP392_Project/Users">
                                 <span class="nav-icon">
@@ -130,12 +133,6 @@
                 <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
-                    <div class="settings">
-                        <span class="gear-icon">
-                            <i class="fa-solid fa-gear"></i>
-                        </span>
-                        <span class="text">Settings</span>
-                    </div>
                     <div class="logoutBtn">
                         <a href="/ISP392_Project/logout">
                             <span class="logout-icon">
@@ -151,7 +148,7 @@
             <div class="contents">
                 <div class="panel-bar1">
                     <h2>Create Store</h2>
-                    
+
                     <form id="storeForm" action="${pageContext.request.contextPath}/Stores" method="POST" onsubmit="confirmSave(event)">
                         <input type="hidden" name="service" value="createStore">
                         <input type="hidden" name="store_id" value="${store.id}">
@@ -222,14 +219,14 @@
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
             <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
             <script type="text/javascript">
-                // Hàm xử lý khi bấm "Save" trong Modal
-                document.getElementById('saveChangesBtn').onclick = function () {
-                    document.getElementById('storeForm').submit(); // Gửi form khi người dùng xác nhận
-                }
+                        // Hàm xử lý khi bấm "Save" trong Modal
+                        document.getElementById('saveChangesBtn').onclick = function () {
+                            document.getElementById('storeForm').submit(); // Gửi form khi người dùng xác nhận
+                        }
 
-                // Hàm gọi Modal để xác nhận
-                function confirmSave(event) {
-                    event.preventDefault(); // Ngừng gửi form
-                    $('#confirmModal').modal('show'); // Hiển thị Modal xác nhận
-                }
+                        // Hàm gọi Modal để xác nhận
+                        function confirmSave(event) {
+                            event.preventDefault(); // Ngừng gửi form
+                            $('#confirmModal').modal('show'); // Hiển thị Modal xác nhận
+                        }
             </script>

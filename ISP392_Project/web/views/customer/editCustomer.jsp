@@ -58,72 +58,74 @@
                 <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
-                    <li>
-                        <a href="/ISP392_Project/dashboard">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-house"></i>
-                            </span>
-                            <span class="nav-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Products">
-                            <span class="nav-icon">
-                                <i class="fas fa-box"></i>
-                            </span>
-                            <span class="nav-text">Products</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/zones">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-table"></i>
-                            </span>
-                            <span class="nav-text">Zones</span>
-                        </a>
-                    </li>
-                    <li class="active">
-                        <a href="/ISP392_Project/Customers">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-user"></i>
-                            </span>
-                            <span class="nav-text">Customers</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="sale">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Orders</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="orders">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Orders History</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Debts">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-money-bill"></i>
-                            </span>
-                            <span class="nav-text">Debts History</span>
-                        </a>
-                    </li>
-                    <li>
-                            <a href="/ISP392_Project/Stores">
+                    <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'staff'}">
+                        <li class="active">
+                            <a href="/ISP392_Project/dashboard">
                                 <span class="nav-icon">
-                                    <i class="fa-solid fa-store"></i>
+                                    <i class="fa-solid fa-house"></i>
                                 </span>
-                                <span class="nav-text">Stores</span>
+                                <span class="nav-text">Dashboard</span>
                             </a>
                         </li>
-                    <c:if test="${sessionScope.role == 'owner'}">
-                        
+
+                        <li>
+                            <a href="/ISP392_Project/Products">
+                                <span class="nav-icon">
+                                    <i class="fas fa-box"></i>
+                                </span>
+                                <span class="nav-text">Products</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/zones">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-table"></i>
+                                </span>
+                                <span class="nav-text">Zones</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/Customers">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <span class="nav-text">Customers</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="sale">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="orders">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders History</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/Imports">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Imports</span>
+                            </a>
+                        </li>
+                    </c:if>
+                    <li>
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
+                    <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'admin'}">
                         <li>
                             <a href="/ISP392_Project/Users">
                                 <span class="nav-icon">
@@ -137,12 +139,6 @@
                 <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
-                    <div class="settings">
-                        <span class="gear-icon">
-                            <i class="fa-solid fa-gear"></i>
-                        </span>
-                        <span class="text">Settings</span>
-                    </div>
                     <div class="logoutBtn">
                         <a href="/ISP392_Project/logout">
                             <span class="logout-icon">

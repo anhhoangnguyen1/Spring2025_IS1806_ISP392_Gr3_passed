@@ -53,7 +53,7 @@
             .show-arrow:hover i {
                 opacity: 1; /* Hiện mũi tên khi trỏ vào */
             }
-     
+
         </style>
     </head>
     <body>
@@ -95,72 +95,74 @@
                 <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
-                    <li>
-                        <a href="/ISP392_Project/dashboard">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-house"></i>
-                            </span>
-                            <span class="nav-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="active">
-                        <a href="/ISP392_Project/Products">
-                            <span class="nav-icon">
-                                <i class="fas fa-box"></i>
-                            </span>
-                            <span class="nav-text">Products</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/zones">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-table"></i>
-                            </span>
-                            <span class="nav-text">Zones</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Customers">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-user"></i>
-                            </span>
-                            <span class="nav-text">Customers</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="sale">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Orders</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="orders">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Orders History</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Debts">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-money-bill"></i>
-                            </span>
-                            <span class="nav-text">Debts History</span>
-                        </a>
-                    </li>
-                    <li>
-                            <a href="/ISP392_Project/Stores">
+                    <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'staff'}">
+                        <li class="active">
+                            <a href="/ISP392_Project/dashboard">
                                 <span class="nav-icon">
-                                    <i class="fa-solid fa-store"></i>
+                                    <i class="fa-solid fa-house"></i>
                                 </span>
-                                <span class="nav-text">Stores</span>
+                                <span class="nav-text">Dashboard</span>
                             </a>
                         </li>
-                    <c:if test="${sessionScope.role == 'owner'}">
-                        
+
+                        <li>
+                            <a href="/ISP392_Project/Products">
+                                <span class="nav-icon">
+                                    <i class="fas fa-box"></i>
+                                </span>
+                                <span class="nav-text">Products</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/zones">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-table"></i>
+                                </span>
+                                <span class="nav-text">Zones</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/Customers">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <span class="nav-text">Customers</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="sale">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="orders">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders History</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/Imports">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Imports</span>
+                            </a>
+                        </li>
+                    </c:if>
+                    <li>
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
+                    <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'admin'}">
                         <li>
                             <a href="/ISP392_Project/Users">
                                 <span class="nav-icon">
@@ -174,12 +176,6 @@
                 <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
-                    <div class="settings">
-                        <span class="gear-icon">
-                            <i class="fa-solid fa-gear"></i>
-                        </span>
-                        <span class="text">Settings</span>
-                    </div>
                     <div class="logoutBtn">
                         <a href="/ISP392_Project/logout">
                             <span class="logout-icon">
@@ -195,8 +191,8 @@
         <div class="contents">
             <div class="panel-bar1">
                 <a href="/ISP392_Project/Products" class="text-secondary show-arrow">
-                        <i class="fa-solid fa-arrow-left"></i> Products
-                    </a>/ Product details
+                    <i class="fa-solid fa-arrow-left"></i> Products
+                </a>/ Product details
 
                 <c:forEach var="product" items="${list}">
 
@@ -260,21 +256,21 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
 <script>
-                    $(".myImg").on("click", function () {
-                        var modal = $("#myModal");
-                        var modalImg = $("#img01");
-                        var captionText = $("#caption");
+    $(".myImg").on("click", function () {
+        var modal = $("#myModal");
+        var modalImg = $("#img01");
+        var captionText = $("#caption");
 
-                        modal.show();
-                        modalImg.attr("src", this.src);
-                        captionText.text(this.alt);
-                    });
+        modal.show();
+        modalImg.attr("src", this.src);
+        captionText.text(this.alt);
+    });
 
-                    // Đóng modal khi bấm vào nền đen
-                    $("#myModal").on("click", function (e) {
-                        if (e.target === this) {
-                            $(this).hide();
-                        }
-                    });
+    // Đóng modal khi bấm vào nền đen
+    $("#myModal").on("click", function (e) {
+        if (e.target === this) {
+            $(this).hide();
+        }
+    });
 </script>
 </html>

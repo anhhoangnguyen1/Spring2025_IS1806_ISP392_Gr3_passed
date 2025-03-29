@@ -26,10 +26,12 @@
                         <span></span>
                         <span></span>
                     </div>
-                    <div class="logo mr-5">
-                        <img src="/ISP392_Project/views/customer/images/logo.png" style="width: 170px; height: 70px" />
+                    <div class="logo">
+                        <img src="/ISP392_Project/views/dashboard/images/logo.png" style="width: 170px; height: 70px" />
                     </div>
                 </div>
+
+
                 <div class="top-bar-right">
                     <div class="mode-switch">
                         <i class="fa-solid fa-moon"></i>
@@ -38,7 +40,13 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="/ISP392_Project/views/customer/images/profile-img.jpg" />
+                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
+                        <div class="profile-menu">
+                            <ul>
+                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
+                                <li><a href="/ISP392_Project/change-password"><i class="fa-solid fa-pen"></i> Change Password</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -46,58 +54,43 @@
 
             <!--   === Side Bar Starts ===   -->
             <aside class="side-bar">
+                <!--   === Nav Bar Links Starts ===   -->
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
-                    <li>
-                        <a href="/ISP392_Project/dashboard">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-house"></i>
-                            </span>
-                            <span class="nav-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Products">
-                            <span class="nav-icon">
-                                <i class="fas fa-box"></i>
-                            </span>
-                            <span class="nav-text">Products</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Zones">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-table"></i>
-                            </span>
-                            <span class="nav-text">Zones</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Customers">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-user"></i>
-                            </span>
-                            <span class="nav-text">Customers</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="sale">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Orders</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="orders">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Orders History</span>
-                        </a>
-                    </li>
+                    <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'staff'}">
+                        <li class="active">
+                            <a href="/ISP392_Project/dashboard">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-house"></i>
+                                </span>
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                        </li>
 
-                    <c:if test="${sessionScope.role == 'owner' or sessionScope.role == 'staff'}">
+                        <li>
+                            <a href="/ISP392_Project/Products">
+                                <span class="nav-icon">
+                                    <i class="fas fa-box"></i>
+                                </span>
+                                <span class="nav-text">Products</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/zones">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-table"></i>
+                                </span>
+                                <span class="nav-text">Zones</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/Customers">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <span class="nav-text">Customers</span>
+                            </a>
+                        </li>
                         <li>
                             <a href="sale">
                                 <span class="nav-icon">
@@ -114,18 +107,15 @@
                                 <span class="nav-text">Orders History</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="/ISP392_Project/Imports">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Imports</span>
+                            </a>
+                        </li>
                     </c:if>
-                    <li>
-                        <a href="/ISP392_Project/Debts">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-money-bill"></i>
-                            </span>
-                            <span class="nav-text">Debts History</span>
-                        </a>
-                    </li>
-                </ul>
-                <span class="menu-label">OWNER ZONE</span>
-                <ul class="navbar-links navbar-links-2">
                     <li>
                         <a href="/ISP392_Project/Stores">
                             <span class="nav-icon">
@@ -134,8 +124,7 @@
                             <span class="nav-text">Stores</span>
                         </a>
                     </li>
-                    <c:if test="${sessionScope.role == 'owner'}">
-
+                    <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'admin'}">
                         <li>
                             <a href="/ISP392_Project/Users">
                                 <span class="nav-icon">
@@ -145,20 +134,16 @@
                             </a>
                         </li>
                     </c:if>
-
                 </ul>
+                <!--   === Nav Bar Links Ends ===   -->
+                <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
-                    <div class="settings">
-                        <span class="gear-icon">
-                            <i class="fa-solid fa-gear"></i>
-                        </span>
-                        <span class="text">Settings</span>
-                    </div>
                     <div class="logoutBtn">
-                        <span class="logout-icon">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </span>
-                        <span class="text">Logout</span>
+                        <a href="/ISP392_Project/logout">
+                            <span class="logout-icon">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="text"><a href="/ISP392_Project/logout">Logout</a></span>
                     </div>
                 </div>
             </aside>
@@ -345,7 +330,12 @@
 
 
                                     <a href="${pageContext.request.contextPath}/views/profile/editProfile.jsp" class="btn btn-primary" style="background-color: #007bff ">Edit Profile</a>
-                                    <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-primary" style="background-color: #6c757d ">Back</a>
+                                    <c:if test="${sessionScope.role == 'admin'}">
+                                        <a href="${pageContext.request.contextPath}/Stores?service=storeList" class="btn btn-secondary">Back</a>
+                                    </c:if>
+                                    <c:if test="${sessionScope.role == 'owner'}">
+                                        <a href="${pageContext.request.contextPath}/Stores?service=storeInfo" class="btn btn-secondary">Back</a>
+                                    </c:if>
                                 </div>
                             </div>
                         </div>
