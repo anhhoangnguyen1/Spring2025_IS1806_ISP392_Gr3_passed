@@ -88,7 +88,6 @@
                             <span class="nav-text">Customers</span>
                         </a>
                     </li>
-                    <c:if test="${sessionScope.role == 'owner' or sessionScope.role == 'staff'}">
                     <li>
                         <a href="sale">
                             <span class="nav-icon">
@@ -105,7 +104,6 @@
                             <span class="nav-text">Orders History</span>
                         </a>
                     </li>
-                    </c:if>
                     <li>
                         <a href="/ISP392_Project/Debts">
                             <span class="nav-icon">

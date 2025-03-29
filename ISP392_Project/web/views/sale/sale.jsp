@@ -166,12 +166,12 @@
         <div class="top-header">
             <div class="search-container">
                 <i class="bi bi-search"></i>
-                <input type="text" placeholder="Find Product" id="productSearchInput">
+                <input type="text" placeholder="Tìm hàng hóa (F3)" id="productSearchInput">
                 <div id="productSearchResults"></div>
             </div>
 
             <div class="tab-container">
-                <span>Invoice 1</span>
+                <span>Hóa đơn 1</span>
                 <span class="tab-close">×</span>
             </div>
 
@@ -194,12 +194,12 @@
 
                 <div class="cart-summary">
                     <div class="summary-row">
-                        <span>Total price</span>
+                        <span>Tổng tiền hàng</span>
                         <span id="cartTotal">0</span>
                     </div>
 
                     <div class="summary-row">
-                        <span>Amount</span>
+                        <span>Số lượng</span>
                         <span id="cartQuantity">0</span>
                     </div>
                 </div>
@@ -211,7 +211,7 @@
                     -->
 
                     <button class="btn btn-primary me-2 d-flex align-items-center" id="checkoutBtn2">
-                        <i class="bi bi-bag me-1"></i> Sell
+                        <i class="bi bi-bag me-1"></i> Bán
                     </button>
 
                     <!--                    <button class="btn btn-outline-secondary d-flex align-items-center">
@@ -240,7 +240,7 @@
                         </span>
                         <input type="text" 
                                class="form-control" 
-                               placeholder="Find customer" 
+                               placeholder="Tìm khách hàng (F4)" 
                                id="customerSearchInput" 
                                autocomplete="off">
                         <div id="customerSearchResults"></div>
@@ -271,7 +271,7 @@
                             <div class="product-card-price">
                                 <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                             </div>
-                            <div class="product-card-stock">Remaining: ${product.quantity}</div>
+                            <div class="product-card-stock">Hàng còn: ${product.quantity}</div>
                         </div>
                     </c:forEach>
                 </div>

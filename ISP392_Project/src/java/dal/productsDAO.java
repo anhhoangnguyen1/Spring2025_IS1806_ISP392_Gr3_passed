@@ -757,7 +757,7 @@ public class productsDAO extends DBContext {
 
         PreparedStatement pst = null;
         ResultSet rs = null;
-        String sql = "SELECT * FROM Products WHERE isDeleted = false AND status != 'Inactive'";
+        String sql = "SELECT * FROM Products WHERE isDeleted = false";
 
         try {
             pst = connection.prepareStatement(sql);
