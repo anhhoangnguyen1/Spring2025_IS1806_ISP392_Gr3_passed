@@ -276,7 +276,7 @@
                     let banButton = '';
                             if ('${sessionScope.role}' === 'admin' && user.role === 'owner' ||
                                     ('${sessionScope.role}' === 'owner' && user.role === 'staff' && user.storeId === '${sessionScope.storeId}')) {
-                    // Kiểm tra xem người dùng có phải là 'owner' hay 'staff' và thuộc cùng storeId với owner
+
                     let banAction = '';
                             if ('${sessionScope.role}' === 'owner' && user.status === 'Inactive') {
                     banAction = '<a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=' + user.id + '" class="btn btn-outline-success">UnBan</a>';
