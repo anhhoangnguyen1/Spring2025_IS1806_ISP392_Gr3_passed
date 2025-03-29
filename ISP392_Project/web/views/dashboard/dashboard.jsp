@@ -159,10 +159,12 @@
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
                     <div class="settings">
-                        <span class="gear-icon">
-                            <i class="fa-solid fa-gear"></i>
-                        </span>
-                        <span class="text">Settings</span>
+                        <a href="/ISP392_Project/settings">
+                            <span class="gear-icon">
+                                <i class="fa-solid fa-gear"></i>
+                            </span>
+                            <span class="text">Settings</span>
+                        </a>
                     </div>
                     <div class="logoutBtn">
                         <a href="/ISP392_Project/logout">

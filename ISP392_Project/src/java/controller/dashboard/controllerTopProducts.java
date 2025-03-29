@@ -243,8 +243,12 @@ public class controllerTopProducts extends HttpServlet {
         request.setAttribute("periodTotalIn", periodTotalIn);
         request.setAttribute("periodTotalOut", periodTotalOut);
         
-        int threshold = 20; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
-        List<Products> lowStockProducts = dao.getLowStockProducts(threshold);
+        // Lấy ngưỡng low stock từ session, nếu không có thì dùng giá trị mặc định là 20
+        Integer lowStockThreshold = (Integer) session.getAttribute("lowStockThreshold");
+        if (lowStockThreshold == null) {
+            lowStockThreshold = 20;
+        }
+        List<Products> lowStockProducts = dao.getLowStockProducts(lowStockThreshold);
         
         request.setAttribute("lowStockProducts", lowStockProducts);
         request.getRequestDispatcher("views/dashboard/dashboard.jsp").forward(request, response);
