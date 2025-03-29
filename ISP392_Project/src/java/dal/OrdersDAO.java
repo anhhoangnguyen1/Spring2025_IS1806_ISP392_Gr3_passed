@@ -152,6 +152,54 @@ public class OrdersDAO extends DBContext {
         return totalOrders;
     }
 
+    public List<Orders> getOrdersByAmount(String amountFilter) {
+        List<Orders> orders = new ArrayList<>();
+        String sql = "SELECT * FROM Orders WHERE 1=1 "; // Start with the base query
+
+        // Add filter for amount
+        if ("positive".equals(amountFilter)) {
+            sql += "AND TotalAmount > 0 ";  // Filter for positive amounts
+        } else if ("negative".equals(amountFilter)) {
+            sql += "AND TotalAmount < 0 ";  // Filter for negative amounts
+        }
+
+        // Add order by clause for sorting
+        sql += "ORDER BY OrderDate DESC";
+
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+
+        try {
+            pst = connection.prepareStatement(sql);
+            rs = pst.executeQuery();
+
+            while (rs.next()) {
+                Orders order = Orders.builder()
+                        .orderID(rs.getInt("ID"))
+                        .orderDate(rs.getDate("OrderDate"))
+                        .totalAmount(rs.getInt("TotalAmount")) // Ensure this matches your database column type
+                        .customerID(rs.getInt("CustomerID"))
+                        .employeeID(rs.getInt("EmployeesID"))
+                        .build();
+                orders.add(order);
+            }
+        } catch (SQLException ex) {
+            logSevere("Error retrieving orders with amount filter", ex);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
+            } catch (SQLException ex) {
+                logSevere("Error closing ResultSet or PreparedStatement", ex);
+            }
+        }
+        return orders;
+    }
+
     /**
      * Get order information by ID
      *

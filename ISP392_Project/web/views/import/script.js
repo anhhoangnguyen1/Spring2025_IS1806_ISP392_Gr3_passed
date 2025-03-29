@@ -268,7 +268,7 @@ function initializeCustomerSearch() {
         }
         
         searchTimeout = setTimeout(function() {
-            fetch('sale?action=searchCustomers&query=' + encodeURIComponent(searchTerm))
+            fetch('Imports?action=searchCustomers&query=' + encodeURIComponent(searchTerm))
                 .then(function(response) {
                     if (!response.ok) {
                         throw new Error('Network response was not ok: ' + response.status);
@@ -392,8 +392,8 @@ function initializeProductSearch() {
         }
         
         searchTimeout = setTimeout(function() {
-            // Thay đổi URL để phù hợp với endpoint trong SaleController.java
-            const url = 'sale?action=searchProducts&query=' + encodeURIComponent(searchTerm);
+            // Thay đổi URL để phù hợp với endpoint trong importController.java
+            const url = 'Imports?action=searchProducts&query=' + encodeURIComponent(searchTerm);
             
             console.log(`[${new Date().toISOString()}] Sending search request to URL: ${url}`);
             

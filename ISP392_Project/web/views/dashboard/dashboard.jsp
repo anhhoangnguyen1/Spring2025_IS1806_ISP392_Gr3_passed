@@ -129,11 +129,11 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/ISP392_Project/Debts">
+                        <a href="/ISP392_Project/Imports">
                             <span class="nav-icon">
-                                <i class="fa-solid fa-money-bill"></i>
+                                <i class="fa-solid fa-file-invoice"></i>
                             </span>
-                            <span class="nav-text">Debts History</span>
+                            <span class="nav-text">Imports</span>
                         </a>
                     </li>
                     <li>

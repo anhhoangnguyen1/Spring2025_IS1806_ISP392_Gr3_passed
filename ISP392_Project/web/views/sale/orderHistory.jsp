@@ -13,7 +13,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Order History</title>
+        <title>Invoice History</title>
 
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -169,11 +169,22 @@
             <!-- End Side Bar -->
 
             <!-- Main Content -->
-            <div class="main-content">
+            <div class="contents">
                 <div class="container mt-4">
                     <div class="card shadow">
                         <div class="card-header bg-primary text-white">
-                            <h2 class="mb-0"><i class="fas fa-history me-2"></i>Order History</h2>
+                            <h2 class="mb-0"><i class="fas fa-history me-2"></i>Invoice History</h2>
+                            <div class="filter-container mb-3">
+                                <form action="orders" method="GET" class="d-flex">
+                                    <label for="amountFilter" class="me-2">Type:</label>
+                                    <select id="amountFilter" name="amountFilter" class="form-control form-control-sm">
+                                        <option value="">All</option>
+                                        <option value="positive">Export</option>
+                                        <option value="negative">Import</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary ms-2">Filter</button>
+                                </form>
+                            </div>
                         </div>
                         <div class="card-body">
                             <!-- Orders Table -->
@@ -352,6 +363,12 @@
                             $("#orderDetailsTable").html('<tr><td colspan="5" class="text-center text-danger">Error loading details. Please try again.</td></tr>');
                         }
                     });
+                });
+
+                // Add event listener to the form submission to log the amountFilter value
+                $("form").on("submit", function () {
+                    var amountFilterValue = $("#amountFilter").val();
+                    console.log("Amount Filter Value: ", amountFilterValue);  // Log the selected filter value
                 });
             });
         </script>

@@ -64,6 +64,23 @@ public class ordersController extends HttpServlet {
         List<Products> products = productsDAO.findAllAsList();
         List<Customers> customersList = customerDAO.findAll();
 
+        // Lấy tham số lọc từ request (amountFilter)
+        String amountFilter = request.getParameter("amountFilter");
+
+        // Log amountFilter để kiểm tra
+        System.out.println("Amount Filter: " + amountFilter);
+
+        // Nếu amountFilter null hoặc rỗng thì không lọc
+        List<Orders> filteredOrders = (amountFilter == null || amountFilter.isEmpty())
+                ? orders // Nếu không lọc, sử dụng danh sách orders ban đầu
+                : ordersDAO.getOrdersByAmount(amountFilter); // Lọc theo giá trị âm hoặc dương
+
+        // Log kiểm tra danh sách đơn hàng sau khi lọc
+        System.out.println("Filtered Orders Size: " + filteredOrders.size());
+
+        // Lưu trữ danh sách orders vào request để hiển thị trong JSP
+        request.setAttribute("orders", filteredOrders); // Lưu đúng danh sách đã lọc
+
         // Set attributes for JSP
         request.setAttribute("orders", orders);
         request.setAttribute("currentPage", page);

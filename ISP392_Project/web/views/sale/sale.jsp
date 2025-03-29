@@ -6,7 +6,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hệ thống quản lý bán hàng</title>
+        <title>Invoice</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/views/sale/sale-css.css">
@@ -166,22 +166,17 @@
         <div class="top-header">
             <div class="search-container">
                 <i class="bi bi-search"></i>
-                <input type="text" placeholder="Tìm hàng hóa (F3)" id="productSearchInput">
+                <input type="text" placeholder="Find Product" id="productSearchInput">
                 <div id="productSearchResults"></div>
             </div>
 
             <div class="tab-container">
-                <span>Hóa đơn 1</span>
+                <span>Invoice 1</span>
                 <span class="tab-close">×</span>
             </div>
 
             <div class="header-icons">
-                <a href="#" class="header-icon"><i class="bi bi-cart"></i></a>
                 <a href="/ISP392_Project/dashboard" class="header-icon"><i class="bi bi-arrow-left"></i></a>
-                <a href="#" class="header-icon"><i class="bi bi-arrow-clockwise"></i></a>
-                <a href="#" class="header-icon"><i class="bi bi-printer"></i></a>
-                <span class="header-icon">0912345678</span>
-                <a href="#" class="header-icon"><i class="bi bi-list"></i></a>
             </div>
         </div>
 
@@ -194,12 +189,12 @@
 
                 <div class="cart-summary">
                     <div class="summary-row">
-                        <span>Tổng tiền hàng</span>
+                        <span>Total price</span>
                         <span id="cartTotal">0</span>
                     </div>
 
                     <div class="summary-row">
-                        <span>Số lượng</span>
+                        <span>Amount</span>
                         <span id="cartQuantity">0</span>
                     </div>
                 </div>
@@ -211,7 +206,7 @@
                     -->
 
                     <button class="btn btn-primary me-2 d-flex align-items-center" id="checkoutBtn2">
-                        <i class="bi bi-bag me-1"></i> Bán
+                        <i class="bi bi-bag me-1"></i> Sell
                     </button>
 
                     <!--                    <button class="btn btn-outline-secondary d-flex align-items-center">
@@ -240,21 +235,12 @@
                         </span>
                         <input type="text" 
                                class="form-control" 
-                               placeholder="Tìm khách hàng (F4)" 
+                               placeholder="Find customer" 
                                id="customerSearchInput" 
-                               autocomplete="off">
+                               autocomplete="off" required>
                         <div id="customerSearchResults"></div>
                         <button class="btn btn-outline-secondary" onclick="window.location.href = '${pageContext.request.contextPath}/Customers?service=addCustomer'">
                             <i class="bi bi-plus"></i>
-                        </button>
-                        <button class="btn btn-outline-secondary">
-                            <i class="bi bi-list"></i>
-                        </button>
-                        <button class="btn btn-outline-secondary">
-                            <i class="bi bi-funnel"></i>
-                        </button>
-                        <button class="btn btn-outline-secondary">
-                            <i class="bi bi-grid"></i>
                         </button>
                     </div>
                 </div>
@@ -271,21 +257,11 @@
                             <div class="product-card-price">
                                 <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                             </div>
-                            <div class="product-card-stock">Hàng còn: ${product.quantity}</div>
+                            <div class="product-card-stock">Remaining: ${product.quantity}</div>
                         </div>
                     </c:forEach>
                 </div>
 
-                <div class="d-flex justify-content-between mt-3">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-telephone me-2"></i>
-                        <span>1900 6522</span>
-                    </div>
-                    <div>
-                        <i class="bi bi-question-circle me-2"></i>
-                        <i class="bi bi-chat"></i>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -334,3 +310,4 @@
         </script>
     </body>
 </html>
+
