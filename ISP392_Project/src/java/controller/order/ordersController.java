@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import dal.*;
 import entity.*;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/orders")
 public class ordersController extends HttpServlet {
@@ -31,6 +32,13 @@ public class ordersController extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        String role = (String) session.getAttribute("role");
+
+        if (role == null || (!role.equals("owner") && !role.equals("staff"))) {
+            response.sendRedirect(request.getContextPath() + "/Stores");
+            return;
+        }
         int page = 1; // Default to page 1
         int recordsPerPage = RECORDS_PER_PAGE;
 
