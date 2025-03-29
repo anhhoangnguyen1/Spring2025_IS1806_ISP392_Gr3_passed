@@ -233,7 +233,6 @@
                         
                         if (role === 'owner') {
                             row += '<td>' +
-                                    '<a href="<%= request.getContextPath() %>/zones?service=viewZoneHistory&zone_id=' + (zone.id || '') + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">View Zone History</a> ' +
                                     '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + (zone.id || '') + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">Edit</a> ' +
                                     '</td>';
                         }
