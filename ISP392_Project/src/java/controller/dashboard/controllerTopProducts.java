@@ -114,7 +114,7 @@ public class controllerTopProducts extends HttpServlet {
         request.setAttribute("selectedPeriod", period);  // Gửi về JSP để đánh dấu mặc định
 
         double revenueToday = revenueDAO.getRevenueToday();
-        int invoiceCountToday = revenueDAO.getInvoiceCountToday();
+        int invoiceCountToday = revenueDAO.getOrderCountToday();
 
         request.setAttribute("revenueToday", revenueToday);
         request.setAttribute("invoiceCountToday", invoiceCountToday);

@@ -13,7 +13,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toán - Hệ thống quản lý bán hàng</title>
+    <title>Payment - Sales Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/views/sale/sale-css.css">
@@ -107,11 +107,11 @@
 <div class="top-header">
     <div class="search-container">
         <i class="bi bi-search"></i>
-        <input type="text" placeholder="Tìm hàng hóa (F3)" id="productSearchInput">
+        <input type="text" placeholder="Search products (F3)" id="productSearchInput">
     </div>
 
     <div class="tab-container">
-        <span>Hóa đơn 1</span>
+        <span>Invoice 1</span>
         <span class="tab-close">×</span>
     </div>
 
@@ -129,18 +129,18 @@
     <div class="payment-container">
         <div class="payment-header">
             <div class="d-flex justify-content-between align-items-center">
-                <h4>Thanh toán</h4>
+                <h4>Payment</h4>
                 <a href="sale" class="btn btn-outline-secondary">
                     <i class="bi bi-x-lg"></i>
                 </a>
             </div>
             <div class="mt-2">
-                <span class="text-muted">Khách hàng: </span>
+                <span class="text-muted">Customer: </span>
                 <c:if test="${customerName != null}">
                     <span id="customerName">${customerName}</span>
                 </c:if>
                 <c:if test="${customerName == null}">
-                    <span id="customerName">Khách lẻ</span>
+                    <span id="customerName">Walk-in Customer</span>
                 </c:if>
             </div>
         </div>
@@ -176,10 +176,10 @@
                     <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 40%">Sản phẩm</th>
-                                <th style="width: 20%" class="text-end">Đơn giá</th>
-                                <th style="width: 15%" class="text-end">Số lượng</th>
-                                <th style="width: 25%" class="text-end">Thành tiền</th>
+                                <th style="width: 40%">Product</th>
+                                <th style="width: 20%" class="text-end">Unit Price</th>
+                                <th style="width: 15%" class="text-end">Quantity</th>
+                                <th style="width: 25%" class="text-end">Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -198,7 +198,7 @@
                         </tbody>
                         <tfoot class="table-light">
                             <tr>
-                                <td colspan="3" class="text-end fw-bold">Tổng tiền hàng:</td>
+                                <td colspan="3" class="text-end fw-bold">Subtotal:</td>
                                 <td class="text-end fw-bold">
                                     <fmt:formatNumber value="${totalAmount}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                                 </td>
@@ -208,19 +208,20 @@
                 </div>
 
                 <div class="summary-row">
-                    <span>Tổng tiền hàng</span>
+                    <span>Subtotal</span>
                     <span id="modalCartTotal" data-value="${totalAmount}">
                         <fmt:formatNumber value="${totalAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
                     </span>
                 </div>
                 
-<!--                 Thêm mục nhập mã giảm giá 
+                <!-- Discount code section -->
+                <!--
                 <div class="summary-row">
-                    <span>Mã giảm giá</span>
+                    <span>Discount Code</span>
                     <div class="input-group">
                         <input type="text" class="form-control" id="discountCodeInput"  name="discountCode"
-                               value="${discountCode}" placeholder="Nhập mã giảm giá">
-                        <button class="btn btn-outline-primary" type="button" id="applyDiscountBtn">Áp dụng</button>
+                               value="${discountCode}" placeholder="Enter discount code">
+                        <button class="btn btn-outline-primary" type="button" id="applyDiscountBtn">Apply</button>
                     </div>
                 </div>
                 
@@ -230,20 +231,21 @@
                 </div>
                 
                 <div class="summary-row">
-                    <span>Giảm giá</span>
+                    <span>Discount</span>
                     <span id="modalDiscount" data-value="${discount}" class="${discount > 0 ? 'text-success' : ''}">
                         <fmt:formatNumber value="${discount}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
                     </span>
                 </div>
--->
+                -->
+
                 <div class="summary-row">
-                    <span>Khách cần trả</span>
+                    <span>Total Amount</span>
                     <span id="modalTotalPayable" class="text-primary fw-bold">
                         <fmt:formatNumber value="${totalAmount - discount}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
                     </span>
                 </div>
                 <div class="summary-row">
-                    <span>Khách thanh toán</span>
+                    <span>Customer Payment</span>
                     <span id="modalCustomerPaid" class="fw-bold">0 ₫</span>
                 </div>
 
@@ -268,8 +270,8 @@
 
             <div class="payment-footer">
                 <div class="payment-actions">
-                    <a href="sale" class="btn btn-outline-secondary">HỦY</a>
-                    <button type="submit" class="btn btn-primary">XÁC NHẬN THANH TOÁN</button>
+                    <a href="sale" class="btn btn-outline-secondary">CANCEL</a>
+                    <button type="submit" class="btn btn-primary">CONFIRM PAYMENT</button>
                 </div>
             </div>
         </form>

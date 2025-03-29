@@ -351,7 +351,7 @@ function selectCustomer(customer) {
     // Cập nhật tiêu đề modal thanh toán
     const paymentModalHeader = document.querySelector('.payment-modal-header h5');
     if (paymentModalHeader) {
-        paymentModalHeader.textContent = customer.customerName || 'Khách lẻ';
+        paymentModalHeader.textContent = customer.customerName || 'Walk-in Customer';
     }
     
     // Lưu thông tin khách hàng vào biến toàn cục để sử dụng khi thanh toán
@@ -655,9 +655,9 @@ function initializeCheckoutButton() {
                 customerPhoneData.value = window.selectedCustomer.phone;
                 customerIdData.value = window.selectedCustomer.id;
             } else {
-                customerNameData.value = "Khách lẻ";
+                customerNameData.value = "Walking Customer";
                 customerPhoneData.value = "";
-                customerIdData.value = "0"; // Mặc định là khách lẻ
+                customerIdData.value = "0";
             }
             
             console.log("Sending customer data:", {

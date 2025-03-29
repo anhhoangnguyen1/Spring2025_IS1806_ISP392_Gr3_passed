@@ -81,6 +81,7 @@
                             <span class="nav-text">Customers</span>
                         </a>
                     </li>
+<<<<<<< HEAD
                     <li>
                         <a href="sale">
                             <span class="nav-icon">
@@ -97,6 +98,24 @@
                             <span class="nav-text">Orders History</span>
                         </a>
                     </li>
+                    <c:if test="${sessionScope.role == 'owner' or sessionScope.role == 'staff'}">
+                        <li>
+                            <a href="sale">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="orders">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders History</span>
+                            </a>
+                        </li>
+                    </c:if>
                     <li>
                         <a href="/ISP392_Project/Debts">
                             <span class="nav-icon">
@@ -110,15 +129,15 @@
                 <ul class="navbar-links navbar-links-2">
                     <li>
 
-                            <a href="/ISP392_Project/Stores">
-                                <span class="nav-icon">
-                                    <i class="fa-solid fa-store"></i>
-                                </span>
-                                <span class="nav-text">Stores</span>
-                            </a>
-                        </li>
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
                     <c:if test="${sessionScope.role == 'owner'}">
-                        
+
                         <li>
                             <a href="/ISP392_Project/Users">
                                 <span class="nav-icon">
@@ -216,6 +235,7 @@
                         }
 
                     </style>
+
                     <div id="avatar-preview" class="avatar" 
                          style="background-image: url('${pageContext.request.contextPath}/avatars/${user.image}');"></div>
 
@@ -245,11 +265,20 @@
                         <div class="form-group">
                             <label for="phone">Phone:</label>
                             <input type="text" id="phone" name="phone" value="${user.phone}">
+                            <c:if test="${not empty phoneError}">
+                                <span style="color: red;">${phoneError}</span>
+                            </c:if>
                         </div>
+
+
                         <div class="form-group">
                             <label for="email">Email:</label>
-                            <input type="email" id="email" name="email" value="${user.email}">
+                            <input type="text" id="email" name="email" value="${user.email}">
+                            <c:if test="${not empty emailError}">
+                                <span style="color: red;">${emailError}</span>
+                            </c:if>
                         </div>
+                            
                         <div class="form-group">
                             <label for="address">Address:</label>
                             <input type="text" id="address" name="address" value="${user.address}">
@@ -291,15 +320,17 @@
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
             <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
             <script type="text/javascript">
-                                       document.getElementById('saveChangesBtn').onclick = function () {
-                                           document.getElementById('profileForm').submit();
-                                       }
+                                document.getElementById('saveChangesBtn').onclick = function () {
+                                    $('#confirmModal').modal('hide');  // Ẩn modal xác nhận
+                                    document.getElementById('profileForm').submit();  // Tiến hành gửi form
+                                }
 
 
-                                       function confirmSave(event) {
-                                           event.preventDefault();
-                                           $('#confirmModal').modal('show');
-                                       }
+
+                                function confirmSave(event) {
+                                    event.preventDefault();
+                                    $('#confirmModal').modal('show');
+                                }
             </script>
         </div>
     </body>

@@ -44,8 +44,7 @@ public class loginServlet extends HttpServlet {
 
         Users login = AccountDAO.INSTANCE.getUser(username, password);
 
-         if (login != null) {
-             
+         if (login != null) {             
              if ("Inactive".equalsIgnoreCase(login.getStatus())) {
         
             request.setAttribute("error", "Your account is inactive. Please contact admin.");

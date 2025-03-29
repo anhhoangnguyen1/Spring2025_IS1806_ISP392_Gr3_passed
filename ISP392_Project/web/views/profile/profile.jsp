@@ -96,6 +96,25 @@
                             <span class="nav-text">Orders History</span>
                         </a>
                     </li>
+
+                    <c:if test="${sessionScope.role == 'owner' or sessionScope.role == 'staff'}">
+                        <li>
+                            <a href="sale">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="orders">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders History</span>
+                            </a>
+                        </li>
+                    </c:if>
                     <li>
                         <a href="/ISP392_Project/Debts">
                             <span class="nav-icon">
@@ -108,15 +127,15 @@
                 <span class="menu-label">OWNER ZONE</span>
                 <ul class="navbar-links navbar-links-2">
                     <li>
-                            <a href="/ISP392_Project/Stores">
-                                <span class="nav-icon">
-                                    <i class="fa-solid fa-store"></i>
-                                </span>
-                                <span class="nav-text">Stores</span>
-                            </a>
-                        </li>
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
                     <c:if test="${sessionScope.role == 'owner'}">
-                        
+
                         <li>
                             <a href="/ISP392_Project/Users">
                                 <span class="nav-icon">
@@ -186,7 +205,7 @@
                                 font-size: 20px;
                                 font-weight: 500;
                                 color: #777;
-                               
+
                             }
 
                             .profile-container {
@@ -203,11 +222,11 @@
 
                             .form-container {
                                 flex: 1;
-                                order: -1; 
+                                order: -1;
                             }
 
                             .avatar-section {
-                                order: 1; 
+                                order: 1;
                             }
 
                             .form-row {
@@ -224,7 +243,7 @@
 
                             .form-group label {
                                 font-size: 14px;
-                                font-weight: bold; 
+                                font-weight: bold;
                                 color: #333;
                                 margin-bottom: 8px;
                             }
@@ -235,8 +254,18 @@
                                 margin-bottom: 10px;
                             }
 
+                            .alert .close {
+                                position: absolute;
+                                top: 10px;
+                                right: 10px;
+                                padding: 0;
+                                border: none;
+                                background: transparent;
+                                font-size: 30px;
 
-                           
+
+                            }
+
 
                             .btn:hover {
                                 background-color: #0056b3;
@@ -258,6 +287,18 @@
                                 }
                             }
                         </style>
+
+                        <c:if test="${not empty sessionScope.successMessage}">
+
+                            <div class="alert alert-success alert-dismissible fade show">
+                                <strong>Success!</strong> ${sessionScope.successMessage}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <c:set var="successMessage" value="${sessionScope.successMessage}" />
+                            <c:remove var="successMessage" />
+                        </c:if>
 
                         <div class="profile-container">
                             <div class="profile-header">
@@ -287,6 +328,7 @@
                                         <div class="form-group">
                                             <label for="email">Email</label>
                                             <p class="info"><c:out value="${user.email}" /></p>
+
                                         </div>
                                     </div>
 

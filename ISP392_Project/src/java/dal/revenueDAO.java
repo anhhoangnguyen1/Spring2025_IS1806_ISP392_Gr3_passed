@@ -21,44 +21,47 @@ public class revenueDAO extends DBContext {
 
     // Doanh thu hôm nay
     public double getRevenueToday() {
-        String sql = "SELECT COALESCE(SUM(total), 0) FROM Invoice WHERE type = 'export' AND DATE(created_at) = CURDATE()";
+        String sql = "SELECT COALESCE(SUM(TotalAmount), 0) FROM Orders WHERE DATE(OrderDate) = CURDATE()";
         return getSingleRevenue(sql);
     }
 
-    // Số lượng hóa đơn hôm nay
-    public int getInvoiceCountToday() {
-        String sql = "SELECT COUNT(*) FROM Invoice WHERE type = 'export' AND DATE(created_at) = CURDATE()";
+    // Số lượng đơn hàng hôm nay
+    public int getOrderCountToday() {
+        String sql = "SELECT COUNT(*) FROM Orders WHERE DATE(OrderDate) = CURDATE()";
         return getSingleCount(sql);
     }
 
     // Doanh thu hôm qua
     public double getRevenueYesterday() {
-        String sql = "SELECT COALESCE(SUM(total), 0) FROM Invoice WHERE type = 'export' AND DATE(created_at) = CURDATE() - INTERVAL 1 DAY";
+        String sql = "SELECT COALESCE(SUM(TotalAmount), 0) FROM Orders WHERE DATE(OrderDate) = CURDATE() - INTERVAL 1 DAY";
         return getSingleRevenue(sql);
     }
 
     // Doanh thu 7 ngày qua
     public List<Revenue> getRevenueLast7Days() {
-        String sql = "SELECT DATE(created_at) AS sale_date, COALESCE(SUM(total), 0) AS revenue FROM Invoice "
-                + "WHERE type = 'export' AND created_at >= CURDATE() - INTERVAL 6 DAY "
-                + "GROUP BY DATE(created_at) ORDER BY sale_date";
+        String sql = "SELECT DATE(OrderDate) AS sale_date, COALESCE(SUM(TotalAmount), 0) AS revenue "
+                + "FROM Orders "
+                + "WHERE OrderDate >= CURDATE() - INTERVAL 6 DAY "
+                + "GROUP BY DATE(OrderDate) ORDER BY sale_date";
         return getRevenueList(sql);
     }
 
     // Doanh thu từng ngày trong tháng này
     public List<Revenue> getRevenueThisMonth() {
-        String sql = "SELECT DATE(created_at) AS sale_date, COALESCE(SUM(total), 0) AS revenue_this_month FROM Invoice "
-                + "WHERE type = 'export' AND YEAR(created_at) = YEAR(CURDATE()) AND MONTH(created_at) = MONTH(CURDATE()) "
-                + "GROUP BY DATE(created_at) ORDER BY sale_date";
+        String sql = "SELECT DATE(OrderDate) AS sale_date, COALESCE(SUM(TotalAmount), 0) AS revenue_this_month "
+                + "FROM Orders "
+                + "WHERE YEAR(OrderDate) = YEAR(CURDATE()) AND MONTH(OrderDate) = MONTH(CURDATE()) "
+                + "GROUP BY DATE(OrderDate) ORDER BY sale_date";
         return getRevenueList(sql);
     }
 
     // Doanh thu từng ngày trong tháng trước
     public List<Revenue> getRevenueLastMonth() {
-        String sql = "SELECT DATE(created_at) AS sale_date, COALESCE(SUM(total), 0) AS revenue_last_month FROM Invoice "
-                + "WHERE type = 'export' AND YEAR(created_at) = YEAR(CURDATE() - INTERVAL 1 MONTH) "
-                + "AND MONTH(created_at) = MONTH(CURDATE() - INTERVAL 1 MONTH) "
-                + "GROUP BY DATE(created_at) ORDER BY sale_date";
+        String sql = "SELECT DATE(OrderDate) AS sale_date, COALESCE(SUM(TotalAmount), 0) AS revenue_last_month "
+                + "FROM Orders "
+                + "WHERE YEAR(OrderDate) = YEAR(CURDATE() - INTERVAL 1 MONTH) "
+                + "AND MONTH(OrderDate) = MONTH(CURDATE() - INTERVAL 1 MONTH) "
+                + "GROUP BY DATE(OrderDate) ORDER BY sale_date";
         return getRevenueList(sql);
     }
 
@@ -108,7 +111,7 @@ public class revenueDAO extends DBContext {
     public static void main(String[] args) {
         revenueDAO dao = new revenueDAO();
         System.out.println("Revenue Today: " + dao.getRevenueToday());
-        System.out.println("Invoice Count Today: " + dao.getInvoiceCountToday());
+        System.out.println("Invoice Count Today: " + dao.getOrderCountToday());
 //        System.out.println("Revenue Yesterday: " + dao.getRevenueYesterday());
 
 //        System.out.println("Revenue Last 7 Days:");
