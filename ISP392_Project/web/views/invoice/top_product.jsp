@@ -103,6 +103,7 @@ bsd12418 --%> <%@page contentType="text/html" pageEncoding="UTF-8"%>
                             <span class="nav-text">Customers</span>
                         </a>
                     </li>
+                    <c:if test="${sessionScope.role == 'owner' or sessionScope.role == 'staff'}">
                     <li>
                         <a href="sale">
                             <span class="nav-icon">
@@ -119,6 +120,7 @@ bsd12418 --%> <%@page contentType="text/html" pageEncoding="UTF-8"%>
                             <span class="nav-text">Orders History</span>
                         </a>
                     </li>
+                    </c:if>
                     <li>
                         <a href="#">
                             <span class="nav-icon">
