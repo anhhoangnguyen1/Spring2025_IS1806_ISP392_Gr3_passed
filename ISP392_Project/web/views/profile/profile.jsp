@@ -303,7 +303,7 @@
                         <div class="profile-container">
                             <div class="profile-header">
                                 <div class="avatar-section">
-                                    <div class="avatar" style="background-image: url('${pageContext.request.contextPath}/avatars/${user.image}');"></div>
+                                    <div class="avatar" style="background-image: url('${pageContext.request.contextPath}/views/profile/image/${user.image}');"></div>
                                 </div>
                                 <div class="form-container">
                                     <h2>Personal Information</h2>
