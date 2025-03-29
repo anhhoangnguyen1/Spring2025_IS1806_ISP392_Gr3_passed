@@ -330,7 +330,7 @@
 
 
 
-
+// cnflict in master
 //                $(".openDebtModal").on("click", function () {
 //                    let currentPage = sessionStorage.getItem("customerPageIndex") || 1;
 //                    sessionStorage.setItem("prevCustomerPageIndex", currentPage); // Lưu trang trước đó
@@ -382,7 +382,7 @@
                                 );
                     }
 
-
+// cnflict in master
 //                    $('#pageSelect').empty();
 //                    for (let page = 1; page <= endPage; page++) {
 //                        $('#pageSelect').append('<option value="' + page + '" ' + (currentIndex == page ? 'selected' : '') + '>' + page + '</option>');
