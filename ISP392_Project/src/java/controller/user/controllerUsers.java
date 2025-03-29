@@ -129,7 +129,6 @@ public class controllerUsers extends HttpServlet {
 
                 List<Users> users = new ArrayList<>();
 
-              
                 // Phân quyền dựa trên role
                 if ("admin".equals(role)) {
                     // Admin chỉ xem users có role "owner"
@@ -208,15 +207,15 @@ public class controllerUsers extends HttpServlet {
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users user = userDAO.getUserById(userId);
 
-                // Chỉ cho phép ban tài khoản có role "staff"
+                
                 if (user != null && "staff".equals(user.getRole())) {
-                    userDAO.deactivateUser(userId);  // Thực hiện ban tài khoản (deactivate)
+                    userDAO.deactivateUser(userId);  
                     session.setAttribute("successMessage", "User has been banned successfully.");
                 } else {
                     session.setAttribute("errorMessage", "You can only ban users with 'staff' role.");
                 }
 
-                // Chuyển hướng lại trang danh sách người dùng sau khi ban
+
                 response.sendRedirect("Users?service=users");
                 break;
             }
@@ -225,15 +224,14 @@ public class controllerUsers extends HttpServlet {
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users user = userDAO.getUserById(userId);
 
-                // Chỉ cho phép unban tài khoản có status là "Deactive"
-                if (user != null && "Deactive".equals(user.getStatus())) {
-                    userDAO.activateUser(userId);  // Thực hiện unban tài khoản (active)
+                if (user != null && "Inactive".equalsIgnoreCase(user.getStatus())) {
+
+                    userDAO.activateUser(userId);
                     session.setAttribute("successMessage", "User has been unbanned successfully.");
                 } else {
-                    session.setAttribute("errorMessage", "You can only unban users with 'Deactive' status.");
+                    session.setAttribute("errorMessage", "You can only unban users with 'Inactive' status.");
                 }
 
-                // Chuyển hướng lại trang danh sách người dùng sau khi unban
                 response.sendRedirect("Users?service=users");
                 break;
             }

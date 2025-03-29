@@ -86,7 +86,7 @@ public class userDAO extends DBContext {
     }
 
     public void deactivateUser(int userId) {
-        String sql = "UPDATE users SET status = 'Deactive' WHERE id = ?";
+        String sql = "UPDATE users SET status = 'Inactive' WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, userId);
             st.executeUpdate();
@@ -94,6 +94,7 @@ public class userDAO extends DBContext {
             e.printStackTrace();
         }
     }
+
 
     public void activateUser(int userId) {
         String sql = "UPDATE users SET status = 'Active' WHERE id = ?";
