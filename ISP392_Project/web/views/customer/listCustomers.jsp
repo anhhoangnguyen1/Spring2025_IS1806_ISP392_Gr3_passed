@@ -237,6 +237,7 @@
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
             <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
             <script type="text/javascript">
+
                 let timeout = null;
                 let currentSortBy = '${sortBy}';
                 let currentSortOrder = '${sortOrder}';
@@ -313,7 +314,7 @@
                                     '<td>' + customer.createdBy + '</td>' +
                                     '<td class="sticky-col">' +
                                     '<button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#">View</button> ' +
-                                    '<button type="button" class="btn btn-outline-danger mr-lg-auto" data-toggle="modal" data-target="#debtListModal' + customer.id + '">Debt note</button> ' +
+                                    '<a href="${pageContext.request.contextPath}/Debts?service=debtInCustomers&customer_id=' + customer.id + '" class="btn btn-outline-danger mr-lg-auto">Debt note</a> ' +
                                     '<a href="${pageContext.request.contextPath}/Customers?service=editCustomer&customer_id=' + customer.id + '" class="btn btn-outline-primary">Edit</a>' +
                                     '</td>' +
                                     '</tr>'
@@ -330,6 +331,15 @@
 
 
 
+//                $(".openDebtModal").on("click", function () {
+//                    let currentPage = sessionStorage.getItem("customerPageIndex") || 1;
+//                    sessionStorage.setItem("prevCustomerPageIndex", currentPage); // Lưu trang trước đó
+//                });
+//					document.addEventListener("DOMContentLoaded", function () {
+//                    let savedIndex = sessionStorage.getItem("prevCustomerPageIndex") || 1;
+//                    searchCustomers('', savedIndex, 'name', 'asc'); // Load trang đã xem trước đó
+//                });
+//
                 function updatePagination(endPage, currentIndex, keyword) {
                     const pagination = $('.pagination');
                     pagination.empty();
@@ -373,10 +383,10 @@
                     }
 
 
-                    $('#pageSelect').empty();
-                    for (let page = 1; page <= endPage; page++) {
-                        $('#pageSelect').append('<option value="' + page + '" ' + (currentIndex == page ? 'selected' : '') + '>' + page + '</option>');
-                    }
+//                    $('#pageSelect').empty();
+//                    for (let page = 1; page <= endPage; page++) {
+//                        $('#pageSelect').append('<option value="' + page + '" ' + (currentIndex == page ? 'selected' : '') + '>' + page + '</option>');
+//                    }
 
                     $('.page-nav').on('click', function (e) {
                         e.preventDefault();

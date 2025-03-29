@@ -18,6 +18,23 @@ import java.util.List;
 
 public class userDAO extends DBContext {
 
+    public List<Users> findAll() {
+        List<Users> usersList = new ArrayList<>();
+        String sqlUsers = "SELECT * FROM users";
+
+        try (PreparedStatement st = connection.prepareStatement(sqlUsers); ResultSet rs = st.executeQuery()) {
+
+            while (rs.next()) {
+                Users user = mapResultSetToUser(rs);
+                usersList.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return usersList;
+    }
+
     public List<Users> viewAllUsers(int index) {
         List<Users> usersList = new ArrayList<>();
         String sqlUsers = "SELECT * FROM users ORDER BY id LIMIT 10 OFFSET ?";
@@ -441,6 +458,42 @@ public List<Users> searchUsersByRole(String role, String keyword, int pageIndex,
             e.printStackTrace();
         }
         return false;
+    }
+
+    public Users getOwnerByStoreId(int storeId) {
+        Users owner = null;
+        String sql = "SELECT * FROM users WHERE store_id = ? AND role = 'owner'";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, storeId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                owner = new Users();
+                owner.setId(rs.getInt("id"));
+                owner.setName(rs.getString("name"));
+                // set other fields as needed...
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return owner;
+    }
+
+    public List<Users> getOwnersWithoutStore() {
+        List<Users> owners = new ArrayList<>();
+        String sql = "SELECT * FROM users WHERE store_id IS NULL AND role = 'owner'";
+
+        try (PreparedStatement pst = connection.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                Users user = new Users();
+                user.setId(rs.getInt("id"));
+                user.setName(rs.getString("name"));
+                owners.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return owners;
     }
 
     private Users mapResultSetToUser(ResultSet rs) throws SQLException {

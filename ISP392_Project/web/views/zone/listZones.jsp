@@ -89,17 +89,15 @@
                 <table class="table table-striped table-hover table-bordered" id="zoneTable">
                     <thead>
                         <tr>
-                            <th class="sortable" data-sort="id">
-                                ID <i class="fa ${sortBy == 'id' && sortOrder == 'ASC' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
-                            </th>
-                            <th class="sortable" data-sort="name">
-                                Name <i class="fa ${sortBy == 'name' && sortOrder == 'ASC' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
-                            </th>
-                            <th>Store ID</th>
-                            <th>Product Name</th>
+                            <th class="sortable" data-sort="id">ID <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-sort="name">Name <i class="fas fa-sort"></i></th>
+                            <th>Description</th>
+                            <th>Product</th>
                             <th>Created By</th>
                             <th>Status</th>
+                            <c:if test="${sessionScope.role == 'owner'}">
                             <th>Actions</th>
+                            </c:if>
                         </tr>
                     </thead>
                     <tbody id="zoneTableBody">
@@ -107,18 +105,14 @@
                             <tr>
                                 <td>${zone.id}</td>
                                 <td style="text-align: left;">${zone.name}</td>
-                                <td>${zone.storeId != null ? zone.storeId.id : 'null'}</td>
+                                <td style="text-align: left;">${zone.description != null ? zone.description : 'N/A'}</td>
                                 <td>${zone.productId != null ? zone.productId.name : 'N/A'}</td>
                                 <td>${zone.createdBy}</td>
                                 <td>${zone.status}</td>
                                 <td>
-                                    <c:if test="${sessionScope.role == 'staff'}">
-                                        <a href="${pageContext.request.contextPath}/zones?service=stockCheck&zone_id=${zone.id}" class="btn btn-outline-success">Stock Check</a>
-                                    </c:if>
                                     <c:if test="${sessionScope.role == 'owner'}">
-                                        <a href="${pageContext.request.contextPath}/zones?service=getZoneById&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">View</a>
+                                        <a href="${pageContext.request.contextPath}/zones?service=viewZoneHistory&zone_id=${zone.id}&index=${param.index}&sortBy=${param.sortBy}&sortOrder=${param.sortOrder}" class="btn btn-outline-info">View Zone History</a>
                                         <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">Edit</a>
-                                        <a href="${pageContext.request.contextPath}/zones?service=viewStockCheckHistory&zone_id=${zone.id}" class="btn btn-outline-info">History</a>
                                     </c:if>
                                 </td>
                             </tr>
@@ -232,20 +226,15 @@
                         let row = '<tr>' +
                                 '<td>' + (zone.id || '') + '</td>' +
                                 '<td style="text-align: left;">' + (zone.name || '') + '</td>' +
-                                '<td>' + (zone.storeId && zone.storeId.id ? zone.storeId.id : 'null') + '</td>' +
+                                '<td style="text-align: left;">' + (zone.description || 'N/A') + '</td>' +
                                 '<td>' + (zone.productName ? zone.productName : 'N/A') + '</td>' +
                                 '<td>' + (zone.createdBy || '') + '</td>' +
                                 '<td>' + (zone.status || '') + '</td>';
-
+                        
                         if (role === 'owner') {
                             row += '<td>' +
-                                    '<a href="<%= request.getContextPath() %>/zones?service=getZoneById&zone_id=' + (zone.id || '') + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">View</a> ' +
+                                    '<a href="<%= request.getContextPath() %>/zones?service=viewZoneHistory&zone_id=' + (zone.id || '') + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">View Zone History</a> ' +
                                     '<a href="<%= request.getContextPath() %>/zones?service=editZone&zone_id=' + (zone.id || '') + '&index=' + currentIndex + '&sortBy=' + currentSortBy + '&sortOrder=' + currentSortOrder + '" class="btn btn-outline-primary">Edit</a> ' +
-                                    '<a href="<%= request.getContextPath() %>/zones?service=viewStockCheckHistory&zone_id=' + (zone.id || '') + '" class="btn btn-outline-info">History</a>' +
-                                    '</td>';
-                        } else if (role === 'staff') {
-                            row += '<td>' +
-                                    '<a href="<%= request.getContextPath() %>/zones?service=stockCheck&zone_id=' + (zone.id || '') + '" class="btn btn-outline-success">Stock Check</a>' +
                                     '</td>';
                         }
                         row += '</tr>';

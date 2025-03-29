@@ -166,18 +166,18 @@
         <div class="top-header">
             <div class="search-container">
                 <i class="bi bi-search"></i>
-                <input type="text" placeholder="Tìm hàng hóa (F3)" id="productSearchInput">
+                <input type="text" placeholder="Find Product" id="productSearchInput">
                 <div id="productSearchResults"></div>
             </div>
 
             <div class="tab-container">
-                <span>Hóa đơn 1</span>
+                <span>Invoice 1</span>
                 <span class="tab-close">×</span>
             </div>
 
             <div class="header-icons">
                 <a href="#" class="header-icon"><i class="bi bi-cart"></i></a>
-                <a href="#" class="header-icon"><i class="bi bi-arrow-left"></i></a>
+                <a href="/ISP392_Project/dashboard" class="header-icon"><i class="bi bi-arrow-left"></i></a>
                 <a href="#" class="header-icon"><i class="bi bi-arrow-clockwise"></i></a>
                 <a href="#" class="header-icon"><i class="bi bi-printer"></i></a>
                 <span class="header-icon">0912345678</span>
@@ -194,12 +194,12 @@
 
                 <div class="cart-summary">
                     <div class="summary-row">
-                        <span>Tổng tiền hàng</span>
+                        <span>Total price</span>
                         <span id="cartTotal">0</span>
                     </div>
 
                     <div class="summary-row">
-                        <span>Số lượng</span>
+                        <span>Amount</span>
                         <span id="cartQuantity">0</span>
                     </div>
                 </div>
@@ -211,7 +211,7 @@
                     -->
 
                     <button class="btn btn-primary me-2 d-flex align-items-center" id="checkoutBtn2">
-                        <i class="bi bi-bag me-1"></i> Bán
+                        <i class="bi bi-bag me-1"></i> Sell
                     </button>
 
                     <!--                    <button class="btn btn-outline-secondary d-flex align-items-center">
@@ -240,7 +240,7 @@
                         </span>
                         <input type="text" 
                                class="form-control" 
-                               placeholder="Tìm khách hàng (F4)" 
+                               placeholder="Find customer" 
                                id="customerSearchInput" 
                                autocomplete="off">
                         <div id="customerSearchResults"></div>
@@ -271,6 +271,7 @@
                             <div class="product-card-price">
                                 <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                             </div>
+                            <div class="product-card-stock">Remaining: ${product.quantity}</div>
                         </div>
                     </c:forEach>
                 </div>

@@ -46,9 +46,13 @@
                                 <input type="text" oninput="formatNumber(event)" onblur="cleanInputBeforeSubmit(event)" class="form-control" name="amount" required />
                             </div>
                             <input type="hidden" name="balance" value="0.0"/>
+
                             <div class="form-group">
                                 <label>Image</label>
                                 <input  type="file" name="image">
+                                <button type="button" class="btn btn-danger btn-sm mt-2" onclick="clearFile()">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
                             </div>
 
                             <div class="form-group">
@@ -75,5 +79,10 @@
                 </div>
             </div>
         </div>
+        <script>
+            function clearFile() {
+                document.getElementById("imageInput").value = "";
+            }
+        </script>
     </body>
 </html>

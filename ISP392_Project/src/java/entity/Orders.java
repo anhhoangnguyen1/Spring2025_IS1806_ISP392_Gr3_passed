@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @ToString
-public class Order {
+public class Orders {
     private Integer orderID;
     private Date orderDate;
     private Integer totalAmount;

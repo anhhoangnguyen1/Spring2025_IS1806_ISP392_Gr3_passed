@@ -83,14 +83,24 @@
                             <span class="nav-text">Customers</span>
                         </a>
                     </li>
+                    <c:if test="${sessionScope.role == 'owner' or sessionScope.role == 'staff'}">
                     <li>
                         <a href="sale">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
-                            <span class="nav-text">Invoices</span>
+                            <span class="nav-text">Orders</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="orders">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </span>
+                            <span class="nav-text">Orders History</span>
+                        </a>
+                    </li>
+                    </c:if>
                     <li>
                         <a href="/ISP392_Project/Debts">
                             <span class="nav-icon">
@@ -142,7 +152,7 @@
             <div class="contents">
                 <div class="panel-bar1">
                     <h2>Edit Store Information</h2>
-                    
+
                     <form id="storeForm" action="${pageContext.request.contextPath}/Stores" method="POST" onsubmit="confirmSave(event)">
                         <input type="hidden" name="service" value="editStore">
                         <input type="hidden" name="store_id" value="${store.id}">
@@ -180,9 +190,30 @@
                             </c:if>
                         </div>
 
+                        <!-- Select Owner (only for admin) -->
+                        <c:if test="${sessionScope.role == 'admin'}">
+                            <div class="form-group">
+                                <label for="owner">Owner</label>
+                                <select class="form-control" name="owner">
+                                    <option value="">--Select New Owner--</option>
+                                    <c:forEach var="user" items="${ownerList}">
+                                        <option value="${user.id}">
+                                            ${user.name}
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                        </c:if>
+
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>
-                            <a href="${pageContext.request.contextPath}/Stores?service=storeInfo" class="btn btn-secondary">Back</a>
+                            <c:if test="${sessionScope.role == 'admin'}">
+                                <a href="${pageContext.request.contextPath}/Stores?service=storeList" class="btn btn-secondary">Back</a>
+                            </c:if>
+                            <c:if test="${sessionScope.role == 'owner'}">
+                                <a href="${pageContext.request.contextPath}/Stores?service=storeInfo" class="btn btn-secondary">Back</a>
+                            </c:if>
+
                         </div>
                     </form>
                 </div>
@@ -213,14 +244,14 @@
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
             <script type="text/javascript" src="<%= request.getContextPath() %>/css/script.js"></script>
             <script type="text/javascript">
-                // Hàm xử lý khi bấm "Save" trong Modal
-                document.getElementById('saveChangesBtn').onclick = function () {
-                    document.getElementById('storeForm').submit(); // Gửi form khi người dùng xác nhận
-                }
+                        // Hàm xử lý khi bấm "Save" trong Modal
+                        document.getElementById('saveChangesBtn').onclick = function () {
+                            document.getElementById('storeForm').submit(); // Gửi form khi người dùng xác nhận
+                        }
 
-                // Hàm gọi Modal để xác nhận
-                function confirmSave(event) {
-                    event.preventDefault(); // Ngừng gửi form
-                    $('#confirmModal').modal('show'); // Hiển thị Modal xác nhận
-                }
+                        // Hàm gọi Modal để xác nhận
+                        function confirmSave(event) {
+                            event.preventDefault(); // Ngừng gửi form
+                            $('#confirmModal').modal('show'); // Hiển thị Modal xác nhận
+                        }
             </script>

@@ -19,6 +19,24 @@ public class customerDAO extends DBContext {
 
     debtDAO debtDao = new debtDAO();
 
+    public List<Customers> findAll() {
+        List<Customers> customersList = new ArrayList<>();
+        String sql = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, deleteBy, store_id, status FROM customers";
+
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+
+            while (rs.next()) {
+                Customers customer = mapResultSetToCustomer(rs);
+                customersList.add(customer);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return customersList;
+    }
+
     public List<String> getAllCustomerNames() {
         List<String> list = new ArrayList<>();
         String sql = "SELECT name FROM Customers";
@@ -39,10 +57,11 @@ public class customerDAO extends DBContext {
         List<Customers> customersList = new ArrayList<>();
         String sqlCustomers = "SELECT id, name, phone, address, balance, created_at, updated_at, updated_by, created_by, isDeleted, deleteBy, store_id, status "
                 + "FROM customers "
-                + " ORDER BY " + "id" + " LIMIT 5 OFFSET ?";
+                + "WHERE store_id = ? ORDER BY id LIMIT 5 OFFSET ?";
 
         try (PreparedStatement st = connection.prepareStatement(sqlCustomers)) {
-            st.setInt(1, (index - 1) * 5);
+            st.setInt(1, storeID);
+            st.setInt(2, (index - 1) * 5);
 
             try (ResultSet rs = st.executeQuery()) {
                 while (rs.next()) {
@@ -184,6 +203,8 @@ public class customerDAO extends DBContext {
         return null;
     }
 
+
+
     public void insertCustomer(Customers customer) {
         String sql = "INSERT INTO Customers (name, phone, address, balance, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, updated_by, store_id, status) "
                 + "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?)";
@@ -316,38 +337,6 @@ public class customerDAO extends DBContext {
     public static void main(String[] args) {
 //        customerDAO dao = new customerDAO();
 //
-//        int pageIndex = 1;
-//        List<Customers> customers = dao.viewAllCustomersWithDebts("id", pageIndex);
-//
-//        if (customers.isEmpty()) {
-//            System.out.println("Không có khách hàng nào được tìm thấy!");
-//        } else {
-//            System.out.println("Danh sách khách hàng:");
-//            for (Customers customer : customers) {
-//                System.out.println("------------------------------------------------------");
-//                System.out.println("Customer ID: " + customer.getId());
-//                System.out.println("Name: " + customer.getName());
-//                System.out.println("Phone: " + customer.getPhone());
-//                System.out.println("Address: " + customer.getAddress());
-//                System.out.println("Balance: " + customer.getBalance());
-//                System.out.println("Created By: " + customer.getCreatedBy());
-//                System.out.println("Created At: " + customer.getCreatedAt());
-//
-//                List<DebtNote> debts = customer.getDebtNotes();
-//                if (debts.isEmpty()) {
-//                    System.out.println(" Không có khoản nợ nào.");
-//                } else {
-//                    System.out.println("Danh sách khoản nợ:");
-//                    for (DebtNote debt : debts) {
-//                        System.out.println("    + Debt ID: " + debt.getId()
-//                                + ", Type: " + debt.getType()
-//                                + ", Amount: " + debt.getAmount()
-//                                + ", Status: " + debt.getStatus());
-//                    }
-//                }
-//            }
-//        }
-
     }
 
     private Customers getFromResulset(ResultSet rs) throws SQLException {

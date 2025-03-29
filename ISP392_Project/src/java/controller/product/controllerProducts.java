@@ -69,7 +69,7 @@ public class controllerProducts extends HttpServlet {
             if (command == null || command.isEmpty()) {
                 command = (String) session.getAttribute("command");
                 if (command == null || command.isEmpty()) {
-                    command = "id";
+                    command = "id DESC";
                 }
             } else {
                 session.setAttribute("command", command);
@@ -93,7 +93,7 @@ public class controllerProducts extends HttpServlet {
             int index = Integer.parseInt(indexPage);
 
             // Tính tổng số sản phẩm
-            int count = products.countProducts(null,storeID);
+            int count = products.countProducts(null, storeID);
 
             // Tính toán số trang dựa vào pageSize
             int endPage = count / pageSize;
@@ -102,7 +102,7 @@ public class controllerProducts extends HttpServlet {
             }
 
             // Lấy danh sách sản phẩm và Zone Active
-            List<Products> listProducts = products.viewAllProducts(command, index, pageSize,storeID);
+            List<Products> listProducts = products.viewAllProducts(command, index, pageSize, storeID);
             List<String> listZoneName = zonesDao.getActiveZoneNames(); // Thay đổi ở đây
 
             // Đặt các thuộc tính cho request
@@ -121,62 +121,6 @@ public class controllerProducts extends HttpServlet {
 
             // Chuyển hướng tới trang JSP
             request.getRequestDispatcher("views/product/products.jsp").forward(request, response);
-        } else if (service.equals("ProductsEditHistory")) {
-            String storeIDStr = (String) session.getAttribute("storeID");
-            int storeID = Integer.parseInt(storeIDStr);
-            String indexPage = request.getParameter("index");
-            String pageSizeStr = request.getParameter("pageSize");
-            String command = request.getParameter("command");
-
-            // Xử lý command
-            if (command == null || command.isEmpty()) {
-                command = (String) session.getAttribute("command");
-                if (command == null || command.isEmpty()) {
-                    command = "id";
-                }
-            } else {
-                session.setAttribute("command", command);
-            }
-
-            // Xử lý pageSize
-            if (pageSizeStr == null || pageSizeStr.isEmpty()) {
-                pageSizeStr = (String) session.getAttribute("pageSize");
-                if (pageSizeStr == null || pageSizeStr.isEmpty()) {
-                    pageSizeStr = "5"; // Mặc định 5 nếu không có
-                }
-            } else {
-                session.setAttribute("pageSize", pageSizeStr);
-            }
-
-            int pageSize = Integer.parseInt(pageSizeStr);
-
-            // Xử lý indexPage
-            if (indexPage == null || indexPage.isEmpty()) {
-                indexPage = "1";
-            }
-            int index = Integer.parseInt(indexPage);
-
-            // Tính tổng số sản phẩm
-            int count = products.countProducts("updated_at IS NOT NULL",storeID);
-            int endPage = (int) Math.ceil((double) count / pageSize);
-
-            // Lấy danh sách sản phẩm với pageSize
-            List<Products> listProducts = products.viewAllProductsEditHistory(command, index, pageSize,storeID);
-            List<String> listZoneName = zonesDao.getAllZoneNames();
-
-            // Đặt thuộc tính cho request
-            request.setAttribute("totalProducts", count);
-            request.setAttribute("zoneName", listZoneName);
-            request.setAttribute("listHistory", listProducts);
-            request.setAttribute("endPage", endPage);
-            request.setAttribute("index", index);
-            request.setAttribute("pageSize", pageSize);
-
-            String notification = (String) request.getAttribute("Notification");
-            if (notification != null && !notification.isEmpty()) {
-                request.setAttribute("Notification", notification);
-            }
-            request.getRequestDispatcher("views/product/productEditHistory.jsp").forward(request, response);
         }
 
         if (service.equals("searchProducts")) {
@@ -184,11 +128,22 @@ public class controllerProducts extends HttpServlet {
             int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("browser");
             try {
-                List<Products> list = products.searchProducts(name, false,storeID);
+                List<Products> list = products.searchProducts(name, false, storeID);
                 request.setAttribute("list", list);
                 request.setAttribute("name", name);
                 request.getRequestDispatcher("views/product/products.jsp").forward(request, response);
             } catch (NumberFormatException e) {
+            }
+        }
+        if (service.equals("UpdateStatusServlet")) {
+            int productId = Integer.parseInt(request.getParameter("productId"));
+            String newStatus = request.getParameter("status");
+            boolean isUpdated = products.updateStatus(productId, newStatus);
+
+            if (isUpdated) {
+                response.sendRedirect("Products"); // Load lại trang sau khi cập nhật
+            } else {
+                response.getWriter().println("Lỗi khi cập nhật trạng thái sản phẩm.");
             }
         }
         if (service.equals("searchProductsEditHistory")) {
@@ -196,7 +151,7 @@ public class controllerProducts extends HttpServlet {
             int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("browser");
             try {
-                List<Products> list = products.searchProducts(name, true,storeID);
+                List<Products> list = products.searchProducts(name, true, storeID);
                 request.setAttribute("listHistory", list);
                 request.setAttribute("name", name);
                 request.getRequestDispatcher("views/product/productEditHistory.jsp").forward(request, response);
@@ -211,7 +166,7 @@ public class controllerProducts extends HttpServlet {
             int id;
             try {
                 id = Integer.parseInt(id_raw);
-                List<Products> product = products.getProductById(id,storeID);
+                List<Products> product = products.getProductById(id, storeID);
                 request.setAttribute("list", product);
                 request.getRequestDispatcher("views/product/detailProduct.jsp").forward(request, response);
             } catch (NumberFormatException e) {
@@ -222,7 +177,7 @@ public class controllerProducts extends HttpServlet {
             String storeIDStr = (String) session.getAttribute("storeID");
             int storeID = Integer.parseInt(storeIDStr);
             int id = Integer.parseInt(request.getParameter("product_id"));
-            List<Products> list = products.getProductById(id,storeID);
+            List<Products> list = products.getProductById(id, storeID);
             request.setAttribute("product", list);
             request.getRequestDispatcher("views/product/editProduct.jsp").forward(request, response);
 
@@ -295,7 +250,7 @@ public class controllerProducts extends HttpServlet {
 //                boolean success = products.editProduct(product, zones);
 
                 // Truyền fullName làm updatedBy
-                boolean success = products.editProduct(product, zones, fullName,storeID);
+                boolean success = products.editProduct(product, zones, fullName, storeID);
 
                 if (success) {
                     session.setAttribute("Notification", "Product updated successfully.");
@@ -411,7 +366,7 @@ public class controllerProducts extends HttpServlet {
                 }
             }
 
-            boolean success = products.insertProduct(product, zones, fullName,storeID);
+            boolean success = products.insertProduct(product, zones, fullName, storeID);
 
             if (success) {
                 request.setAttribute("Notification", "Product added successfully!");

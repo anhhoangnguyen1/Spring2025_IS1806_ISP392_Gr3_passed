@@ -103,14 +103,24 @@ bsd12418 --%> <%@page contentType="text/html" pageEncoding="UTF-8"%>
                             <span class="nav-text">Customers</span>
                         </a>
                     </li>
+                    <c:if test="${sessionScope.role == 'owner' or sessionScope.role == 'staff'}">
                     <li>
                         <a href="sale">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
-                            <span class="nav-text">Invoices</span>
+                            <span class="nav-text">Orders</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="orders">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </span>
+                            <span class="nav-text">Orders History</span>
+                        </a>
+                    </li>
+                    </c:if>
                     <li>
                         <a href="#">
                             <span class="nav-icon">

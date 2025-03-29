@@ -82,14 +82,24 @@
                             <span class="nav-text">Customers</span>
                         </a>
                     </li>
+                    <c:if test="${sessionScope.role == 'owner' or sessionScope.role == 'staff'}">
                     <li>
                         <a href="sale">
                             <span class="nav-icon">
                                 <i class="fa-solid fa-file-invoice"></i>
                             </span>
-                            <span class="nav-text">Invoices</span>
+                            <span class="nav-text">Orders</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="orders">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </span>
+                            <span class="nav-text">Orders History</span>
+                        </a>
+                    </li>
+                    </c:if>
                     <li>
                         <a href="/ISP392_Project/Debts">
                             <span class="nav-icon">
@@ -144,12 +154,6 @@
                 </div>
             </div>
         </div>
-
-
-        <c:import url="debtHistory.jsp" />
-        <c:import url="addDebt.jsp" />
-
-
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>

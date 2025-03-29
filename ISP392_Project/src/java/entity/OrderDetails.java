@@ -11,7 +11,7 @@ import lombok.Builder;
 @AllArgsConstructor
 @Builder
 @ToString
-public class OrderDetail {
+public class OrderDetails {
     private Integer orderDetailID;
     private Integer quantity;
     private Integer price;

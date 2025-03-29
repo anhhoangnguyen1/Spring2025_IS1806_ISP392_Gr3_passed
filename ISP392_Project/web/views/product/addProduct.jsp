@@ -61,13 +61,6 @@
                                 <textarea class="form-control" name="description" rows="3"></textarea>
                             </div>
 
-                            <div class="form-group">
-                                <label>Status</label>
-                                <select class="form-control" name="status" required>
-                                    <option value="Available">Available</option>
-                                    <option value="Out of Stock">Out of Stock</option>
-                                </select>
-                            </div>
                         </div>
 
                         <!-- Chân Modal -->

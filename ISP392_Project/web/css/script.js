@@ -376,7 +376,6 @@ document.addEventListener("DOMContentLoaded", function () {
             // Lấy dữ liệu từ data-attribute của nút được click
             const debtId = this.getAttribute("data-id");
             const amount = this.getAttribute("data-amount");
-            const type = this.getAttribute("data-type");
             const createdAt = this.getAttribute("data-createdat");
             const description = this.getAttribute("data-description");
             const status = this.getAttribute("data-status");
@@ -385,7 +384,6 @@ document.addEventListener("DOMContentLoaded", function () {
             // Gán dữ liệu vào input readonly
             document.getElementById("modalDebtId").textContent = debtId;
             document.getElementById("modalDebtAmount").value = amount;
-            document.getElementById("modalDebtType").value = type;
             document.getElementById("modalDebtCreatedAt").value = createdAt;
             document.getElementById("modalDebtDescription").value = description;
             document.getElementById("modalDebtStatus").value = status;
