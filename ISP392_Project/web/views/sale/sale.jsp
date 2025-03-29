@@ -177,7 +177,7 @@
 
             <div class="header-icons">
                 <a href="#" class="header-icon"><i class="bi bi-cart"></i></a>
-                <a href="#" class="header-icon"><i class="bi bi-arrow-left"></i></a>
+                <a href="/ISP392_Project/dashboard" class="header-icon"><i class="bi bi-arrow-left"></i></a>
                 <a href="#" class="header-icon"><i class="bi bi-arrow-clockwise"></i></a>
                 <a href="#" class="header-icon"><i class="bi bi-printer"></i></a>
                 <span class="header-icon">0912345678</span>
@@ -271,6 +271,7 @@
                             <div class="product-card-price">
                                 <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                             </div>
+                            <div class="product-card-stock">Hàng còn: ${product.quantity}</div>
                         </div>
                     </c:forEach>
                 </div>
