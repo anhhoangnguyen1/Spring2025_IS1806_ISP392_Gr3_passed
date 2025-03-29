@@ -81,7 +81,7 @@
                             <span class="nav-text">Customers</span>
                         </a>
                     </li>
-<<<<<<< HEAD
+
                     <li>
                         <a href="sale">
                             <span class="nav-icon">
@@ -237,13 +237,17 @@
                     </style>
 
                     <div id="avatar-preview" class="avatar" 
-                         style="background-image: url('${pageContext.request.contextPath}/avatars/${user.image}');"></div>
+                         style="background-image: url('${pageContext.request.contextPath}/views/profile/image/${user.image}?timestamp=${System.nanoTime()}');">
+                    </div>
+
 
                     <form id="profileForm" action="${pageContext.request.contextPath}/editprofile" method="post" enctype="multipart/form-data" onsubmit="confirmSave(event)">
                         <div class="form-group">
                             <label for="avatar">Change Avatar:</label>
-                            <input type="file" id="avatar" name="avatar" accept="image/*" onchange="previewImage(event)">
+                            <input type="file" id="avatar" name="image" accept="image/*" onchange="previewImage(event)">
                         </div>
+
+
                         <div class="form-group">
                             <label for="name">Name:</label>
                             <input type="text" id="name" name="name" value="${user.name}">
@@ -278,7 +282,7 @@
                                 <span style="color: red;">${emailError}</span>
                             </c:if>
                         </div>
-                            
+
                         <div class="form-group">
                             <label for="address">Address:</label>
                             <input type="text" id="address" name="address" value="${user.address}">
@@ -330,6 +334,17 @@
                                 function confirmSave(event) {
                                     event.preventDefault();
                                     $('#confirmModal').modal('show');
+                                }
+                                function previewImage(event) {
+                                    const file = event.target.files[0];
+                                    const reader = new FileReader();
+
+                                    reader.onload = function (e) {
+                                        const avatarPreview = document.getElementById('avatar-preview');
+                                        avatarPreview.style.backgroundImage = 'url(' + e.target.result + ')';
+                                    };
+
+                                    reader.readAsDataURL(file);
                                 }
             </script>
         </div>
