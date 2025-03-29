@@ -169,7 +169,7 @@ public class customerDAO extends DBContext {
         try (ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 Customers customer = mapResultSetToCustomer(rs);
-           
+
                 list.add(customer);
             }
         }

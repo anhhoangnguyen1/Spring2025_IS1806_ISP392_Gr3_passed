@@ -16,15 +16,16 @@ import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.File;
+import java.util.regex.Pattern;
 
 /**
  *
  * @author THC
  */
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024 * 2, 
-        maxFileSize = 1024 * 1024 * 10, 
-        maxRequestSize = 1024 * 1024 * 50 
+        fileSizeThreshold = 1024 * 1024 * 2,
+        maxFileSize = 1024 * 1024 * 10,
+        maxRequestSize = 1024 * 1024 * 50
 )
 
 public class EditProfileServlet extends HttpServlet {
@@ -32,6 +33,7 @@ public class EditProfileServlet extends HttpServlet {
     private final profileDAO profileDAO = new profileDAO();
 
     private static final String AVATAR_DIR = "avatars";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -40,7 +42,7 @@ public class EditProfileServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
 
         if (userId == null) {
-            response.sendRedirect("login.html");
+            response.sendRedirect("login.jsp");
             return;
         }
 
@@ -62,10 +64,9 @@ public class EditProfileServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
 
         if (userId == null) {
-            response.sendRedirect("login.html");
+            response.sendRedirect("login.jsp");
             return;
         }
-
 
         Users existingUser = profileDAO.INSTANCE.getUserById(userId);
         if (existingUser == null) {
@@ -73,7 +74,6 @@ public class EditProfileServlet extends HttpServlet {
             request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
         }
-
 
         String name = request.getParameter("name");
         String email = request.getParameter("email");
@@ -83,14 +83,12 @@ public class EditProfileServlet extends HttpServlet {
         String dob = request.getParameter("dob");
         String status = request.getParameter("status");
 
-
         name = (name != null && !name.trim().isEmpty()) ? name : existingUser.getName();
         email = (email != null && !email.trim().isEmpty()) ? email : existingUser.getEmail();
         phone = (phone != null && !phone.trim().isEmpty()) ? phone : existingUser.getPhone();
         address = (address != null && !address.trim().isEmpty()) ? address : existingUser.getAddress();
         gender = (gender != null && !gender.trim().isEmpty()) ? gender : existingUser.getGender();
         status = (status != null && !status.trim().isEmpty()) ? status : existingUser.getStatus();
-
 
         java.sql.Date sqlDob = null;
         try {
@@ -103,9 +101,43 @@ public class EditProfileServlet extends HttpServlet {
             sqlDob = existingUser.getDob();
         }
 
+        // Kiểm tra trùng email và số điện thoại
+        boolean emailExists = profileDAO.checkEmailExists(email, userId);
+        boolean phoneExists = profileDAO.checkPhoneExists(phone, userId);
+
+        if (emailExists) {
+            request.setAttribute("emailError", "Email already exists.");
+            request.setAttribute("user", existingUser);  // Truyền lại thông tin người dùng
+            request.getRequestDispatcher("/views/profile/editProfile.jsp").forward(request, response);
+            return;
+        }
+
+        if (phoneExists) {
+            request.setAttribute("phoneError", "Phone number already exists.");
+            existingUser.setPhone(phone); // Đảm bảo số điện thoại mới được truyền vào
+            request.setAttribute("user", existingUser);
+            request.getRequestDispatcher("/views/profile/editProfile.jsp").forward(request, response);
+            return;
+        }
+
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            request.setAttribute("emailError", "Invalid email format.");
+            existingUser.setEmail(email); // Đảm bảo email mới được truyền vào
+            request.setAttribute("user", existingUser);
+            request.getRequestDispatcher("/views/profile/editProfile.jsp").forward(request, response);
+            return;
+        }
+
+        if (!phone.matches("^0\\d{9}$")) {
+            request.setAttribute("phoneError", "Invalid phone format.");
+            existingUser.setPhone(phone); // Đảm bảo số điện thoại mới được truyền vào
+            request.setAttribute("user", existingUser);
+            request.getRequestDispatcher("/views/profile/editProfile.jsp").forward(request, response);
+            return;
+        }
 
         Part filePart = request.getPart("avatar");
-        String avatarFileName = existingUser.getImage(); 
+        String avatarFileName = existingUser.getImage();
 
         if (filePart != null && filePart.getSize() > 0) {
             String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
@@ -130,20 +162,20 @@ public class EditProfileServlet extends HttpServlet {
                 .gender(gender)
                 .dob(sqlDob)
                 .status(status)
-                .image(avatarFileName) 
+                .image(avatarFileName)
                 .build();
 
         boolean updateSuccess = profileDAO.updateUser(updatedUser);
         if (updateSuccess) {
             session.setAttribute("successMessage", "Profile updated successfully!");
+            // Update the user object in the session to reflect the changes
+            session.setAttribute("user", updatedUser);
             response.sendRedirect(request.getContextPath() + "/user");
-
         } else {
             request.setAttribute("errorMessage", "Failed to update profile!");
             request.setAttribute("user", updatedUser);
             request.getRequestDispatcher("/views/profile/editProfile.jsp").forward(request, response);
         }
-
     }
 
     /**

@@ -44,22 +44,14 @@ public class loginServlet extends HttpServlet {
 
         Users login = AccountDAO.INSTANCE.getUser(username, password);
 
-//<<<<<<< HEAD
-         if (login != null) {
 
-//=======
-//        // Nếu xác thực thành công
-//        if (login != null) {
-//            System.out.println("Login successful for username: " + username);
-//>>>>>>> origin/master
-
-            // Kiểm tra trạng thái tài khoản người dùng
-            if ("Inactive".equalsIgnoreCase(login.getStatus())) {
-                System.out.println("User account is deactivated: " + username);
-                request.setAttribute("error", "Your account is deactivated. Please contact admin.");
-                request.getRequestDispatcher("/views/login.jsp").forward(request, response);
-                return;
-            }
+         if (login != null) {             
+             if ("Inactive".equalsIgnoreCase(login.getStatus())) {
+        
+            request.setAttribute("error", "Your account is inactive. Please contact admin.");
+            request.getRequestDispatcher("/views/login.jsp").forward(request, response);
+            return;
+        }
 
             // Kiểm tra nếu người dùng là admin
             if (!"admin".equalsIgnoreCase(login.getRole())) {

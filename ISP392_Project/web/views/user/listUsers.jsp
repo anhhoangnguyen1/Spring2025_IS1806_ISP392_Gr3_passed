@@ -147,10 +147,10 @@
                                         </a>
 
                                         <c:if test="${sessionScope.role == 'owner'}">
-                                            <c:if test="${user.status == 'Deactive'}">
+                                            <c:if test="${user.status == 'Inactive'}">
                                                 <a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=${user.id}" class="btn btn-outline-success">UnBan</a>
                                             </c:if>
-                                            <c:if test="${user.status != 'Deactive'}">
+                                            <c:if test="${user.status != 'Inactive'}">
                                                 <a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=${user.id}" class="btn btn-outline-danger">Ban</a>
                                             </c:if>
                                         </c:if>
@@ -274,7 +274,7 @@
 
                             // Hiển thị các nút Ban/UnBan tùy thuộc vào trạng thái
                             if ('${sessionScope.role}' === 'owner') {
-                                if (user.status === 'Deactive') {
+                                if (user.status === 'Inactive') {
                                     banButton = '<a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=' + user.id + '" class="btn btn-outline-success">UnBan</a>';
                                 } else if (user.status === 'Active' && user.role === 'staff') {
                                     banButton = '<a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=' + user.id + '" class="btn btn-outline-danger">Ban</a>';
