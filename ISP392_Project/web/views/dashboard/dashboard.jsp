@@ -137,13 +137,13 @@
                         </a>
                     </li>
                     <li>
-                            <a href="/ISP392_Project/Stores">
-                                <span class="nav-icon">
-                                    <i class="fa-solid fa-store"></i>
-                                </span>
-                                <span class="nav-text">Stores</span>
-                            </a>
-                        </li>
+                        <a href="/ISP392_Project/Stores">
+                            <span class="nav-icon">
+                                <i class="fa-solid fa-store"></i>
+                            </span>
+                            <span class="nav-text">Stores</span>
+                        </a>
+                    </li>
                     <c:if test="${sessionScope.role == 'owner'}">
                         <li>
                             <a href="/ISP392_Project/Users">
@@ -326,57 +326,66 @@
                                     </div>
                                 </div>
                             </div>
-                            <script>
-                                document.addEventListener("DOMContentLoaded", function () {
-                                    function animateCounter(element, targetValue, unit = "", duration = 2000) {
-                                        let startTime = null;
-
-                                        function easeOutQuad(t) {
-                                            return t * (2 - t); // Hàm easing giúp làm chậm lại về cuối
-                                        }
-
-                                        function updateCounter(timestamp) {
-                                            if (!startTime)
-                                                startTime = timestamp;
-                                            let progress = (timestamp - startTime) / duration;
-                                            if (progress > 1)
-                                                progress = 1;
-
-                                            let currentValue = Math.floor(targetValue * easeOutQuad(progress));
-                                            element.innerHTML = currentValue.toLocaleString() + unit;
-
-                                            if (progress < 1) {
-                                                requestAnimationFrame(updateCounter);
-                                            } else {
-                                                element.innerHTML = targetValue.toLocaleString() + unit; // Đảm bảo hiển thị giá trị chính xác
-                                            }
-                                        }
-
-                                        requestAnimationFrame(updateCounter);
-                                    }
-
-                                    // Total Income
-                                    const counterElement = document.getElementById("counter");
-                                    if (counterElement) {
-                                        let targetValue = parseInt(counterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
-                                        animateCounter(counterElement, targetValue, ' <sub>(VND)</sub>');
-                                    }
-
-                                    // Total Invoices
-                                    const invoiceCounterElement = document.getElementById("invoiceCounter");
-                                    if (invoiceCounterElement) {
-                                        let targetInvoices = parseInt(invoiceCounterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
-                                        animateCounter(invoiceCounterElement, targetInvoices, " Invoices");
-                                    }
-                                });
-
-                            </script>
+                            <div class="balance-box">
+                                <div class="subject-row">
+                                    <div class="text">
+                                        <h3>Total Money In</h3>
+                                        <h1 id="moneyInCounter" data-value="<fmt:formatNumber value="${totalMoneyIn}" type="number" groupingUsed="true" />">
+                                            <sub>(VND)</sub>
+                                        </h1>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa-solid fa-arrow-down-to-arc"></i>
+                                    </div>
+                                </div>
+                                <div class="progress-row">
+                                    <div class="subject">
+                                        <fmt:formatDate value="<%= new java.util.Date() %>" pattern="dd/MM/yyyy" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="balance-box">
+                                <div class="subject-row">
+                                    <div class="text">
+                                        <h3>Total Money Out</h3>
+                                        <h1 id="moneyOutCounter" data-value="<fmt:formatNumber value="${totalMoneyOut}" type="number" groupingUsed="true" />">
+                                            -<sub>(VND)</sub>
+                                        </h1>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa-solid fa-arrow-up-from-arc"></i>
+                                    </div>
+                                </div>
+                                <div class="progress-row">
+                                    <div class="subject">
+                                        <fmt:formatDate value="<%= new java.util.Date() %>" pattern="dd/MM/yyyy" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="balance-box">
+                                <div class="subject-row">
+                                    <div class="text">
+                                        <h3>Net Profit Today</h3>
+                                        <h1 id="netProfitCounter" data-value="<fmt:formatNumber value="${netProfit}" type="number" groupingUsed="true" />">
+                                            <sub>(VND)</sub>
+                                        </h1>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa-solid fa-chart-line"></i>
+                                    </div>
+                                </div>
+                                <div class="progress-row">
+                                    <div class="subject">
+                                        <fmt:formatDate value="<%= new java.util.Date() %>" pattern="dd/MM/yyyy" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <!--   === Boxes Row Ends ===   -->
                         <!--   === Analytics Chart Starts ===   -->
                         <div class="chart">
                             <div class="chart-header">
-                                <h2>Revenue Analytics</h2>
+                                <h2>Income Chart</h2>
                                 <form method="GET" action="dashboard" id="revenueForm">
                                     <label for="period">Select Period:</label>
                                     <select id="period" name="period" onchange="document.getElementById('revenueForm').submit();">
@@ -445,14 +454,14 @@
                                 <% for (String[] product : topProducts) { %>
                                 <div class="product">
                                     <div class="product-img">
-                                        <img src="/ISP392_Project/views/dashboard/images/products/product-1.jpg" /> <!-- Thay bằng đường dẫn ảnh thực tế nếu có -->
+                                        <img src="<%= request.getContextPath() %>/views/product/images/<%= product[2] != null ? product[2] : "default-product.jpg" %>" alt="<%= product[0] %>" />
                                     </div>
                                     <div class="product-desc">
                                         <div class="product-row-1">
-                                            <h2><%= product[0] %></h2> <!-- Tên sản phẩm -->
+                                            <h2><%= product[0] %></h2>
                                         </div>
                                         <div class="product-row-2">
-                                            <p>Sold: <span class="count-up" data-count="<%= product[1] %>">0</span> products</p> <!-- Hiệu ứng đếm số -->
+                                            <p>Sold: <span class="count-up" data-count="<%= product[1] %>">0</span> products</p>
                                         </div>
                                     </div>
                                 </div>
@@ -486,6 +495,69 @@
                         </script>
 
                         <!--   === Top Products Ends ===   -->
+                        <div class="cash-flow-history">
+                            <header class="cash-flow-header">
+                                <h1>Lịch Sử Dòng Tiền Hôm Nay</h1>
+                            </header>
+                            <div class="cash-flow-summary">
+                                <div class="summary-item income">
+                                    <span class="label">Tổng thu:</span>
+                                    <span class="value">
+                                        <fmt:formatNumber value="${totalMoneyIn}" type="number" groupingUsed="true" /> VND
+                                    </span>
+                                </div>
+                                <div class="summary-item expense">
+                                    <span class="label">Tổng chi:</span>
+                                    <span class="value">
+                                        <fmt:formatNumber value="${totalMoneyOut}" type="number" groupingUsed="true" /> VND
+                                    </span>
+                                </div>
+                                <div class="summary-item net">
+                                    <span class="label">Thực tế:</span>
+                                    <span class="value">
+                                        <fmt:formatNumber value="${netProfit}" type="number" groupingUsed="true" /> VND
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="cash-flow-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 15%">Thời Gian</th>
+                                            <th style="width: 10%">Loại</th>
+                                            <th style="width: 20%">Số Tiền</th>
+                                            <th style="width: 25%">Mô Tả</th>
+                                            <th style="width: 30%">Trạng Thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="debt" items="${todayDebts}">
+                                            <tr class="${debt.type == '-' ? 'money-out' : 'money-in'}">
+                                                <td>
+                                                    <fmt:parseDate value="${debt.createdAt}" pattern="yyyy-MM-dd'T'HH:mm" var="parsedDate" type="both" />
+                                                    <fmt:formatDate value="${parsedDate}" pattern="HH:mm" />
+                                                </td>
+                                                <td>${debt.type == '-' ? 'Chi' : 'Thu'}</td>
+                                                <td class="amount">
+                                                    <fmt:formatNumber value="${debt.amount}" type="number" groupingUsed="true" /> VND
+                                                </td>
+                                                <td>${debt.description}</td>
+                                                <td>
+                                                    <span class="status ${
+                                                        debt.description == 'Customer repays debt' ? 'customer-repay' :
+                                                        debt.description == 'Customer pays' ? 'customer-pay' :
+                                                        debt.description == 'Owner repays debt' ? 'owner-repay' :
+                                                        debt.description == 'Owner borrows debt' ? 'owner-borrow' : 'unknown'
+                                                    }">
+                                                        ${debt.description}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                     <!--   === Column 2 Ends ===   -->
                 </div>
@@ -497,5 +569,165 @@
 
         <!--   *** Link To Custom Script File ***   -->
         <script type="text/javascript" src="<%= request.getContextPath() %>/views/dashboard/script.js"></script>
+        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                function animateCounter(element, targetValue, unit = "", duration = 2000) {
+                                    let startTime = null;
+
+                                    function easeOutQuad(t) {
+                                        return t * (2 - t); // Hàm easing giúp làm chậm lại về cuối
+                                    }
+
+                                    function updateCounter(timestamp) {
+                                        if (!startTime)
+                                            startTime = timestamp;
+                                        let progress = (timestamp - startTime) / duration;
+                                        if (progress > 1)
+                                            progress = 1;
+
+                                        let currentValue = Math.floor(targetValue * easeOutQuad(progress));
+                                        element.innerHTML = currentValue.toLocaleString() + unit;
+
+                                        if (progress < 1) {
+                                            requestAnimationFrame(updateCounter);
+                                        } else {
+                                            element.innerHTML = targetValue.toLocaleString() + unit; // Đảm bảo hiển thị giá trị chính xác
+                                        }
+                                    }
+
+                                    requestAnimationFrame(updateCounter);
+                                }
+
+                                // Total Income
+                                const counterElement = document.getElementById("counter");
+                                if (counterElement) {
+                                    let targetValue = parseInt(counterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                                    animateCounter(counterElement, targetValue, ' <sub>(VND)</sub>');
+                                }
+
+                                // Total Invoices
+                                const invoiceCounterElement = document.getElementById("invoiceCounter");
+                                if (invoiceCounterElement) {
+                                    let targetInvoices = parseInt(invoiceCounterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                                    animateCounter(invoiceCounterElement, targetInvoices, " Invoices");
+                                }
+
+                                // Total Money In
+                                const moneyInCounterElement = document.getElementById("moneyInCounter");
+                                if (moneyInCounterElement) {
+                                    let targetMoneyIn = parseInt(moneyInCounterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                                    animateCounter(moneyInCounterElement, targetMoneyIn, ' <sub>(VND)</sub>');
+                                }
+
+                                // Total Money Out
+                                const moneyOutCounterElement = document.getElementById("moneyOutCounter");
+                                if (moneyOutCounterElement) {
+                                    let targetMoneyOut = parseInt(moneyOutCounterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                                    animateCounter(moneyOutCounterElement, targetMoneyOut, ' <sub>(VND)</sub>');
+                                }
+
+                                // Net Profit
+                                const netProfitCounterElement = document.getElementById("netProfitCounter");
+                                if (netProfitCounterElement) {
+                                    let targetNetProfit = parseInt(netProfitCounterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                                    animateCounter(netProfitCounterElement, targetNetProfit, ' <sub>(VND)</sub>');
+                                }
+                            });
+        </script>
+        <style>
+            .cash-flow-history {
+                background-color: var(--bg-primary);
+                border-radius: 12px;
+                padding: 20px;
+                margin: 20px 0;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .cash-flow-table {
+                margin-top: 20px;
+                background-color: var(--bg-primary);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            
+            .cash-flow-table table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+            
+            .cash-flow-table th,
+            .cash-flow-table td {
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid var(--bg-ternary);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .cash-flow-table th {
+                background-color: var(--bg-ternary);
+                color: var(--heading-clr);
+                font-weight: 600;
+                font-size: 14px;
+            }
+            
+            .cash-flow-table tr:hover {
+                background-color: rgba(var(--bg-ternary-rgb), 0.1);
+            }
+            
+            .money-in {
+                background-color: rgba(95, 207, 101, 0.05);
+            }
+            
+            .money-out {
+                background-color: rgba(255, 107, 107, 0.05);
+            }
+            
+            .money-in .amount {
+                color: #5fcf65;
+                font-weight: 500;
+            }
+            
+            .money-out .amount {
+                color: #ff6b6b;
+                font-weight: 500;
+            }
+            
+            .status {
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 500;
+                display: inline-block;
+                white-space: nowrap;
+            }
+            
+            .status.customer-repay {
+                background-color: rgba(95, 207, 101, 0.15);
+                color: #5fcf65;
+            }
+            
+            .status.customer-pay {
+                background-color: rgba(52, 152, 219, 0.15);
+                color: #3498db;
+            }
+            
+            .status.owner-repay {
+                background-color: rgba(155, 89, 182, 0.15);
+                color: #9b59b6;
+            }
+            
+            .status.owner-borrow {
+                background-color: rgba(243, 156, 18, 0.15);
+                color: #f39c12;
+            }
+            
+            .status.unknown {
+                background-color: rgba(158, 158, 158, 0.15);
+                color: #9e9e9e;
+            }
+        </style>
     </body>
 </html>
