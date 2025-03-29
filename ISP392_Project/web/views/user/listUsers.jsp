@@ -130,7 +130,7 @@
                     </thead>
                     <tbody id = "userTableBody">
                         <c:forEach var="user" items="${list}">
-                            <c:if test="${(sessionScope.role == 'admin' && user.role == 'owner') || (sessionScope.role == 'owner' && user.storeId == sessionScope.storeId) || sessionScope.role == 'admin'}">
+                            <c:if test="${(sessionScope.role == 'admin' && user.role == 'owner') || (sessionScope.role == 'owner' && user.role == 'staff' && user.storeId == sessionScope.storeId)}">
                                 <tr>
                                     <td>${user.id}</td>
                                     <td>${user.role}</td>
@@ -145,20 +145,23 @@
                                         <a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=${user.id}" class="btn btn-outline-primary">
                                             Edit
                                         </a>
-
-                                        <c:if test="${sessionScope.role == 'owner'}">
-                                            <c:if test="${user.status == 'Inactive'}">
-                                                <a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=${user.id}" class="btn btn-outline-success">UnBan</a>
-                                            </c:if>
-                                            <c:if test="${user.status != 'Inactive'}">
-                                                <a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=${user.id}" class="btn btn-outline-danger">Ban</a>
-                                            </c:if>
+                                        <c:if test="${sessionScope.role == 'owner' && user.role == 'staff'}">
+                                            <c:choose>
+                                                <c:when test="${user.status == 'Inactive'}">
+                                                    <a href="Users?service=unBanUser&user_id=${user.id}" class="btn btn-outline-success">UnBan</a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <a href="Users?service=banUser&user_id=${user.id}" class="btn btn-outline-danger">Ban</a>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </c:if>
+
                                     </td>
                                 </tr>
                             </c:if>
                         </c:forEach>
                     </tbody>
+
                 </table>
             </div>
             <div class="container d-flex justify-content-center mt-4" id="pagination">
@@ -240,7 +243,7 @@
                     const keyword = $('#searchInput').val().trim();
                     searchUsers(keyword, selectedPage, currentSortBy, currentSortOrder);
                 });
-                
+
                 function searchUsers(keyword, page, sortBy, sortOrder) {
                     $.ajax({
                         url: '<%= request.getContextPath() %>/Users',
@@ -267,42 +270,44 @@
                     tbody.empty();
 
                     if (users.length === 0) {
-                        tbody.append('<tr><td colspan="10">No users found</td></tr>');
+                    tbody.append('<tr><td colspan="10">No users found</td></tr>');
                     } else {
-                        users.forEach(function (user) {
-                            let banButton = '';
-
-                            // Hiển thị các nút Ban/UnBan tùy thuộc vào trạng thái
-                            if ('${sessionScope.role}' === 'owner') {
-                                if (user.status === 'Inactive') {
-                                    banButton = '<a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=' + user.id + '" class="btn btn-outline-success">UnBan</a>';
-                                } else if (user.status === 'Active' && user.role === 'staff') {
-                                    banButton = '<a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=' + user.id + '" class="btn btn-outline-danger">Ban</a>';
-                                }
-                            }
-
-                            tbody.append(
-                                    '<tr>' +
-                                    '<td>' + user.id + '</td>' +
-                                    '<td>' + user.role + '</td>' +
-                                    '<td>' + user.name + '</td>' +
-                                    '<td>' + user.phone + '</td>' +
-                                    '<td>' + user.address + '</td>' +
-                                    '<td>' + user.gender + '</td>' +
-                                    '<td>' + user.dob + '</td>' +
-                                    '<td>' + user.email + '</td>' +
-                                    '<td>' + user.status + '</td>' +
-                                    '<td class="sticky-col">' +
-                                    '<a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=' + user.id + '" class="btn btn-outline-primary">Edit</a>' +
-                                    banButton +
-                                    '</td>' +
-                                    '</tr>'
-                                    );
-                        });
+                    users.forEach(function (user) {
+                    let banButton = '';
+                            if ('${sessionScope.role}' === 'admin' && user.role === 'owner' ||
+                                    ('${sessionScope.role}' === 'owner' && user.role === 'staff' && user.storeId === '${sessionScope.storeId}')) {
+                    // Kiểm tra xem người dùng có phải là 'owner' hay 'staff' và thuộc cùng storeId với owner
+                    let banAction = '';
+                            if ('${sessionScope.role}' === 'owner' && user.status === 'Inactive') {
+                    banAction = '<a href="${pageContext.request.contextPath}/Users?service=unBanUser&user_id=' + user.id + '" class="btn btn-outline-success">UnBan</a>';
+                    } else if ('${sessionScope.role}' === 'owner' && user.status === 'Active') {
+                    banAction = '<a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=' + user.id + '" class="btn btn-outline-danger">Ban</a>';
                     }
-                }
 
-                function updatePagination(endPage, currentIndex, keyword) {
+
+                    tbody.append(
+                            '<tr>' +
+                            '<td>' + user.id + '</td>' +
+                            '<td>' + user.role + '</td>' +
+                            '<td>' + user.name + '</td>' +
+                            '<td>' + user.phone + '</td>' +
+                            '<td>' + user.address + '</td>' +
+                            '<td>' + user.gender + '</td>' +
+                            '<td>' + user.dob + '</td>' +
+                            '<td>' + user.email + '</td>' +
+                            '<td>' + user.status + '</td>' +
+                            '<td class="sticky-col">' +
+                            '<a href="${pageContext.request.contextPath}/Users?service=editUser&user_id=' + user.id + '" class="btn btn-outline-primary">Edit</a>' +
+                            banButton +
+                            '</td>' +
+                            '</tr>'
+                            );
+                    });
+                    }
+                    }
+
+
+                    function updatePagination(endPage, currentIndex, keyword) {
                     const pagination = $('.pagination');
                     pagination.empty();
 
@@ -386,8 +391,8 @@
                 });
 
                 function loadDefaultUsers() {
-                    const currentIndex = ${index};
-                    searchUsers('', currentIndex, currentSortBy, currentSortOrder);
+                const currentIndex = ${index};
+                        searchUsers('', currentIndex, currentSortBy, currentSortOrder);
                 }
 
             </script>
