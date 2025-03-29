@@ -135,9 +135,9 @@
                             <th class="sticky-col">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id = "userTableBody">
+                    <tbody id="userTableBody">
                         <c:forEach var="user" items="${list}">
-                            <c:if test="${(sessionScope.role == 'admin' && user.role == 'owner') || (sessionScope.role == 'owner' && user.storeId == sessionScope.storeId) || sessionScope.role == 'admin'}">
+                            <c:if test="${(sessionScope.role == 'admin' && user.role == 'owner') || (sessionScope.role == 'owner' && user.storeId == sessionScope.storeId)}">
                                 <tr>
                                     <td>${user.id}</td>
                                     <td>${user.role}</td>
@@ -169,6 +169,7 @@
                             </c:if>
                         </c:forEach>
                     </tbody>
+
                 </table>
             </div>
             <div class="container d-flex justify-content-center mt-4" id="pagination">

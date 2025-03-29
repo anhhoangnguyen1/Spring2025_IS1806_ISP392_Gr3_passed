@@ -43,15 +43,25 @@ public class controllerUsers extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        String storeIDStr = (String) session.getAttribute("storeID");
-        int storeID = Integer.parseInt(storeIDStr);
         String role = (String) session.getAttribute("role");
 
+        // Added null check and special handling for admin role
+        int storeID = -1; // Default value for admin
         if (role == null || !role.equals("owner") && !role.equals("admin")) {
-
             response.sendRedirect("/dashboard.jsp");
             return;
         }
+
+        // For admin, set a default storeID or skip storeID-related logic
+        if (!"admin".equals(role)) {
+            String storeIDStr = (String) session.getAttribute("storeID");
+            if (storeIDStr == null) {
+                response.sendRedirect("/dashboard.jsp");
+                return;
+            }
+            storeID = Integer.parseInt(storeIDStr);
+        }
+
         String service = request.getParameter("service");
 
         if (service == null) {
@@ -89,20 +99,24 @@ public class controllerUsers extends HttpServlet {
                 } catch (NumberFormatException ignored) {
                 }
 
-                int total = userDAO.countUsers(keyword, statusFilter, storeID);
+                // For admin, specifically search for users with "owner" role
+                List<Users> list = null;
+                int total = 0;
+                if (role.equals("admin")) {
+                    // Chỉ tìm kiếm các tài khoản có role là 'owner' cho admin
+                    total = userDAO.countUsersByRole("owner", keyword, statusFilter);
+                    list = userDAO.searchUsersByRole("owner", keyword, index, 5, sortBy, sortOrder, -1, statusFilter);
+                } else if (role.equals("owner")) {
+                    total = userDAO.countUsers(keyword, statusFilter, storeID);
+                    list = userDAO.searchUsers(keyword, index, 5, sortBy, sortOrder, storeID, statusFilter);
+                } else {
+                    list = new ArrayList<>();
+                }
+
                 int endPage = (total % 5 == 0) ? total / 5 : (total / 5) + 1;
 
                 if (index > endPage) {
                     index = endPage;
-                }
-
-                List<Users> list = null;
-                if (role.equals("admin")) {
-                    list = userDAO.searchUsersByRole("owner", keyword, index, 5, sortBy, sortOrder, storeID, statusFilter);
-                } else if (role.equals("owner")) {
-                    list = userDAO.searchUsers(keyword, index, 5, sortBy, sortOrder, storeID, statusFilter);
-                } else {
-                    list = new ArrayList<>();
                 }
 
                 String notification = (String) request.getSession().getAttribute("Notification");
