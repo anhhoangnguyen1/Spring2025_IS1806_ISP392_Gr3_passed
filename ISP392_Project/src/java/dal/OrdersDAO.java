@@ -132,7 +132,7 @@ public class OrdersDAO extends DBContext {
 
     public int getTotalOrderCount() {
         int totalOrders = 0;
-        String sql = "SELECT COUNT(*) FROM Orders"; // No status filtering
+        String sql = "SELECT COUNT(*) FROM Orders";
 
         // Ensure connection is open
         if (connection == null) {
