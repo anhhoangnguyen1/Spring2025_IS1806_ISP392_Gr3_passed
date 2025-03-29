@@ -100,7 +100,6 @@ CREATE TABLE Customers (
 	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
 );
 
-
 -- Table Debt note
 CREATE TABLE Debt_note (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -120,26 +119,6 @@ CREATE TABLE Debt_note (
     image VARCHAR(255),
 	FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL
 );
-
-CREATE TABLE StockChecks (
-    stockCheckId INT PRIMARY KEY AUTO_INCREMENT,
-    zoneId INT, -- Liên kết với bảng Zones
-    productId INT, -- Liên kết với bảng Products
-    checkedDate DATETIME, -- Ngày kiểm kho
-    actualQuantity INT, -- Số lượng thực tế sau kiểm kho
-    recordedQuantity INT, -- Số lượng ghi nhận trước đó trong hệ thống
-    discrepancy INT, -- Chênh lệch (actualQuantity - recordedQuantity)
-    notes VARCHAR(255), -- Ghi chú (nếu có)
-    FOREIGN KEY (zoneId) REFERENCES Zones(id),
-    FOREIGN KEY (productId) REFERENCES Products(id)
-);
-
--- Thêm trường status vào bảng StockChecks
-ALTER TABLE StockChecks
-ADD COLUMN status VARCHAR(255);
-
-ALTER TABLE StockChecks
-ADD COLUMN checked_by VARCHAR(255);
 
 -- Table structure for table `Orders`
 
@@ -179,7 +158,7 @@ VALUES
 -- Insert into Users
 INSERT INTO Users (username, password, image, name, phone, address, gender, dob, role, email, store_id, status)
 VALUES 
-('admin', '482c811da5d5b4bc6d497ffa98491e38', 'admin.jpg', 'Nguyễn Văn Hoàng', '0987654321', '123 Đường Nguyễn Trãi, Hà Nội', 'Male', '1980-01-01', 'admin', 'hoangnahe181458@fpt.edu.vn', 1, 'Active'),
+('admin', '482c811da5d5b4bc6d497ffa98491e38', 'admin.jpg', 'Nguyễn Văn Hoàng', '0987654321', '123 Đường Nguyễn Trãi, Hà Nội', 'Male', '1980-01-01', 'admin', 'hoangnahe181458@fpt.edu.vn', null, 'Active'),
 ('owner', '482c811da5d5b4bc6d497ffa98491e38', 'owner.jpg', 'Phan Ngọc Mai', '0987654322', '456 Đường Khuất Duy Tiến, Hà Nội', 'Female', '1990-02-02', 'owner', 'phanngocmai2411@gmail.com', 1, 'Active'),
 ('staff1', '482c811da5d5b4bc6d497ffa98491e38', 'staff1.jpg', 'Lê Phương Linh', '0987654323', '789 Đường Trần Hưng Đạo, Hà Nội', 'Female', '2000-03-03', 'staff', 'phuonglinh2611.cv@gmail.com', 1, 'Active'),
 ('staff2', '482c811da5d5b4bc6d497ffa98491e38', 'staff2.jpg', 'Phạm Hoàng Anh', '0987654324', '101 Đường Hai Bà Trưng, Hà Nội', 'Male', '1999-04-04', 'staff', 'anhhoangyh3@gmail.com', 1, 'Active');
