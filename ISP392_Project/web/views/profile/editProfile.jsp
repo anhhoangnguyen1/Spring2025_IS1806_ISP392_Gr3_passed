@@ -274,8 +274,7 @@
 
                         <div class="button-container">
                             <button type="submit" class="btn btn-primary" style="background-color: #007bff ">Save Changes</button>
-
-
+                            <a href="${pageContext.request.contextPath}/views/profile/change-password.jsp" class="btn btn-primary" style="background-color: #007bff ">Change password</a>
                             <a href="${pageContext.request.contextPath}/views/profile/profile.jsp" class="btn btn-primary" style="background-color: #6c757d ">Back</a>
                         </div>
                     </form>
