@@ -13,7 +13,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Payment - Sales Management System</title>
+        <title>Payment</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/views/sale/sale-css.css">
@@ -292,7 +292,10 @@
                             // Đảm bảo form không được submit nếu Remaining Amount âm
                             const checkoutForm = document.getElementById("checkoutForm");
                             checkoutForm.addEventListener("submit", function (event) {
-                                
+                                if (parseFloat(document.getElementById('remainingAmount').textContent.replace(/[^\d.-]/g, '')) < 0) {
+                                    event.preventDefault(); // Ngừng gửi form nếu Remaining Amount âm
+                                    alert("Số tiền khách thanh toán không được nhỏ hơn tổng tiền cần thanh toán.");
+                                }
                             });
                         });
 

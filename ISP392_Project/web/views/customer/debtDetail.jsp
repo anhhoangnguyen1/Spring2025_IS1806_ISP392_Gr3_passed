@@ -9,7 +9,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <title>Customer</title>
     </head>
     <body>
         <div class="modal fade" id="debtDetailModal${debt.id}" tabindex="-1" role="dialog" aria-labelledby="debtDetailLabel${debt.id}" aria-hidden="true">

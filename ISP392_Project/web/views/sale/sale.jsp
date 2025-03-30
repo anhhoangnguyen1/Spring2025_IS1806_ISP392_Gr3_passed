@@ -306,7 +306,30 @@
                                         console.error('Error clearing toast:', error);
                                     });
                                 }
+                                const checkoutBtn = document.getElementById('checkoutBtn2');
+                                checkoutBtn.addEventListener('click', function (event) {
+                                    // Lấy thông tin khách hàng từ các input ẩn
+                                    const customerName = document.getElementById('customerNameData').value;
+                                    const customerPhone = document.getElementById('customerPhoneData').value;
+                                    const customerId = document.getElementById('customerIdData').value;
+
+                                    // Kiểm tra nếu thông tin khách hàng không hợp lệ
+                                    if (!customerName || !customerPhone || !customerId) {
+                                        // Hiển thị thông báo lỗi nếu khách hàng chưa được chọn
+                                        iziToast.error({
+                                            title: 'Lỗi',
+                                            message: 'Vui lòng chọn khách hàng trước khi tiếp tục.',
+                                            position: 'topRight',
+                                            timeout: 5000
+                                        });
+                                        event.preventDefault(); // Ngừng chuyển hướng
+                                    } else {
+                                        // Nếu khách hàng đã được chọn, cho phép chuyển hướng
+                                        document.getElementById('checkoutForm2').submit();
+                                    }
+                                });
                             });
+
         </script>
     </body>
 </html>

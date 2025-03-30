@@ -10,7 +10,7 @@
 <html>
     <head>
 
-        <title>JSP Page</title>
+        <title>Product</title>
     </head>
     <body>
 

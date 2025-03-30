@@ -442,7 +442,7 @@
                                 <% for (String[] product : topProducts) { %>
                                 <div class="product">
                                     <div class="product-img">
-                                        <img src="/ISP392_Project/views/dashboard/images/products/product-1.jpg" /> <!-- Thay bằng đường dẫn ảnh thực tế nếu có -->
+                                        <img src="<%= request.getContextPath() %>/views/product/images/<%= product[2] != null ? product[2] : "default-product.jpg" %>" alt="<%= product[0] %>" />
                                     </div>
                                     <div class="product-desc">
                                         <div class="product-row-1">

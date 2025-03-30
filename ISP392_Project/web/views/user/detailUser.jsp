@@ -53,7 +53,7 @@
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
                     <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'staff'}">
-                        <li class="active">
+                        <li>
                             <a href="/ISP392_Project/dashboard">
                                 <span class="nav-icon">
                                     <i class="fa-solid fa-house"></i>
@@ -120,7 +120,7 @@
                         </a>
                     </li>
                     <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'admin'}">
-                        <li>
+                        <li class="active">
                             <a href="/ISP392_Project/Users">
                                 <span class="nav-icon">
                                     <i class="fa-solid fa-user-tie"></i>

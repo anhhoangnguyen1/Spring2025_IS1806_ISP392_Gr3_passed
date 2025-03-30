@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class productsDAO extends DBContext {
-    
+
     private static final Logger LOGGER = Logger.getLogger(productsDAO.class.getName());
     private static final String RED_COLOR = "\u001B[31m";
     private static final String RESET_COLOR = "\u001B[0m";
@@ -223,7 +223,7 @@ public class productsDAO extends DBContext {
         }
         return 0;
     }
-    
+
     public List<Products> getProductById(int id) {
         List<Products> products = new ArrayList<>();
         String sql = "SELECT * FROM products WHERE id = ?";
@@ -277,7 +277,7 @@ public class productsDAO extends DBContext {
         }
         return products;
     }
-    
+
     public List<Products> searchProductsByName(String name) {
         List<Products> products = new ArrayList<>();
 
@@ -317,7 +317,7 @@ public class productsDAO extends DBContext {
 
         return products;
     }
-    
+
     public Products getProductById02(int id) {
         List<Products> list = getProductById(id);
         return list.isEmpty() ? null : list.get(0);
@@ -757,8 +757,8 @@ public class productsDAO extends DBContext {
 
         PreparedStatement pst = null;
         ResultSet rs = null;
-        String sql = "SELECT * FROM Products WHERE isDeleted = false";
-
+        String sql = "SELECT * FROM Products WHERE isDeleted = false AND status != 'Inactive' AND quantity > 0"
+        ;
         try {
             pst = connection.prepareStatement(sql);
             rs = pst.executeQuery();
@@ -882,11 +882,11 @@ public class productsDAO extends DBContext {
         for (Products p : topProducts) {
             System.out.println(p);
         }
-         boolean isUpdated = productsDAO.updateStatus(1, "Active");
-            if (isUpdated) {
-                System.out.println("✅ Cập nhật trạng thái thành công!");
-            } else {
-                System.out.println("❌ Cập nhật trạng thái thất bại!");
-            }
+        boolean isUpdated = productsDAO.updateStatus(1, "Active");
+        if (isUpdated) {
+            System.out.println("✅ Cập nhật trạng thái thành công!");
+        } else {
+            System.out.println("❌ Cập nhật trạng thái thất bại!");
+        }
     }
 }

@@ -202,7 +202,7 @@ public class controllerProducts extends HttpServlet {
                     }
 
                     imageFileName = getSubmittedFileName(file);
-                    String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest1\\ISP392_Project\\web\\views\\product\\images";
+                    String uploadDirectory = getServletContext().getRealPath("/") + "images";
                     File uploadDir = new File(uploadDirectory);
                     if (!uploadDir.exists()) {
                         uploadDir.mkdirs();
@@ -288,7 +288,7 @@ public class controllerProducts extends HttpServlet {
                 }
                 imageFileName = getSubmittedFileName(file);
 
-                String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest1\\ISP392_Project\\web\\views\\product\\images";
+                String uploadDirectory = getServletContext().getRealPath("/") + "images";
                 File uploadDir = new File(uploadDirectory);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();

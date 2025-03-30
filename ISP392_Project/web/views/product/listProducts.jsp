@@ -11,7 +11,7 @@
         <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
         <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <title>Product</title>
     </head>
     <body>
         <style>.search-box {
