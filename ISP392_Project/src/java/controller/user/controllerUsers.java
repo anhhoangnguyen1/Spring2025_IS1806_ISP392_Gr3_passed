@@ -91,10 +91,23 @@ public class controllerUsers extends HttpServlet {
                 if (role.equals("admin")) {
                     list = userDAO.searchUsersByRole("owner", keyword, index, 5, sortBy, sortOrder);
                 } else if (role.equals("owner")) {
-                    // Owner có thể thấy danh sách người dùng nhưng không lọc theo role
-                    list = userDAO.searchUsers(keyword, index, 5, sortBy, sortOrder); // Đảm bảo gán kết quả trả về vào list
+                    String storeIdString = (String) session.getAttribute("storeID");
+
+                    if (storeIdString != null) {
+                        try {
+                            int storeId = Integer.parseInt(storeIdString);  // Convert the storeID from String to int
+                            Stores store = userDAO.getStoreById(storeId);  // Fetch the Stores object from DB
+                            System.out.println(storeId);
+                            // Owner can only see staff who belong to their store
+                            list = userDAO.searchUsersByStoreId("staff", keyword, index, 5, sortBy, sortOrder, store.getId());
+                            System.out.println("Staff list retrieved for store ID: " + storeId + " with " + list + " staff members.");
+                        } catch (NumberFormatException e) {
+                            list = new ArrayList<>(); // Handle case where storeID is not valid
+                        }
+                    } else {
+                        list = new ArrayList<>(); // If no storeID found in session, show empty list
+                    }
                 } else {
-                    // Staff: không hiển thị người dùng nào
                     list = new ArrayList<>();
                 }
 
@@ -130,14 +143,25 @@ public class controllerUsers extends HttpServlet {
                 List<Users> users = new ArrayList<>();
 
                 // Phân quyền dựa trên role
-                if ("admin".equals(role)) {
-                    // Admin chỉ xem users có role "owner"
-                    users = userDAO.searchUsersByRole("owner", keyword, index, pageSize, sortBy, sortOrder);
-                } else if ("owner".equals(role)) {
-                    // Owner có thể xem tất cả người dùng nhưng lọc theo storeId
-                    users = userDAO.searchUsers(keyword, index, pageSize, sortBy, sortOrder);
+                if (role.equals("admin")) {
+                    users = userDAO.searchUsersByRole("owner", keyword, index, 5, sortBy, sortOrder);
+                } else if (role.equals("owner")) {
+                    String storeIdString = (String) session.getAttribute("storeID");
+
+                    if (storeIdString != null) {
+                        try {
+                            int storeId = Integer.parseInt(storeIdString);  // Convert the storeID from String to int
+                            Stores store = userDAO.getStoreById(storeId);  // Fetch the Stores object from DB
+
+                            // Owner can only see staff who belong to their store
+                            users = userDAO.searchUsersByStoreId("staff", keyword, index, 5, sortBy, sortOrder, store.getId());
+                        } catch (NumberFormatException e) {
+                            users = new ArrayList<>(); // Handle case where storeID is not valid
+                        }
+                    } else {
+                        users = new ArrayList<>(); // If no storeID found in session, show empty list
+                    }
                 } else {
-                    // Staff không xem được người dùng
                     users = new ArrayList<>();
                 }
 
@@ -207,14 +231,12 @@ public class controllerUsers extends HttpServlet {
                 int userId = Integer.parseInt(request.getParameter("user_id"));
                 Users user = userDAO.getUserById(userId);
 
-                
                 if (user != null && "staff".equals(user.getRole())) {
-                    userDAO.deactivateUser(userId);  
+                    userDAO.deactivateUser(userId);
                     session.setAttribute("successMessage", "User has been banned successfully.");
                 } else {
                     session.setAttribute("errorMessage", "You can only ban users with 'staff' role.");
                 }
-
 
                 response.sendRedirect("Users?service=users");
                 break;

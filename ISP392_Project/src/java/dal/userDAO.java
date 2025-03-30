@@ -95,7 +95,6 @@ public class userDAO extends DBContext {
         }
     }
 
-
     public void activateUser(int userId) {
         String sql = "UPDATE users SET status = 'Active' WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
@@ -143,57 +142,109 @@ public class userDAO extends DBContext {
 
         return list;
     }
-public List<Users> searchUsersByRole(String role, String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
-    List<Users> list = new ArrayList<>();
-    List<String> allowedSortColumns = List.of("id", "role", "name", "phone", "address", "gender", "dob", "email", "status");
-    
-    if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
-        sortBy = "id";
-    }
 
-    if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
-        sortOrder = "ASC";
-    }
+    public List<Users> searchUsersByRole(String role, String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder) {
+        List<Users> list = new ArrayList<>();
+        List<String> allowedSortColumns = List.of("id", "role", "name", "phone", "address", "gender", "dob", "email", "status");
 
-    // SQL truy vấn với điều kiện lọc theo role
-    String sql = "SELECT * FROM users WHERE role = ? ";
-    
-    // Nếu có keyword, thêm điều kiện tìm kiếm theo tên hoặc số điện thoại
-    if (keyword != null && !keyword.trim().isEmpty()) {
-        sql += "AND (name LIKE ? OR phone LIKE ?) ";
-    }
-    
-    // Sắp xếp theo cột và thứ tự
-    sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
+        if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
+            sortBy = "id";
+        }
 
-    try (PreparedStatement st = connection.prepareStatement(sql)) {
-        int paramIndex = 1;
-        
-        // Gán giá trị cho role và keyword (nếu có)
-        st.setString(paramIndex++, role);
+        if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
+            sortOrder = "ASC";
+        }
+
+        // SQL truy vấn với điều kiện lọc theo role
+        String sql = "SELECT * FROM users WHERE role = ? ";
+
+        // Nếu có keyword, thêm điều kiện tìm kiếm theo tên hoặc số điện thoại
         if (keyword != null && !keyword.trim().isEmpty()) {
-            String param = "%" + keyword + "%";
-            st.setString(paramIndex++, param);
-            st.setString(paramIndex++, param);
+            sql += "AND (name LIKE ? OR phone LIKE ?) ";
         }
-        
-        // Gán giá trị cho pageSize và OFFSET (cho phân trang)
-        st.setInt(paramIndex++, pageSize);
-        st.setInt(paramIndex, (pageIndex - 1) * pageSize);
 
-        try (ResultSet rs = st.executeQuery()) {
-            while (rs.next()) {
-                Users user = mapResultSetToUser(rs);  // Hàm này giả sử đã được định nghĩa để chuyển ResultSet thành đối tượng User
-                list.add(user);
+        // Sắp xếp theo cột và thứ tự
+        sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            int paramIndex = 1;
+
+            // Gán giá trị cho role và keyword (nếu có)
+            st.setString(paramIndex++, role);
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String param = "%" + keyword + "%";
+                st.setString(paramIndex++, param);
+                st.setString(paramIndex++, param);
             }
+
+            // Gán giá trị cho pageSize và OFFSET (cho phân trang)
+            st.setInt(paramIndex++, pageSize);
+            st.setInt(paramIndex, (pageIndex - 1) * pageSize);
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Users user = mapResultSetToUser(rs);  // Hàm này giả sử đã được định nghĩa để chuyển ResultSet thành đối tượng User
+                    list.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+
+        return list;
     }
 
-    return list;
-}
+    public List<Users> searchUsersByStoreId(String role, String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, int storeId) {
+        List<Users> list = new ArrayList<>();
+        List<String> allowedSortColumns = List.of("id", "role", "name", "phone", "address", "gender", "dob", "email", "status");
 
+        if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
+            sortBy = "id";
+        }
+        if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
+            sortOrder = "ASC";
+        }
+
+        // SQL truy vấn với điều kiện lọc theo store_id và role
+        String sql = "SELECT * FROM users WHERE store_id = ? AND role = ? ";
+
+        // Nếu có keyword, thêm điều kiện tìm kiếm theo tên hoặc số điện thoại
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql += "AND (name LIKE ? OR phone LIKE ? OR email LIKE ?) ";
+        }
+
+        // Sắp xếp theo cột và thứ tự
+        sql += "ORDER BY " + sortBy + " " + sortOrder + " LIMIT ? OFFSET ?";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            int paramIndex = 1;
+
+            // Gán giá trị cho store_id và role
+            st.setInt(paramIndex++, storeId);  // store_id của owner
+            st.setString(paramIndex++, role);  // role = 'staff'
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String param = "%" + keyword + "%";
+                st.setString(paramIndex++, param);  // Tìm theo tên
+                st.setString(paramIndex++, param);  // Tìm theo phone
+                st.setString(paramIndex++, param);  // Tìm theo email
+            }
+
+            // Gán giá trị cho pageSize và OFFSET (cho phân trang)
+            st.setInt(paramIndex++, pageSize);
+            st.setInt(paramIndex, (pageIndex - 1) * pageSize);
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Users user = mapResultSetToUser(rs);  // Hàm này sẽ ánh xạ ResultSet thành đối tượng User
+                    list.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
     public Users getUserById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
@@ -529,6 +580,30 @@ public List<Users> searchUsersByRole(String role, String keyword, int pageIndex,
 
     public static void main(String[] args) {
         userDAO dao = new userDAO();
+
+        String role = "staff";  // Only staff roles
+        String keyword = "Mai";  // Searching for users with "John" in name, phone, or email
+        int pageIndex = 1;  // First page
+        int pageSize = 5;  // 5 users per page
+        String sortBy = "id";  // Sorting by id
+        String sortOrder = "ASC";  // Ascending order
+        int storeId = 1;  // Example storeId
+
+        // Create DAO instance and test the method
+        List<Users> users = dao.searchUsersByStoreId(role, keyword, pageIndex, pageSize, sortBy, sortOrder, storeId);
+
+        // Output the results
+        if (users.isEmpty()) {
+            System.out.println("No users found.");
+        } else {
+            for (Users user : users) {
+                System.out.println("User ID: " + user.getId());
+                System.out.println("User Name: " + user.getName());
+                System.out.println("User Email: " + user.getEmail());
+                System.out.println("User Phone: " + user.getPhone());
+                System.out.println("User Store ID: " + user.getStoreId());
+                System.out.println("-------------------------------");
+            }
 //
 //        int pageIndex = 1;
 //        String keyword = null;
@@ -552,5 +627,6 @@ public List<Users> searchUsersByRole(String role, String keyword, int pageIndex,
 //            }
 //        }
 
+        }
     }
 }
