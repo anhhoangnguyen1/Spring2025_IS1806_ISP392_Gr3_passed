@@ -52,6 +52,8 @@
                                         </select>
                                     </div>
                                 </div>
+                                <input type="hidden" name="status" value="${product.status}">
+                                <input type="hidden" name="quantity" value="${product.quantity}">
                                 <input type="hidden" name="index" value="${index}">
                                 <div class="form-group">
                                     <label>Description</label>
