@@ -135,6 +135,7 @@
                                                 </form>
                                                         <form action="Products" method="POST">
                                                             <input type="hidden" name="service" value="UpdateStatusServlet">
+                                                            <input type="hidden" name="index" value="${index}" />
                                                             <input type="hidden" name="productId" value="${product.productId}" />
                                                             <input type="hidden" name="status" value="${product.status == 'Active' ? 'Inactive' : 'Active'}" />
                                                             <button type="submit" class="btn ${product.status == 'Active' ? 'btn-primary' : 'btn-secondary'}">

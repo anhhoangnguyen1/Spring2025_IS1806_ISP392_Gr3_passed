@@ -125,6 +125,21 @@ public class productsDAO extends DBContext {
         return new Timestamp(System.currentTimeMillis() - 86400000).toString(); // Ví dụ: 1 ngày trước
     }
 
+    public boolean isProductNameExists(String name, int storeID) {
+        String query = "SELECT COUNT(*) FROM Products WHERE name = ? AND store_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, name);
+            stmt.setInt(2, storeID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                return true; // Tên sản phẩm đã tồn tại
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false; // Tên sản phẩm chưa tồn tại
+    }
+
     public boolean updateStatus(int productId, String status) {
         String query = "UPDATE Products SET status = ? WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(query)) {
@@ -757,8 +772,7 @@ public class productsDAO extends DBContext {
 
         PreparedStatement pst = null;
         ResultSet rs = null;
-        String sql = "SELECT * FROM Products WHERE isDeleted = false AND status != 'Inactive' AND quantity > 0"
-        ;
+        String sql = "SELECT * FROM Products WHERE isDeleted = false AND status != 'Inactive' AND quantity > 0";
         try {
             pst = connection.prepareStatement(sql);
             rs = pst.executeQuery();
@@ -874,7 +888,7 @@ public class productsDAO extends DBContext {
     public static void main(String[] args) {
         productsDAO productsDAO = new productsDAO();
 
-        String name = "id";
+        String name = "Holima";
         int threshold = 1300; // Ngưỡng cảnh báo sản phẩm sắp hết hàng
         List<Products> topProducts = productsDAO.viewAllProducts(name, 1, 10, 1);
 
@@ -882,7 +896,7 @@ public class productsDAO extends DBContext {
         for (Products p : topProducts) {
             System.out.println(p);
         }
-        boolean isUpdated = productsDAO.updateStatus(1, "Active");
+        boolean isUpdated = productsDAO.isProductNameExists(name, 1);
         if (isUpdated) {
             System.out.println("✅ Cập nhật trạng thái thành công!");
         } else {

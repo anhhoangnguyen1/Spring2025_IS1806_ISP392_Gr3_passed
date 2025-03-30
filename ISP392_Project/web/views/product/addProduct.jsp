@@ -35,7 +35,8 @@
 
                             <div class="form-group">
                                 <label>Image</label>
-                                <input  type="file" name="image" required>
+                                <img id="productImagePreview" src="" alt="Preview Image" style="width: 150px; height: 150px; object-fit: cover; margin-bottom: 10px; display: none;">
+                                <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required="">
                             </div>
                             <div class="form-row">
                                 <div class="form-group col-md-6">
@@ -72,6 +73,21 @@
                 </div>
             </div>
         </div>
+        <script>
+function previewImage(event) {
+    var file = event.target.files[0];  
+    var reader = new FileReader();     
 
+    if (file) {
+        reader.onload = function (e) {
+            var imgPreview = document.getElementById('productImagePreview');
+            imgPreview.src = e.target.result;
+            imgPreview.style.display = "block"; // Hiện ảnh
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+        </script>
     </body>
 </html>

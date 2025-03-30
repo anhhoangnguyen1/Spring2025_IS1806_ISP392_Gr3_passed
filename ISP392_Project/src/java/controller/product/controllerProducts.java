@@ -136,12 +136,14 @@ public class controllerProducts extends HttpServlet {
             }
         }
         if (service.equals("UpdateStatusServlet")) {
+            String indexStr = request.getParameter("index");
+            int index = Integer.parseInt(indexStr);
             int productId = Integer.parseInt(request.getParameter("productId"));
             String newStatus = request.getParameter("status");
             boolean isUpdated = products.updateStatus(productId, newStatus);
 
             if (isUpdated) {
-                response.sendRedirect("Products"); // Load lại trang sau khi cập nhật
+                response.sendRedirect("Products?service=products&index=" + index); // Load lại trang sau khi cập nhật
             } else {
                 response.getWriter().println("Lỗi khi cập nhật trạng thái sản phẩm.");
             }
@@ -202,7 +204,7 @@ public class controllerProducts extends HttpServlet {
                     }
 
                     imageFileName = getSubmittedFileName(file);
-                    String uploadDirectory = "D:\\Ki_5\\Spring2025_IS1806_ISP392_Gr3\\ISP392_Project\\web\\views\\product\\images";
+                    String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest2\\ISP392_Project\\web\\views\\product\\images";
                     File uploadDir = new File(uploadDirectory);
                     if (!uploadDir.exists()) {
                         uploadDir.mkdirs();
@@ -224,7 +226,8 @@ public class controllerProducts extends HttpServlet {
                     response.sendRedirect("Products");
                     return;
                 }
-                int quantity = 0;
+                String quantityStr = request.getParameter("quantity");
+                int quantity = Integer.parseInt(quantityStr);
                 String createBy = request.getParameter("createBy");
                 String deletedBy = request.getParameter("deletedBy");
                 String description = request.getParameter("description");
@@ -270,6 +273,12 @@ public class controllerProducts extends HttpServlet {
             String storeIDStr = (String) session.getAttribute("storeID");
             int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("name");
+            if (products.isProductNameExists(name, storeID)) {
+                request.setAttribute("Notification", "Product name already exists!");
+                request.getRequestDispatcher("Products?service=products").forward(request, response);
+                return;
+            }
+
             if (name == null || name.trim().isEmpty()) {
                 request.setAttribute("Notification", "Product name is required.");
                 request.getRequestDispatcher("Products?service=products").forward(request, response);
@@ -288,7 +297,7 @@ public class controllerProducts extends HttpServlet {
                 }
                 imageFileName = getSubmittedFileName(file);
 
-                String uploadDirectory = "D:\\Ki_5\\Spring2025_IS1806_ISP392_Gr3\\ISP392_Project\\web\\views\\product\\images";
+                String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest2\\ISP392_Project\\web\\views\\product\\images";
                 File uploadDir = new File(uploadDirectory);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
