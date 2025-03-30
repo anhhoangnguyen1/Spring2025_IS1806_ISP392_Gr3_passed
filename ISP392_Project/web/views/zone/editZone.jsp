@@ -151,6 +151,15 @@
                     <c:if test="${not empty requestScope.nameError}">
                         <div class="alert alert-danger">${requestScope.nameError}</div>
                     </c:if>
+                    <c:if test="${not empty requestScope.descriptionError}">
+                        <div class="alert alert-danger">${requestScope.descriptionError}</div>
+                    </c:if>
+                    <c:if test="${not empty requestScope.statusError}">
+                        <div class="alert alert-danger">${requestScope.statusError}</div>
+                    </c:if>
+                    <c:if test="${not empty requestScope.zoneIdError}">
+                        <div class="alert alert-danger">${requestScope.zoneIdError}</div>
+                    </c:if>
                     <form id="zoneForm" action="${pageContext.request.contextPath}/zones" method="POST" onsubmit="confirmSave(event)">
                         <input type="hidden" name="service" value="editZone" />
                         <input type="hidden" name="zone_id" value="${zone.id}" />
@@ -160,19 +169,30 @@
 
                         <div class="form-group">
                             <label for="name">Name</label>
-                            <input type="text" class="form-control" name="name" value="${zone.name}" required>
+                            <input type="text" class="form-control ${not empty requestScope.nameError ? 'is-invalid' : ''}" 
+                                   name="name" value="${not empty requestScope.name ? requestScope.name : zone.name}" required>
+                            <c:if test="${not empty requestScope.nameError}">
+                                <div class="invalid-feedback">${requestScope.nameError}</div>
+                            </c:if>
                         </div>
                         <div class="form-group">
                             <label for="description">Description</label>
-                            <textarea class="form-control" name="description" rows="3">${zone.description}</textarea>
+                            <textarea class="form-control ${not empty requestScope.descriptionError ? 'is-invalid' : ''}" 
+                                      name="description" rows="3">${not empty requestScope.description ? requestScope.description : zone.description}</textarea>
+                            <c:if test="${not empty requestScope.descriptionError}">
+                                <div class="invalid-feedback">${requestScope.descriptionError}</div>
+                            </c:if>
                         </div>
-                        <!-- Xóa phần Store ID -->
                         <div class="form-group">
                             <label for="status">Status</label>
-                            <select class="form-control" id="status" name="status">
-                                <option value="Active" ${status == null ? (zone.status == 'Active' ? 'selected' : '') : (status == 'Active' ? 'selected' : '')}>Active</option>
-                                <option value="Inactive" ${status == null ? (zone.status == 'Inactive' ? 'selected' : '') : (status == 'Inactive' ? 'selected' : '')}>Inactive</option>
+                            <select class="form-control ${not empty requestScope.statusError ? 'is-invalid' : ''}" 
+                                    id="status" name="status">
+                                <option value="Active" ${not empty requestScope.status ? (requestScope.status == 'Active' ? 'selected' : '') : (zone.status == 'Active' ? 'selected' : '')}>Active</option>
+                                <option value="Inactive" ${not empty requestScope.status ? (requestScope.status == 'Inactive' ? 'selected' : '') : (zone.status == 'Inactive' ? 'selected' : '')}>Inactive</option>
                             </select>
+                            <c:if test="${not empty requestScope.statusError}">
+                                <div class="invalid-feedback">${requestScope.statusError}</div>
+                            </c:if>
                         </div>
                         <input type="hidden" name="updateBy" value="${zone.createdBy}" />
                         <div class="form-group">
