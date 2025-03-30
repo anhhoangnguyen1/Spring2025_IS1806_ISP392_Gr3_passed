@@ -454,32 +454,55 @@ public class controllerZones extends HttpServlet {
                 break;
             }
             case "editZone": {
-                int zoneId = Integer.parseInt(request.getParameter("zone_id"));
-                Zone zoneForEdit = zoneDAO.getZoneById(zoneId);
-
-                String currentIndex = request.getParameter("index");
-                if (currentIndex == null) {
-                    currentIndex = "1";
+                String zoneIdParam = request.getParameter("zone_id");
+                if (zoneIdParam == null || zoneIdParam.trim().isEmpty()) {
+                    session.setAttribute("Notification", "Invalid zone ID.");
+                    response.sendRedirect("zones?service=zones");
+                    return;
                 }
+                
+                try {
+                    int zoneId = Integer.parseInt(zoneIdParam);
+                    if (zoneId <= 0) {
+                        session.setAttribute("Notification", "Invalid zone ID.");
+                        response.sendRedirect("zones?service=zones");
+                        return;
+                    }
+                    
+                    Zone zoneForEdit = zoneDAO.getZoneById(zoneId);
+                    if (zoneForEdit == null) {
+                        session.setAttribute("Notification", "Zone not found.");
+                        response.sendRedirect("zones?service=zones");
+                        return;
+                    }
 
-                String currentSortBy = request.getParameter("sortBy");
-                if (currentSortBy == null) {
-                    currentSortBy = "id";
+                    String currentIndex = request.getParameter("index");
+                    if (currentIndex == null) {
+                        currentIndex = "1";
+                    }
+
+                    String currentSortBy = request.getParameter("sortBy");
+                    if (currentSortBy == null) {
+                        currentSortBy = "id";
+                    }
+
+                    String currentSortOrder = request.getParameter("sortOrder");
+                    if (currentSortOrder == null) {
+                        currentSortOrder = "ASC";
+                    }
+
+                    request.setAttribute("zone", zoneForEdit);
+                    request.setAttribute("fullName", fullName);
+                    request.setAttribute("index", currentIndex);
+                    request.setAttribute("sortBy", currentSortBy);
+                    request.setAttribute("sortOrder", currentSortOrder);
+                    request.setAttribute("pageSize", pageSize);
+
+                    request.getRequestDispatcher("views/zone/editZone.jsp").forward(request, response);
+                } catch (NumberFormatException e) {
+                    session.setAttribute("Notification", "Invalid zone ID format.");
+                    response.sendRedirect("zones?service=zones");
                 }
-
-                String currentSortOrder = request.getParameter("sortOrder");
-                if (currentSortOrder == null) {
-                    currentSortOrder = "ASC";
-                }
-
-                request.setAttribute("zone", zoneForEdit);
-                request.setAttribute("fullName", fullName);
-                request.setAttribute("index", currentIndex);
-                request.setAttribute("sortBy", currentSortBy);
-                request.setAttribute("sortOrder", currentSortOrder);
-                request.setAttribute("pageSize", pageSize); // Truyền pageSize vào JSP
-
-                request.getRequestDispatcher("views/zone/editZone.jsp").forward(request, response);
                 break;
             }
             case "stockCheck": {
@@ -570,7 +593,6 @@ public class controllerZones extends HttpServlet {
         }
 
         if ("addZone".equals(service)) {
-
             // Staff không được phép thực hiện bất kỳ POST nào
             if ("staff".equals(role)) {
                 session.setAttribute("Notification", "You do not have permission to perform this action.");
@@ -580,8 +602,25 @@ public class controllerZones extends HttpServlet {
 
             String name = request.getParameter("name");
             String description = request.getParameter("description");
+            String status = request.getParameter("status");
 
-            // Lấy storeId từ session (được gán từ controllerStore)
+            // Validate input
+            String nameError = validateZoneName(name);
+            String descriptionError = validateDescription(description);
+            String statusError = validateStatus(status);
+
+            if (nameError != null || descriptionError != null || statusError != null) {
+                request.setAttribute("nameError", nameError);
+                request.setAttribute("descriptionError", descriptionError);
+                request.setAttribute("statusError", statusError);
+                request.setAttribute("name", name);
+                request.setAttribute("description", description);
+                request.setAttribute("status", status);
+                request.getRequestDispatcher("views/zone/addZone.jsp").forward(request, response);
+                return;
+            }
+
+            // Lấy storeId từ session
             String storeIdStr = (String) session.getAttribute("storeID");
             if (storeIdStr == null) {
                 session.setAttribute("errorMessage", "No store associated with your account. Please create a store first.");
@@ -603,29 +642,29 @@ public class controllerZones extends HttpServlet {
                 request.setAttribute("nameError", "Zone name already exists for this store.");
                 request.setAttribute("name", name);
                 request.setAttribute("description", description);
+                request.setAttribute("status", status);
                 request.getRequestDispatcher("views/zone/addZone.jsp").forward(request, response);
                 return;
             }
 
             Stores store = new Stores();
-            store.setId(storeId); // Gán storeId từ session vào entity Stores
+            store.setId(storeId);
 
             Zone zone = Zone.builder()
                     .name(name)
                     .description(description)
                     .createdBy(fullName)
-                    .storeId(store) // Gán entity Stores với storeId từ session
-                    .status(request.getParameter("status") != null ? request.getParameter("status") : "Active")
+                    .storeId(store)
+                    .status(status)
                     .build();
 
             zoneDAO.insertZone(zone);
 
-            // Lấy showInactive từ session thay vì request
+            // Lấy showInactive từ session
             Boolean showInactive = (Boolean) session.getAttribute("showInactive");
             if (showInactive == null) {
-                showInactive = true; // Mặc định là true nếu chưa có
+                showInactive = true;
             }
-
 
             session.setAttribute("Notification", "Zone added successfully.");
 
@@ -649,10 +688,33 @@ public class controllerZones extends HttpServlet {
                 return;
             }
 
-            int zoneId = Integer.parseInt(request.getParameter("zone_id"));
+            String zoneIdParam = request.getParameter("zone_id");
             String name = request.getParameter("name");
             String description = request.getParameter("description");
-            String status = request.getParameter("status") != null ? request.getParameter("status") : "Active";
+            String status = request.getParameter("status");
+
+            // Validate input
+            String zoneIdError = validateZoneId(zoneIdParam);
+            String nameError = validateZoneName(name);
+            String descriptionError = validateDescription(description);
+            String statusError = validateStatus(status);
+
+            if (zoneIdError != null || nameError != null || descriptionError != null || statusError != null) {
+                request.setAttribute("zoneIdError", zoneIdError);
+                request.setAttribute("nameError", nameError);
+                request.setAttribute("descriptionError", descriptionError);
+                request.setAttribute("statusError", statusError);
+                Zone zoneForEdit = zoneDAO.getZoneById(Integer.parseInt(zoneIdParam));
+                request.setAttribute("zone", zoneForEdit);
+                request.setAttribute("name", name);
+                request.setAttribute("description", description);
+                request.setAttribute("status", status);
+                request.setAttribute("fullName", fullName);
+                request.getRequestDispatcher("views/zone/editZone.jsp").forward(request, response);
+                return;
+            }
+
+            int zoneId = Integer.parseInt(zoneIdParam);
 
             // Lấy storeId từ session
             String storeIdStr = (String) session.getAttribute("storeID");
@@ -676,9 +738,10 @@ public class controllerZones extends HttpServlet {
                 request.setAttribute("nameError", "Zone name already exists for this store.");
                 Zone zoneForEdit = zoneDAO.getZoneById(zoneId);
                 request.setAttribute("zone", zoneForEdit);
-                request.setAttribute("status", status); // Giữ trạng thái vừa chọn
+                request.setAttribute("name", name);
+                request.setAttribute("description", description);
+                request.setAttribute("status", status);
                 request.setAttribute("fullName", fullName);
-                request.setAttribute("sortOrder", request.getParameter("sortOrder"));
                 request.getRequestDispatcher("views/zone/editZone.jsp").forward(request, response);
                 return;
             }
@@ -704,12 +767,12 @@ public class controllerZones extends HttpServlet {
                     .createdAt(currentZone.getCreatedAt())
                     .createdBy(currentZone.getCreatedBy())
                     .history(currentZone.getHistory())
-                    .productId(currentZone.getProductId()) // Mặc định giữ nguyên
+                    .productId(currentZone.getProductId())
                     .build();
 
             // Nếu trạng thái là "Inactive", set productId thành null
             if ("Inactive".equals(status)) {
-                zone.setProductId(null); // Set productId về null
+                zone.setProductId(null);
             }
 
             // Cập nhật Zone
@@ -788,5 +851,50 @@ public class controllerZones extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Short description";
+    }
+
+    private String validateZoneName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return "Zone name cannot be empty";
+        }
+        if (name.length() < 3) {
+            return "Zone name must be at least 3 characters long";
+        }
+        if (name.length() > 50) {
+            return "Zone name cannot exceed 50 characters";
+        }
+        return null;
+    }
+
+    private String validateDescription(String description) {
+        if (description != null && description.length() > 500) {
+            return "Description cannot exceed 500 characters";
+        }
+        return null;
+    }
+
+    private String validateStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            return "Status cannot be empty";
+        }
+        if (!status.equals("Active") && !status.equals("Inactive")) {
+            return "Invalid status value";
+        }
+        return null;
+    }
+
+    private String validateZoneId(String zoneId) {
+        if (zoneId == null || zoneId.trim().isEmpty()) {
+            return "Zone ID cannot be empty";
+        }
+        try {
+            int id = Integer.parseInt(zoneId);
+            if (id <= 0) {
+                return "Invalid zone ID";
+            }
+        } catch (NumberFormatException e) {
+            return "Invalid zone ID format";
+        }
+        return null;
     }
 }
