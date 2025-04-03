@@ -202,6 +202,7 @@ public class zoneDAO extends DBContext {
 
     public void insertZone(Zone zone) {
         try {
+            System.out.println("Starting to insert zone: " + zone.getName());
             connection.setAutoCommit(false);
             
             // Lấy ID lớn nhất hiện tại
@@ -213,11 +214,13 @@ public class zoneDAO extends DBContext {
                     maxId = rs.getInt(1);
                 }
             }
+            System.out.println("Current max zone ID: " + maxId);
             
             // Đẩy tất cả các zone hiện tại xuống một đơn vị
             String updateSql = "UPDATE Zones SET id = id + 1 WHERE isDeleted = 0 ORDER BY id DESC";
             try (PreparedStatement st = connection.prepareStatement(updateSql)) {
-                st.executeUpdate();
+                int updatedRows = st.executeUpdate();
+                System.out.println("Updated " + updatedRows + " existing zones");
             }
             
             // Thêm zone mới với ID = 1
@@ -237,21 +240,28 @@ public class zoneDAO extends DBContext {
                 }
                 st.setString(4, zone.getCreatedBy());
                 st.setString(5, zone.getStatus());
-                st.executeUpdate();
+                int insertedRows = st.executeUpdate();
+                System.out.println("Inserted new zone with ID 1. Rows affected: " + insertedRows);
             }
             
             connection.commit();
+            System.out.println("Successfully committed zone insertion");
         } catch (SQLException e) {
+            System.err.println("Error inserting zone: " + e.getMessage());
             try {
                 connection.rollback();
+                System.out.println("Rolled back zone insertion");
             } catch (SQLException rollbackEx) {
+                System.err.println("Error rolling back: " + rollbackEx.getMessage());
                 rollbackEx.printStackTrace();
             }
             e.printStackTrace();
         } finally {
             try {
                 connection.setAutoCommit(true);
+                System.out.println("Reset auto-commit to true");
             } catch (SQLException autoCommitEx) {
+                System.err.println("Error resetting auto-commit: " + autoCommitEx.getMessage());
                 autoCommitEx.printStackTrace();
             }
         }
@@ -412,28 +422,28 @@ public class zoneDAO extends DBContext {
     }
 
     // Thêm bản ghi kiểm kho mới
-public void addStockCheck(int zoneId, int productId, int systemQuantity, int actualQuantity, String checkedBy, String note) throws SQLException {
-    String sql = "INSERT INTO StockChecks (zoneId, productId, recordedQuantity, actualQuantity, discrepancy, checked_by, notes) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?)";
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, zoneId);
-        ps.setInt(2, productId);
-        ps.setInt(3, systemQuantity);
-        ps.setInt(4, actualQuantity);
-        ps.setInt(5, actualQuantity - systemQuantity);
-        ps.setString(6, checkedBy);
-        ps.setString(7, note != null ? note : null);
-        int rowsAffected = ps.executeUpdate();
-        if (rowsAffected == 0) {
-            throw new SQLException("Failed to insert stock check record.");
+    public void addStockCheck(int zoneId, int productId, int systemQuantity, int actualQuantity, String checkedBy, String note) throws SQLException {
+        String sql = "INSERT INTO StockChecks (zoneId, productId, recordedQuantity, actualQuantity, discrepancy, checked_by, notes) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, zoneId);
+            ps.setInt(2, productId);
+            ps.setInt(3, systemQuantity);
+            ps.setInt(4, actualQuantity);
+            ps.setInt(5, actualQuantity - systemQuantity);
+            ps.setString(6, checkedBy);
+            ps.setString(7, note != null ? note : null);
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new SQLException("Failed to insert stock check record.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error adding stock check: " + e.getMessage());
+            throw e;
         }
-    } catch (SQLException e) {
-        System.err.println("Error adding stock check: " + e.getMessage());
-        throw e;
     }
-}
 
-// Lấy lịch sử kiểm kho của một zone
+    // Lấy lịch sử kiểm kho của một zone
     public List<Map<String, Object>> getStockCheckHistory(int zoneId) {
         List<Map<String, Object>> history = new ArrayList<>();
         String sql = "SELECT sc.stockCheckId, sc.productId, p.name AS product_name, sc.recordedQuantity, sc.actualQuantity, "
@@ -482,7 +492,7 @@ public void addStockCheck(int zoneId, int productId, int systemQuantity, int act
 
         // Test viewAllZones
         int pageIndex = 1;
-    List<Zone> zones = dao.viewAllZones("id", pageIndex,1);
+        List<Zone> zones = dao.viewAllZones("id", pageIndex,1);
 
         if (zones.isEmpty()) {
             System.out.println("Không có zone nào được tìm thấy!");
@@ -499,87 +509,5 @@ public void addStockCheck(int zoneId, int productId, int systemQuantity, int act
                 System.out.println("History: " + zone.getHistory());
             }
         }
-//        
-//        System.out.println("--------------------------------------");
-//        // 1. Test getAllZoneNames
-//        System.out.println("=== Test getAllZoneNames ===");
-//        List<String> zoneNames = dao.getAllZoneNames();
-//        if (zoneNames.isEmpty()) {
-//            System.out.println("Không có tên zone nào!");
-//        } else {
-//            System.out.println("Danh sách tên zones:");
-//            for (String name : zoneNames) {
-//                System.out.println("- " + name);
-//            }
-//        }
-//        System.out.println("--------------------------------------");
-//        // 3. Test countZones
-//        System.out.println("=== Test countZones ===");
-//        int totalZones = dao.countZones(null);
-//        System.out.println("Tổng số zones: " + totalZones);
-//        int filteredZones = dao.countZones("Gạo ST");
-//        System.out.println("Số zones chứa 'Gạo ST': " + filteredZones);
-//        System.out.println("--------------------------------------");
-//
-//        // 4. Test searchZones
-//        System.out.println("=== Test searchZones ===");
-//        List<Zone> searchResults = dao.searchZones("Gạo", 1, 5, "name", "ASC");
-//        if (searchResults.isEmpty()) {
-//            System.out.println("Không tìm thấy zone nào với từ khóa 'Gạo'!");
-//        } else {
-//            System.out.println("Kết quả tìm kiếm với từ khóa 'Gạo':");
-//            for (Zone zone : searchResults) {
-//                System.out.println("ID: " + zone.getId() + ", Name: " + zone.getName()
-//                        + ", Created At: " + zone.getCreatedAt() + ", Status: " + zone.getStatus());
-//            }
-//        }
-//        System.out.println("--------------------------------------");
-//
-//        // 5. Test getZoneById
-//        System.out.println("=== Test getZoneById ===");
-//        Zone zoneById = dao.getZoneById(1); // Giả sử ID 1 tồn tại trong DB
-//        if (zoneById == null) {
-//            System.out.println("Không tìm thấy zone với ID = 1!");
-//        } else {
-//            System.out.println("Zone với ID = 1: " + zoneById.getName()
-//                    + ", Store ID: " + (zoneById.getStoreId() != null ? zoneById.getStoreId().getId() : "null")
-//                    + ", Status: " + zoneById.getStatus());
-//        }
-//        System.out.println("--------------------------------------");
-//
-//        // 6. Test insertZone
-//        System.out.println("=== Test insertZone ===");
-//        Stores store = new Stores();
-//        store.setId(1); // Giả sử store_id = 1 tồn tại
-//        Zone newZone = Zone.builder()
-//                .name("Gạo Test Mới")
-//                .createdBy("Admin")
-//                .storeId(store)
-//                .status("Active")
-//                .build();
-//        dao.insertZone(newZone);
-//        System.out.println("Đã thêm zone mới: Gạo Test Mới");
-//        zones = dao.viewAllZones("id", 1); // Kiểm tra lại danh sách
-//        System.out.println("Danh sách zones sau khi thêm:");
-//        for (Zone zone : zones) {
-//            System.out.println("ID: " + zone.getId() + ", Name: " + zone.getName());
-//        }
-//        System.out.println("--------------------------------------");
-//
-//        // 7. Test updateZone
-//        System.out.println("=== Test updateZone ===");
-//        Zone zoneToUpdate = dao.getZoneById(1); // Giả sử ID 1 tồn tại
-//        if (zoneToUpdate != null) {
-//            zoneToUpdate.setName("Gạo Test Cập Nhật");
-//            zoneToUpdate.setStatus("Inactive");
-//            dao.updateZone(zoneToUpdate);
-//            System.out.println("Đã cập nhật zone ID = 1");
-//            Zone updatedZone = dao.getZoneById(1);
-//            System.out.println("Zone sau khi cập nhật: " + updatedZone.getName() + ", Status: " + updatedZone.getStatus());
-//        } else {
-//            System.out.println("Không tìm thấy zone để cập nhật!");
-//        }
-//        System.out.println("--------------------------------------");
-//
     }
 }
