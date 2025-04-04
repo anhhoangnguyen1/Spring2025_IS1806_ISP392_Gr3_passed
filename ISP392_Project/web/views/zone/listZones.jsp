@@ -111,7 +111,6 @@
                                 <td>${zone.status}</td>
                                 <td>
                                     <c:if test="${sessionScope.role == 'owner'}">
-                                        <a href="${pageContext.request.contextPath}/zones?service=viewZoneHistory&zone_id=${zone.id}&index=${param.index}&sortBy=${param.sortBy}&sortOrder=${param.sortOrder}" class="btn btn-outline-info">View Zone History</a>
                                         <a href="${pageContext.request.contextPath}/zones?service=editZone&zone_id=${zone.id}&index=${index}&sortBy=${sortBy}&sortOrder=${sortOrder}" class="btn btn-outline-primary">Edit</a>
                                     </c:if>
                                 </td>

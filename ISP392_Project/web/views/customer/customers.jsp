@@ -35,11 +35,17 @@
                     <div class="mode-switch">
                         <i class="fa-solid fa-moon"></i>
                     </div>
-                    <div class="notifications">
-                        <i class="fa-solid fa-bell"></i>
+                    <div class="notifications" style="font-size: 16px; color: #333; margin-right: 15px;">
+                        Howdy, <span style="font-weight: 600;">${sessionScope.user.name}</span>
                     </div>
                     <div class="profile">
-                        <img src="/ISP392_Project/views/customer/images/profile-img.jpg" />
+                        <img src="${pageContext.request.contextPath}/views/profile/image/${sessionScope.user.image}" id="profile-img" onerror="this.src='${pageContext.request.contextPath}/views/dashboard/images/profile-img.jpg'"/>
+                        <div class="profile-menu">
+                            <ul>
+                                <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
+                                <li><a href="/ISP392_Project/change-password"><i class="fa-solid fa-pen"></i> Change Password</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
