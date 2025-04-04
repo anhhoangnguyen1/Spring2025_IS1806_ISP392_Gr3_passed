@@ -125,6 +125,7 @@ public class zoneDAO extends DBContext {
     public List<Zone> searchZones(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, boolean showInactive, Integer storeId) {
         List<Zone> list = new ArrayList<>();
 
+        // Validate sortBy parameter
         List<String> allowedSortColumns = List.of("id", "name", "created_at", "updated_at");
         if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
             sortBy = "id";
@@ -133,12 +134,15 @@ public class zoneDAO extends DBContext {
             sortOrder = "ASC";
         }
 
+        // Escape keyword for LIKE clause
+        String escapedKeyword = keyword != null ? keyword.replace("%", "\\%").replace("_", "\\_") : "";
+
         String sql = "SELECT z.id, z.name, z.description, z.created_at, z.created_by, z.deletedAt, z.deleteBy, z.isDeleted, z.updated_at, z.store_id, z.status, z.product_id, p.name AS product_name, z.history "
                 + "FROM Zones z "
                 + "LEFT JOIN Products p ON z.product_id = p.id "
                 + "WHERE z.isDeleted = 0 ";
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
+        if (escapedKeyword != null && !escapedKeyword.trim().isEmpty()) {
             sql += "AND (LOWER(z.name) LIKE ? OR LOWER(p.name) LIKE ? OR LOWER(z.description) LIKE ?) ";
         }
 
@@ -155,8 +159,8 @@ public class zoneDAO extends DBContext {
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             int paramIndex = 1;
 
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                String searchKeyword = "%" + keyword.toLowerCase() + "%";
+            if (escapedKeyword != null && !escapedKeyword.trim().isEmpty()) {
+                String searchKeyword = "%" + escapedKeyword.toLowerCase() + "%";
                 st.setString(paramIndex++, searchKeyword);
                 st.setString(paramIndex++, searchKeyword);
                 st.setString(paramIndex++, searchKeyword);
@@ -484,6 +488,17 @@ public class zoneDAO extends DBContext {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    // Thêm phương thức mới để escape input
+    private String escapeInput(String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.replace("'", "''")
+                    .replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_");
     }
 
     // Phương thức main để test

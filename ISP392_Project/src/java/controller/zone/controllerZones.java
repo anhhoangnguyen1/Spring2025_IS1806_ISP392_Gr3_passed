@@ -788,9 +788,16 @@ public class controllerZones extends HttpServlet {
         if (name.length() > 50) {
             return "Zone name cannot exceed 50 characters";
         }
-        // Kiểm tra ký tự đặc biệt
+        // Kiểm tra ký tự đặc biệt và SQL injection
         if (!name.matches("^[a-zA-Z0-9\\s\\-\\_]+$")) {
             return "Zone name can only contain letters, numbers, spaces, hyphens, and underscores";
+        }
+        // Kiểm tra từ khóa SQL nguy hiểm
+        String[] sqlKeywords = {"SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "UNION", "ALTER", "CREATE", "TRUNCATE"};
+        for (String keyword : sqlKeywords) {
+            if (name.toUpperCase().contains(keyword)) {
+                return "Zone name contains invalid characters";
+            }
         }
         return null;
     }
@@ -806,6 +813,13 @@ public class controllerZones extends HttpServlet {
         if (description.matches(".*[<>'\"].*")) {
             return "Description cannot contain dangerous characters";
         }
+        // Kiểm tra từ khóa SQL nguy hiểm
+        String[] sqlKeywords = {"SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "UNION", "ALTER", "CREATE", "TRUNCATE"};
+        for (String keyword : sqlKeywords) {
+            if (description.toUpperCase().contains(keyword)) {
+                return "Description contains invalid characters";
+            }
+        }
         return null;
     }
 
@@ -813,8 +827,16 @@ public class controllerZones extends HttpServlet {
         if (status == null || status.trim().isEmpty()) {
             return "Status cannot be empty";
         }
+        // Chỉ cho phép các giá trị cụ thể
         if (!status.equals("Active") && !status.equals("Inactive")) {
             return "Invalid status value";
+        }
+        // Kiểm tra từ khóa SQL nguy hiểm
+        String[] sqlKeywords = {"SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "UNION", "ALTER", "CREATE", "TRUNCATE"};
+        for (String keyword : sqlKeywords) {
+            if (status.toUpperCase().contains(keyword)) {
+                return "Status contains invalid characters";
+            }
         }
         return null;
     }
@@ -847,5 +869,16 @@ public class controllerZones extends HttpServlet {
             return "ID cửa hàng phải là số";
         }
         return null;
+    }
+
+    // Thêm phương thức mới để escape input
+    private String escapeInput(String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.replace("'", "''")
+                    .replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_");
     }
 }
