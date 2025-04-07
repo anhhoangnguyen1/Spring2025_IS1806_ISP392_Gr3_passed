@@ -42,14 +42,13 @@ public class SearchServlet extends HttpServlet {
 
         String storeIDStr = (String) session.getAttribute("storeID");
         int storeID = Integer.parseInt(storeIDStr);
-        
+
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
         String keyword = request.getParameter("searchProduct");
 
-      String orderType = request.getParameter("orderType"); // Export hoặc Import
-
+        String orderType = request.getParameter("orderType"); // Export hoặc Import
 
         int userId = (int) session.getAttribute("userID");
 
@@ -88,7 +87,7 @@ public class SearchServlet extends HttpServlet {
                     }
                     zonesStr.append("]");
 
-                     if ("Export".equalsIgnoreCase(orderType)) {
+                    if ("Export".equalsIgnoreCase(orderType)) {
                         // Xuất HTML với unitSizes được truyền vào addProductToOrder()
                         out.println("<div class='product-item' onclick=\"addProductToOrder('"
                                 + product.getProductId() + "','"
@@ -161,7 +160,6 @@ public class SearchServlet extends HttpServlet {
             }
         }
     }
-    
 
     /**
      * Handles the HTTP <code>POST</code> method.
@@ -187,42 +185,40 @@ public class SearchServlet extends HttpServlet {
         String storeIDStr = (String) session.getAttribute("storeID");
         int storeID = Integer.parseInt(storeIDStr);
         String searchValue = request.getParameter("keyword");
-        List<Customers> customers = customerDAO.INSTANCE.findByNameOrPhone(searchValue, storeID);
 
-        if (customers.isEmpty()) {
-            out.println("<p>Can not find customer.</p>");
-            out.println("<div class='customer-item add-new' onclick='openAddCustomerPopup()'>");
-            out.println("<p>Add new customer</p>");
-            out.println("</div>");
-        } else {
-            // Bạn có thể bọc toàn bộ danh sách trong 1 container lớn
+        if (searchValue != null && !searchValue.trim().isEmpty()) {
+            List<Customers> customers = customerDAO.INSTANCE.findByNameOrPhone(searchValue, storeID);
 
-            out.println("<div class='search-suggestions'>");
-            for (Customers customer : customers) {
-                out.println("<div class='customer-item' onclick=\"selectCustomer('"
-                        + customer.getId() + "', '"
-                        + customer.getName() + "', '"
-                        + customer.getPhone() + "', '"
-                        + customer.getBalance() + "')\">");
-
-                out.println("<h3>" + customer.getName() + "</h3>");
-
-                // Kiểm tra nếu role là "staff" thì ẩn 5 số ở giữa
-                if (role.equals("staff")) {
-                    String phone = customer.getPhone();
-                    if (phone.length() >= 10) {
-                        // Ẩn 5 số giữa số điện thoại
-                        phone = phone.substring(0, 3) + "xxxxx" + phone.substring(8);
-                    }
-                    out.println("<p>Phone: " + phone + "</p>");
-                } else {
-                    // Hiển thị số điện thoại đầy đủ cho owner hoặc các role khác
-                    out.println("<p>Phone: " + customer.getPhone() + "</p>");
-                }
-
+            if (customers.isEmpty()) {
+                out.println("<p>Can not find customer.</p>");
+                out.println("<div class='customer-item add-new' onclick='openAddCustomerPopup()'>");
+                out.println("<p>Add new customer</p>");
                 out.println("</div>");
+            } else {
+                for (Customers customer : customers) {
+                    out.println("<div class='customer-item' onclick='selectCustomer("
+                            + customer.getId() + ", \""
+                            + customer.getName() + "\", \""
+                            + customer.getPhone() + "\", "
+                            + customer.getBalance() + ")'>");
+                    out.println("<h3>" + customer.getName() + "</h3>");
+
+                    // Kiểm tra nếu role là "staff" thì ẩn 5 số ở giữa
+                    if (role.equals("staff")) {
+                        String phone = customer.getPhone();
+                        if (phone.length() >= 10) {
+                            // Ẩn 5 số giữa số điện thoại
+                            phone = phone.substring(0, 3) + "xxxxx" + phone.substring(8);
+                        }
+                        out.println("<p>Phone: " + phone + "</p>");
+                    } else {
+                        // Hiển thị số điện thoại đầy đủ cho owner hoặc các role khác
+                        out.println("<p>Phone: " + customer.getPhone() + "</p>");
+                    }
+
+                    out.println("</div>");
+                }
             }
-            out.println("</div>");
         }
     }
 
