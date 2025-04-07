@@ -17,6 +17,8 @@ import java.util.List;
 
 public class customerDAO extends DBContext {
 
+    public static final customerDAO INSTANCE = new customerDAO();
+
     debtDAO debtDao = new debtDAO();
 
     public List<Customers> findAll() {
@@ -77,107 +79,106 @@ public class customerDAO extends DBContext {
         return customersList;
     }
 
-   public int countCustomers(String keyword, String balanceFilter, int storeID) {
-    StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM customers WHERE store_id = ?");
-
-    if (keyword != null && !keyword.trim().isEmpty()) {
-        sql.append(" AND (name LIKE ? OR phone LIKE ?)");
-    }
-
-    if (balanceFilter != null && !balanceFilter.equals("all")) {
-        if (balanceFilter.equals("0")) {
-            sql.append(" AND balance = 0");
-        } else if (balanceFilter.equals("positive")) {
-            sql.append(" AND balance > 0");
-        } else if (balanceFilter.equals("negative")) {
-            sql.append(" AND balance < 0");
-        }
-    }
-
-    try (PreparedStatement st = connection.prepareStatement(sql.toString())) {
-        int paramIndex = 1;
-        st.setInt(paramIndex++, storeID);
+    public int countCustomers(String keyword, String balanceFilter, int storeID) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM customers WHERE store_id = ?");
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            String param = "%" + keyword + "%";
-            st.setString(paramIndex++, param);
-            st.setString(paramIndex++, param);
+            sql.append(" AND (name LIKE ? OR phone LIKE ?)");
         }
 
-        try (ResultSet rs = st.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-
-    return 0;
-}
-
-   public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, int storeID, String balanceFilter) {
-    List<Customers> list = new ArrayList<>();
-    List<String> allowedSortColumns = List.of("id", "name", "phone", "balance", "created_at", "updated_at");
-
-    if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
-        sortBy = "id";
-    }
-
-    if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
-        sortOrder = "ASC";
-    }
-
-    StringBuilder sql = new StringBuilder("SELECT * FROM customers WHERE store_id = ?");
-
-    if (keyword != null && !keyword.trim().isEmpty()) {
-        sql.append(" AND (name LIKE ? OR phone LIKE ?)");
-    }
-
-    if (balanceFilter != null && !balanceFilter.equals("all")) {
-        switch (balanceFilter) {
-            case "0":
+        if (balanceFilter != null && !balanceFilter.equals("all")) {
+            if (balanceFilter.equals("0")) {
                 sql.append(" AND balance = 0");
-                break;
-            case "positive":
+            } else if (balanceFilter.equals("positive")) {
                 sql.append(" AND balance > 0");
-                break;
-            case "negative":
+            } else if (balanceFilter.equals("negative")) {
                 sql.append(" AND balance < 0");
-                break;
-        }
-    }
-
-    sql.append(" ORDER BY ").append(sortBy).append(" ").append(sortOrder);
-    sql.append(" LIMIT ? OFFSET ?");
-
-    try (PreparedStatement st = connection.prepareStatement(sql.toString())) {
-        int paramIndex = 1;
-
-        st.setInt(paramIndex++, storeID); 
-
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            String param = "%" + keyword + "%";
-            st.setString(paramIndex++, param);
-            st.setString(paramIndex++, param);
-        }
-
-        st.setInt(paramIndex++, pageSize);
-        st.setInt(paramIndex, (pageIndex - 1) * pageSize);
-
-        try (ResultSet rs = st.executeQuery()) {
-            while (rs.next()) {
-                Customers customer = mapResultSetToCustomer(rs);
-                list.add(customer);
             }
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+
+        try (PreparedStatement st = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            st.setInt(paramIndex++, storeID);
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String param = "%" + keyword + "%";
+                st.setString(paramIndex++, param);
+                st.setString(paramIndex++, param);
+            }
+
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 
-    return list;
-}
+    public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, int storeID, String balanceFilter) {
+        List<Customers> list = new ArrayList<>();
+        List<String> allowedSortColumns = List.of("id", "name", "phone", "balance", "created_at", "updated_at");
 
+        if (sortBy == null || !allowedSortColumns.contains(sortBy)) {
+            sortBy = "id";
+        }
+
+        if (sortOrder == null || (!sortOrder.equalsIgnoreCase("ASC") && !sortOrder.equalsIgnoreCase("DESC"))) {
+            sortOrder = "ASC";
+        }
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM customers WHERE store_id = ?");
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (name LIKE ? OR phone LIKE ?)");
+        }
+
+        if (balanceFilter != null && !balanceFilter.equals("all")) {
+            switch (balanceFilter) {
+                case "0":
+                    sql.append(" AND balance = 0");
+                    break;
+                case "positive":
+                    sql.append(" AND balance > 0");
+                    break;
+                case "negative":
+                    sql.append(" AND balance < 0");
+                    break;
+            }
+        }
+
+        sql.append(" ORDER BY ").append(sortBy).append(" ").append(sortOrder);
+        sql.append(" LIMIT ? OFFSET ?");
+
+        try (PreparedStatement st = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            st.setInt(paramIndex++, storeID);
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String param = "%" + keyword + "%";
+                st.setString(paramIndex++, param);
+                st.setString(paramIndex++, param);
+            }
+
+            st.setInt(paramIndex++, pageSize);
+            st.setInt(paramIndex, (pageIndex - 1) * pageSize);
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Customers customer = mapResultSetToCustomer(rs);
+                    list.add(customer);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 
     public Customers getCustomerById(int id) {
         String sql = "SELECT * FROM customers WHERE id = ?";
@@ -193,8 +194,6 @@ public class customerDAO extends DBContext {
         }
         return null;
     }
-
-
 
     public void insertCustomer(Customers customer) {
         String sql = "INSERT INTO Customers (name, phone, address, balance, created_at, created_by, deletedAt, deleteBy, isDeleted, updated_at, updated_by, store_id, status) "
@@ -382,6 +381,50 @@ public class customerDAO extends DBContext {
             System.err.println("Error searching customers by name: " + query + "\n" + ex.getMessage());
         } finally {
             // Close ResultSet and PreparedStatement
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
+            } catch (SQLException ex) {
+                System.err.println("Error closing ResultSet or PreparedStatement: " + ex.getMessage());
+            }
+        }
+
+        return customers;
+    }
+
+    public List<Customers> findByNameOrPhone(String searchValue, int storeID) {
+        List<Customers> customers = new ArrayList<>();
+
+        // Kiểm tra kết nối
+        if (connection == null) {
+            System.err.println("Error: Cannot connect to database!");
+            return customers;
+        }
+
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        // Sử dụng LIKE cho cả tên và số điện thoại
+        String sql = "SELECT * FROM Customers WHERE (name LIKE ? OR phone LIKE ?) AND store_id = ? AND isDeleted = false";
+
+        try {
+            pst = connection.prepareStatement(sql);
+            // Thêm dấu '%' để tìm kiếm tên hoặc số điện thoại chứa giá trị tìm kiếm
+            pst.setString(1, "%" + searchValue + "%");
+            pst.setString(2, "%" + searchValue + "%");
+            pst.setInt(3, storeID); // Lọc theo cửa hàng
+            rs = pst.executeQuery();
+
+            while (rs.next()) {
+                customers.add(getFromResulset(rs));
+            }
+        } catch (SQLException ex) {
+            System.err.println("Error searching customers by name or phone: " + searchValue + "\n" + ex.getMessage());
+        } finally {
+            // Đóng ResultSet và PreparedStatement
             try {
                 if (rs != null) {
                     rs.close();
