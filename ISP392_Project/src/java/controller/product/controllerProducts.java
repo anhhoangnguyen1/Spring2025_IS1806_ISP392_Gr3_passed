@@ -32,11 +32,7 @@ import java.util.List;
  * @author phamh
  */
 @WebServlet(name = "controllerProducts", urlPatterns = {"/Products"})
-@MultipartConfig(
-        fileSizeThreshold = 1024 * 1024 * 2, // 2MB
-        maxFileSize = 1024 * 1024 * 10, // 10MB
-        maxRequestSize = 1024 * 1024 * 50 // 50MB
-)
+@MultipartConfig
 public class controllerProducts extends HttpServlet {
 
     private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList("image/jpeg", "image/png", "image/gif");
@@ -208,7 +204,7 @@ public class controllerProducts extends HttpServlet {
                     }
 
                     imageFileName = getSubmittedFileName(file);
-                    String uploadDirectory = "D:\\Ki_5\\Spring2025_IS1806_ISP392_Gr3\\ISP392_Project\\web\\views\\product\\images";
+                    String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest2\\ISP392_Project\\web\\views\\product\\images";
                     File uploadDir = new File(uploadDirectory);
                     if (!uploadDir.exists()) {
                         uploadDir.mkdirs();
@@ -301,7 +297,7 @@ public class controllerProducts extends HttpServlet {
                 }
                 imageFileName = getSubmittedFileName(file);
 
-                String uploadDirectory = "D:\\Ki_5\\Spring2025_IS1806_ISP392_Gr3\\ISP392_Project\\web\\views\\product\\images";
+                String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest2\\ISP392_Project\\web\\views\\product\\images";
                 File uploadDir = new File(uploadDirectory);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
