@@ -636,6 +636,38 @@
                         </div>
 
                         <script>
+                            // Thêm biến role từ session
+                            const userRole = "${sessionScope.role}";
+                            
+                            // Hàm để ẩn số điện thoại cho staff
+                            function maskPhoneNumber(phone) {
+                                if (phone.length >= 10) {
+                                    return phone.substring(0, 3) + "xxxxx" + phone.substring(8);
+                                }
+                                return phone;
+                            }
+                            
+                            // Cập nhật hàm selectCustomer
+                            function selectCustomer(id, name, phone, balance) {
+                                $("#customerId").val(id);
+                                $("#customerName").text("Name: " + name);
+
+                                // Xử lý hiển thị số điện thoại dựa trên role
+                                let displayPhone = userRole === "staff" ? maskPhoneNumber(phone) : phone;
+                                $("#customerPhone").text("Phone: " + displayPhone);
+
+                                // Xác định cách hiển thị tổng nợ
+                                if (balance < 0) {
+                                    $("#customerDebt").text("Amount Due: " + formatNumberVND(-balance));
+                                } else if (balance > 0) {
+                                    $("#customerDebt").text("Amount Owed: " + formatNumberVND(balance));
+                                } else {
+                                    $("#customerDebt").text("Total Debt: " + formatNumberVND(balance));
+                                }
+
+                                $("#customerInfo").show();
+                            }
+
                             $(document).ready(function () {
                                 let currentLoad;
                                 $("#searchCustomerInput").on("input", function () {
@@ -653,11 +685,17 @@
                                                 type: "POST",
                                                 data: {keyword: query},
                                                 success: function (data) {
+                                                    console.log("Search response:", data);
                                                     if (data.trim() !== "") {
                                                         $("#suggestionsCustomer").html(data).show();
                                                     } else {
                                                         $("#suggestionsCustomer").hide();
                                                     }
+                                                },
+                                                error: function(xhr, status, error) {
+                                                    console.error("Search error:", error);
+                                                    console.error("Status:", status);
+                                                    console.error("Response:", xhr.responseText);
                                                 }
                                             });
                                         } else {
