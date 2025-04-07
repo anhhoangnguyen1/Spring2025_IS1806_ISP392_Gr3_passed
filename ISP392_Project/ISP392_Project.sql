@@ -61,25 +61,6 @@ CREATE TABLE Products (
     FULLTEXT(name,description)
 );
 
--- Table ProductPriceHistory
-CREATE TABLE ProductPriceHistory (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-    price DECIMAL(18,2) NOT NULL,
-    importPrice DECIMAL(18,2) NOT NULL,
-    type VARCHAR(255) NOT NULL,
-    store_id INT,
-    product_id INT,
-    order_id INT,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(255),
-    deletedAt DATETIME,
-    deleteBy VARCHAR(255),
-    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
-    FOREIGN KEY (product_id) REFERENCES Products(id) ON DELETE SET NULL,
-    FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL,
-    FOREIGN KEY (order_id) REFERENCES Orders(id) ON DELETE SET NULL
-);
 
 -- Table Zones
 CREATE TABLE Zones (
@@ -125,7 +106,7 @@ CREATE TABLE Orders (
     customers_id INT,
     store_id INT,
     user_id INT,
-    type ENUM('Import', 'Export') NOT NULL,
+    type ENUM('Export', 'Import') NOT NULL,
     amount DECIMAL(18,2) NOT NULL, 
     paidAmount DECIMAL(18,2) NOT NULL, 
     FOREIGN KEY (customers_id) REFERENCES Customers(id) ON DELETE CASCADE,
@@ -188,9 +169,34 @@ CREATE TABLE Debt_note (
     FOREIGN KEY (order_id) REFERENCES Orders(id) ON DELETE SET NULL
 );
 
+-- Table ProductPriceHistory
+CREATE TABLE ProductPriceHistory (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    price DECIMAL(18,2) NOT NULL,
+    importPrice DECIMAL(18,2) NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    store_id INT,
+    product_id INT,
+    order_id INT,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    deletedAt DATETIME,
+    deleteBy VARCHAR(255),
+    isDeleted TINYINT(1) DEFAULT 0 CHECK (isDeleted IN (0,1)),
+    FOREIGN KEY (product_id) REFERENCES Products(id) ON DELETE SET NULL,
+    FOREIGN KEY (store_id) REFERENCES Stores(id) ON DELETE SET NULL,
+    FOREIGN KEY (order_id) REFERENCES Orders(id) ON DELETE SET NULL
+);
 
-
-
+-- Table ProductUnits
+CREATE TABLE ProductUnits (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT,
+    unitSize VARCHAR(255) NOT NULL,
+     FOREIGN KEY (product_id) REFERENCES Products(id) ON DELETE SET NULL
+    
+);
 -- Insert into Stores
 INSERT INTO Stores(name, address, phone, email, status)
 VALUES 
