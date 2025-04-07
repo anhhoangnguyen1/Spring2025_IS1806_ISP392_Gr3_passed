@@ -4,16 +4,26 @@ import java.util.Date;
 
 import lombok.*;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @ToString
 public class Orders {
-    private Integer orderID;
-    private Date orderDate;
-    private Integer totalAmount;
-    private Integer customerID;
-    private Integer employeeID;
+
+    private int id;
+    private Customers customerID;
+    private Users userID;
+    private Stores storeId;
+    private String type;
+    private double amount;
+    private double paidAmount;
+    private String description;
+    private java.sql.Date createdAt;
+    private String createdBy;
+    private java.sql.Date deleteAt;
+    private String deleteBy;
+    private boolean isDeleted;
+    private java.sql.Date updatedAt;
+    private String status;
 }
