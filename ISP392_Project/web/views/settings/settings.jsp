@@ -80,29 +80,29 @@
                         </a>
                     </li>
                     <li>
-                        <a href="sale">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Orders</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="orders">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Orders History</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/ISP392_Project/Imports">
-                            <span class="nav-icon">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </span>
-                            <span class="nav-text">Imports</span>
-                        </a>
-                    </li>
+                            <a href="/ISP392_Project/Orders">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Orders</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/InvoiceHistory">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Invoice History</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/ISP392_Project/Import">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Imports</span>
+                            </a>
+                        </li>
                     <li>
                         <a href="/ISP392_Project/Stores">
                             <span class="nav-icon">
