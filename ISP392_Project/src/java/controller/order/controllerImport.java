@@ -41,7 +41,7 @@ public class controllerImport extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         HttpSession session = request.getSession();
-        String userName = (String) session.getAttribute("username");
+        String fullName = (String) session.getAttribute("fullName");
         int userId = (int) session.getAttribute("userId");
         int storeId = Integer.parseInt((String) session.getAttribute("storeID"));
         int customerId = Integer.parseInt(request.getParameter("customerId"));
@@ -121,7 +121,7 @@ public class controllerImport extends HttpServlet {
                     .paidAmount(paidAmount)
                     .description(status)
                     .status("PENDING")
-                    .createdBy(userName)
+                    .createdBy(fullName)
                     .build();
 
             OrderWorker.startWorker();

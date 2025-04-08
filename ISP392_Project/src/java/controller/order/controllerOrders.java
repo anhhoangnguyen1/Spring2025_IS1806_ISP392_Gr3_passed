@@ -56,7 +56,7 @@ public class controllerOrders extends HttpServlet {
         HttpSession session = request.getSession();
 
         String orderType = request.getParameter("orderType"); // 1: xuất, 2: nhập
-        String userName = (String) session.getAttribute("username");
+        String fullName = (String) session.getAttribute("fullName");
         int customerId = Integer.parseInt(request.getParameter("customerId"));
         int userId = (int) session.getAttribute("userId");
         System.out.println("User Id: " + userId);
@@ -207,7 +207,7 @@ public class controllerOrders extends HttpServlet {
                     .paidAmount(paidAmount)
                     .description(status)
                     .status("PENDING")
-                    .createdBy(userName)
+                    .createdBy(fullName)
                     .build();
 
             // Gửi vào hàng đợi
