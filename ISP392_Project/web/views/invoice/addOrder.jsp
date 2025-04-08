@@ -857,7 +857,7 @@
                         <!-- Action buttons -->
                         <div class="action-buttons">
 
-                            <button type="submit" id="submitOrder" style="background-color: #007bff">Add New Order</button>
+                            <button type="submit" id="submitOrder" style="background-color: #007bff">Create Order Invoice</button>
 
                         </div>
 
