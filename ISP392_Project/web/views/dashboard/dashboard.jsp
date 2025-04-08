@@ -115,7 +115,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="sale">
+                            <a href="/ISP392_Project/Orders">
                                 <span class="nav-icon">
                                     <i class="fa-solid fa-file-invoice"></i>
                                 </span>
@@ -131,7 +131,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="/ISP392_Project/Imports">
+                            <a href="/ISP392_Project/Import">
                                 <span class="nav-icon">
                                     <i class="fa-solid fa-file-invoice"></i>
                                 </span>

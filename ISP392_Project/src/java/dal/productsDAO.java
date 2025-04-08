@@ -29,81 +29,106 @@ public class productsDAO extends DBContext {
     private static final String RESET_COLOR = "\u001B[0m";
     zoneDAO zones = new zoneDAO();
 
-   public int getProductQuantity(int productId) {
-    int quantity = 0;
-    String sql = "SELECT quantity FROM Products WHERE id = ? AND isDeleted = 0"; 
-
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, productId);
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                quantity = rs.getInt("quantity");
-            }
+    public productsDAO() {
+        try {
+            this.connection = getConnection(); // từ DBContext
+        } catch (Exception e) {
+            System.err.println("❌ Error initializing DB connection in productsDAO: " + e.getMessage());
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return quantity;
-}
-
-
-public double getProductPrice(int productId) {
-    double price = 0.0;
-    String sql = "SELECT price FROM Products WHERE id = ? AND isDeleted = 0"; 
-
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, productId);
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                price = rs.getDouble("price");
-            }
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
     }
 
-    return price;
-}
-
-
-public List<Integer> getProductUnitsByProductID(int productId) {
-    List<Integer> unitSizes = new ArrayList<>();
-    String sql = "SELECT unitSize FROM ProductUnits WHERE product_id = ?"; 
-
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, productId);
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                unitSizes.add(rs.getInt("unitsize"));
-            }
+    public boolean updateProductQuantity(int productId, int newQuantity) {
+        String sql = "UPDATE Products SET quantity = ? WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, newQuantity);
+            ps.setInt(2, productId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        LOGGER.log(Level.SEVERE, "Error retrieving product units", e);
+        return false;
     }
 
-    return unitSizes;
-}
-public List<String> getZonesByProductID(int productId) {
-    List<String> zones = new ArrayList<>();
-    String sql = "SELECT name FROM Zones WHERE product_id = ? AND isDeleted = 0";  // Cập nhật theo đúng tên cột
+    public int getProductQuantity(int productId) {
+        int quantity = 0;
+        String sql = "SELECT quantity FROM Products WHERE id = ? AND isDeleted = 0";
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, productId);
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                zones.add(rs.getString("name"));
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    quantity = rs.getInt("quantity");
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        LOGGER.log(Level.SEVERE, "Error retrieving zones by product ID", e);
+        return quantity;
     }
 
-    return zones;
-}
+    public double getProductPrice(int productId) {
+        double price = 0.0;
+        String sql = "SELECT price FROM Products WHERE id = ? AND isDeleted = 0";
 
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    price = rs.getDouble("price");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        return price;
+    }
 
-    
+    public List<Integer> getProductUnitsByProductID(int productId) {
+        List<Integer> unitSizes = new ArrayList<>();
+        String sql = "SELECT unitSize FROM ProductUnits WHERE product_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    unitSizes.add(rs.getInt("unitsize"));
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving product units", e);
+        }
+
+        return unitSizes;
+    }
+
+    public List<String> getZonesByProductID(int productId) {
+        List<String> zones = new ArrayList<>();
+        String sql = "SELECT name FROM Zones WHERE product_id = ? AND isDeleted = 0";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String zone = rs.getString("name");
+                    if (zone != null && !zone.trim().isEmpty()) {
+                        zones.add(zone);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving zones by product ID", e);
+        }
+
+        // Nếu không có zone nào thì thêm zone mặc định
+        if (zones.isEmpty()) {
+            zones.add("Unknown");
+        }
+
+        return zones;
+    }
+
     // Lấy productId hiện tại của Zone
     private int getCurrentProductId(int zoneId) {
         String sql = "SELECT product_id FROM Zones WHERE id = ?";
@@ -409,49 +434,46 @@ public List<String> getZonesByProductID(int productId) {
 
         return products;
     }
-    
-   public List<Products> searchProductsByNameO(String keyword) {
-    List<Products> products = new ArrayList<>();
-    // Sửa câu SQL để JOIN với bảng Zones và lấy zone_name từ bảng đó
-    String sql = "SELECT p.id AS product_id, p.name, p.image, p.price, p.quantity, p.description, " +
-                 "p.created_at, p.created_by, p.deletedAt, p.deleteBy, p.isDeleted, p.updated_at, p.status, " +
-                 "z.name AS zone_name " +
-                 "FROM Products p " +
-                 "LEFT JOIN Zones z ON p.id = z.product_id " +
-                 "WHERE p.name LIKE ? AND p.isDeleted = 0"; // Điều kiện tìm kiếm tên sản phẩm và sản phẩm chưa bị xóa
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setString(1, "%" + keyword + "%"); // Tìm kiếm sản phẩm theo tên
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Products product = new Products(
-                        rs.getInt("product_id"), // Sử dụng alias trong SQL để lấy product_id
-                        rs.getString("name"),
-                        rs.getString("image"),
-                        rs.getBigDecimal("price"),
-                        rs.getInt("quantity"),
-                        rs.getString("description"),
-                        rs.getDate("created_at"),
-                        rs.getString("created_by"),
-                        rs.getDate("deletedAt"),
-                        rs.getString("deleteBy"),
-                        rs.getBoolean("isDeleted"),
-                        rs.getDate("updated_at"),
-                        rs.getString("status"),
-                        rs.getString("zone_name") // Lấy zone_name từ bảng Zones
-                );
-                products.add(product);
+    public List<Products> searchProductsByNameO(String keyword) {
+        List<Products> products = new ArrayList<>();
+        // Sửa câu SQL để JOIN với bảng Zones và lấy zone_name từ bảng đó
+        String sql = "SELECT p.id AS product_id, p.name, p.image, p.price, p.quantity, p.description, "
+                + "p.created_at, p.created_by, p.deletedAt, p.deleteBy, p.isDeleted, p.updated_at, p.status, "
+                + "z.name AS zone_name "
+                + "FROM Products p "
+                + "LEFT JOIN Zones z ON p.id = z.product_id "
+                + "WHERE p.name LIKE ? AND p.isDeleted = 0"; // Điều kiện tìm kiếm tên sản phẩm và sản phẩm chưa bị xóa
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%"); // Tìm kiếm sản phẩm theo tên
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Products product = new Products(
+                            rs.getInt("product_id"), // Sử dụng alias trong SQL để lấy product_id
+                            rs.getString("name"),
+                            rs.getString("image"),
+                            rs.getBigDecimal("price"),
+                            rs.getInt("quantity"),
+                            rs.getString("description"),
+                            rs.getDate("created_at"),
+                            rs.getString("created_by"),
+                            rs.getDate("deletedAt"),
+                            rs.getString("deleteBy"),
+                            rs.getBoolean("isDeleted"),
+                            rs.getDate("updated_at"),
+                            rs.getString("status"),
+                            rs.getString("zone_name") // Lấy zone_name từ bảng Zones
+                    );
+                    products.add(product);
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+
+        return products;
     }
-
-    return products;
-}
-
-
-
 
     public Products getProductById02(int id) {
         List<Products> list = getProductById(id);
@@ -1005,41 +1027,40 @@ public List<String> getZonesByProductID(int productId) {
         return null;
     }
 
-   public static void main(String[] args) {
-     
-        
-        // Test tìm kiếm sản phẩm với từ khóa
-//        String searchKeyword = "ST25"; // Bạn có thể thay đổi từ khóa để kiểm tra
-//        List<Products> products = productsDAO.INSTANCE.searchProductsByNameO(searchKeyword);
+    public static void main(String[] args) {
 
-         // Thử kiểm tra hàm tìm kiếm sản phẩm theo tên
-        String searchKeyword = "gạo";  // Từ khóa tìm kiếm (thử tìm sản phẩm "gạo")
+        // Test tìm kiếm sản phẩm với từ khóa
+        String searchKeyword = "Thơm Thái"; // Bạn có thể thay đổi từ khóa để kiểm tra
         List<Products> products = productsDAO.INSTANCE.searchProductsByNameO(searchKeyword);
-        
+
+//         // Thử kiểm tra hàm tìm kiếm sản phẩm theo tên
+//        String searchKeyword = "gạo";  // Từ khóa tìm kiếm (thử tìm sản phẩm "gạo")
+//        List<Products> products = productsDAO.INSTANCE.searchProductsByNameO(searchKeyword);
+//        
         // Kiểm tra nếu có sản phẩm và in ra kết quả
         if (products.isEmpty()) {
             System.out.println("Không tìm thấy sản phẩm với từ khóa: " + searchKeyword);
         } else {
             System.out.println("Danh sách sản phẩm tìm được:");
             for (Products product : products) {
-                System.out.println("ID: " + product.getProductId() + ", Tên: " + product.getName() +
-                        ", Giá: " + product.getPrice() + ", Số lượng: " + product.getQuantity());
+                System.out.println("ID: " + product.getProductId() + ", Tên: " + product.getName()
+                        + ", Giá: " + product.getPrice() + ", Số lượng: " + product.getQuantity());
             }
         }
-        
+
         // Thử kiểm tra hàm lấy số lượng sản phẩm
-        int productId = 1;  // Thử với sản phẩm có ID = 1
+        int productId = 10;  // Thử với sản phẩm có ID = 1
         int quantity = productsDAO.INSTANCE.getProductQuantity(productId);
         System.out.println("Số lượng sản phẩm ID " + productId + ": " + quantity);
-        
+
         // Thử kiểm tra hàm lấy giá sản phẩm
         double price = productsDAO.INSTANCE.getProductPrice(productId);
         System.out.println("Giá sản phẩm ID " + productId + ": " + price);
-        
+
         // Thử kiểm tra hàm lấy các đơn vị của sản phẩm
         List<Integer> unitSizes = productsDAO.INSTANCE.getProductUnitsByProductID(productId);
         System.out.println("Các đơn vị của sản phẩm ID " + productId + ": " + unitSizes);
-        
+
         // Thử kiểm tra hàm lấy các zones của sản phẩm
         List<String> zones = productsDAO.INSTANCE.getZonesByProductID(productId);
         System.out.println("Các kho của sản phẩm ID " + productId + ": " + zones);

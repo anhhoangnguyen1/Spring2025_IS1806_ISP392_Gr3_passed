@@ -2,6 +2,8 @@ package service;
 
 import dal.OrdersDAO;
 import dal.OrderDetailsDAO;
+import dal.customerDAO;
+import dal.debtDAO;
 import entity.Orders;
 import entity.OrderDetails;
 
@@ -36,21 +38,46 @@ public class OrderWorker extends Thread {
                 OrderTask task = OrderQueue.take();
                 Orders order = task.getOrder();
                 List<OrderDetails> details = task.getOrderDetails();
+                String balanceAction = task.getBalanceAction(); // 👈 Lấy từ task
 
                 OrdersDAO ordersDAO = new OrdersDAO();
                 OrderDetailsDAO orderDetailsDAO = new OrderDetailsDAO();
 
-                // Insert đơn hàng, lấy ra orderId vừa được tạo
+                // Insert đơn hàng
                 int orderId = ordersDAO.insertOrder(order);
 
                 if (orderId > 0) {
-                    // Gán order ID vào từng OrderDetails trước khi lưu
                     for (OrderDetails od : details) {
-                        od.setOrderID(order); // hoặc set Order chứa ID
-                        od.getOrderID().setId(orderId); // đảm bảo có ID đúng
+                        od.setOrderID(order);
+                        od.getOrderID().setId(orderId);
                         orderDetailsDAO.insertOrderDetail(od);
                     }
 
+                    // ✅ Cập nhật trạng thái đơn hàng thành SUCCESS
+                    ordersDAO.updateOrderStatus(orderId, "SUCCESS");
+
+                    // ✅ Nếu đơn hàng có nợ thì cộng vào balance của khách hàng
+                    double debt = order.getAmount() - order.getPaidAmount();
+                    if (Math.abs(debt) > 1e-6) {
+                        customerDAO customersDAO = new customerDAO();
+                        debtDAO debtNoteDAO = new debtDAO();
+                        String note = "Order ID: " + orderId;
+                        int storeId = order.getStoreId().getId();
+
+                        if ("Export".equalsIgnoreCase(order.getType())) {
+                            // Xuất kho, khách hàng nợ
+                            if ("debt".equalsIgnoreCase(balanceAction)) {
+                                customersDAO.updateCustomerDebt(order.getCustomerID().getId(), debt);
+                                debtNoteDAO.insertDebtNote(order.getCustomerID().getId(), -debt, note, order.getUserID().getName(), storeId);
+                            }
+                        } else if ("Import".equalsIgnoreCase(order.getType())) {
+                            // Nhập kho, cửa hàng nợ nhà cung cấp
+                            if ("debt".equalsIgnoreCase(balanceAction)) {
+                                customersDAO.updateCustomerDebt(order.getCustomerID().getId(), debt); // dùng lại customer nếu nhà cung cấp cùng bảng
+                                debtNoteDAO.insertDebtNote(order.getCustomerID().getId(), -debt, note, order.getUserID().getName(), storeId);
+                            }
+                        }
+                    }
                     processedStatus.put(order.getUserID().getId(), "done");
                 } else {
                     processedStatus.put(order.getUserID().getId(), "error");

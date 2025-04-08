@@ -231,11 +231,23 @@ VALUES
 
 INSERT INTO Zones (name, description, product_id, store_id, created_by, status)
 VALUES 
-('T1', 'Trái 1', 6, 1, 'Phan Ngọc Mai', 'Active'),
-('T2', 'Trái 2', 7, 1, 'Lê Phương Linh', 'Active'),
-('P1', 'Phải 1', 8, 1, 'Phạm Hoàng Anh', 'Active'),
-('P2', 'Phải 2', 9, 1, 'Phan Ngọc Mai', 'Active'),
-('P3', 'Phải 3', 10, 1, 'Lê Phương Linh', 'Active');
+('T1', 'Trái 1', 1, 1, 'System', 'Active'),
+('T2', 'Trái 2', 2, 1, 'System', 'Active'),
+('T3', 'Trái 3', 3, 1, 'System', 'Active'),
+('T4', 'Trái 4', 4, 1, 'System', 'Active'),
+('T5', 'Trái 5', 5, 1, 'System', 'Active'),
+('T6', 'Trái 6', 6, 1, 'System', 'Active'),
+('T7', 'Trái 7', 7, 1, 'System', 'Active'),
+('T8', 'Trái 8', 8, 1, 'System', 'Active'),
+('P1', 'Phải 1', 9, 1, 'System', 'Active'),
+('P2', 'Phải 2', 10, 1, 'System', 'Active'),
+('P3', 'Phải 3', 11, 1, 'System', 'Active'),
+('P4', 'Phải 4', 12, 1, 'System', 'Active'),
+('P5', 'Phải 5', 13, 1, 'System', 'Active'),
+('P6', 'Phải 6', 14, 1, 'System', 'Active'),
+('P7', 'Phải 7', 15, 1, 'System', 'Active'),
+('P8', 'Phải 8', 16, 1, 'System', 'Active');
+
 
 -- Insert into Customers
 INSERT INTO Customers (name, phone, address, balance, created_by, store_id, status)
@@ -245,3 +257,22 @@ VALUES
 ('Lê Hoàng Nam', '0912345680', '789 Lê Lợi, Hà Nội', 0, 'Phan Ngọc Mai', 1, 'Active'),
 ('Phạm Văn Hùng', '0912345681', '101 Trần Hưng Đạo, Hải Dương',0, 'Lê Phương Linh', 1, 'Active'),
 ('Hoàng Thị Hạnh', '0912345682', '222 Hai Bà Trưng, Hà Nội', 0, 'Lê Phương Linh', 1, 'Active');
+
+-- Thêm unitSize 1kg, 10kg, 20kg cho 16 sản phẩm
+INSERT INTO ProductUnits (product_id, unitSize) VALUES 
+(1, '1'), (1, '10'), (1, '20'),
+(2, '1'), (2, '10'), (2, '20'),
+(3, '1'), (3, '10'), (3, '20'),
+(4, '1'), (4, '10'), (4, '20'),
+(5, '1'), (5, '10'), (5, '20'),
+(6, '1'), (6, '10'), (6, '20'),
+(7, '1'), (7, '10'), (7, '20'),
+(8, '1'), (8, '10'), (8, '20'),
+(9, '1'), (9, '10'), (9, '20'),
+(10, '1'), (10, '10'), (10, '20'),
+(11, '1'), (11, '10'), (11, '20'),
+(12, '1'), (12, '10'), (12, '20'),
+(13, '1'), (13, '10'), (13, '20'),
+(14, '1'), (14, '10'), (14, '20'),
+(15, '1'), (15, '10'), (15, '20'),
+(16, '1'), (16, '10'), (16, '20');

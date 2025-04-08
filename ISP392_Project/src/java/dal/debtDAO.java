@@ -23,6 +23,15 @@ import java.util.Date;
  */
 public class debtDAO extends DBContext {
 
+    public debtDAO() {
+        try {
+            this.connection = getConnection(); // ✅ FIX lỗi NullPointerException
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi kết nối DB trong debtDAO constructor: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     public List<DebtNote> viewAllDebtInCustomer(String command, int customerId, int storeId, String startDate, String endDate, int index, int pageSize) {
         List<DebtNote> list = new ArrayList<>();
 
@@ -89,9 +98,23 @@ public class debtDAO extends DBContext {
         } catch (SQLException e) {
             System.err.println("Error fetching debts: " + e.getMessage());
             e.printStackTrace();
-        }
-
+        } 
         return list;
+    }
+
+    public void insertDebtNote(int customerId, double amount, String description, String createdBy, int storeId) {
+        String sql = "INSERT INTO debt_note (customers_id, amount, description, created_by, store_id, created_at, isDeleted) "
+                + "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 0)";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, customerId);
+            st.setDouble(2, amount);
+            st.setString(3, description);
+            st.setString(4, createdBy);
+            st.setInt(5, storeId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } 
     }
 
     public List<DebtNote> viewAllDebt(String command, int index, int pageSize, int storeID) {
@@ -141,8 +164,7 @@ public class debtDAO extends DBContext {
         } catch (SQLException e) {
             System.err.println("Error fetching debts: " + e.getMessage());
             e.printStackTrace();
-        }
-
+        } 
         return list;
     }
 
@@ -209,8 +231,7 @@ public class debtDAO extends DBContext {
         } catch (SQLException e) {
             System.err.println("Error fetching debts: " + e.getMessage());
             e.printStackTrace();
-        }
-
+        }  
         return debts;
     }
 
@@ -261,8 +282,7 @@ public class debtDAO extends DBContext {
         } catch (SQLException e) {
             System.err.println("Error counting debts: " + e.getMessage());
             e.printStackTrace();
-        }
-
+        }  
         return count;
     }
 
@@ -315,8 +335,7 @@ public class debtDAO extends DBContext {
         } catch (SQLException e) {
             System.err.println("Error fetching debts: " + e.getMessage());
             e.printStackTrace();
-        }
-
+        } 
         return list;
     }
 
@@ -351,7 +370,7 @@ public class debtDAO extends DBContext {
         } catch (SQLException e) {
             System.err.println("❌ SQL Error: " + e.getMessage());
             e.printStackTrace();
-        }
+        } 
         return false; // Không đóng connection ở đây
     }
 
@@ -387,7 +406,7 @@ public class debtDAO extends DBContext {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } 
         return false; // Nếu có lỗi hoặc không insert thành công thì trả về false
     }
 
@@ -401,23 +420,23 @@ public class debtDAO extends DBContext {
             }
         } catch (SQLException e) {
             System.out.println("getTotalDebtCount: " + e.getMessage());
-        }
+        } 
         return 0;
     }
-    
+
     public List<DebtNote> getDebtsByDateRange(LocalDate startDate, LocalDate endDate, int offset, int limit, int storeID) {
         List<DebtNote> list = new ArrayList<>();
-        String sql = "SELECT id, type, amount, description, created_at, status FROM Debt_note " +
-                    "WHERE store_id = ? AND DATE(created_at) BETWEEN ? AND ? " +
-                    "ORDER BY created_at DESC LIMIT ? OFFSET ?";
-        
+        String sql = "SELECT id, type, amount, description, created_at, status FROM Debt_note "
+                + "WHERE store_id = ? AND DATE(created_at) BETWEEN ? AND ? "
+                + "ORDER BY created_at DESC LIMIT ? OFFSET ?";
+
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, storeID);
             st.setString(2, startDate.toString());
             st.setString(3, endDate.toString());
             st.setInt(4, limit);
             st.setInt(5, offset);
-            
+
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 DebtNote debt = new DebtNote();
@@ -431,21 +450,21 @@ public class debtDAO extends DBContext {
             }
         } catch (SQLException e) {
             System.out.println("getDebtsByDateRange: " + e.getMessage());
-        }
+        } 
         return list;
     }
-    
+
     public List<DebtNote> getAllDebtsByDateRange(LocalDate startDate, LocalDate endDate, int storeID) {
         List<DebtNote> list = new ArrayList<>();
-        String sql = "SELECT id, type, amount, description, created_at, status FROM Debt_note " +
-                    "WHERE store_id = ? AND DATE(created_at) BETWEEN ? AND ? " +
-                    "ORDER BY created_at DESC";
-        
+        String sql = "SELECT id, type, amount, description, created_at, status FROM Debt_note "
+                + "WHERE store_id = ? AND DATE(created_at) BETWEEN ? AND ? "
+                + "ORDER BY created_at DESC";
+
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, storeID);
             st.setString(2, startDate.toString());
             st.setString(3, endDate.toString());
-            
+
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 DebtNote debt = new DebtNote();
@@ -459,7 +478,7 @@ public class debtDAO extends DBContext {
             }
         } catch (SQLException e) {
             System.out.println("getAllDebtsByDateRange: " + e.getMessage());
-        }
+        } 
         return list;
     }
 

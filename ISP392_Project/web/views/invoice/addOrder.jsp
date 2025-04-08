@@ -47,6 +47,8 @@
                 border: 1px solid var(--border-color);
                 border-radius: 8px;
                 padding: 20px;
+                overflow: visible;
+                position: relative;
             }
 
             .left-panel {
@@ -247,6 +249,10 @@
             }
 
             /* Search Input */
+            .search-boxx {
+                position: relative;
+            }
+
             .search-boxx input[type="text"] {
                 width: 100%;
                 padding: 12px 14px;
@@ -273,32 +279,15 @@
                 font-size: 12px;
             }
 
-            /* Container chứa danh sách gợi ý */
-           .search-suggestions {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 9999;
-    background-color: white;
-    display: none;
-    width: 100%;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
 
             /* Mỗi sản phẩm gợi ý */
             .product-item {
                 display: flex;
                 align-items: center;
 
-
-                background-color: var(--darker-bg);
-                border: 1px solid var(--border-color);
-                border-radius: 5px;
-                margin-bottom: 3px;
-
+                padding: 6px 8px;
                 cursor: pointer;
+                transition: background-color 0.2s ease-in-out;
             }
 
             /* Khi hover */
@@ -310,72 +299,42 @@
 
 
             /* Ảnh sản phẩm */
-            .product-image img {
-                width: 50px;
-                height: 50px;
-                border-radius: 5px;
-                object-fit: cover;
-            }
-
-            /* Container chứa thông tin sản phẩm */
-            .product-content {
-                display: flex;
-                flex-direction: column;
-                flex: 1;
-                margin-left: 25px;
-            }
-
-            /* Hàng chứa tên, số lượng, giá */
-            .product-info {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 10px;
-                width: 100%;
-            }
-
-            /* Tên sản phẩm */
-            .product-name {
-                font-size: 12px;
+            .product-item h3 {
+                font-size: 15px;
                 font-weight: bold;
-                flex: 2;
-                min-width: 120px;
-            }
-
-            /* Số lượng */
-            .product-quantity {
-                font-size: 12px;
-                color: var(--text-color);
+                margin: 0;
+                color: black;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 flex: 1;
-                text-align: center;
             }
 
-            /* Giá sản phẩm */
-            .product-price {
-                font-size: 12px;
+            .product-item p {
+                font-size: 14px;
                 color: var(--text-color);
-                flex: 1;
-                text-align: center;
+                margin: 0;
+                font-weight: 500;
+                white-space: nowrap;
             }
 
-            /* Mô tả sản phẩm */
-            .product-description {
-                font-size: 12px;
-                color: #aaa; /* Màu xám nhạt */
-                margin-top: 5px;
-                flex: 3;
-                text-align: left;
-                padding-left: 10px;
-            }
 
             /* Danh sách gợi ý */
             .search-suggestions {
-                max-height: 180px; /* Giới hạn chiều cao */
+                display: none;
+                position: absolute;
+                z-index: 1000;
+                background-color: #fff;
+                border: 1px solid #ccc;
+                max-height: 300px;
+                min-height: 50px;
                 overflow-y: auto;
                 overflow-x: hidden;
-                padding: 5px;
-                width: 100%; /* Đảm bảo bằng với ô tìm kiếm */
+                padding: 8px;
+                width: 100%;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
             }
+
 
             /* Mỗi khách hàng gợi ý */
             .customer-item {
@@ -454,7 +413,24 @@
             }
 
 
+            .back-button {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: #007bff;
+                color: white;
+                padding: 8px 14px;
+                border-radius: 5px;
+                text-decoration: none;
+                font-size: 14px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                z-index: 999;
+                transition: background-color 0.3s ease;
+            }
 
+            .back-button:hover {
+                background-color: #0056b3;
+            }
 
         </style>
 
@@ -463,7 +439,8 @@
         <div class="main-content">
 
 
-            <button onclick="openNewTab()">Add New Order</button>
+            <button onclick="openNewTab()" style="background-color: #007bff">Add New Order</button>
+            <a href="${pageContext.request.contextPath}/dashboard" class="back-button">Back to Dashboard</a>
 
             <script>
                 // Kiểm tra số hóa đơn hiện tại trong sessionStorage
@@ -485,16 +462,24 @@
                 Sales Invoice
             </h1>
             <form id="orderForm" action="Orders" method="post">
-
-
-
-
-
+                <c:if test="${not empty message}">
+                    <c:choose>
+                        <c:when test="${message == 'success'}">
+                            <div class="alert alert-success" role="alert">
+                                Order created successfully!
+                            </div>
+                        </c:when>
+                        <c:when test="${message == 'error'}">
+                            <div class="alert alert-danger" role="alert">
+                                Order creation failed. Please try again!
+                            </div>
+                        </c:when>
+                    </c:choose>
+                </c:if>
                 <div class="order-container">
 
                     <!-- LEFT PANEL: Product search, order items, notes -->
                     <div class="left-panel">
-
 
                         <!-- Product search -->
 
@@ -502,8 +487,6 @@
                         <div class="search-boxx">
 
                             <input type="text" id="search" placeholder="Search for product." >
-
-
                             <div id="suggestions" class="search-suggestions"></div>
                         </div>
 
@@ -519,12 +502,11 @@
                             console.log("Clear timeout");
                             clearTimeout(currentLoad);
                         }
-
                         let that = this;
                         currentLoad = setTimeout(function () {
-                            console.log("fetch customer");
+                            console.log("fetch product");
                             let query = $(that).val();
-                            if (query.length > 0) {
+                            if (query.trim().length > 0) {
                                 $.ajax({
                                     url: "SearchServlet",
                                     type: "GET",
@@ -533,11 +515,17 @@
                                         orderType: "Export"
                                     },
                                     success: function (data) {
+                                        console.log("Search response:", data);
                                         if (data.trim() !== "") {
-                                            $("#suggestions").html(data).show();
+                                            $("#suggestions").html(data).fadeIn(); // dùng fadeIn thay vì .show()
                                         } else {
-                                            $("#suggestions").hide();
+                                            $("#suggestions").fadeOut(100);
                                         }
+                                    },
+                                    error: function (xhr, status, error) {
+                                        console.error("Search error:", error);
+                                        console.error("Status:", status);
+                                        console.error("Response:", xhr.responseText);
                                     }
                                 });
                             } else {
@@ -546,16 +534,32 @@
                             currentLoad = null;
                         }, 500);
                     });
-                    // Ẩn danh sách khi click ra ngoài
+
+                    // Kiểm tra khi click trên document
                     $(document).on("click", function (event) {
-                        if (!$(event.target).closest("#search, #suggestions").length) {
-                            $("#suggestions").hide();
+                        if (!$(event.target).closest("#search").length &&
+                                !$(event.target).closest("#suggestions").length) {
+                            $("#suggestions").fadeOut(100); // hiệu ứng nhẹ nhàng
                         }
                     });
-                    // Hiển thị lại danh sách khi focus vào ô tìm kiếm (nếu có nội dung)
+
+                    // Hiển thị lại khi focus
                     $("#search").on("focus", function () {
+                        console.log("Search focused");
                         if ($(this).val().length > 0) {
-                            $("#suggestions").show();
+                            $.ajax({
+                                url: "SearchServlet",
+                                type: "GET",
+                                data: {
+                                    searchProduct: $(this).val(),
+                                    orderType: "Export"
+                                },
+                                success: function (data) {
+                                    console.log("Refreshed data on focus");
+                                    $("#suggestions").html(data);
+                                    $("#suggestions").show();
+                                }
+                            });
                         }
                     });
                 });
@@ -576,7 +580,6 @@
                                         <th>Unit Price</th>
                                         <th>Discount</th>
                                         <th>Amount</th>
-
                                         <th>Delete</th>
 
                                     </tr>
@@ -638,7 +641,7 @@
                         <script>
                             // Thêm biến role từ session
                             const userRole = "${sessionScope.role}";
-                            
+
                             // Hàm để ẩn số điện thoại cho staff
                             function maskPhoneNumber(phone) {
                                 if (phone.length >= 10) {
@@ -646,7 +649,7 @@
                                 }
                                 return phone;
                             }
-                            
+
                             // Cập nhật hàm selectCustomer
                             function selectCustomer(id, name, phone, balance) {
                                 $("#customerId").val(id);
@@ -687,12 +690,12 @@
                                                 success: function (data) {
                                                     console.log("Search response:", data);
                                                     if (data.trim() !== "") {
-                                                        $("#suggestionsCustomer").html(data).show();
+                                                        $("#suggestionsCustomer").html(data).fadeIn();
                                                     } else {
-                                                        $("#suggestionsCustomer").hide();
+                                                        $("#suggestionsCustomer").fadeOut(100);
                                                     }
                                                 },
-                                                error: function(xhr, status, error) {
+                                                error: function (xhr, status, error) {
                                                     console.error("Search error:", error);
                                                     console.error("Status:", status);
                                                     console.error("Response:", xhr.responseText);
@@ -723,7 +726,7 @@
                                 $("#customerName").text("Name: " + name);
 
                                 // Ẩn 3 số cuối số điện thoại
-                                let maskedPhone = phone.slice(0, 3) + "xxxxx" + phone.slice(8);
+                                let maskedPhone = (userRole === 'owner') ? phone : phone.slice(0, 3) + "xxxxx" + phone.slice(8);
                                 $("#customerPhone").text("Phone: " + maskedPhone);
 
                                 // Xác định cách hiển thị tổng nợ
@@ -854,7 +857,7 @@
                         <!-- Action buttons -->
                         <div class="action-buttons">
 
-                            <button type="submit" id="submitOrder">Add New Order</button>
+                            <button type="submit" id="submitOrder" style="background-color: #007bff">Add New Order</button>
 
                         </div>
 
@@ -943,6 +946,7 @@
                         unitTypeInput.addEventListener('change', () => recalculateRow(newRow, pricePerKg, availableQuantity));
                         discountInput.addEventListener('input', () => recalculateRow(newRow, pricePerKg, availableQuantity));
                         recalculateRow(newRow, pricePerKg, availableQuantity);
+                        $("#suggestions").hide();
                     }
                     function recalculateRow(row, pricePerKg, availableQuantity) {
 
@@ -1091,7 +1095,7 @@
                             // Tạo một thẻ div ẩn để chứa response HTML
                             let tempDiv = $("<div>").html(response);
 
-// Kiểm tra xem có thông báo thành công hay không
+                            // Kiểm tra xem có thông báo thành công hay không
                             if (tempDiv.find("#successMessage").length > 0) {
                                 alert("Khách hàng đã được thêm!");
                                 closeAddCustomerPopup();
@@ -1142,6 +1146,9 @@
                             success: function (response) {
                                 if (response.status === "done") {
                                     $("#orderStatus").text("✅ Tạo đơn hàng thành công!");
+                                    setTimeout(function () {
+                                        window.location.href = "orders/list"; // <-- Đường dẫn tới trang danh sách hóa đơn
+                                    }, 1500); // đợi 1.5 giây rồi chuyển hướng
                                 } else if (response.status === "error") {
                                     $("#orderStatus").text("❌ Lỗi: Tạo đơn hàng không thành công!");
                                 } else {

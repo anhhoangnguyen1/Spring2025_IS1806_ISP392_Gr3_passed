@@ -15,8 +15,7 @@ public class OrdersDAO extends DBContext {
         List<Orders> ordersList = new ArrayList<>();
         String sql = "SELECT * FROM Orders WHERE isDeleted = false";
 
-        try (PreparedStatement st = connection.prepareStatement(sql);
-             ResultSet rs = st.executeQuery()) {
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
 
             while (rs.next()) {
                 Orders order = mapResultSetToOrder(rs);
@@ -30,36 +29,46 @@ public class OrdersDAO extends DBContext {
         return ordersList;
     }
 
-  public Orders mapResultSetToOrder(ResultSet rs) throws SQLException {
-    return Orders.builder()
-            .id(rs.getInt("id"))
-            .customerID(Customers.builder()
-                    .id(rs.getInt("customer_id"))
-                    .build())
-            .userID(Users.builder()
-                    .id(rs.getInt("user_id"))
-                    .build())
-            .storeId(Stores.builder()
-                    .id(rs.getInt("store_id"))
-                    .build())
-            .type(rs.getString("type"))
-            .amount(rs.getDouble("amount"))
-            .paidAmount(rs.getDouble("paid_amount"))
-            .description(rs.getString("description"))
-            .status(rs.getString("status"))
-            .createdAt(rs.getDate("created_at"))
-            .createdBy(rs.getString("created_by"))
-            .updatedAt(rs.getDate("updated_at"))
-            .deleteAt(rs.getDate("delete_at"))
-            .deleteBy(rs.getString("delete_by"))
-            .isDeleted(rs.getBoolean("isDeleted"))
-            .build();
-}
+    public Orders mapResultSetToOrder(ResultSet rs) throws SQLException {
+        return Orders.builder()
+                .id(rs.getInt("id"))
+                .customerID(Customers.builder()
+                        .id(rs.getInt("customers_id"))
+                        .build())
+                .userID(Users.builder()
+                        .id(rs.getInt("user_id"))
+                        .build())
+                .storeId(Stores.builder()
+                        .id(rs.getInt("store_id"))
+                        .build())
+                .type(rs.getString("type"))
+                .amount(rs.getDouble("amount"))
+                .paidAmount(rs.getDouble("paidAmount"))
+                .description(rs.getString("description"))
+                .status(rs.getString("status"))
+                .createdAt(rs.getDate("created_at"))
+                .createdBy(rs.getString("created_by"))
+                .updatedAt(rs.getDate("updated_at"))
+                .deleteAt(rs.getDate("delete_at"))
+                .deleteBy(rs.getString("delete_by"))
+                .isDeleted(rs.getBoolean("isDeleted"))
+                .build();
+    }
 
+    public void updateOrderStatus(int orderId, String status) {
+        String sql = "UPDATE Orders SET status = ? WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, status);
+            st.setInt(2, orderId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public int insertOrder(Orders order) {
-        String sql = "INSERT INTO Orders (customer_id, user_id, store_id, type, amount, paid_amount, description, status, created_at, created_by, isDeleted) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_DATE, ?, false)";
+        String sql = "INSERT INTO Orders (customers_id, user_id, store_id, type, amount, paidAmount, description, status, created_at, created_by, isDeleted) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_DATE, ?, false)";
 
         try (PreparedStatement st = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             st.setInt(1, order.getCustomerID().getId());

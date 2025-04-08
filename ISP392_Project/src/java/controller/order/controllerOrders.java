@@ -58,13 +58,21 @@ public class controllerOrders extends HttpServlet {
         String orderType = request.getParameter("orderType"); // 1: xuất, 2: nhập
         String userName = (String) session.getAttribute("username");
         int customerId = Integer.parseInt(request.getParameter("customerId"));
-        int userId = (int) session.getAttribute("userID");
-
+        int userId = (int) session.getAttribute("userId");
+        System.out.println("User Id: " + userId);
         String status;
-        double totalDiscount = 0;
 
         if ("Export".equals(orderType)) {
-            totalDiscount = Double.parseDouble(request.getParameter("totalDiscount"));
+            String discountStr = request.getParameter("totalDiscount");
+            double totalDiscount = 0;
+            if (discountStr != null && !discountStr.trim().isEmpty()) {
+                try {
+                    totalDiscount = Double.parseDouble(discountStr.trim());
+                } catch (NumberFormatException e) {
+                    totalDiscount = 0; // hoặc log lỗi
+                    System.err.println("Invalid discount value: " + discountStr);
+                }
+            }
             if (totalDiscount >= 200000) {
                 status = "CẢNH BÁO! Giảm giá: " + totalDiscount + "\n" + request.getParameter("status");
             } else {
@@ -74,8 +82,20 @@ public class controllerOrders extends HttpServlet {
             status = request.getParameter("status");
         }
 
-        double totalOrderPrice = Double.parseDouble(request.getParameter("totalOrderPriceHidden"));
-        double paidAmount = Double.parseDouble(request.getParameter("paidAmount"));
+        String totalPriceStr = request.getParameter("totalOrderPriceHidden");
+        double totalOrderPrice = 0;
+        if (totalPriceStr != null && !totalPriceStr.trim().isEmpty()) {
+            try {
+                totalOrderPrice = Double.parseDouble(totalPriceStr.trim());
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid number format for totalOrderPriceHidden: " + totalPriceStr);
+            }
+        }
+        String paidAmountStr = request.getParameter("paidAmount");
+        double paidAmount = 0;
+        if (paidAmountStr != null && !paidAmountStr.trim().isEmpty()) {
+            paidAmount = Double.parseDouble(paidAmountStr);
+        }
         double debtAmount = Double.parseDouble(request.getParameter("balanceAmount"));
         String balanceAction = request.getParameter("balanceAction");
         double epsilon = 1e-9;
@@ -86,7 +106,7 @@ public class controllerOrders extends HttpServlet {
             String[] totalPrices = request.getParameterValues("totalPriceHidden");
             String[] unitPrices = request.getParameterValues("unitPriceHidden");
             String[] quantities = request.getParameterValues("totalWeight");
-            String[] discounts = "1".equals(orderType) ? request.getParameterValues("discount") : null;
+            String[] discounts = "Export".equals(orderType) ? request.getParameterValues("discount") : null;
 
             List<OrderDetails> orderDetailsList = new ArrayList<>();
             double calculatedTotalAmount = 0;
@@ -97,10 +117,19 @@ public class controllerOrders extends HttpServlet {
                     String productName = productNames[i];
                     double price = Double.parseDouble(totalPrices[i]);
                     double unitPrice = Double.parseDouble(unitPrices[i]);
-                    double discount = "1".equals(orderType) ? Double.parseDouble(discounts[i]) : 0.0;
+                    double discount = "Export".equals(orderType) ? Double.parseDouble(discounts[i]) : 0.0;
                     int quantity = Integer.parseInt(quantities[i]);
                     double actualUnitPrice = 0;
                     double expectedPrice = 0;
+                    System.out.println(">>>>> DEBUG ORDER START <<<<<");
+                    System.out.println("customerId: " + customerId);
+                    System.out.println("userId: " + userId);
+                    System.out.println("storeId: " + session.getAttribute("storeID"));
+                    System.out.println("totalOrderPrice: " + totalOrderPrice);
+                    System.out.println("paidAmount: " + paidAmount);
+                    System.out.println("balanceAmount: " + debtAmount);
+                    System.out.println("orderDetailsList.size: " + orderDetailsList.size());
+                    System.out.println(">>>>> DEBUG ORDER END <<<<<");
 
                     if ("Export".equals(orderType)) {
                         int availableQuantity = productsDAO.INSTANCE.getProductQuantity(productID);
@@ -111,6 +140,7 @@ public class controllerOrders extends HttpServlet {
                             response.getWriter().write("{\"status\": \"error\", \"message\": \"Lỗi dữ liệu sản phẩm, vui lòng kiểm tra lại.\"}");
                             return;
                         }
+
                     } else {
                         actualUnitPrice = unitPrice;
                         expectedPrice = unitPrice * quantity;
@@ -122,7 +152,13 @@ public class controllerOrders extends HttpServlet {
                     }
 
                     calculatedTotalAmount += expectedPrice;
-
+                    int storeId = 0;
+                    try {
+                        storeId = Integer.parseInt((String) session.getAttribute("storeID"));
+                    } catch (NumberFormatException | NullPointerException e) {
+                        response.getWriter().write("{\"status\": \"error\", \"message\": \"Không lấy được storeID từ session.\"}");
+                        return;
+                    }
                     OrderDetails od = OrderDetails.builder()
                             .productID(Products.builder().productId(productID).build())
                             .productName(productName)
@@ -132,10 +168,19 @@ public class controllerOrders extends HttpServlet {
                             .quantity(quantity)
                             .description("Chi tiết đơn hàng")
                             .status("ACTIVE")
-                            .storeId(Stores.builder().id((int) session.getAttribute("storeID")).build())
+                            .storeId(Stores.builder().id(storeId).build())
                             .build();
 
                     orderDetailsList.add(od);
+                    // ✅ Trừ số lượng tồn kho
+                    int availableQuantity = productsDAO.INSTANCE.getProductQuantity(productID);
+                    int newQuantity = availableQuantity - quantity;
+                    boolean updated = productsDAO.INSTANCE.updateProductQuantity(productID, newQuantity);
+                    if (!updated) {
+                        response.getWriter().write("{\"status\": \"error\", \"message\": \"Không thể cập nhật số lượng tồn kho.\"}");
+                        return;
+                    }
+
                 }
             }
 
@@ -150,13 +195,14 @@ public class controllerOrders extends HttpServlet {
             } else {
                 debtAmount = 0.0;
             }
+            int storeId = Integer.parseInt((String) session.getAttribute("storeID")); // ✅ đúng
 
             // Tạo đơn hàng
             Orders order = Orders.builder()
                     .customerID(Customers.builder().id(customerId).build())
                     .userID(Users.builder().id(userId).build())
-                    .storeId(Stores.builder().id((int) session.getAttribute("storeID")).build())
-                    .type("1".equals(orderType) ? "Export" : "Import")
+                    .storeId(Stores.builder().id(storeId).build())
+                    .type("Export".equals(orderType) ? "Export" : "Import")
                     .amount(calculatedTotalAmount)
                     .paidAmount(paidAmount)
                     .description(status)
@@ -167,13 +213,16 @@ public class controllerOrders extends HttpServlet {
             // Gửi vào hàng đợi
             OrderWorker.startWorker();
             OrderWorker.clearProcessedOrder(userId);
-            OrderQueue.addOrder(new OrderTask(order, orderDetailsList));
+            OrderQueue.addOrder(new OrderTask(order, orderDetailsList, balanceAction));
 
-            response.getWriter().write("{\"status\": \"processing\"}");
+            request.setAttribute("message", "success");
+            request.getRequestDispatcher("views/invoice/addOrder.jsp").forward(request, response);
 
         } catch (Exception ex) {
-            Logger.getLogger(controllerOrders.class.getName()).log(Level.SEVERE, null, ex);
-            response.getWriter().write("{\"status\": \"error\", \"message\": \"Lỗi hệ thống khi tạo đơn hàng.\"}");
+            ex.printStackTrace(); // In log chi tiết ra console
+            Logger.getLogger(controllerOrders.class.getName()).log(Level.SEVERE, "Lỗi khi tạo đơn hàng", ex);
+            request.setAttribute("message", "error");
+            request.getRequestDispatcher("views/invoice/addOrder.jsp").forward(request, response);
         }
     }
 

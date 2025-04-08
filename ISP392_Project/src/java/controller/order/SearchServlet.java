@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -47,120 +48,108 @@ public class SearchServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         String keyword = request.getParameter("searchProduct");
-
         String orderType = request.getParameter("orderType"); // Export hoặc Import
+        System.out.println("OrderType: " + orderType); // để xác nhận
 
-        int userId = (int) session.getAttribute("userID");
+        System.out.println("Search Request - Keyword: " + keyword + ", OrderType: " + orderType + ", StoreID: " + storeID);
 
         if (keyword != null && !keyword.trim().isEmpty()) {
+            // Thêm storeID vào tìm kiếm sản phẩm để lọc theo cửa hàng
             List<Products> products = productsDAO.INSTANCE.searchProductsByNameO(keyword);
+            // Hoặc nếu bạn muốn lọc theo cửa hàng:
+            // List<Products> products = productsDAO.INSTANCE.searchProductsByNameAndStore(keyword, storeID);
+
+            System.out.println("Từ khóa: " + keyword);
+            System.out.println("Số sản phẩm tìm thấy: " + products.size());
 
             if (products.isEmpty()) {
                 out.println("<p>Can not find product.</p>");
             } else {
-                // Bạn có thể bọc toàn bộ danh sách trong 1 container lớn
-                out.println("<div class='search-suggestions'>");
+                // Bọc toàn bộ danh sách trong 1 container lớn
 
                 for (Products product : products) {
+                    String escapedName = product.getName().replace("'", "\\'").replace("\"", "\\\"");
 
-                    // Lấy danh sách unitSizes từ bảng ProductUnits (đã trả về List<Integer>)
-                    List<Integer> unitSizes = productsDAO.INSTANCE.getProductUnitsByProductID(product.getProductId());
-
-                    // Lấy danh sách zones từ bảng ProductZones
-                    List<String> zones = productsDAO.INSTANCE.getZonesByProductID(product.getProductId());
-                    // Chuyển danh sách unitSizes thành chuỗi JavaScript Array
-                    StringBuilder unitSizesStr = new StringBuilder("[");
-                    for (int i = 0; i < unitSizes.size(); i++) {
-                        unitSizesStr.append(unitSizes.get(i));
-                        if (i < unitSizes.size() - 1) {
-                            unitSizesStr.append(",");
+                    try {
+                        // Lấy danh sách unitSizes từ bảng ProductUnits
+                        List<Integer> unitSizes = productsDAO.INSTANCE.getProductUnitsByProductID(product.getProductId());
+                        if (unitSizes == null || unitSizes.isEmpty()) {
+                            unitSizes = Arrays.asList(1); // mặc định 1kg
                         }
-                    }
-                    unitSizesStr.append("]");
-                    // Chuyển danh sách zones thành chuỗi JavaScript Array
-                    StringBuilder zonesStr = new StringBuilder("[");
-                    for (int i = 0; i < zones.size(); i++) {
-                        zonesStr.append("\"").append(zones.get(i)).append("\"");
-                        if (i < zones.size() - 1) {
-                            zonesStr.append(",");
+                        System.out.println("unitSizes for Product " + product.getName() + ": " + unitSizes);
+
+                        // Lấy danh sách zones từ bảng ProductZones
+                        List<String> zones = productsDAO.INSTANCE.getZonesByProductID(product.getProductId());
+
+                        // Chuyển danh sách unitSizes thành chuỗi JavaScript Array
+                        StringBuilder unitSizesStr = new StringBuilder("[");
+                        System.out.println("Product: " + product.getName());
+
+                        for (int i = 0; i < unitSizes.size(); i++) {
+                            unitSizesStr.append(unitSizes.get(i));
+                            if (i < unitSizes.size() - 1) {
+                                unitSizesStr.append(",");
+                            }
                         }
+                        unitSizesStr.append("]");
+                        System.out.println("unitSizesStr: " + unitSizesStr.toString());
+
+                        // Chuyển danh sách zones thành chuỗi JavaScript Array
+                        StringBuilder zonesStr = new StringBuilder("[");
+                        for (int i = 0; i < zones.size(); i++) {
+                            zonesStr.append("\"").append(zones.get(i)).append("\"");
+                            if (i < zones.size() - 1) {
+                                zonesStr.append(",");
+                            }
+                        }
+                        zonesStr.append("]");
+
+                        if ("Export".equalsIgnoreCase(orderType)) {
+                            out.println("<div class='product-item' onclick=\"addProductToOrder('"
+                                    + product.getProductId() + "','"
+                                    + escapedName + "',"
+                                    + product.getPrice() + ","
+                                    + product.getQuantity() + ","
+                                    + unitSizesStr.toString() + ")\">");
+
+//                            // Container chứa nội dung
+//
+//                            // Hàng chứa tên, số lượng và giá
+                            out.println("<h3>" + product.getName() + "</h3>");
+                            out.println("<p>Số lượng: " + product.getQuantity() + "</p>");
+
+                            out.println("</div>"); // đóng div .product-item
+
+                        } else {
+                            // Code cho Import
+                            // Xuất HTML với unitSizes được truyền vào addProductToOrder()
+                            out.println("<div class='product-item' onclick=\"addProductToOrder("
+                                    + product.getProductId() + ", '"
+                                    + escapedName.replace("'", "&#39;").replace("\"", "&quot;") + "', "
+                                    + product.getPrice() + ", "
+                                    + product.getQuantity() + ", "
+                                    + unitSizesStr.toString() + ")\">");
+
+                            // Hàng chứa tên, số lượng và giá
+                            out.println("<h3>" + product.getName() + "</h3>");
+                            out.println("<p>Số lượng: " + product.getQuantity() + "</p>");
+
+                            out.println("</div>"); // đóng div .product-item
+                        }
+                    } catch (Exception e) {
+                        // Log lỗi nếu có
+                        System.err.println("Error processing product: " + product.getProductId());
+                        e.printStackTrace();
                     }
-                    zonesStr.append("]");
-
-                    if ("Export".equalsIgnoreCase(orderType)) {
-                        // Xuất HTML với unitSizes được truyền vào addProductToOrder()
-                        out.println("<div class='product-item' onclick=\"addProductToOrder('"
-                                + product.getProductId() + "','"
-                                + product.getName() + "',"
-                                + unitSizesStr.toString() + ")\">");
-
-                        // Ảnh sản phẩm
-                        out.println("<div class='product-image'>"
-                                + "<img src='" + product.getImage() + "' alt='Product Image' />"
-                                + "</div>");
-
-                        // Container chứa nội dung
-                        out.println("<div class='product-content'>");
-
-                        // Hàng chứa tên, số lượng và giá
-                        out.println("<div class='product-info'>");
-                        out.println("<h3 class='product-name'>" + product.getName() + "</h3>");
-                        out.println("<p class='product-quantity'>Số lượng: " + product.getQuantity() + "</p>");
-                        out.println("<p class='product-price'>Giá Bán: " + formatter.format(product.getPrice()) + "</p>");
-                        out.println("</div>");
-
-                        // Mô tả sản phẩm
-                        out.println("<p class='product-description'>"
-                                + (product.getDescription() != null ? product.getDescription() : "")
-                                + "</p>");
-                        // Hiển thị danh sách zones
-                        out.println("<p class='product-zones'>Kho: " + String.join(", ", zones) + "</p>");
-
-                        out.println("</div>"); // đóng div .product-content
-                        out.println("</div>"); // đóng div .product-item
-
-                    } else {
-
-                        // Xuất HTML với unitSizes được truyền vào addProductToOrder()
-                        out.println("<div class='product-item' onclick=\"addProductToOrder('"
-                                + product.getProductId() + "','"
-                                + product.getName() + "','"
-                                + (BigDecimal) product.getPrice() + "','"
-                                + product.getQuantity() + "',"
-                                + unitSizesStr.toString() + ")\">");
-                        // Ảnh sản phẩm
-                        out.println("<div class='product-image'>"
-                                + "<img src='" + product.getImage() + "' alt='Product Image' />"
-                                + "</div>");
-
-                        // Container chứa nội dung
-                        out.println("<div class='product-content'>");
-
-                        // Hàng chứa tên, số lượng và giá
-                        out.println("<div class='product-info'>");
-                        out.println("<h3 class='product-name'>" + product.getName() + "</h3>");
-                        out.println("<p class='product-quantity'>Số lượng: " + product.getQuantity() + "</p>");
-                        out.println("<p class='product-price'>Giá Bán: " + formatter.format(product.getPrice()) + "</p>");
-                        out.println("</div>");
-
-                        // Mô tả sản phẩm
-                        out.println("<p class='product-description'>"
-                                + (product.getDescription() != null ? product.getDescription() : "")
-                                + "</p>");
-                        // Hiển thị danh sách zones
-                        out.println("<p class='product-zones'>Kho: " + String.join(", ", zones) + "</p>");
-
-                        out.println("</div>"); // đóng div .product-content
-                        out.println("</div>"); // đóng div .product-item
-                    }
-
                 }// kết thúc for
 
-                out.println("</div>"); // đóng container lớn
             }
+        } else {
+            out.println("<p>Please enter a search keyword.</p>");
         }
     }
 
+    // Các phương thức khác giữ nguyên
     /**
      * Handles the HTTP <code>POST</code> method.
      *
@@ -178,7 +167,7 @@ public class SearchServlet extends HttpServlet {
         String role = (String) session.getAttribute("role");
 
         if (role != null && role.equals("admin")) {
-            response.sendRedirect("/dashboard.jsp");
+            response.sendRedirect("/dashboard");
             return;
         }
 

@@ -118,6 +118,17 @@ public class customerDAO extends DBContext {
         return 0;
     }
 
+    public void updateCustomerDebt(int customerId, double debtAmount) {
+        String sql = "UPDATE Customers SET balance = balance + ? WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setDouble(1, debtAmount);
+            st.setInt(2, customerId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public List<Customers> searchCustomers(String keyword, int pageIndex, int pageSize, String sortBy, String sortOrder, int storeID, String balanceFilter) {
         List<Customers> list = new ArrayList<>();
         List<String> allowedSortColumns = List.of("id", "name", "phone", "balance", "created_at", "updated_at");

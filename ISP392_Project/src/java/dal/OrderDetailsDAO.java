@@ -9,7 +9,7 @@ import java.sql.SQLException;
 public class OrderDetailsDAO extends DBContext {
 
     public void insertOrderDetail(OrderDetails od) {
-        String sql = "INSERT INTO OrderDetails (order_id, store_id, product_id, product_name, price, unit_price, quantity, import_price, created_at, status, isDeleted) " +
+        String sql = "INSERT INTO OrderDetails (order_id, store_id, product_id, productName, price, unitPrice, quantity, importPrice, created_at, status, isDeleted) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_DATE, ?, false)";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
