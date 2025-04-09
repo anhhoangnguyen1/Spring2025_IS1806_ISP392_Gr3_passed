@@ -183,7 +183,7 @@ public class controllerDebts extends HttpServlet {
                 return;
             }
 
-            List<DebtNote> list = debts.getDebtByCustomerId(id, storeID,startDate, endDate);
+            List<DebtNote> list = debts.getDebtByCustomerId(id, storeID, startDate, endDate);
 
             request.setAttribute("list", list);
             String notification = (String) request.getSession().getAttribute("Notification");
@@ -556,20 +556,22 @@ public class controllerDebts extends HttpServlet {
 
             // Kiểm tra và chuyển đổi 'created_at'
             String createdAtStr = request.getParameter("created_at");
-            LocalDateTime createdAt = null;
-            if (createdAtStr == null || createdAtStr.trim().isEmpty()) {
-                request.getSession().setAttribute("Notification", "Created date is required.");
-                response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
-                return; // Nếu created_at rỗng, không tiếp tục xử lý
-            }
+            LocalDateTime createdAt;
 
-            try {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-                createdAt = LocalDateTime.parse(createdAtStr, formatter);
-            } catch (DateTimeParseException e) {
-                request.getSession().setAttribute("Notification", "Invalid date format. Expected format: yyyy-MM-dd'T'HH:mm.");
-                response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
-                return; // Nếu không thể chuyển đổi định dạng ngày, không tiếp tục
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+
+            if (createdAtStr == null || createdAtStr.trim().isEmpty()) {
+                // Nếu input trống -> lấy thời gian hiện tại
+                createdAt = LocalDateTime.now();
+            } else {
+                try {
+                    createdAt = LocalDateTime.parse(createdAtStr, formatter);
+                } catch (DateTimeParseException e) {
+                    // Nếu định dạng sai -> hiện thông báo lỗi và dừng xử lý
+                    request.getSession().setAttribute("Notification", "Invalid date format. Expected format: yyyy-MM-dd'T'HH:mm.");
+                    response.sendRedirect("Debts?service=debtInCustomers&customer_id=" + customer_id);
+                    return;
+                }
             }
 
             LocalDateTime updatedAt = LocalDateTime.now();

@@ -212,19 +212,11 @@ public class controllerProducts extends HttpServlet {
                         return;
                     }
 
-
-                    imageFileName = getSubmittedFileName(file);
-                    String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest2\\ISP392_Project\\web\\views\\product\\images";
-                    File uploadDir = new File(uploadDirectory);
-                    if (!uploadDir.exists()) {
-                        uploadDir.mkdirs();
-
                     // 2. Lấy đường dẫn upload từ context (tương đối)
                     String uploadDirectory = getServletContext().getRealPath("/views/product/images");
                     if (uploadDirectory == null) {
                         // Fallback nếu không lấy được realPath
                         uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest3\\ISP392_Project\\web\\views\\product\\images";
-
                     }
 
                     // 3. Tạo thư mục nếu chưa tồn tại
@@ -279,27 +271,19 @@ public class controllerProducts extends HttpServlet {
                 Date updatedAt = new java.sql.Date(System.currentTimeMillis());
                 boolean isDelete = false;
                 String createdAtStr = request.getParameter("createdAt");
-                java.sql.Date sqlDate;
+                java.sql.Date createdAt = null;
 
-                if (createdAtStr != null && !createdAtStr.isEmpty()) {
-                    try {
-                        // Parse as java.util.Date first
-                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd"); // adjust pattern as needed
-                        java.util.Date utilDate = format.parse(createdAtStr);
-
-                        // Convert to java.sql.Date
-                        sqlDate = new java.sql.Date(utilDate.getTime());
-                    } catch (ParseException e) {
-                        // Handle parsing error (use current date as fallback)
-                        sqlDate = new java.sql.Date(System.currentTimeMillis());
-                    }
-                } else {
-                    // If no parameter provided, use current date
-                    sqlDate = new java.sql.Date(System.currentTimeMillis());
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); 
+                    java.util.Date utilDate = sdf.parse(createdAtStr);        
+                    createdAt = new java.sql.Date(utilDate.getTime());         
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
+
                 String[] zoneNames = request.getParameterValues("zoneName");
 
-                Products product = new Products(productId, name, imageFileName, price, quantity, description, sqlDate, createBy, deletedAt, deletedBy, isDelete, updatedAt, status);
+                Products product = new Products(productId, name, imageFileName, price, quantity, description, createdAt, createBy, deletedAt, deletedBy, isDelete, updatedAt, status);
                 List<Zone> zones = new ArrayList<>();
                 if (zoneNames != null && zoneNames.length > 0) {
                     for (String zoneName : zoneNames) {
@@ -352,13 +336,10 @@ public class controllerProducts extends HttpServlet {
                 // 1. Kiểm tra loại file
                 String fileType = file.getContentType();
                 if (!ALLOWED_MIME_TYPES.contains(fileType)) {
-                    session.setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
+                    request.setAttribute("Notification", "Chỉ chấp nhận file ảnh JPG, PNG hoặc GIF");
                     request.getRequestDispatcher("Products?service=products").forward(request, response);
                     return;
                 }
-
-
-                String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest2\\ISP392_Project\\web\\views\\product\\images";
 
                 // 2. Sử dụng đường dẫn tương đối trong webapp thay vì đường dẫn tuyệt đối
                 String uploadDirectory = getServletContext().getRealPath("/views/product/images");
@@ -369,7 +350,6 @@ public class controllerProducts extends HttpServlet {
                 imageFileName = "img_" + System.currentTimeMillis() + fileExtension;
 
                 // 4. Tạo thư mục nếu chưa tồn tại
-
                 File uploadDir = new File(uploadDirectory);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
