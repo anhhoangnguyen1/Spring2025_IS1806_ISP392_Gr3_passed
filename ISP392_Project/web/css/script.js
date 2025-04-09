@@ -126,30 +126,7 @@ function deleteSelected() {
     window.location.href = query;
 }
 
-document.getElementById("toggle-checkbox-btn").addEventListener("click", function () {
-    const checkboxColumns = document.querySelectorAll('.checkbox-column');
 
-    if (checkboxColumns.length === 0)
-        return;
-
-    const isHidden = checkboxColumns[0].style.display === 'none' || checkboxColumns[0].style.display === '';
-
-    checkboxColumns.forEach(column => {
-        column.style.display = isHidden ? 'table-cell' : 'none';
-    });
-    const icon = this.querySelector("i");
-    if (icon) {
-        icon.classList.toggle("fa-list-check");
-        icon.classList.toggle("fa-eye-slash");
-    }
-});
-//Check box tất cả sản phẩm
-function toggleSelectAll(source) {
-    const checkboxes = document.querySelectorAll('.product-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = source.checked;
-    });
-}
 const dropArea = document.getElementById("dropArea");
 const fileInput = document.getElementById("file");
 
@@ -179,30 +156,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedOption = document.getElementById("selectedOption");
     const options = document.querySelectorAll(".option");
 
-    // Toggle options container visibility
-    selectedOption.addEventListener("click", function () {
-        optionsContainer.style.display = optionsContainer.style.display === "block" ? "none" : "block";
-    });
 
-    // Hide options when clicked outside
-    document.addEventListener("click", function (e) {
-        if (!e.target.closest(".custom-select")) {
-            optionsContainer.style.display = "none";
-        }
-    });
 
-    // Search functionality
-    searchBox.addEventListener("input", function () {
-        const searchTerm = searchBox.value.toLowerCase();
-        options.forEach(option => {
-            const optionText = option.textContent.toLowerCase();
-            if (optionText.includes(searchTerm)) {
-                option.style.display = "block";
-            } else {
-                option.style.display = "none";
-            }
-        });
-    });
 
     // Select option and update the selected option text
     options.forEach(option => {

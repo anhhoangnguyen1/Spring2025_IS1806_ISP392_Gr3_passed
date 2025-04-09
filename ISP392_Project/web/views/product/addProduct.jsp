@@ -34,10 +34,15 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Image</label>
-                                <img id="productImagePreview" src="" alt="Preview Image" style="width: 150px; height: 150px; object-fit: cover; margin-bottom: 10px; display: none;">
-                                <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required="">
+                                <label>Product Image</label>
+                                <!-- Ảnh hiện tại -->
+                                <img id="productImagePreview" 
+                                     
+                                     alt="Current Product Image" 
+                                     style="width: 150px; height: 150px; object-fit: cover; margin-bottom: 10px; display: block;" />
+                                <input type="file" name="image" accept="image/*" onchange="previewImage(event)">
                             </div>
+
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label>Price</label>
@@ -74,20 +79,21 @@
             </div>
         </div>
         <script>
-function previewImage(event) {
-    var file = event.target.files[0];  
-    var reader = new FileReader();     
+            function previewImage(event) {
+                const file = event.target.files[0]; // Lấy file đầu tiên
+                const reader = new FileReader(); // Đọc nội dung file
 
-    if (file) {
-        reader.onload = function (e) {
-            var imgPreview = document.getElementById('productImagePreview');
-            imgPreview.src = e.target.result;
-            imgPreview.style.display = "block"; // Hiện ảnh
-        }
-        reader.readAsDataURL(file);
-    }
-}
-
+                if (file && file.type.startsWith("image/")) {
+                    reader.onload = function (e) {
+                        const imgPreview = document.getElementById('productImagePreview');
+                        imgPreview.src = e.target.result;
+                        imgPreview.style.display = "block"; // Hiện ảnh
+                    };
+                    reader.readAsDataURL(file); // Đọc file dạng base64
+                } else {
+                    alert("Vui lòng chọn một tệp hình ảnh hợp lệ.");
+                }
+            }
         </script>
     </body>
 </html>

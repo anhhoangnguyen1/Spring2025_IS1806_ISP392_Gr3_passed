@@ -195,22 +195,24 @@
                 }
             }, 3000);
 
-            $(".myImg").on("click", function () {
-                var modal = $("#myModal");
-                var modalImg = $("#img01");
-                var captionText = $("#caption");
+            $(document).ready(function () {
+                $(".myImg").on("click", function () {
+                    var modal = $("#myModal");
+                    var modalImg = $("#img01");
+                    var captionText = $("#caption");
 
-                modal.show();
-                modalImg.attr("src", this.src);
-                captionText.text(this.alt);
+                    modal.show();
+                    modalImg.attr("src", this.src);
+                    captionText.text(this.alt);
+                });
+
+                $("#myModal").on("click", function (e) {
+                    if (e.target === this) {
+                        $(this).hide();
+                    }
+                });
             });
 
-            // Đóng modal khi bấm vào nền đen
-            $("#myModal").on("click", function (e) {
-                if (e.target === this) {
-                    $(this).hide();
-                }
-            });
 
         </script> 
         <c:import url="editProduct.jsp" />

@@ -112,7 +112,7 @@
                                     <td>${product.productId}</td>
                                     <td class="bold-row">${product.name}</td>
                                     <td>
-                                        <img src="/ISP392_Project/views/product/images/${product.image}" class="myImg" style="width: 100px; height: 100px; object-fit: cover;" alt="Product Image" />
+                                        <img src="/ISP392_Project/views/product/images/${product.image}?v=${System.currentTimeMillis()}" class="myImg" style="width: 100px; height: 100px; object-fit: cover;" alt="Product Image" />
                                     </td>
                                     <td><fmt:formatNumber value="${product.price}" pattern="###,##0"/></td>
                                     <td>${product.zoneName}</td>

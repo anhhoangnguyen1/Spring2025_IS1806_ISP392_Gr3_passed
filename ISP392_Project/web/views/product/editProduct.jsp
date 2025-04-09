@@ -52,6 +52,7 @@
                                         </select>
                                     </div>
                                 </div>
+                                <input type="hidden" name="createdAt" value="${product.createdAt}">
                                 <input type="hidden" name="status" value="${product.status}">
                                 <input type="hidden" name="quantity" value="${product.quantity}">
                                 <input type="hidden" name="index" value="${index}">
