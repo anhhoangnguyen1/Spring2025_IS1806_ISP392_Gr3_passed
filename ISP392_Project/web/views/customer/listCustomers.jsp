@@ -150,9 +150,6 @@
                                     <td>${customer.createdAt}</td>
                                     <td>${customer.createdBy}</td>
                                     <td class="sticky-col">
-                                        <button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#">
-                                            View
-                                        </button>
                                         <button type="button" class="btn btn-outline-danger mr-lg-auto" data-toggle="modal" data-target="#debtListModal${customer.id}">
                                             Debt note
                                         </button>
@@ -319,7 +316,6 @@
                                     '<td>' + customer.createdAt + '</td>' +
                                     '<td>' + customer.createdBy + '</td>' +
                                     '<td class="sticky-col">' +
-                                    '<button type="button" class="btn btn-outline-primary mr-lg-auto" data-toggle="modal" data-target="#">View</button> ' +
                                     '<a href="${pageContext.request.contextPath}/Debts?service=debtInCustomers&customer_id=' + customer.id + '" class="btn btn-outline-danger mr-lg-auto">Debt note</a> ' +
                                     editButton + // Chỉ hiển thị nút Edit nếu không phải staff
                                     '</td>' +

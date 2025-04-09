@@ -380,29 +380,46 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                background: black;
-                color: white;
-                padding: 15px;
-                border-radius: 5px;
-                width: 280px;
+                background-color: #fff;
+                padding: 20px;
+                width: 400px;
+                border-radius: 8px;
+                box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+                z-index: 9999;
+            }
+
+            .popup h2 {
+                font-size: 24px;
                 text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .popup label {
+                font-weight: bold;
+                margin-bottom: 10px;
+                display: block;
             }
 
             .popup input {
                 width: 100%;
                 padding: 8px;
-                margin: 5px 0;
-                background: black;
-                color: white;
-                border: 1px solid white;
+                margin: 8px 0;
+                border: 1px solid #ccc;
+                border-radius: 4px;
             }
 
             .popup button {
-                background: #007bff;
+                width: 100%;
+                padding: 10px;
+                background-color: #4CAF50;
                 color: white;
                 border: none;
-                padding: 8px;
+                border-radius: 4px;
                 cursor: pointer;
+            }
+
+            .popup button:hover {
+                background-color: #45a049;
             }
 
             .close {
@@ -472,6 +489,21 @@
                         <c:when test="${message == 'error'}">
                             <div class="alert alert-danger" role="alert">
                                 Order creation failed. Please try again!
+                            </div>
+                        </c:when>
+                        <c:when test="${message == 'Please choose product!'}">
+                            <div class="alert alert-danger" role="alert">
+                                Please choose product!
+                            </div>
+                        </c:when>
+                        <c:when test="${message == 'Payment error!'}">
+                            <div class="alert alert-danger" role="alert">
+                                Payment error!
+                            </div>
+                        </c:when>
+                        <c:when test="${message == 'Please choose customer!'}">
+                            <div class="alert alert-danger" role="alert">
+                                Please choose customer!
                             </div>
                         </c:when>
                     </c:choose>
@@ -576,7 +608,7 @@
                                         <th>Product</th>
                                         <th>Quantity</th>
                                         <th>Unit</th>
-                                        <th>Weight</th>
+                                        <th>Total Weight</th>
                                         <th>Unit Price</th>
                                         <th>Discount</th>
                                         <th>Amount</th>
@@ -741,6 +773,28 @@
                                 $("#customerInfo").show(); // Hiển thị div chứa thông tin khách hàng
                             }
 
+                            function updateCustomerSuggestions() {
+                                let query = $("#searchCustomerInput").val();  // Lấy lại giá trị từ ô tìm kiếm
+                                if (query.trim().length > 0) {
+                                    $.ajax({
+                                        url: "SearchServlet",
+                                        type: "POST",
+                                        data: {keyword: query},
+                                        success: function (data) {
+                                            if (data.trim() !== "") {
+                                                $("#suggestionsCustomer").html(data).fadeIn();
+                                            } else {
+                                                $("#suggestionsCustomer").fadeOut(100);
+                                            }
+                                        },
+                                        error: function (xhr, status, error) {
+                                            console.error("Search error:", error);
+                                            console.error("Status:", status);
+                                            console.error("Response:", xhr.responseText);
+                                        }
+                                    });
+                                }
+                            }
 
 
                         </script>
@@ -832,6 +886,12 @@
                                         event.preventDefault(); // Ngăn form hoặc hành động tiếp theo
                                         alert("Vui lòng chọn khách hàng trước khi tạo đơn hàng!");
                                     }
+                                    // Kiểm tra nếu bảng sản phẩm không có sản phẩm nào
+                                    if ($("#orderItems tbody tr").length === 0) {
+                                        event.preventDefault(); // Ngăn form hoặc hành động tiếp theo
+                                        alert("Vui lòng chọn ít nhất một sản phẩm để tạo đơn hàng.");
+                                        return; // Ngừng quá trình gửi form
+                                    }
                                     let paidAmount = $("#paidAmount").val().trim();
                                     // Kiểm tra đã nhập số tiền thanh toán chưa
                                     if (!paidAmount || isNaN(parseFloat(paidAmount))) {
@@ -897,10 +957,10 @@
                                 productName;
                         // Chọn đơn vị tính: kg hoặc bao
                         // Tạo dropdown từ danh sách unitSizes
-                        var unitSelectHTML = '<select name="unitType" class="unitType">';
+                        var unitSelectHTML = '<select name="unitType" class="unitType" style="width: auto; min-width: 50px; white-space: normal;">';
                         if (unitSizes && unitSizes.length > 0) {
                             unitSizes.forEach(size => {
-                                unitSelectHTML += '<option value="' + size + '">' + (size === 1 ? "Kg" : "Bao (" + size + "kg)") + '</option>';
+                                unitSelectHTML += '<option value="' + size + '">' + (size === 1 ? "Kg" : "Bag (" + size + "kg)") + '</option>';
                             });
                         } else {
                             unitSelectHTML += '<option value="1">Kg</option>'; // Mặc định nếu không có dữ liệu
@@ -917,7 +977,7 @@
                                 '<input type="hidden" name="totalPriceHidden" class="totalPriceHidden">' +
                                 '<input type="text" name="totalPrice" class="totalPrice" readonly>';
                         // Nút xóa
-                        cell8.innerHTML = '<button type="button" onclick="deleteRow(this)">Xóa</button>';
+                        cell8.innerHTML = '<button type="button" onclick="deleteRow(this)" style="background-color: #007bff">Delete</button>';
                         // Thêm input ẩn để lưu totalWeight
                         cell4.innerHTML = '<input type="number" name="totalWeight" class="totalWeight" readonly >';
                         //không cho phép nhập âm số lượng và giảm giá
@@ -1025,7 +1085,7 @@
 
             </form>
 
-            <div id="addCustomerPopup" class="popup">
+            <div id="addCustomerPopup" class="popup" style="background-color: whitesmoke">
 
                 <span class="close" onclick="closeAddCustomerPopup()">&times;</span>
                 <h2>Add new customer</h2>
@@ -1042,7 +1102,7 @@
                     <input type="hidden" name="email" value="">
                     <input type="hidden" name="total" value="0"> 
 
-                    <button type="button" onclick="saveNewCustomer()">Save</button>
+                    <button type="button" onclick="saveNewCustomer()" style="background-color: #007bff">Save</button>
                 </form>
 
             </div>
@@ -1073,7 +1133,7 @@
                     let phone = $("#newCustomerPhone").val().trim();
 
                     if (name === "" || phone === "") {
-                        alert("Vui lòng nhập đầy đủ thông tin!");
+                        alert("Enter full information!");
                         return;
                     }
 
@@ -1085,30 +1145,32 @@
                         email: "", // Giá trị mặc định
                         total: "0" // Để Servlet chấp nhận
                     };
+
                     // Gửi dữ liệu lên server để lưu khách hàng mới
                     $.ajax({
                         url: "AddCustomer",
                         type: "POST",
                         data: customerData,
                         success: function (response) {
-                            // Kiểm tra nội dung phản hồi từ Servlet
-                            // Tạo một thẻ div ẩn để chứa response HTML
-                            let tempDiv = $("<div>").html(response);
+                            console.log("Server Response:", response); // In ra phản hồi từ server
 
-                            // Kiểm tra xem có thông báo thành công hay không
-                            if (tempDiv.find("#successMessage").length > 0) {
-                                alert("Khách hàng đã được thêm!");
+                            // Kiểm tra phản hồi JSON từ server
+                            if (response.status === "success") {
+                                alert("Add customer successful!");
                                 closeAddCustomerPopup();
-                            } else if (tempDiv.find("#errorMessage").length > 0) {
-                                alert("Lỗi khi thêm khách hàng!");
+                            } else if (response.status === "error") {
+                                alert(response.message); // Hiển thị thông báo lỗi từ server
                             } else {
-                                alert("Không tìm thấy phản hồi từ server!");
+                                alert("Unexpected response from server!");
                             }
-
                         },
-
+                        error: function (xhr, status, error) {
+                            console.error("AJAX error:", error); // In lỗi ra console
+                            alert("Error to server!"); // Thông báo lỗi khi có sự cố
+                        }
                     });
                 }
+
 
             </script>
 
@@ -1117,6 +1179,7 @@
                 $(document).ready(function () {
                     $("#orderForm").submit(function (event) {
                         event.preventDefault(); // Ngăn chặn việc tải lại trang
+
                         $("#orderStatus").text("⏳ Đơn hàng đang xử lý..."); // Hiển thị trạng thái ngay lập tức
                         $("#submitOrder").prop("disabled", true); // Disable nút submit
 

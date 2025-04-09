@@ -48,11 +48,28 @@ public class controllerImport extends HttpServlet {
         String status = request.getParameter("status");
 
         double totalOrderPrice = Double.parseDouble(request.getParameter("totalOrderPriceHidden"));
-        double paidAmount = Double.parseDouble(request.getParameter("paidAmount"));
         double balanceAmount = Double.parseDouble(request.getParameter("balanceAmount"));
         String balanceAction = request.getParameter("balanceAction");
         double epsilon = 1e-9;
 
+        // Validate customer
+        if (customerId <= 0) {
+            request.setAttribute("message", "Please choose customer!");
+            request.getRequestDispatcher("views/invoice/import.jsp").forward(request, response);
+            return;
+        }
+        // Validate paid amount
+        String paidAmountStr = request.getParameter("paidAmount");
+        double paidAmount = 0;
+        if (paidAmountStr != null && !paidAmountStr.trim().isEmpty()) {
+            try {
+                paidAmount = Double.parseDouble(paidAmountStr.trim());
+            } catch (NumberFormatException e) {
+                request.setAttribute("message", "Payment error!");
+                request.getRequestDispatcher("views/invoice/import.jsp").forward(request, response);
+                return;
+            }
+        }
         try {
             String[] productIds = request.getParameterValues("productID");
             String[] productNames = request.getParameterValues("productName");

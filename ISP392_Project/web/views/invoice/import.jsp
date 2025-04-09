@@ -437,6 +437,7 @@
     </head>
     <body>
         <div class="main-content">
+            <button onclick="openNewTab()" style="background-color: #007bff">Add New Order</button>
 
             <a href="${pageContext.request.contextPath}/dashboard" class="back-button">Back to Dashboard</a>
 
@@ -470,6 +471,21 @@
                         <c:when test="${message == 'error'}">
                             <div class="alert alert-danger" role="alert">
                                 Order creation failed. Please try again!
+                            </div>
+                        </c:when>
+                        <c:when test="${message == 'Please choose product!'}">
+                            <div class="alert alert-danger" role="alert">
+                                Please choose product!
+                            </div>
+                        </c:when>
+                        <c:when test="${message == 'Payment error!'}">
+                            <div class="alert alert-danger" role="alert">
+                                Payment error!
+                            </div>
+                        </c:when>
+                        <c:when test="${message == 'Please choose customer!'}">
+                            <div class="alert alert-danger" role="alert">
+                                Please choose customer!
                             </div>
                         </c:when>
                     </c:choose>
@@ -574,7 +590,7 @@
                                         <th>Product</th>
                                         <th>Quantity</th>
                                         <th>Unit</th>
-                                        <th>Weight</th>
+                                        <th>Total Weight</th>
                                         <th>Unit Price</th>
                                         <th>Discount</th>
                                         <th>Amount</th>
@@ -830,6 +846,12 @@
                                         event.preventDefault(); // Ngăn form hoặc hành động tiếp theo
                                         alert("Please choose Customer for create invoice!");
                                     }
+                                    // Kiểm tra nếu bảng sản phẩm không có sản phẩm nào
+                                    if ($("#orderItems tbody tr").length === 0) {
+                                        event.preventDefault(); // Ngăn form hoặc hành động tiếp theo
+                                        alert("Vui lòng chọn ít nhất một sản phẩm để tạo đơn hàng.");
+                                        return; // Ngừng quá trình gửi form
+                                    }
                                     let paidAmount = $("#paidAmount").val().trim();
                                     // Kiểm tra đã nhập số tiền thanh toán chưa
                                     if (!paidAmount || isNaN(parseFloat(paidAmount))) {
@@ -887,10 +909,10 @@
                                 productName;
                         // Chọn đơn vị tính: kg hoặc bao
                         // Tạo dropdown từ danh sách unitSizes
-                        var unitSelectHTML = '<select name="unitType" class="unitType">';
+                        var unitSelectHTML = '<select name="unitType" class="unitType" style="width: auto; min-width: 50px; white-space: normal;">';
                         if (unitSizes && unitSizes.length > 0) {
                             unitSizes.forEach(size => {
-                                unitSelectHTML += '<option value="' + size + '">' + (size === 1 ? "Kg" : "Bao (" + size + "kg)") + '</option>';
+                                unitSelectHTML += '<option value="' + size + '">' + (size === 1 ? "Kg" : "Bag (" + size + "kg)") + '</option>';
                             });
                         } else {
                             unitSelectHTML += '<option value="1">Kg</option>'; // Mặc định nếu không có dữ liệu
@@ -907,9 +929,9 @@
                                 '<input type="hidden" name="totalPriceHidden" class="totalPriceHidden">' +
                                 '<input type="text" name="totalPrice" class="totalPrice" readonly>';
                         // Nút xóa
-                        cell8.innerHTML = '<button type="button" onclick="deleteRow(this)">Xóa</button>';
+                        cell8.innerHTML = '<button type="button" onclick="deleteRow(this)" style="background-color: #007bff">Delete</button>';
                         // Thêm input ẩn để lưu totalWeight
-                        cell4.innerHTML = '<input type="number" name="totalWeight" class="totalWeight" readonly >';
+                        cell4.innerHTML = '<input type="number" name="totalWeight" class="totalWeight" readonly>';
                         //không cho phép nhập âm số lượng và giảm giá
 
                         var quantityInput = cell2.querySelector('.quantity');
@@ -928,7 +950,7 @@
                                 this.value = 0; // Đặt giá trị tối thiểu là 1
                             }
                             if (parseFloat(this.value) > pricePerKg) {
-                                alert("Giảm giá không được vượt quá giá của 1 kg gạo!");
+                                alert("Discount cannot exceed the price of 1 kg of rice!");
                                 this.value = pricePerKg; // Đặt lại giá trị bằng giá gốc nếu vượt quá
                             }
                             recalculateRow(newRow, pricePerKg, availableQuantity);
@@ -955,17 +977,23 @@
                         var totalPriceHidden = row.querySelector(".totalPriceHidden");
                         var totalWeightInput = row.querySelector(".totalWeight");
                         var unitMultiplier = parseInt(unitTypeInput.value);
-                        var quantity = parseInt(quantityInput.value);
-                        var totalWeight = quantity * unitMultiplier;
+                        var quantity = parseInt(quantityInput.value); // Số lượng nhập
+                        var totalWeight = quantity * unitMultiplier;  // Tính tổng trọng lượng
 
-
+                        // Tính toán số tiền giảm giá
                         var discount = parseInt(discountInput.value) || 0;
-                        var totalDiscount = totalWeight * discount;
+                        var totalDiscount = totalWeight * discount;  // Tổng tiền giảm giá
+
+                        // Tính toán số tiền
                         var unitPrice = parseFloat(row.querySelector(".unitPrice").value) || 0;
-                        var totalPrice = (totalWeight * unitPrice) - totalDiscount;
+                        var totalPrice = (totalWeight * unitPrice) - totalDiscount;  // Tính tổng tiền
+
+                        // Cập nhật giá trị vào các ô input tương ứng
                         totalWeightInput.value = totalWeight;
-                        totalPriceHidden.value = totalPrice; // Lưu giá trị số
-                        totalPriceInput.value = formatNumberVND(totalPrice);
+                        totalPriceHidden.value = totalPrice; // Lưu giá trị số thực
+                        totalPriceInput.value = formatNumberVND(totalPrice);  // Cập nhật ô hiển thị
+
+                        // Cập nhật tổng tiền cho đơn hàng
                         updateTotalOrderPrice();
                     }
 
