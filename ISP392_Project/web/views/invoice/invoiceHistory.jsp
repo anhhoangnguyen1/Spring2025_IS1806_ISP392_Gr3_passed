@@ -219,7 +219,7 @@
                                             <td>${order.id}</td>
                                             <td>${order.customerID.name}</td>
                                             <td>${order.type}</td>
-                                            <td><fmt:formatDate value="${order.createdAt}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
+                                            <td><fmt:formatDate value="${order.createdAt}" pattern="yyyy-MM-dd"/></td>
                                             <td class="sticky-col">
                                                 <button type="button"
                                                         class="btn btn-outline-primary btn-sm"

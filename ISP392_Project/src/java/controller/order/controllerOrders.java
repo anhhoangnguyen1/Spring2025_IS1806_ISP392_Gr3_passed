@@ -59,8 +59,27 @@ public class controllerOrders extends HttpServlet {
         String fullName = (String) session.getAttribute("fullName");
         int customerId = Integer.parseInt(request.getParameter("customerId"));
         int userId = (int) session.getAttribute("userId");
-        System.out.println("User Id: " + userId);
         String status;
+
+        // Validate customer
+        if (customerId <= 0) {
+            request.setAttribute("message", "Please choose customer!");
+            request.getRequestDispatcher("views/invoice/addOrder.jsp").forward(request, response);
+            return;
+        }
+
+        // Validate paid amount
+        String paidAmountStr = request.getParameter("paidAmount");
+        double paidAmount = 0;
+        if (paidAmountStr != null && !paidAmountStr.trim().isEmpty()) {
+            try {
+                paidAmount = Double.parseDouble(paidAmountStr.trim());
+            } catch (NumberFormatException e) {
+                request.setAttribute("message", "Payment error!");
+                request.getRequestDispatcher("views/invoice/addOrder.jsp").forward(request, response);
+                return;
+            }
+        }
 
         if ("Export".equals(orderType)) {
             String discountStr = request.getParameter("totalDiscount");
@@ -91,8 +110,7 @@ public class controllerOrders extends HttpServlet {
                 System.err.println("Invalid number format for totalOrderPriceHidden: " + totalPriceStr);
             }
         }
-        String paidAmountStr = request.getParameter("paidAmount");
-        double paidAmount = 0;
+
         if (paidAmountStr != null && !paidAmountStr.trim().isEmpty()) {
             paidAmount = Double.parseDouble(paidAmountStr);
         }
@@ -107,7 +125,12 @@ public class controllerOrders extends HttpServlet {
             String[] unitPrices = request.getParameterValues("unitPriceHidden");
             String[] quantities = request.getParameterValues("totalWeight");
             String[] discounts = "Export".equals(orderType) ? request.getParameterValues("discount") : null;
-
+            // Validate order items
+            if (productIds == null || productIds.length == 0) {
+                request.setAttribute("message", "Please choose product!");
+                request.getRequestDispatcher("views/invoice/addOrder.jsp").forward(request, response);
+                return;
+            }
             List<OrderDetails> orderDetailsList = new ArrayList<>();
             double calculatedTotalAmount = 0;
 
@@ -166,7 +189,7 @@ public class controllerOrders extends HttpServlet {
                             .price(expectedPrice)
                             .importPrice(actualUnitPrice)
                             .quantity(quantity)
-                            .description("Chi tiết đơn hàng")
+                            .description("Order detail")
                             .status("ACTIVE")
                             .storeId(Stores.builder().id(storeId).build())
                             .build();
@@ -177,7 +200,8 @@ public class controllerOrders extends HttpServlet {
                     int newQuantity = availableQuantity - quantity;
                     boolean updated = productsDAO.INSTANCE.updateProductQuantity(productID, newQuantity);
                     if (!updated) {
-                        response.getWriter().write("{\"status\": \"error\", \"message\": \"Không thể cập nhật số lượng tồn kho.\"}");
+                        request.setAttribute("message", "Không thể cập nhật số lượng tồn kho");
+                        request.getRequestDispatcher("views/invoice/addOrder.jsp").forward(request, response);
                         return;
                     }
 
@@ -185,7 +209,8 @@ public class controllerOrders extends HttpServlet {
             }
 
             if (Math.abs(calculatedTotalAmount - totalOrderPrice) > epsilon) {
-                response.getWriter().write("{\"status\": \"error\", \"message\": \"Tổng tiền tính toán không khớp.\"}");
+                request.setAttribute("message", "Tổng tiền tính toán không khớp");
+                request.getRequestDispatcher("views/invoice/addOrder.jsp").forward(request, response);
                 return;
             }
 
