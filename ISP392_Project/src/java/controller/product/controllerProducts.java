@@ -22,10 +22,17 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  *
@@ -193,30 +200,65 @@ public class controllerProducts extends HttpServlet {
                 String name = request.getParameter("name");
                 Part file = request.getPart("image");
                 String currentImage = request.getParameter("current_image");
-                String imageFileName = (currentImage != null) ? currentImage : "";
+                String imageFileName = (currentImage != null && !currentImage.isEmpty()) ? currentImage : "";
                 int index = Integer.parseInt(request.getParameter("index"));
+
                 if (file != null && file.getSize() > 0) {
+                    // 1. Kiểm tra loại file
                     String fileType = file.getContentType();
                     if (!ALLOWED_MIME_TYPES.contains(fileType)) {
-                        session.setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
-                        response.sendRedirect("Products");
+                        session.setAttribute("Notification", "Chỉ chấp nhận file ảnh (JPG, PNG, GIF)");
+                        response.sendRedirect("Products?service=products&index=" + index);
                         return;
                     }
+
 
                     imageFileName = getSubmittedFileName(file);
                     String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest2\\ISP392_Project\\web\\views\\product\\images";
                     File uploadDir = new File(uploadDirectory);
                     if (!uploadDir.exists()) {
                         uploadDir.mkdirs();
+
+                    // 2. Lấy đường dẫn upload từ context (tương đối)
+                    String uploadDirectory = getServletContext().getRealPath("/views/product/images");
+                    if (uploadDirectory == null) {
+                        // Fallback nếu không lấy được realPath
+                        uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest3\\ISP392_Project\\web\\views\\product\\images";
+
                     }
 
-                    String uploadPath = uploadDirectory + File.separator + imageFileName;
-                    try (FileOutputStream fos = new FileOutputStream(uploadPath); InputStream is = file.getInputStream()) {
-                        byte[] buffer = new byte[1024];
-                        int bytesRead;
-                        while ((bytesRead = is.read(buffer)) != -1) {
-                            fos.write(buffer, 0, bytesRead);
+                    // 3. Tạo thư mục nếu chưa tồn tại
+                    File uploadDir = new File(uploadDirectory);
+                    if (!uploadDir.exists()) {
+                        if (!uploadDir.mkdirs()) {
+                            session.setAttribute("Notification", "Không thể tạo thư mục lưu ảnh");
+                            response.sendRedirect("Products?service=products&index=" + index);
+                            return;
                         }
+                    }
+
+                    // 4. Tạo tên file duy nhất
+                    String originalFileName = Paths.get(getSubmittedFileName(file)).getFileName().toString();
+                    String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+                    String uniqueFileName = "product_" + System.currentTimeMillis() + "_" + new Random().nextInt(1000) + fileExtension;
+                    imageFileName = uniqueFileName;
+
+                    // 5. Lưu file
+                    Path destination = Paths.get(uploadDirectory, imageFileName);
+                    try (InputStream is = file.getInputStream()) {
+                        Files.copy(is, destination, StandardCopyOption.REPLACE_EXISTING);
+
+                        // 6. Xóa ảnh cũ nếu có (trừ khi đó là ảnh mặc định)
+                        if (!currentImage.isEmpty() && !currentImage.equals("default.jpg")) {
+                            Path oldImagePath = Paths.get(uploadDirectory, currentImage);
+                            if (Files.exists(oldImagePath)) {
+                                Files.delete(oldImagePath);
+                            }
+                        }
+                    } catch (IOException e) {
+                        session.setAttribute("Notification", "Lỗi khi lưu ảnh: " + e.getMessage());
+                        response.sendRedirect("Products?service=products&index=" + index);
+                        return;
                     }
                 }
 
@@ -236,10 +278,28 @@ public class controllerProducts extends HttpServlet {
                 Date deletedAt = new java.sql.Date(System.currentTimeMillis());
                 Date updatedAt = new java.sql.Date(System.currentTimeMillis());
                 boolean isDelete = false;
-                Date createdAt = new java.sql.Date(System.currentTimeMillis());
+                String createdAtStr = request.getParameter("createdAt");
+                java.sql.Date sqlDate;
+
+                if (createdAtStr != null && !createdAtStr.isEmpty()) {
+                    try {
+                        // Parse as java.util.Date first
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd"); // adjust pattern as needed
+                        java.util.Date utilDate = format.parse(createdAtStr);
+
+                        // Convert to java.sql.Date
+                        sqlDate = new java.sql.Date(utilDate.getTime());
+                    } catch (ParseException e) {
+                        // Handle parsing error (use current date as fallback)
+                        sqlDate = new java.sql.Date(System.currentTimeMillis());
+                    }
+                } else {
+                    // If no parameter provided, use current date
+                    sqlDate = new java.sql.Date(System.currentTimeMillis());
+                }
                 String[] zoneNames = request.getParameterValues("zoneName");
 
-                Products product = new Products(productId, name, imageFileName, price, quantity, description, createdAt, createBy, deletedAt, deletedBy, isDelete, updatedAt, status);
+                Products product = new Products(productId, name, imageFileName, price, quantity, description, sqlDate, createBy, deletedAt, deletedBy, isDelete, updatedAt, status);
                 List<Zone> zones = new ArrayList<>();
                 if (zoneNames != null && zoneNames.length > 0) {
                     for (String zoneName : zoneNames) {
@@ -289,30 +349,47 @@ public class controllerProducts extends HttpServlet {
             String imageFileName = null;
 
             if (file != null && file.getSize() > 0) {
+                // 1. Kiểm tra loại file
                 String fileType = file.getContentType();
                 if (!ALLOWED_MIME_TYPES.contains(fileType)) {
-                    request.setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
+                    session.setAttribute("Notification", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
                     request.getRequestDispatcher("Products?service=products").forward(request, response);
                     return;
                 }
-                imageFileName = getSubmittedFileName(file);
+
 
                 String uploadDirectory = "C:\\Users\\phamh\\OneDrive\\Desktop\\gitest2\\ISP392_Project\\web\\views\\product\\images";
+
+                // 2. Sử dụng đường dẫn tương đối trong webapp thay vì đường dẫn tuyệt đối
+                String uploadDirectory = getServletContext().getRealPath("/views/product/images");
+
+                // 3. Tạo tên file duy nhất để tránh trùng lặp
+                String originalFileName = getSubmittedFileName(file);
+                String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+                imageFileName = "img_" + System.currentTimeMillis() + fileExtension;
+
+                // 4. Tạo thư mục nếu chưa tồn tại
+
                 File uploadDir = new File(uploadDirectory);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
                 }
 
-                String uploadPath = uploadDirectory + File.separator + imageFileName;
-                try (FileOutputStream fos = new FileOutputStream(uploadPath); InputStream is = file.getInputStream()) {
+                // 5. Lưu file
+                try (InputStream is = file.getInputStream(); FileOutputStream fos = new FileOutputStream(uploadDirectory + File.separator + imageFileName)) {
+
                     byte[] buffer = new byte[1024];
                     int bytesRead;
                     while ((bytesRead = is.read(buffer)) != -1) {
                         fos.write(buffer, 0, bytesRead);
                     }
+
+                    // 6. Đảm bảo dữ liệu được ghi hoàn toàn
+                    fos.flush();
+
                 } catch (Exception e) {
                     e.printStackTrace();
-                    request.setAttribute("Notification", "Error uploading image.");
+                    request.setAttribute("Notification", "Lỗi khi upload ảnh: " + e.getMessage());
                     request.getRequestDispatcher("Products?service=products").forward(request, response);
                     return;
                 }
