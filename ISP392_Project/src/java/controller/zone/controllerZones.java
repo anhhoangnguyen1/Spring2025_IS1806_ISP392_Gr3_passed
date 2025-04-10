@@ -505,66 +505,6 @@ public class controllerZones extends HttpServlet {
                 }
                 break;
             }
-            case "stockCheck": {
-                storeIDStr = (String) session.getAttribute("storeID");
-                storeID = Integer.parseInt(storeIDStr);
-                String zoneIdParam = request.getParameter("zone_id");
-                if (zoneIdParam == null || zoneIdParam.trim().isEmpty()) {
-                    session.setAttribute("Notification", "Invalid or missing zone ID.");
-                    response.sendRedirect("zones?service=zones");
-                    return;
-                }
-                try {
-                    int zoneId = Integer.parseInt(zoneIdParam);
-                    Zone zone = zoneDAO.getZoneById(zoneId);
-                    if (zone == null) {
-                        session.setAttribute("Notification", "Zone not found.");
-                        response.sendRedirect("zones?service=zones");
-                        return;
-                    }
-
-                    // Lấy thông tin sản phẩm hiện tại của zone
-                    Products product = zone.getProductId();
-
-                    int systemQuantity = (product != null) ? productsDAO.getProductById(product.getProductId(), storeID).get(0).getQuantity() : 0;
-
-                    request.setAttribute("zone", zone);
-                    request.setAttribute("systemQuantity", systemQuantity);
-                    request.setAttribute("fullName", fullName); // Người thực hiện kiểm kho
-                    request.getRequestDispatcher("views/stockcheck/stockCheck.jsp").forward(request, response);
-                } catch (NumberFormatException e) {
-                    session.setAttribute("Notification", "Invalid zone ID format.");
-                    response.sendRedirect("zones?service=zones");
-                }
-                break;
-            }
-
-            case "viewStockCheckHistory": {
-                String zoneIdParam = request.getParameter("zone_id");
-                if (zoneIdParam == null || zoneIdParam.trim().isEmpty()) {
-                    session.setAttribute("Notification", "Invalid or missing zone ID.");
-                    response.sendRedirect("zones?service=zones");
-                    return;
-                }
-                try {
-                    int zoneId = Integer.parseInt(zoneIdParam);
-                    Zone zone = zoneDAO.getZoneById(zoneId);
-                    if (zone == null) {
-                        session.setAttribute("Notification", "Zone not found.");
-                        response.sendRedirect("zones?service=zones");
-                        return;
-                    }
-
-                    List<Map<String, Object>> stockCheckHistory = zoneDAO.getStockCheckHistory(zoneId);
-                    request.setAttribute("zone", zone);
-                    request.setAttribute("stockCheckHistory", stockCheckHistory);
-                    request.getRequestDispatcher("views/stockcheck/stockCheckHistory.jsp").forward(request, response);
-                } catch (NumberFormatException e) {
-                    session.setAttribute("Notification", "Invalid zone ID format.");
-                    response.sendRedirect("zones?service=zones");
-                }
-                break;
-            }
         }
     }
 
@@ -603,6 +543,11 @@ public class controllerZones extends HttpServlet {
             String name = request.getParameter("name");
             String description = request.getParameter("description");
             String status = request.getParameter("status");
+            
+            // Set default status to Active if not provided
+            if (status == null || status.trim().isEmpty()) {
+                status = "Active";
+            }
 
             // Validate input
             String nameError = validateZoneName(name);
@@ -658,25 +603,37 @@ public class controllerZones extends HttpServlet {
                     .status(status)
                     .build();
 
-            zoneDAO.insertZone(zone);
+            try {
+                zoneDAO.insertZone(zone);
+                System.out.println("Zone added successfully: " + name);
+                
+                // Lấy showInactive từ session
+                Boolean showInactive = (Boolean) session.getAttribute("showInactive");
+                if (showInactive == null) {
+                    showInactive = true;
+                }
 
-            // Lấy showInactive từ session
-            Boolean showInactive = (Boolean) session.getAttribute("showInactive");
-            if (showInactive == null) {
-                showInactive = true;
-            }
+                session.setAttribute("Notification", "Zone added successfully.");
 
-            session.setAttribute("Notification", "Zone added successfully.");
-
-            String sortBy = request.getParameter("sortBy");
-            if (sortBy == null) {
-                sortBy = "id";
+                String sortBy = request.getParameter("sortBy");
+                if (sortBy == null) {
+                    sortBy = "id";
+                }
+                String sortOrder = request.getParameter("sortOrder");
+                if (sortOrder == null) {
+                    sortOrder = "ASC";
+                }
+                
+                // Chuyển hướng về trang danh sách zone
+                String redirectUrl = request.getContextPath() + "/zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=1&pageSize=" + pageSize + "&showInactive=" + showInactive;
+                System.out.println("Redirecting to: " + redirectUrl);
+                response.sendRedirect(redirectUrl);
+            } catch (Exception e) {
+                System.err.println("Error adding zone: " + e.getMessage());
+                e.printStackTrace();
+                session.setAttribute("errorMessage", "Error adding zone. Please try again.");
+                response.sendRedirect(request.getContextPath() + "/zones?service=addZone");
             }
-            String sortOrder = request.getParameter("sortOrder");
-            if (sortOrder == null) {
-                sortOrder = "ASC";
-            }
-            response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=1&pageSize=" + pageSize + "&showInactive=" + showInactive);
             return;
         }
 
@@ -794,38 +751,6 @@ public class controllerZones extends HttpServlet {
             }
             response.sendRedirect("zones?service=zones&sortBy=" + sortBy + "&sortOrder=" + sortOrder + "&index=" + currentIndex + "&pageSize=" + pageSize);
         }
-        if ("submitStockCheck".equals(service)) {
-            String zoneIdParam = request.getParameter("zone_id");
-            String productIdParam = request.getParameter("product_id");
-            String systemQuantityParam = request.getParameter("system_quantity");
-            String actualQuantityParam = request.getParameter("actual_quantity");
-            String note = request.getParameter("note");
-            String checkedBy = fullName;
-
-            try {
-                int zoneId = Integer.parseInt(zoneIdParam);
-                int productId = Integer.parseInt(productIdParam);
-                int systemQuantity = Integer.parseInt(systemQuantityParam);
-                int actualQuantity = Integer.parseInt(actualQuantityParam);
-
-                System.out.println("Submitting stock check: zoneId=" + zoneId + ", productId=" + productId + ", systemQuantity=" + systemQuantity + ", actualQuantity=" + actualQuantity);
-
-                zoneDAO.addStockCheck(zoneId, productId, systemQuantity, actualQuantity, checkedBy, note);
-
-                if (actualQuantity != systemQuantity) {
-                    zoneDAO.updateProductQuantity(productId, actualQuantity);
-                }
-
-                session.setAttribute("Notification", "Stock check completed successfully.");
-                response.sendRedirect("zones?service=viewStockCheckHistory&zone_id=" + zoneId);
-            } catch (NumberFormatException e) {
-                session.setAttribute("Notification", "Invalid input format: " + e.getMessage());
-                response.sendRedirect("zones?service=zones");
-            } catch (SQLException e) {
-                session.setAttribute("Notification", "Error saving stock check: " + e.getMessage());
-                response.sendRedirect("zones?service=stockCheck&zone_id=" + zoneIdParam);
-            }
-        }
     }
 
     private Zone getZoneFromRequest(HttpServletRequest request, boolean isNew) {
@@ -857,18 +782,43 @@ public class controllerZones extends HttpServlet {
         if (name == null || name.trim().isEmpty()) {
             return "Zone name cannot be empty";
         }
-        if (name.length() < 3) {
-            return "Zone name must be at least 3 characters long";
+        if (name.length() <= 0) {
+            return "Zone name cannot be blank";
         }
         if (name.length() > 50) {
             return "Zone name cannot exceed 50 characters";
+        }
+        // Kiểm tra ký tự đặc biệt và SQL injection
+        if (!name.matches("^[a-zA-Z0-9\\s\\-\\_]+$")) {
+            return "Zone name can only contain letters, numbers, spaces, hyphens, and underscores";
+        }
+        // Kiểm tra từ khóa SQL nguy hiểm
+        String[] sqlKeywords = {"SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "UNION", "ALTER", "CREATE", "TRUNCATE"};
+        for (String keyword : sqlKeywords) {
+            if (name.toUpperCase().contains(keyword)) {
+                return "Zone name contains invalid characters";
+            }
         }
         return null;
     }
 
     private String validateDescription(String description) {
-        if (description != null && description.length() > 500) {
+        if (description == null) {
+            return null; // Cho phép mô tả trống
+        }
+        if (description.length() > 500) {
             return "Description cannot exceed 500 characters";
+        }
+        // Kiểm tra ký tự đặc biệt nguy hiểm
+        if (description.matches(".*[<>'\"].*")) {
+            return "Description cannot contain dangerous characters";
+        }
+        // Kiểm tra từ khóa SQL nguy hiểm
+        String[] sqlKeywords = {"SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "UNION", "ALTER", "CREATE", "TRUNCATE"};
+        for (String keyword : sqlKeywords) {
+            if (description.toUpperCase().contains(keyword)) {
+                return "Description contains invalid characters";
+            }
         }
         return null;
     }
@@ -877,8 +827,16 @@ public class controllerZones extends HttpServlet {
         if (status == null || status.trim().isEmpty()) {
             return "Status cannot be empty";
         }
+        // Chỉ cho phép các giá trị cụ thể
         if (!status.equals("Active") && !status.equals("Inactive")) {
             return "Invalid status value";
+        }
+        // Kiểm tra từ khóa SQL nguy hiểm
+        String[] sqlKeywords = {"SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "UNION", "ALTER", "CREATE", "TRUNCATE"};
+        for (String keyword : sqlKeywords) {
+            if (status.toUpperCase().contains(keyword)) {
+                return "Status contains invalid characters";
+            }
         }
         return null;
     }
@@ -890,11 +848,37 @@ public class controllerZones extends HttpServlet {
         try {
             int id = Integer.parseInt(zoneId);
             if (id <= 0) {
-                return "Invalid zone ID";
+                return "Invalid zone ID format";
             }
         } catch (NumberFormatException e) {
-            return "Invalid zone ID format";
+            return "Zone ID must be a number";
         }
         return null;
+    }
+
+    private String validateStoreId(String storeId) {
+        if (storeId == null || storeId.trim().isEmpty()) {
+            return "Store ID cannot be empty";
+        }
+        try {
+            int id = Integer.parseInt(storeId);
+            if (id <= 0) {
+                return "Invalid store ID format";
+            }
+        } catch (NumberFormatException e) {
+            return "ID cửa hàng phải là số";
+        }
+        return null;
+    }
+
+    // Thêm phương thức mới để escape input
+    private String escapeInput(String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.replace("'", "''")
+                    .replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_");
     }
 }

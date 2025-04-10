@@ -226,38 +226,61 @@
                     .low-stock-alert {
                         background-color: #F8D7DA;
                         color: #333;
-                        padding: 10px 15px;
+                        padding: 15px 20px;
                         border-radius: 12px;
-                        font-size: 16px;
-                        margin: 10px 0;
+                        font-size: 15px;
+                        margin: 15px 0;
                         position: relative;
-                        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                         max-width: 100%;
                         display: flex;
                         align-items: center;
-                        justify-content: left; /* Căn cách đều các phần tử */
-                        white-space: nowrap; /* Không xuống dòng */
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        gap: 10px; /* Khoảng cách giữa các phần tử */
-                        animation: fadeIn 0.5s ease-out; /* Áp dụng hiệu ứng fade-in */
+                        justify-content: flex-start;
+                        flex-wrap: wrap;
+                        word-wrap: break-word;
+                        gap: 8px;
+                        line-height: 1.5;
+                        border-left: 5px solid #dc3545;
+                        animation: fadeIn 0.5s ease-out;
                     }
 
+                    .low-stock-alert strong {
+                        color: #721c24;
+                        margin-right: 5px;
+                    }
 
                     .low-stock-qty {
                         font-weight: bold;
-                        color: red;
+                        color: #dc3545;
+                        background-color: rgba(220, 53, 69, 0.1);
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                        display: inline-block;
                     }
 
                     .close-btn {
-                        font-size: 20px;
+                        position: absolute;
+                        top: 50%;
+                        right: 15px;
+                        transform: translateY(-50%);
+                        font-size: 18px;
                         cursor: pointer;
-                        margin-left: 10px;
-                        color: #333;
+                        color: #721c24;
+                        background: none;
+                        border: none;
+                        padding: 5px;
+                        border-radius: 50%;
+                        width: 25px;
+                        height: 25px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.3s ease;
                     }
 
                     .close-btn:hover {
-                        color: red;
+                        background-color: rgba(220, 53, 69, 0.1);
+                        color: #dc3545;
                     }
                     /* Ẩn thông báo với hiệu ứng fade-out */
                     .low-stock-alert.fade-out {
