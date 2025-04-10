@@ -435,6 +435,10 @@ public class controllerProducts extends HttpServlet {
             boolean success = products.insertProduct(product, zones, fullName, storeID);
 
             if (success) {
+                // Lấy ID của sản phẩm vừa thêm
+                int productId = products.getLastInsertedProductId();
+                // Thêm quy cách đóng gói mặc định
+                products.insertDefaultProductUnits(productId);
                 request.setAttribute("Notification", "Product added successfully!");
             } else {
                 request.setAttribute("Notification", "Failed to add product!");

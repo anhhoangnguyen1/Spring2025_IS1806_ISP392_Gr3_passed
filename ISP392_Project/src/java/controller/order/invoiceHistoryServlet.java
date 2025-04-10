@@ -64,9 +64,15 @@ public class invoiceHistoryServlet extends HttpServlet {
             totalSize = all.size();
             pagedOrders = all.stream().skip(offset).limit(pageSize).toList();
         } else if (fromDate != null && toDate != null && !fromDate.trim().isEmpty() && !toDate.trim().isEmpty()) {
-            List<Orders> all = ordersDAO.getOrdersByDateRange(fromDate, toDate);
-            totalSize = all.size();
-            pagedOrders = all.stream().skip(offset).limit(pageSize).toList();
+            try {
+                List<Orders> all = ordersDAO.getOrdersByDateRange(fromDate, toDate);
+                totalSize = all.size();
+                pagedOrders = all.stream().skip(offset).limit(pageSize).toList();
+            } catch (IllegalArgumentException e) {
+                request.setAttribute("errorMessage", e.getMessage());
+                pagedOrders = ordersDAO.getOrdersPaging(offset, pageSize);
+                totalSize = ordersDAO.getTotalOrdersCount();
+            }
         } else {
             pagedOrders = ordersDAO.getOrdersPaging(offset, pageSize);
             totalSize = ordersDAO.getTotalOrdersCount();

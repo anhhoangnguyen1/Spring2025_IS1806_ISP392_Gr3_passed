@@ -437,20 +437,22 @@ public class productsDAO extends DBContext {
 
     public List<Products> searchProductsByNameO(String keyword) {
         List<Products> products = new ArrayList<>();
-        // Sửa câu SQL để JOIN với bảng Zones và lấy zone_name từ bảng đó
+        // Sửa câu SQL để sử dụng GROUP_CONCAT để gộp các zone_name thành một chuỗi
         String sql = "SELECT p.id AS product_id, p.name, p.image, p.price, p.quantity, p.description, "
                 + "p.created_at, p.created_by, p.deletedAt, p.deleteBy, p.isDeleted, p.updated_at, p.status, "
-                + "z.name AS zone_name "
+                + "GROUP_CONCAT(z.name) AS zone_names "
                 + "FROM Products p "
                 + "LEFT JOIN Zones z ON p.id = z.product_id "
-                + "WHERE p.name LIKE ? AND p.isDeleted = 0"; // Điều kiện tìm kiếm tên sản phẩm và sản phẩm chưa bị xóa
+                + "WHERE p.name LIKE ? AND p.isDeleted = 0 "
+                + "GROUP BY p.id, p.name, p.image, p.price, p.quantity, p.description, "
+                + "p.created_at, p.created_by, p.deletedAt, p.deleteBy, p.isDeleted, p.updated_at, p.status";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, "%" + keyword + "%"); // Tìm kiếm sản phẩm theo tên
+            ps.setString(1, "%" + keyword + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Products product = new Products(
-                            rs.getInt("product_id"), // Sử dụng alias trong SQL để lấy product_id
+                            rs.getInt("product_id"),
                             rs.getString("name"),
                             rs.getString("image"),
                             rs.getBigDecimal("price"),
@@ -463,7 +465,7 @@ public class productsDAO extends DBContext {
                             rs.getBoolean("isDeleted"),
                             rs.getDate("updated_at"),
                             rs.getString("status"),
-                            rs.getString("zone_name") // Lấy zone_name từ bảng Zones
+                            rs.getString("zone_names") // Lấy chuỗi các zone_name đã được gộp
                     );
                     products.add(product);
                 }
@@ -671,15 +673,19 @@ public class productsDAO extends DBContext {
                 + "`updated_at` = CURRENT_TIMESTAMP, "
                 + "`isDeleted` = ?, "
                 + "`status` = ?, "
-                + "`store_id` = ? " // Cập nhật store_id
+                + "`store_id` = ? "
                 + "WHERE `id` = ?;";
 
-        String sqlUpdateZone = "UPDATE zones SET product_id = ?, store_id = ? WHERE name = ? AND store_id = ?"; // Cập nhật store_id trong zones
+        // SQL để xóa tất cả các zone cũ của sản phẩm
+        String sqlClearZones = "UPDATE zones SET product_id = NULL WHERE product_id = ? AND store_id = ?";
+
+        // SQL để cập nhật zone mới cho sản phẩm
+        String sqlUpdateZone = "UPDATE zones SET product_id = ?, store_id = ? WHERE name = ? AND store_id = ?";
 
         try {
             connection.setAutoCommit(false); // Bắt đầu transaction
 
-            // Cập nhật sản phẩm
+            // Cập nhật thông tin sản phẩm
             try (PreparedStatement stProduct = connection.prepareStatement(sqlProduct)) {
                 stProduct.setString(1, product.getName());
                 stProduct.setString(2, product.getImage());
@@ -688,29 +694,41 @@ public class productsDAO extends DBContext {
                 stProduct.setString(5, product.getDescription());
                 stProduct.setBoolean(6, product.isIsDeleted());
                 stProduct.setString(7, product.getStatus());
-                stProduct.setInt(8, storeId); // Thêm store_id vào product
+                stProduct.setInt(8, storeId);
                 stProduct.setInt(9, product.getProductId());
 
                 int rowsAffected = stProduct.executeUpdate();
                 if (rowsAffected == 0) {
                     connection.rollback();
-                    return false; // Không tìm thấy sản phẩm để cập nhật
+                    return false;
                 }
             }
 
-            // Cập nhật zones
-            try (PreparedStatement stZone = connection.prepareStatement(sqlUpdateZone)) {
-                for (Zone zone : zones) {
-                    stZone.setInt(1, product.getProductId());
-                    stZone.setInt(2, storeId); // Chèn store_id vào zone
-                    stZone.setString(3, zone.getName());
-                    stZone.setInt(4, storeId); // Điều kiện cập nhật theo store_id
-                    stZone.executeUpdate();
+            // Xóa tất cả các zone cũ của sản phẩm
+            try (PreparedStatement stClearZones = connection.prepareStatement(sqlClearZones)) {
+                stClearZones.setInt(1, product.getProductId());
+                stClearZones.setInt(2, storeId);
+                stClearZones.executeUpdate();
+            }
+
+            // Cập nhật các zone mới
+            if (zones != null && !zones.isEmpty()) {
+                try (PreparedStatement stZone = connection.prepareStatement(sqlUpdateZone)) {
+                    for (Zone zone : zones) {
+                        if (zone.getName() != null && !zone.getName().trim().isEmpty()) {
+                            stZone.setInt(1, product.getProductId());
+                            stZone.setInt(2, storeId);
+                            stZone.setString(3, zone.getName());
+                            stZone.setInt(4, storeId);
+                            stZone.executeUpdate();
+                        }
+                    }
                 }
             }
 
             connection.commit(); // Xác nhận thay đổi
             return true;
+
         } catch (SQLException e) {
             e.printStackTrace();
             try {
@@ -1027,6 +1045,34 @@ public class productsDAO extends DBContext {
         return null;
     }
 
+    public void insertDefaultProductUnits(int productId) {
+        String sql = "INSERT INTO ProductUnits (product_id, unitSize) VALUES (?, ?)";
+        String[] defaultUnits = {"1", "10", "20"};
+        
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            for (String unit : defaultUnits) {
+                st.setInt(1, productId);
+                st.setString(2, unit);
+                st.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int getLastInsertedProductId() {
+        String sql = "SELECT LAST_INSERT_ID() as last_id";
+        try (PreparedStatement st = connection.prepareStatement(sql);
+             ResultSet rs = st.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("last_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
     public static void main(String[] args) {
 
         // Test tìm kiếm sản phẩm với từ khóa
@@ -1066,3 +1112,4 @@ public class productsDAO extends DBContext {
         System.out.println("Các kho của sản phẩm ID " + productId + ": " + zones);
     }
 }
+

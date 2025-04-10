@@ -244,30 +244,43 @@ public class OrdersDAO extends DBContext {
         return 0;
     }
 
-    public List<Orders> getOrdersByDateRange(String fromDate, String toDate) {
+    public List<Orders> getOrdersByDateRange(String fromDate, String toDate) throws IllegalArgumentException {
         List<Orders> list = new ArrayList<>();
-        // Kiểm tra null hoặc chuỗi rỗng
+        
+        // Nếu không có ngày được chọn, trả về tất cả đơn hàng
         if (fromDate == null || fromDate.trim().isEmpty() || toDate == null || toDate.trim().isEmpty()) {
-            return getAllOrders(); // fallback
+            return getAllOrders();
         }
+
         String sql = """
-        SELECT o.*, c.name AS customer_name
-        FROM Orders o
-        JOIN Customers c ON o.customers_id = c.id
-        WHERE o.isDeleted = false
-        AND o.created_at BETWEEN ? AND ?
-        ORDER BY o.id DESC
-    """;
+            SELECT o.*, c.name AS customer_name
+            FROM Orders o
+            JOIN Customers c ON o.customers_id = c.id
+            WHERE o.isDeleted = false
+            AND DATE(o.created_at) BETWEEN ? AND ?
+            ORDER BY o.id DESC
+        """;
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setDate(1, java.sql.Date.valueOf(fromDate));
-            st.setDate(2, java.sql.Date.valueOf(toDate));
-            try (ResultSet rs = st.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapResultSetToOrder(rs));
+            // Chuyển đổi chuỗi ngày thành java.sql.Date một cách an toàn
+            try {
+                java.sql.Date sqlFromDate = java.sql.Date.valueOf(fromDate);
+                java.sql.Date sqlToDate = java.sql.Date.valueOf(toDate);
+                
+                st.setDate(1, sqlFromDate);
+                st.setDate(2, sqlToDate);
+                
+                try (ResultSet rs = st.executeQuery()) {
+                    while (rs.next()) {
+                        list.add(mapResultSetToOrder(rs));
+                    }
                 }
+            } catch (IllegalArgumentException e) {
+                // Ném ngoại lệ với thông báo lỗi cụ thể
+                throw new IllegalArgumentException("Invalid date format. Please use the correct format");
             }
         } catch (SQLException e) {
+            System.err.println("Database error: " + e.getMessage());
             e.printStackTrace();
         }
 

@@ -201,6 +201,15 @@
                         </form>
                     </div>
 
+                    <c:if test="${not empty errorMessage}">
+                        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                            ${errorMessage}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    </c:if>
+
                     <div class="table-container mt-4">
                         <table class="table table-striped table-hover table-bordered" id="invoiceTable">
                             <thead>

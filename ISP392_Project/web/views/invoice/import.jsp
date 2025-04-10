@@ -919,7 +919,7 @@
                         }
                         unitSelectHTML += '</select>';
                         cell3.innerHTML = unitSelectHTML;
-                        cell2.innerHTML = '<input type="number" name="quantity" class="quantity" required value="1" min="1" max="' + availableQuantity + '">';
+                        cell2.innerHTML = '<input type="number" name="quantity" class="quantity" required value="1" min="1" max="1000">';
                         // Nếu nhập kho, giá cố định
                         cell5.innerHTML = '<input type="number" name="unitPrice" class="unitPrice" value="' + pricePerKg + '" min="0">';
 
