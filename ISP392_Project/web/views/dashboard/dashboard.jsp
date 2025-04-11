@@ -138,6 +138,25 @@
                                 <span class="nav-text">Imports</span>
                             </a>
                         </li>
+                        <li>
+                            <div class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <span class="nav-icon">
+                                        <i class="fa-solid fa-file-invoice"></i>
+                                    </span>
+                                    <span class="nav-text">Price History</span>
+                                    <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+                                </a>
+                                <div class="dropdown-menu">
+                                    <a href="/ISP392_Project/HistoryExportPriceServlet" class="dropdown-item">
+                                        Export Price History
+                                    </a>
+                                    <a href="/ISP392_Project/HistoryImportPriceServlet" class="dropdown-item">
+                                        Import Price History
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
                     </c:if>
                     <li>
                         <a href="/ISP392_Project/Stores">
@@ -287,6 +306,51 @@
                         animation: fadeOut 0.5s ease-out;
                         opacity: 0;
                         pointer-events: none; /* Ngăn người dùng tương tác khi đang ẩn */
+                    }
+
+                    /* Dropdown menu styles */
+                    .dropdown-menu {
+                        display: block;
+                        position: static;
+                        max-height: 0;
+                        overflow: hidden;
+                        background: var(--white);
+                        transition: max-height 0.3s ease-in-out;
+                        padding: 0;
+                        margin-left: 20px;
+                    }
+                    
+                    .dropdown:hover .dropdown-menu {
+                        max-height: 200px;
+                        padding: 8px 0;
+                    }
+                    
+                    .dropdown-item {
+                        display: flex;
+                        align-items: center;
+                        padding: 8px 15px;
+                        color: var(--text-color);
+                        text-decoration: none;
+                        transition: background-color 0.3s;
+                    }
+                    
+                    .dropdown-item:hover {
+                        background-color: var(--hover-color);
+                    }
+                    
+                    .dropdown-item i {
+                        margin-right: 10px;
+                        width: 16px;
+                    }
+                    
+                    .dropdown-icon {
+                        margin-left: 5px;
+                        font-size: 12px;
+                        transition: transform 0.3s ease;
+                    }
+
+                    .dropdown:hover .dropdown-icon {
+                        transform: rotate(180deg);
                     }
                 </style>
                 <script>
