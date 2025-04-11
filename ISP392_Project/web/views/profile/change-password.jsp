@@ -107,6 +107,14 @@
                                 <span class="nav-text">Imports</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="/ISP392_Project/HistoryExportPriceServlet">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Price History</span>
+                            </a>
+                        </li>
                     </c:if>
                     <li>
                         <a href="/ISP392_Project/Stores">

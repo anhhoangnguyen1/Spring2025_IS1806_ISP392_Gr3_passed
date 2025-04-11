@@ -114,6 +114,14 @@
                                 <span class="nav-text">Imports</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="/ISP392_Project/HistoryExportPriceServlet">
+                                <span class="nav-icon">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </span>
+                                <span class="nav-text">Price History</span>
+                            </a>
+                        </li>
                     </c:if>
                     <li>
                         <a href="/ISP392_Project/Stores">
@@ -137,12 +145,6 @@
                 <!--   === Nav Bar Links Ends ===   -->
                 <!--   === Side Bar Footer Starts ===   -->
                 <div class="sidebar-footer">
-                    <div class="settings">
-                        <span class="gear-icon">
-                            <i class="fa-solid fa-gear"></i>
-                        </span>
-                        <span class="text">Settings</span>
-                    </div>
                     <div class="logoutBtn">
                         <a href="/ISP392_Project/logout">
                             <span class="logout-icon">

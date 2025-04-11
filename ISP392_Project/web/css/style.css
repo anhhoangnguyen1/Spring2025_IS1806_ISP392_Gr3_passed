@@ -40,7 +40,7 @@ body {
 .table-bordered td {
     width: auto;
     text-align: center;
-    word-wrap: break-word; 
+    word-wrap: break-word;
     overflow: hidden; /* Ẩn nội dung tràn */
     text-overflow: ellipsis;
     cursor: pointer;
@@ -285,34 +285,34 @@ th, td {
 }
 
 .top-bar .top-bar-right .profile .profile-menu {
-  display: none;
-  position: absolute;
-  top: 50px;
-  right: 0;
-  background: var(--bg-primary);
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 167px;
-  z-index: 100;
+    display: none;
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 167px;
+    z-index: 100;
 }
 
 .top-bar .top-bar-right .profile .profile-menu ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .top-bar .top-bar-right .profile .profile-menu li {
-  padding: 10px;
-  cursor: pointer;
-  color: var(--heading-clr);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    padding: 10px;
+    cursor: pointer;
+    color: var(--heading-clr);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .top-bar .top-bar-right .profile .profile-menu li:hover {
-  background: var(--bg-secondary);
+    background: var(--bg-secondary);
 }
 /*   === Top Bar Code Ends ===   */
 
@@ -1561,7 +1561,7 @@ input[type="checkbox"]:checked::after {
 }
 .search-box .clear-btn {
     position: absolute;
-    right: 45px; 
+    right: 45px;
     background: none;
     border: none;
     color: var(--text-clr);
@@ -1581,7 +1581,7 @@ input[type="checkbox"]:checked::after {
 }
 .modal-dialog {
     max-height: 100vh; /* Giới hạn chiều cao của modal */
-    overflow-y: auto; 
+    overflow-y: auto;
 }
 
 .modal-content {
