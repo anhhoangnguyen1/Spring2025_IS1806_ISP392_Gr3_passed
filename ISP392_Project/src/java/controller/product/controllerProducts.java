@@ -486,7 +486,7 @@ public class controllerProducts extends HttpServlet {
                 // Lấy userId từ session
                 int userId = Integer.parseInt((String) session.getAttribute("userID"));
                 // Nếu giá thay đổi, ghi log vào lịch sử
-                DAOProduct.INSTANCE.logPriceChange(id, price.doubleValue(), "sell", userId, null);
+                DAOProduct.INSTANCE.logPriceChange(id, price.doubleValue(), "sell", userId, null, fullName);
             }
 
             boolean success = products.updateProduct(product);

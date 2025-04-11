@@ -271,7 +271,6 @@
                                 <th scope="col" style="text-align: right;">Export Price</th>
                                 <th scope="col">Change Date</th>
                                 <th scope="col">Changed By</th>
-                                <th scope="col" style="width: 150px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -283,11 +282,6 @@
                                     </td>
                                     <td>${history.changedAt}</td>
                                     <td>${history.changedBy}</td>
-                                    <td>
-                                        <button class="btn btn-success btn-sm" onclick="showUpdateForm(${history.productID}, ${history.price}, '${history.productName}')">
-                                            Update Price
-                                        </button>
-                                    </td>
                                 </tr>
                             </c:forEach>
                         </tbody>
@@ -320,41 +314,6 @@
                     </ul>
                 </div>
 
-                <!-- Price Update Modal -->
-                <div class="modal fade" id="updatePriceModal" tabindex="-1" role="dialog" aria-labelledby="updatePriceModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="updatePriceModalLabel">Update Export Price</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <form action="HistoryExportPriceServlet" method="POST" id="updatePriceForm">
-                                <div class="modal-body">
-                                    <input type="hidden" id="productId" name="productId">
-                                    <div class="form-group">
-                                        <label for="productName" class="col-form-label">Product Name:</label>
-                                        <input type="text" class="form-control" id="productName" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="currentPrice" class="col-form-label">Current Price:</label>
-                                        <input type="text" class="form-control" id="currentPrice" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="newPrice" class="col-form-label">New Price:</label>
-                                        <input type="number" class="form-control" id="newPrice" name="newPrice" required min="0" step="1000">
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-success">Update</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
                 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
                 <script>
@@ -369,36 +328,6 @@
                     function redirectToImportPriceHistory() {
                         window.location.href = 'HistoryImportPriceServlet';
                     }
-
-                    function showUpdateForm(productId, currentPrice, productName) {
-                        $('#productId').val(productId);
-                        $('#productName').val(productName);
-                        $('#currentPrice').val(currentPrice.toLocaleString('vi-VN') + ' đ');
-                        $('#newPrice').val(currentPrice);
-                        $('#updatePriceModal').modal('show');
-                    }
-
-                    // Format số tiền khi nhập
-                    $('#newPrice').on('input', function() {
-                        let value = $(this).val();
-                        if (value !== '') {
-                            value = parseInt(value);
-                            if (!isNaN(value)) {
-                                $(this).val(value);
-                            }
-                        }
-                    });
-
-                    // Validate update price form
-                    $('#updatePriceForm').on('submit', function(e) {
-                        const newPrice = parseInt($('#newPrice').val());
-                        if (isNaN(newPrice) || newPrice <= 0) {
-                            alert('Please enter a valid price');
-                            e.preventDefault();
-                            return false;
-                        }
-                        return true;
-                    });
                 </script>
             </div>
         </div>

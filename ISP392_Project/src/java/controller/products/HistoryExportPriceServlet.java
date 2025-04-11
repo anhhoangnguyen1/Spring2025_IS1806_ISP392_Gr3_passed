@@ -66,7 +66,7 @@ public class HistoryExportPriceServlet extends HttpServlet {
         request.setAttribute("startDate", startDate);
         request.setAttribute("endDate", endDate);
 
-        request.getRequestDispatcher("product/historyExportPrice.jsp").forward(request, response);
+        request.getRequestDispatcher("/product/historyExportPrice.jsp").forward(request, response);
     }
 
     @Override
@@ -74,6 +74,7 @@ public class HistoryExportPriceServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         int userId = (int) session.getAttribute("userId");
+        String userName = (String) session.getAttribute("fullName");
         
         String productIdStr = request.getParameter("productId");
         String newPriceStr = request.getParameter("newPrice");
@@ -84,7 +85,7 @@ public class HistoryExportPriceServlet extends HttpServlet {
                 double newPrice = Double.parseDouble(newPriceStr);
                 
                 // Update product price and log history
-                boolean success = DAOProduct.INSTANCE.updateProductPrice(productId, newPrice, userId);
+                boolean success = DAOProduct.INSTANCE.updateProductPrice(productId, newPrice, userId, userName);
                 if (success) {
                     response.sendRedirect("HistoryExportPriceServlet?success=1");
                     return;

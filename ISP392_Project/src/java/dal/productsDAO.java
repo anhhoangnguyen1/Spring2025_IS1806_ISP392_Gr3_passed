@@ -691,7 +691,7 @@ public class productsDAO extends DBContext {
                 // Nếu giá thay đổi, ghi log vào lịch sử
                 int userId = getUserIdByStoreId(storeId);
                 if (userId != -1) {
-                    DAOProduct.INSTANCE.logPriceChange(product.getProductId(), product.getPrice().doubleValue(), "sell", userId, null);
+                    DAOProduct.INSTANCE.logPriceChange(product.getProductId(), product.getPrice().doubleValue(), "sell", userId, null, updatedBy);
                 }
             }
 

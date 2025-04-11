@@ -107,10 +107,9 @@ public class DAOProduct extends DBContext {
 
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT pph.id, p.id as productID, p.name as productName, p.image, ");
-        sqlBuilder.append("pph.importPrice as price, pph.type, pph.created_at, u.name as changedByName, c.name as supplierName ");
+        sqlBuilder.append("pph.importPrice as price, pph.type, pph.created_at, pph.created_by as changedByName, c.name as supplierName ");
         sqlBuilder.append("FROM ProductPriceHistory pph ");
         sqlBuilder.append("JOIN Products p ON pph.product_id = p.id ");
-        sqlBuilder.append("JOIN Users u ON pph.created_by = u.id ");
         sqlBuilder.append("LEFT JOIN Customers c ON pph.order_id = c.id ");
         sqlBuilder.append("WHERE p.store_id = ? ");
         sqlBuilder.append("AND pph.type = 'import' ");
@@ -167,10 +166,9 @@ public class DAOProduct extends DBContext {
 
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT pph.id, p.id as productID, p.name as productName, p.image, ");
-        sqlBuilder.append("pph.price, pph.type, pph.created_at, u.name as changedByName ");
+        sqlBuilder.append("pph.price, pph.type, pph.created_at, pph.created_by as changedByName ");
         sqlBuilder.append("FROM ProductPriceHistory pph ");
         sqlBuilder.append("JOIN Products p ON pph.product_id = p.id ");
-        sqlBuilder.append("JOIN Users u ON pph.created_by = u.id ");
         sqlBuilder.append("WHERE p.store_id = ? ");
         sqlBuilder.append("AND pph.type = 'sell' ");
         sqlBuilder.append("AND pph.isDeleted = 0 ");
@@ -209,7 +207,7 @@ public class DAOProduct extends DBContext {
         return historyList;
     }
 
-    public boolean logPriceChange(int productId, double newPrice, String priceType, int userId, Integer supplierID) {
+    public boolean logPriceChange(int productId, double newPrice, String priceType, int userId, Integer supplierID, String userName) {
         int storeId = getStoreIdByUserId(userId);
 
         String sql = """
@@ -228,7 +226,7 @@ public class DAOProduct extends DBContext {
                 stmt.setDouble(3, newPrice); // importPrice là giá nhập
             }
             stmt.setString(4, priceType);
-            stmt.setInt(5, userId);
+            stmt.setString(5, userName);
             stmt.setInt(6, storeId);
             if (supplierID == null) {
                 stmt.setNull(7, java.sql.Types.INTEGER);
@@ -244,7 +242,7 @@ public class DAOProduct extends DBContext {
         return false;
     }
 
-    public boolean updateProductPrice(int productId, double newPrice, int userId) {
+    public boolean updateProductPrice(int productId, double newPrice, int userId, String userName) {
         String sql = "UPDATE Products SET price = ? WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setDouble(1, newPrice);
@@ -253,7 +251,7 @@ public class DAOProduct extends DBContext {
             
             if (rowsAffected > 0) {
                 // Log price change to history
-                return logPriceChange(productId, newPrice, "sell", userId, null);
+                return logPriceChange(productId, newPrice, "sell", userId, null, userName);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -261,8 +259,8 @@ public class DAOProduct extends DBContext {
         return false;
     }
 
-    public boolean importProduct(int productId, double importPrice, int userId, int supplierId) {
-        return logPriceChange(productId, importPrice, "import", userId, supplierId);
+    public boolean importProduct(int productId, double importPrice, int userId, int supplierId, String userName) {
+        return logPriceChange(productId, importPrice, "import", userId, supplierId, userName);
     }
 
     private int getStoreIdByUserId(int userId) {
@@ -408,7 +406,7 @@ public class DAOProduct extends DBContext {
         int testProductId = 17; // Giả sử productId = 17
         double newPrice = 50000.0;
         
-        boolean updateResult = dao.updateProductPrice(testProductId, newPrice, testUserId);
+        boolean updateResult = dao.updateProductPrice(testProductId, newPrice, testUserId, "John Doe");
         System.out.println("Kết quả cập nhật giá bán: " + updateResult);
         System.out.println();
         
@@ -418,7 +416,7 @@ public class DAOProduct extends DBContext {
         int testSupplierId = 1; // Giả sử supplierId = 1
         double importPrice = 45000.0;
         
-        boolean importResult = dao.importProduct(testProductId, importPrice, testUserId, testSupplierId);
+        boolean importResult = dao.importProduct(testProductId, importPrice, testUserId, testSupplierId, "Jane Smith");
         System.out.println("Kết quả cập nhật giá nhập: " + importResult);
         
         System.out.println("\n=== KẾT THÚC KIỂM TRA ===");

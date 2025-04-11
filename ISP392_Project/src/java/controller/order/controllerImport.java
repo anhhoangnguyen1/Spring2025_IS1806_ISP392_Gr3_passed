@@ -121,7 +121,7 @@ public class controllerImport extends HttpServlet {
                 }
                 
                 // Ghi log giá nhập vào lịch sử
-                DAOProduct.INSTANCE.logPriceChange(productID, unitPrice, "import", userId, customerId);
+                DAOProduct.INSTANCE.logPriceChange(productID, unitPrice, "import", userId, customerId, fullName);
             }
 
             if (Math.abs(calculatedTotal - totalOrderPrice) > epsilon) {

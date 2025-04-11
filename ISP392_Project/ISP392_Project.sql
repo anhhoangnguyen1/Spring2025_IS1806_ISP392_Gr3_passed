@@ -276,8 +276,3 @@ INSERT INTO ProductUnits (product_id, unitSize) VALUES
 (14, '1'), (14, '10'), (14, '20'),
 (15, '1'), (15, '10'), (15, '20'),
 (16, '1'), (16, '10'), (16, '20');
-
-
-ALTER TABLE ProductPriceHistory 
-MODIFY COLUMN created_by INT,
-ADD FOREIGN KEY (created_by) REFERENCES Users(id) ON DELETE SET NULL;
