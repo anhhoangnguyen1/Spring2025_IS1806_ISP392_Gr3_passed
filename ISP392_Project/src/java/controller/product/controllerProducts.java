@@ -4,6 +4,7 @@
  */
 package controller.product;
 
+import dal.DAOProduct;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -463,6 +464,38 @@ public class controllerProducts extends HttpServlet {
             }
 
             response.sendRedirect("Products");
+        }
+
+        if (service.equals("updateProduct")) {
+            int id = Integer.parseInt(request.getParameter("id"));
+            String name = request.getParameter("name");
+            String image = request.getParameter("image");
+            BigDecimal price = new BigDecimal(request.getParameter("price"));
+            int quantity = Integer.parseInt(request.getParameter("quantity"));
+            String description = request.getParameter("description");
+            String status = request.getParameter("status");
+            boolean isDelete = Boolean.parseBoolean(request.getParameter("isDelete"));
+            String updatedBy = fullName;
+            Date updatedAt = new java.sql.Date(System.currentTimeMillis());
+
+            Products product = new Products(id, name, image, price, quantity, description, null, null, null, null, isDelete, updatedAt, status, null);
+
+            // Lấy giá cũ của sản phẩm
+            Products oldProduct = products.getProductByIdSimple(id);
+            if (oldProduct != null && !oldProduct.getPrice().equals(price)) {
+                // Lấy userId từ session
+                int userId = Integer.parseInt((String) session.getAttribute("userID"));
+                // Nếu giá thay đổi, ghi log vào lịch sử
+                DAOProduct.INSTANCE.logPriceChange(id, price.doubleValue(), "sell", userId, null);
+            }
+
+            boolean success = products.updateProduct(product);
+            if (success) {
+                request.setAttribute("Notification", "Product updated successfully!");
+            } else {
+                request.setAttribute("Notification", "Failed to update product!");
+            }
+            request.getRequestDispatcher("Products?service=products").forward(request, response);
         }
 
     }

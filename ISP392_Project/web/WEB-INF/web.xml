@@ -50,6 +50,14 @@
         <servlet-name>controllerZones</servlet-name>
         <servlet-class>controller.zone.controllerZones</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>HistoryImportPriceServlet</servlet-name>
+        <servlet-class>controller.products.HistoryImportPriceServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>HistoryExportPriceServlet</servlet-name>
+        <servlet-class>controller.products.HistoryExportPriceServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>loginServlet</servlet-name>
         <url-pattern>/views/loginServlet</url-pattern>
@@ -77,5 +85,13 @@
     <servlet-mapping>
         <servlet-name>controllerZones</servlet-name>
         <url-pattern>/zones</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>HistoryImportPriceServlet</servlet-name>
+        <url-pattern>/HistoryImportPriceServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>HistoryExportPriceServlet</servlet-name>
+        <url-pattern>/HistoryExportPriceServlet</url-pattern>
     </servlet-mapping>
 </web-app>

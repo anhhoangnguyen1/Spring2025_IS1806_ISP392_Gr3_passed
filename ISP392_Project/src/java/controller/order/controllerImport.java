@@ -1,5 +1,6 @@
 package controller.order;
 
+import dal.DAOProduct;
 import dal.productsDAO;
 import entity.*;
 import jakarta.servlet.ServletException;
@@ -109,6 +110,8 @@ public class controllerImport extends HttpServlet {
                         .build();
 
                 orderDetailsList.add(detail);
+                
+                // Cập nhật số lượng và giá nhập
                 int currentQuantity = productsDAO.INSTANCE.getProductQuantity(productID);
                 int newQuantity = currentQuantity + quantity;
                 boolean updated = productsDAO.INSTANCE.updateProductQuantity(productID, newQuantity);
@@ -116,6 +119,9 @@ public class controllerImport extends HttpServlet {
                     response.getWriter().write("{\"status\": \"error\", \"message\": \"Failed to update stock.\"}");
                     return;
                 }
+                
+                // Ghi log giá nhập vào lịch sử
+                DAOProduct.INSTANCE.logPriceChange(productID, unitPrice, "import", userId, customerId);
             }
 
             if (Math.abs(calculatedTotal - totalOrderPrice) > epsilon) {

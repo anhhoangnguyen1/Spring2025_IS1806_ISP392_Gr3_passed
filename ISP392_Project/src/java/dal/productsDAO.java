@@ -685,6 +685,16 @@ public class productsDAO extends DBContext {
         try {
             connection.setAutoCommit(false); // Bắt đầu transaction
 
+            // Lấy giá cũ của sản phẩm
+            Products oldProduct = getProductByIdSimple(product.getProductId());
+            if (oldProduct != null && !oldProduct.getPrice().equals(product.getPrice())) {
+                // Nếu giá thay đổi, ghi log vào lịch sử
+                int userId = getUserIdByStoreId(storeId);
+                if (userId != -1) {
+                    DAOProduct.INSTANCE.logPriceChange(product.getProductId(), product.getPrice().doubleValue(), "sell", userId, null);
+                }
+            }
+
             // Cập nhật thông tin sản phẩm
             try (PreparedStatement stProduct = connection.prepareStatement(sqlProduct)) {
                 stProduct.setString(1, product.getName());
@@ -1110,6 +1120,21 @@ public class productsDAO extends DBContext {
         // Thử kiểm tra hàm lấy các zones của sản phẩm
         List<String> zones = productsDAO.INSTANCE.getZonesByProductID(productId);
         System.out.println("Các kho của sản phẩm ID " + productId + ": " + zones);
+    }
+
+    private int getUserIdByStoreId(int storeId) {
+        String sql = "SELECT id FROM Users WHERE store_id = ? LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, storeId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 }
 
