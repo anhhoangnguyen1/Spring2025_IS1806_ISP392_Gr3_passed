@@ -133,9 +133,9 @@
                     </li>
                     <c:if test="${index > 3}">
                         <li class="page-item disabled"><span class="page-link">...</span></li>
-                        </c:if>
-                        <c:forEach begin="${index - 1}" end="${index + 1}" var="page">
-                            <c:if test="${page > 1 && page < endPage}">
+                    </c:if>
+                    <c:forEach begin="${index > 1 ? index - 1 : 1}" end="${index + 1}" var="page">
+                        <c:if test="${page > 1 && page < endPage}">
                             <li class="page-item ${index == page ? 'active' : ''}">
                                 <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${requestScope.showInactive}">
                                     ${page}
@@ -145,8 +145,8 @@
                     </c:forEach>
                     <c:if test="${index < endPage - 2}">
                         <li class="page-item disabled"><span class="page-link">...</span></li>
-                        </c:if>
-                        <c:if test="${endPage > 1}">
+                    </c:if>
+                    <c:if test="${endPage > 1}">
                         <li class="page-item ${index == endPage ? 'active' : ''}">
                             <a class="page-link" href="zones?service=zones&searchZone=${searchZone}&index=${endPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&pageSize=${pageSize}&showInactive=${requestScope.showInactive}">
                                 ${endPage}

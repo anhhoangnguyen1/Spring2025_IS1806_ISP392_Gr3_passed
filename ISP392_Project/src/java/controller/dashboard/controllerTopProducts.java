@@ -66,7 +66,13 @@ public class controllerTopProducts extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         productsDAO dao = new productsDAO();
-        List<String[]> topProducts = dao.getTopSellingProductNamesOfMonth();
+        
+        // Lấy storeID từ session
+        HttpSession session = request.getSession();
+        String storeIDStr = (String) session.getAttribute("storeID");
+        int storeID = Integer.parseInt(storeIDStr);
+        
+        List<String[]> topProducts = dao.getTopSellingProductNamesOfMonth(storeID);
         request.setAttribute("topProducts", topProducts);
 
         // Lấy doanh thu
@@ -92,19 +98,19 @@ public class controllerTopProducts extends HttpServlet {
         Object revenueData = null;
         switch (period) {
             case "today":
-                revenueData = revenueDAO.getRevenueToday();
+                revenueData = revenueDAO.getRevenueToday(storeID);
                 break;
             case "yesterday":
-                revenueData = revenueDAO.getRevenueYesterday();
+                revenueData = revenueDAO.getRevenueYesterday(storeID);
                 break;
             case "last7days":
-                revenueData = revenueDAO.getRevenueLast7Days();
+                revenueData = revenueDAO.getRevenueLast7Days(storeID);
                 break;
             case "thismonth":
-                revenueData = revenueDAO.getRevenueThisMonth();
+                revenueData = revenueDAO.getRevenueThisMonth(storeID);
                 break;
             case "lastmonth":
-                revenueData = revenueDAO.getRevenueLastMonth();
+                revenueData = revenueDAO.getRevenueLastMonth(storeID);
                 break;
             default:
                 revenueData = "Invalid period";
@@ -118,21 +124,20 @@ public class controllerTopProducts extends HttpServlet {
         request.setAttribute("revenueData", new Gson().toJson(revenueData));
         request.setAttribute("selectedPeriod", period);  // Gửi về JSP để đánh dấu mặc định
 
-        double revenueToday = revenueDAO.getRevenueToday();
-        int invoiceCountToday = revenueDAO.getOrderCountToday();
+        double revenueToday = revenueDAO.getRevenueToday(storeID);
+        int invoiceCountToday = revenueDAO.getOrderCountToday(storeID);
+        double importRevenueToday = revenueDAO.getImportRevenueToday(storeID);
+        int importInvoiceCountToday = revenueDAO.getImportOrderCountToday(storeID);
 
         request.setAttribute("revenueToday", revenueToday);
         request.setAttribute("invoiceCountToday", invoiceCountToday);
+        request.setAttribute("importRevenueToday", importRevenueToday);
+        request.setAttribute("importInvoiceCountToday", importInvoiceCountToday);
         
         // Tính tổng tiền vào/ra từ nợ
         debtDAO debtDAO = new debtDAO();
         BigDecimal totalMoneyIn = BigDecimal.ZERO;
         BigDecimal totalMoneyOut = BigDecimal.ZERO;
-        
-        // Lấy storeID từ session
-        HttpSession session = request.getSession();
-        String storeIDStr = (String) session.getAttribute("storeID");
-        int storeID = Integer.parseInt(storeIDStr);
         
         // Lấy ngày hiện tại
         LocalDate today = LocalDate.now();
@@ -248,7 +253,7 @@ public class controllerTopProducts extends HttpServlet {
         if (lowStockThreshold == null) {
             lowStockThreshold = 20;
         }
-        List<Products> lowStockProducts = dao.getLowStockProducts(lowStockThreshold);
+        List<Products> lowStockProducts = dao.getLowStockProducts(lowStockThreshold, storeID);
         
         request.setAttribute("lowStockProducts", lowStockProducts);
         request.getRequestDispatcher("views/dashboard/dashboard.jsp").forward(request, response);

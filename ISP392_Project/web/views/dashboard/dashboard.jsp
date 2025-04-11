@@ -377,7 +377,7 @@
                             <div class="balance-box">
                                 <div class="subject-row">
                                     <div class="text">
-                                        <h3>Total Income Today</h3>
+                                        <h3>Total Export Income Today</h3>
                                         <h1 id="counter" data-value="<fmt:formatNumber value="${revenueToday}" type="number" groupingUsed="true" />">
                                             <sub>(VND)</sub>
                                         </h1>
@@ -395,7 +395,7 @@
                             <div class="balance-box">
                                 <div class="subject-row">
                                     <div class="text">
-                                        <h3>Total Invoices Today</h3>
+                                        <h3>Total Export Invoices Today</h3>
                                         <h1 id="invoiceCounter" data-value="${invoiceCountToday}">
                                             ${invoiceCountToday} Invoices
                                         </h1>
@@ -410,51 +410,42 @@
                                     </div>
                                 </div>
                             </div>
-                            <script>
-                                document.addEventListener("DOMContentLoaded", function () {
-                                    function animateCounter(element, targetValue, unit = "", duration = 2000) {
-                                        let startTime = null;
-
-                                        function easeOutQuad(t) {
-                                            return t * (2 - t); // Hàm easing giúp làm chậm lại về cuối
-                                        }
-
-                                        function updateCounter(timestamp) {
-                                            if (!startTime)
-                                                startTime = timestamp;
-                                            let progress = (timestamp - startTime) / duration;
-                                            if (progress > 1)
-                                                progress = 1;
-
-                                            let currentValue = Math.floor(targetValue * easeOutQuad(progress));
-                                            element.innerHTML = currentValue.toLocaleString() + unit;
-
-                                            if (progress < 1) {
-                                                requestAnimationFrame(updateCounter);
-                                            } else {
-                                                element.innerHTML = targetValue.toLocaleString() + unit; // Đảm bảo hiển thị giá trị chính xác
-                                            }
-                                        }
-
-                                        requestAnimationFrame(updateCounter);
-                                    }
-
-                                    // Total Income
-                                    const counterElement = document.getElementById("counter");
-                                    if (counterElement) {
-                                        let targetValue = parseInt(counterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
-                                        animateCounter(counterElement, targetValue, ' <sub>(VND)</sub>');
-                                    }
-
-                                    // Total Invoices
-                                    const invoiceCounterElement = document.getElementById("invoiceCounter");
-                                    if (invoiceCounterElement) {
-                                        let targetInvoices = parseInt(invoiceCounterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
-                                        animateCounter(invoiceCounterElement, targetInvoices, " Invoices");
-                                    }
-                                });
-
-                            </script>
+                            <div class="balance-box">
+                                <div class="subject-row">
+                                    <div class="text">
+                                        <h3>Total Import Price Today</h3>
+                                        <h1 id="importCounter" data-value="<fmt:formatNumber value="${importRevenueToday}" type="number" groupingUsed="true" />">
+                                            <sub>(VND)</sub>
+                                        </h1>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                </div>
+                                <div class="progress-row">
+                                    <div class="subject">
+                                        <fmt:formatDate value="<%= new java.util.Date() %>" pattern="dd/MM/yyyy" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="balance-box">
+                                <div class="subject-row">
+                                    <div class="text">
+                                        <h3>Total Import Invoices Today</h3>
+                                        <h1 id="importInvoiceCounter" data-value="${importInvoiceCountToday}">
+                                            ${importInvoiceCountToday} Invoices
+                                        </h1>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-file-import"></i>
+                                    </div>
+                                </div>
+                                <div class="progress-row">
+                                    <div class="subject">
+                                        <fmt:formatDate value="<%= new java.util.Date() %>" pattern="dd/MM/yyyy" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <!--   === Boxes Row Ends ===   -->
                         <!--   === Analytics Chart Starts ===   -->
@@ -581,5 +572,63 @@
 
         <!--   *** Link To Custom Script File ***   -->
         <script type="text/javascript" src="<%= request.getContextPath() %>/views/dashboard/script.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                function animateCounter(element, targetValue, unit = "", duration = 2000) {
+                    let startTime = null;
+
+                    function easeOutQuad(t) {
+                        return t * (2 - t); // Hàm easing giúp làm chậm lại về cuối
+                    }
+
+                    function updateCounter(timestamp) {
+                        if (!startTime)
+                            startTime = timestamp;
+                        let progress = (timestamp - startTime) / duration;
+                        if (progress > 1)
+                            progress = 1;
+
+                        let currentValue = Math.floor(targetValue * easeOutQuad(progress));
+                        element.innerHTML = currentValue.toLocaleString() + unit;
+
+                        if (progress < 1) {
+                            requestAnimationFrame(updateCounter);
+                        } else {
+                            element.innerHTML = targetValue.toLocaleString() + unit;
+                        }
+                    }
+
+                    requestAnimationFrame(updateCounter);
+                }
+
+                // Total Income
+                const counterElement = document.getElementById("counter");
+                if (counterElement) {
+                    let targetValue = parseInt(counterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                    animateCounter(counterElement, targetValue, ' <sub>(VND)</sub>');
+                }
+
+                // Total Invoices
+                const invoiceCounterElement = document.getElementById("invoiceCounter");
+                if (invoiceCounterElement) {
+                    let targetInvoices = parseInt(invoiceCounterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                    animateCounter(invoiceCounterElement, targetInvoices, " Invoices");
+                }
+
+                // Total Import Price
+                const importCounterElement = document.getElementById("importCounter");
+                if (importCounterElement) {
+                    let targetValue = parseInt(importCounterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                    animateCounter(importCounterElement, targetValue, ' <sub>(VND)</sub>');
+                }
+
+                // Total Import Invoices
+                const importInvoiceCounterElement = document.getElementById("importInvoiceCounter");
+                if (importInvoiceCounterElement) {
+                    let targetInvoices = parseInt(importInvoiceCounterElement.getAttribute("data-value").replace(/\D/g, ""), 10);
+                    animateCounter(importInvoiceCounterElement, targetInvoices, " Invoices");
+                }
+            });
+        </script>
     </body>
 </html>

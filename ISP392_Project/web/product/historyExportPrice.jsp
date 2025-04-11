@@ -109,8 +109,8 @@
                     <div class="mode-switch">
                         <i class="fa-solid fa-moon"></i>
                     </div>
-                    <div class="notifications">
-                        <i class="fa-solid fa-bell"></i>
+                    <div class="notifications" style="font-size: 16px; color: #333;">
+                        Howdy, <span style="font-weight: 600;">${sessionScope.user.name}</span>
                     </div>
                     <div class="profile">
                         <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
@@ -131,7 +131,7 @@
                 <span class="menu-label">MENU</span>
                 <ul class="navbar-links navbar-links-1">
                     <c:if test="${sessionScope.role == 'owner' || sessionScope.role == 'staff'}">
-                        <li class="active">
+                        <li>
                             <a href="/ISP392_Project/dashboard">
                                 <span class="nav-icon">
                                     <i class="fa-solid fa-house"></i>

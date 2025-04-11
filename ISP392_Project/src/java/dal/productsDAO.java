@@ -576,27 +576,35 @@ public class productsDAO extends DBContext {
         return products;
     }
 
-    public List<String[]> getTopSellingProductNamesOfMonth() {
+    public List<String[]> getTopSellingProductNamesOfMonth(int storeId) {
         List<String[]> topProducts = new ArrayList<>();
-        String sql = "SELECT p.name, p.image, SUM(od.Quantity) AS total_quantity_sold "
-                + "FROM OrderDetails od "
-                + "JOIN Orders o ON od.OrdersID = o.ID "
-                + "JOIN Products p ON od.ProductsID = p.id "
-                + "WHERE MONTH(o.OrderDate) = MONTH(CURRENT_DATE()) "
-                + "AND YEAR(o.OrderDate) = YEAR(CURRENT_DATE()) "
-                + "GROUP BY p.name, p.image "
-                + "ORDER BY total_quantity_sold DESC "
-                + "LIMIT 10";
+        String sql = """
+            SELECT p.name, p.image, SUM(od.quantity) AS total_quantity_sold 
+            FROM OrderDetails od 
+            JOIN Orders o ON od.order_id = o.id 
+            JOIN Products p ON od.product_id = p.id 
+            WHERE MONTH(o.created_at) = MONTH(CURRENT_DATE()) 
+            AND YEAR(o.created_at) = YEAR(CURRENT_DATE())
+            AND o.type = 'Export'
+            AND o.isDeleted = 0
+            AND o.store_id = ?
+            GROUP BY p.name, p.image 
+            ORDER BY total_quantity_sold DESC 
+            LIMIT 10
+        """;
 
-        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
-            while (rs.next()) {
-                String name = rs.getString("name");
-                String image = rs.getString("image");
-                int totalQuantitySold = rs.getInt("total_quantity_sold");
-                topProducts.add(new String[]{name, String.valueOf(totalQuantitySold), image});
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeId);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    String image = rs.getString("image");
+                    int totalQuantitySold = rs.getInt("total_quantity_sold");
+                    topProducts.add(new String[]{name, String.valueOf(totalQuantitySold), image});
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error in getTopSellingProductNamesOfMonth: " + e.getMessage());
         }
 
         return topProducts;
@@ -729,7 +737,7 @@ public class productsDAO extends DBContext {
                             stZone.setInt(1, product.getProductId());
                             stZone.setInt(2, storeId);
                             stZone.setString(3, zone.getName());
-                            stZone.setInt(4, storeId);
+                            stZone.setInt(4, storeId); // Điều kiện cập nhật theo store_id
                             stZone.executeUpdate();
                         }
                     }
@@ -875,13 +883,14 @@ public class productsDAO extends DBContext {
         }
     }
 
-    public List<Products> getLowStockProducts(int threshold) {
+    public List<Products> getLowStockProducts(int threshold, int storeId) {
         List<Products> products = new ArrayList<>();
-        String sql = "SELECT id, name, quantity FROM Products WHERE quantity <= ? ORDER BY quantity ASC";
+        String sql = "SELECT id, name, quantity FROM Products WHERE quantity <= ? AND store_id = ? AND isDeleted = 0 ORDER BY quantity ASC";
 
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, threshold);
+            ps.setInt(2, storeId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 products.add(new Products(rs.getInt("id"), rs.getString("name"), rs.getInt("quantity")));
