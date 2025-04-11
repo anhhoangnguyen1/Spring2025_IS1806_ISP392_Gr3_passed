@@ -63,7 +63,7 @@
                         <i class="fa-solid fa-bell"></i>
                     </div>
                     <div class="profile">
-                        <img src="/ISP392_Project/views/dashboard/images/profile-img.jpg" id="profile-img" />
+                        <img src="${pageContext.request.contextPath}/views/profile/image/${sessionScope.user.image}" id="profile-img" onerror="this.src='${pageContext.request.contextPath}/views/dashboard/images/profile-img.jpg'"/>
                         <div class="profile-menu">
                             <ul>
                                 <li><a href="/ISP392_Project/user"><i class="fa-solid fa-pen"></i> User Profile</a></li>
