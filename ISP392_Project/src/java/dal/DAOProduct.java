@@ -262,20 +262,7 @@ public class DAOProduct extends DBContext {
     }
 
     public boolean importProduct(int productId, double importPrice, int userId, int supplierId) {
-        String sql = "UPDATE Products SET import_price = ? WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setDouble(1, importPrice);
-            stmt.setInt(2, productId);
-            int rowsAffected = stmt.executeUpdate();
-            
-            if (rowsAffected > 0) {
-                // Log import price to history
-                return logPriceChange(productId, importPrice, "import", userId, supplierId);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+        return logPriceChange(productId, importPrice, "import", userId, supplierId);
     }
 
     private int getStoreIdByUserId(int userId) {

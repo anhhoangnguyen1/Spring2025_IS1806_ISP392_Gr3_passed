@@ -278,9 +278,6 @@ INSERT INTO ProductUnits (product_id, unitSize) VALUES
 (16, '1'), (16, '10'), (16, '20');
 
 
-ALTER TABLE Products 
-ADD COLUMN import_price DECIMAL(18,2) NOT NULL DEFAULT 0;
-
 ALTER TABLE ProductPriceHistory 
 MODIFY COLUMN created_by INT,
 ADD FOREIGN KEY (created_by) REFERENCES Users(id) ON DELETE SET NULL;
