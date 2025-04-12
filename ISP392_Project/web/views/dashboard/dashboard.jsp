@@ -199,7 +199,7 @@
                         <span class="close-btn" onclick="this.parentElement.style.display = 'none';">&times;</span>
                         ⚠ <strong>Warning! Low Stock Products:   </strong> 
                         <c:forEach var="product" items="${lowStockProducts}" varStatus="loop">
-                            <strong>${product.name}</strong> (<span class="low-stock-qty">${product.quantity} units</span>)
+                            <strong>${product.name}</strong> (<span class="low-stock-qty">${product.quantity} Kg</span>)
                             <c:if test="${!loop.last}">,</c:if>
                         </c:forEach>
                     </div>
