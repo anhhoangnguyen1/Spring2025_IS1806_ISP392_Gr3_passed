@@ -116,7 +116,7 @@ public class SearchServlet extends HttpServlet {
 //
 //                            // Hàng chứa tên, số lượng và giá
                             out.println("<h3>" + product.getName() + "</h3>");
-                            out.println("<p>Số lượng: " + product.getQuantity() + "</p>");
+                            out.println("<p>Quantity: " + product.getQuantity() + "</p>");
 
                             out.println("</div>"); // đóng div .product-item
 
@@ -132,7 +132,7 @@ public class SearchServlet extends HttpServlet {
 
                             // Hàng chứa tên, số lượng và giá
                             out.println("<h3>" + product.getName() + "</h3>");
-                            out.println("<p>Số lượng: " + product.getQuantity() + "</p>");
+                            out.println("<p>Quantity: " + product.getQuantity() + "</p>");
 
                             out.println("</div>"); // đóng div .product-item
                         }

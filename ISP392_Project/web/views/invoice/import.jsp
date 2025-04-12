@@ -11,7 +11,7 @@
     <head>
         <meta charset="UTF-8">
 
-        <title>Import invoice</title>
+        <title>Import Invoice</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
@@ -27,7 +27,7 @@
             }
 
             body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
                 background-color: var(--bg-color);
                 color: var(--text-color);
                 padding: 20px;
@@ -39,26 +39,39 @@
 
             .order-container {
                 display: flex;
+                flex-direction: column;
                 gap: 20px;
             }
 
-            .left-panel, .right-panel {
+            .panel-box {
                 background-color: #ffffff;
                 border: 1px solid var(--border-color);
                 border-radius: 8px;
                 padding: 20px;
-                overflow: visible;
-                position: relative;
+                margin-bottom: 20px;
             }
 
-            .left-panel {
-                flex: 3;
-                min-width: 600px;
+            .customer-section {
+
             }
 
-            .right-panel {
-                flex: 2;
-                min-width: 350px;
+            .product-section {
+
+            }
+
+            .payment-section {
+                background-color: #f9f9f9;
+            }
+
+            .overlay {
+                display: none; /* Ẩn mặc định */
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5); /* nền mờ */
+                z-index: 9990; /* thấp hơn popup nhưng che toàn trang */
             }
 
             /* Form elements */
@@ -146,7 +159,7 @@
 
             #orderItems th:nth-child(4),
             #orderItems td:nth-child(4) {
-                width: 60px;
+                width: 80px;
                 min-width: 60px;
                 text-align: center;
             }
@@ -437,10 +450,12 @@
     </head>
     <body>
         <div class="main-content">
-            <button onclick="openNewTab()" style="background-color: #007bff">Add New Order</button>
+            <div class="top-actions d-flex justify-content-end" style="gap: 10px; margin-bottom: 20px;">
+                <button onclick="openNewTab()" class="btn btn-primary">Add New Order</button>
+                <button type="button"  onclick="window.location.href = '${pageContext.request.contextPath}/dashboard'">
+                    Back to Dashboard</button>
 
-            <a href="${pageContext.request.contextPath}/dashboard" class="back-button">Back to Dashboard</a>
-
+            </div>
             <script>
                 // Kiểm tra số hóa đơn hiện tại trong sessionStorage
                 let invoiceCount = sessionStorage.getItem("invoiceCount");
@@ -458,7 +473,7 @@
             </script>
 
             <h1 style="text-align: center">
-                Import invoice
+                Import Invoice
             </h1>
             <form id="orderForm" action="Import" method="post">
                 <c:if test="${not empty message}">
@@ -492,12 +507,41 @@
                 </c:if>
                 <div class="order-container">
 
-                    <!-- LEFT PANEL: Product search, order items, notes -->
-                    <div class="left-panel">
 
-                        <!-- Product search -->
+                    <div class="customer-section panel-box">
+                        <div class="customer-search-box right-panel" style="margin-bottom: 20px;">
+                            <h2>Customer Information</h2>
+
+                            <div class="search-boxx">
+
+                                <input type="text" id="searchCustomerInput"  placeholder="Search for customer." >
 
 
+                                <div id="suggestionsCustomer" class="search-suggestions"></div>
+
+
+                            </div>
+
+
+                            <div style="margin-top: 10px;">
+                                <button type="button" onclick="openAddCustomerPopup()" style="background-color: #28a745; color: white;">
+                                    Add New Customer
+                                </button>
+                            </div>
+
+                            <div id="customerInfo" class="customer-info" style="display: none;">
+                                <h3 class="info-value success-text" id="customerName"></h3>
+                                <p id="customerPhone"></p>
+                                <p id="customerDebt"></p>
+                                <input type="hidden" id="customerId" name="customerId">
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="product-section panel-box">
+                        <h2>Order Details</h2>
                         <div class="search-boxx">
 
                             <input type="text" id="search" placeholder="Search for product." >
@@ -505,78 +549,76 @@
                         </div>
 
 
-
-
                         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                         <script>
-                $(document).ready(function () {
-                    let currentLoad;
-                    $("#search").on("input", function () {
-                        if (currentLoad) {
-                            console.log("Clear timeout");
-                            clearTimeout(currentLoad);
-                        }
-                        let that = this;
-                        currentLoad = setTimeout(function () {
-                            console.log("fetch product");
-                            let query = $(that).val();
-                            if (query.trim().length > 0) {
-                                $.ajax({
-                                    url: "SearchServlet",
-                                    type: "GET",
-                                    data: {
-                                        searchProduct: query,
-                                        orderType: "Import"
-                                    },
-                                    success: function (data) {
-                                        console.log("Search response:", data);
-                                        if (data.trim() !== "") {
-                                            $("#suggestions").html(data).fadeIn(); // dùng fadeIn thay vì .show()
-                                        } else {
-                                            $("#suggestions").fadeOut(100);
-                                        }
-                                    },
-                                    error: function (xhr, status, error) {
-                                        console.error("Search error:", error);
-                                        console.error("Status:", status);
-                                        console.error("Response:", xhr.responseText);
-                                    }
-                                });
-                            } else {
-                                $("#suggestions").hide();
-                            }
-                            currentLoad = null;
-                        }, 500);
-                    });
+                                    $(document).ready(function () {
+                                        let currentLoad;
+                                        $("#search").on("input", function () {
+                                            if (currentLoad) {
+                                                console.log("Clear timeout");
+                                                clearTimeout(currentLoad);
+                                            }
+                                            let that = this;
+                                            currentLoad = setTimeout(function () {
+                                                console.log("fetch product");
+                                                let query = $(that).val();
+                                                if (query.trim().length > 0) {
+                                                    $.ajax({
+                                                        url: "SearchServlet",
+                                                        type: "GET",
+                                                        data: {
+                                                            searchProduct: query,
+                                                            orderType: "Import"
+                                                        },
+                                                        success: function (data) {
+                                                            console.log("Search response:", data);
+                                                            if (data.trim() !== "") {
+                                                                $("#suggestions").html(data).fadeIn(); // dùng fadeIn thay vì .show()
+                                                            } else {
+                                                                $("#suggestions").fadeOut(100);
+                                                            }
+                                                        },
+                                                        error: function (xhr, status, error) {
+                                                            console.error("Search error:", error);
+                                                            console.error("Status:", status);
+                                                            console.error("Response:", xhr.responseText);
+                                                        }
+                                                    });
+                                                } else {
+                                                    $("#suggestions").hide();
+                                                }
+                                                currentLoad = null;
+                                            }, 500);
+                                        });
 
-                    // Kiểm tra khi click trên document
-                    $(document).on("click", function (event) {
-                        if (!$(event.target).closest("#search").length &&
-                                !$(event.target).closest("#suggestions").length) {
-                            $("#suggestions").fadeOut(100); // hiệu ứng nhẹ nhàng
-                        }
-                    });
+                                        // Kiểm tra khi click trên document
+                                        $(document).on("click", function (event) {
+                                            if (!$(event.target).closest("#search").length &&
+                                                    !$(event.target).closest("#suggestions").length) {
+                                                $("#suggestions").fadeOut(100); // hiệu ứng nhẹ nhàng
+                                            }
+                                        });
 
-                    // Hiển thị lại khi focus
-                    $("#search").on("focus", function () {
-                        console.log("Search focused");
-                        if ($(this).val().length > 0) {
-                            $.ajax({
-                                url: "SearchServlet",
-                                type: "GET",
-                                data: {
-                                    searchProduct: $(this).val(),
-                                    orderType: "Import"
-                                },
-                                success: function (data) {
-                                    console.log("Refreshed data on focus");
-                                    $("#suggestions").html(data);
-                                    $("#suggestions").show();
-                                }
-                            });
-                        }
-                    });
-                });
+                                        // Hiển thị lại khi focus
+                                        $("#search").on("focus", function () {
+                                            console.log("Search focused");
+                                            if ($(this).val().length > 0) {
+                                                $.ajax({
+                                                    url: "SearchServlet",
+                                                    type: "GET",
+                                                    data: {
+                                                        searchProduct: $(this).val(),
+                                                        orderType: "Import"
+                                                    },
+                                                    success: function (data) {
+                                                        console.log("Refreshed data on focus");
+                                                        $("#suggestions").html(data);
+                                                        $("#suggestions").show();
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    });
                         </script>
 
                         <input type="hidden" name="orderType" value="Import"><!-- nhập -->
@@ -625,32 +667,11 @@
                         <!-- Order notes -->
                         <div class="order-notes">
                             <h3>Note</h3>
-                            <textarea id="status" name="status" rows="4" placeholder="Note"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT PANEL: Order info, customer, payment -->
-                    <div class="right-panel">
-                        <h2>Order Information</h2>
-                        <!-- Customer search -->
-                        <div class="search-boxx">
-
-                            <input type="text" id="searchCustomerInput"  placeholder="Search for customer." >
-
-
-                            <div id="suggestionsCustomer" class="search-suggestions"></div>
-
-
+                            <textarea id="status" name="status" rows="4" placeholder="..."></textarea>
                         </div>
 
-                        <!-- Ô hiển thị thông tin khách hàng sau khi chọn -->
-                        <div id="customerInfo" class="customer-info" style="display: none;">
-                            <h3 class="info-value success-text" id="customerName"></h3>
-                            <p id="customerPhone"></p>
-                            <p id="customerDebt"></p>
-                            <input type="hidden" id="customerId" name="customerId">
 
-                        </div>
+
 
                         <script>
                             // Thêm biến role từ session
@@ -753,9 +774,32 @@
                                 }
 
                                 $("#customerInfo").show(); // Hiển thị div chứa thông tin khách hàng
+                                $("#searchCustomerInput").val("");
+                                $("#suggestionsCustomer").hide();
                             }
 
-
+                            function updateCustomerSuggestions() {
+                                let query = $("#searchCustomerInput").val();  // Lấy lại giá trị từ ô tìm kiếm
+                                if (query.trim().length > 0) {
+                                    $.ajax({
+                                        url: "SearchServlet",
+                                        type: "POST",
+                                        data: {keyword: query},
+                                        success: function (data) {
+                                            if (data.trim() !== "") {
+                                                $("#suggestionsCustomer").html(data).fadeIn();
+                                            } else {
+                                                $("#suggestionsCustomer").fadeOut(100);
+                                            }
+                                        },
+                                        error: function (xhr, status, error) {
+                                            console.error("Search error:", error);
+                                            console.error("Status:", status);
+                                            console.error("Response:", xhr.responseText);
+                                        }
+                                    });
+                                }
+                            }
 
                         </script>
 
@@ -831,11 +875,11 @@
                                 </div>
                                 <div id="debtOption" style="display: none;">
                                     <label><input type="radio" name="balanceAction" value="debt">Add to Debt</label>
-                                </div>
+                                   </div>
                             </div>
                         </div>
-
-
+                    </div>
+                </div>
 
                         <script>
 
@@ -844,19 +888,19 @@
                                 $("#submitOrder").on("click", function (event) {
                                     if ($("#customerId").val() === "") {
                                         event.preventDefault(); // Ngăn form hoặc hành động tiếp theo
-                                        alert("Please choose Customer for create invoice!");
+                                        alert("Please select a customer before creating the order!");
                                     }
                                     // Kiểm tra nếu bảng sản phẩm không có sản phẩm nào
                                     if ($("#orderItems tbody tr").length === 0) {
                                         event.preventDefault(); // Ngăn form hoặc hành động tiếp theo
-                                        alert("Vui lòng chọn ít nhất một sản phẩm để tạo đơn hàng.");
+                                        alert("Please select at least one product to create the order.");
                                         return; // Ngừng quá trình gửi form
                                     }
                                     let paidAmount = $("#paidAmount").val().trim();
                                     // Kiểm tra đã nhập số tiền thanh toán chưa
                                     if (!paidAmount || isNaN(parseFloat(paidAmount))) {
                                         event.preventDefault();
-                                        alert("Please enter payment!");
+                                        alert("Please enter the amount paid by the customer!");
                                         return;
                                     }
 
@@ -874,14 +918,15 @@
                         </script>
 
 
-                        <!-- Action buttons -->
-                        <div class="action-buttons">
+                      
+                <!-- Action buttons -->
+                <div class="top-actions d-flex justify-content-end" style="gap: 10px; margin-bottom: 20px;">
+                    <button type="submit" id="submitOrder" style="background-color: #007bff">Submit Order</button>
+                    <button type="button"  onclick="window.location.href = '${pageContext.request.contextPath}/InvoiceHistory'">
+                        Go to Order List </button>
+                </div>
 
-                            <button type="submit" id="submitOrder" style="background-color: #007bff">Create Import Invoice</button>
-
-                        </div>
-
-                        <p id="orderStatus"></p>
+                <p id="orderStatus"></p>
                     </div>
 
                 </div>
@@ -1043,31 +1088,30 @@
 
 
 
+ </form>
+    <div id="overlay" class="overlay"></div>
 
-            </form>
+    <div id="addCustomerPopup" class="popup" style="background-color: whitesmoke">
 
-            <div id="addCustomerPopup" class="popup">
+        <span class="close" onclick="closeAddCustomerPopup()">&times;</span>
+        <h2>Add new customer</h2>
 
-                <span class="close" onclick="closeAddCustomerPopup()">&times;</span>
-                <h2>Add new customer</h2>
+        <form id="addCustomerForm">
+            <label for="newCustomerName">Name:</label>
+            <input type="text" id="newCustomerName" name="name" required>
 
-                <form id="addCustomerForm">
-                    <label for="newCustomerName">Name:</label>
-                    <input type="text" id="newCustomerName" name="name" required>
-
-                    <label for="newCustomerPhone">Phone:</label>
-                    <input type="number" id="newCustomerPhone" name="phone" required>
+            <label for="newCustomerPhone">Phone:</label>
+            <input type="number" id="newCustomerPhone" name="phone" required>
 
 
-                    <input type="hidden" name="address" value="">
-                    <input type="hidden" name="email" value="">
-                    <input type="hidden" name="total" value="0"> 
+            <input type="hidden" name="address" value="">
+            <input type="hidden" name="email" value="">
+            <input type="hidden" name="total" value="0"> 
 
-                    <button type="button" onclick="saveNewCustomer()">Save</button>
-                </form>
+            <button type="button" onclick="saveNewCustomer()" style="background-color: #007bff">Save</button>
+        </form>
 
-            </div>
-
+    </div>
 
 
             <script>
@@ -1080,14 +1124,23 @@
 
 
             </script>
-            <script>
-                function openAddCustomerPopup() {
-                    $("#addCustomerPopup").show();
-                }
+             <script>
+        function openAddCustomerPopup() {
+            $("#overlay").fadeIn(200);
+            $("#addCustomerPopup").fadeIn(200);
+        }
 
-                function closeAddCustomerPopup() {
-                    $("#addCustomerPopup").hide();
-                }
+        function closeAddCustomerPopup() {
+            $("#addCustomerPopup").fadeOut(200);
+            $("#overlay").fadeOut(200);
+        }
+
+        $("#overlay").on("click", function () {
+            closeAddCustomerPopup();
+        });
+
+
+
 
                 function saveNewCustomer() {
                     let name = $("#newCustomerName").val().trim();
@@ -1138,7 +1191,7 @@
                 $(document).ready(function () {
                     $("#orderForm").submit(function (event) {
                         event.preventDefault(); // Ngăn chặn việc tải lại trang
-                        $("#orderStatus").text("⏳ Đơn hàng đang xử lý..."); // Hiển thị trạng thái ngay lập tức
+                        $("#orderStatus").text("The order is being processed..."); // Hiển thị trạng thái ngay lập tức
                         $("#submitOrder").prop("disabled", true); // Disable nút submit
 
                         $.ajax({
@@ -1166,12 +1219,12 @@
                             dataType: "json",
                             success: function (response) {
                                 if (response.status === "done") {
-                                    $("#orderStatus").text("✅ Tạo đơn hàng thành công!");
+                                    $("#orderStatus").text("Order created successfully!");
                                     setTimeout(function () {
                                         window.location.href = "orders/list"; // <-- Đường dẫn tới trang danh sách hóa đơn
                                     }, 1500); // đợi 1.5 giây rồi chuyển hướng
                                 } else if (response.status === "error") {
-                                    $("#orderStatus").text("❌ Lỗi: Tạo đơn hàng không thành công!");
+                                    $("#orderStatus").text("Error: Failed to create the order!");
                                 } else {
                                     setTimeout(checkOrderStatus, 1000); // Tiếp tục kiểm tra sau 1 giây
                                 }
@@ -1208,7 +1261,7 @@
                     openAddNewDebt.addEventListener('click', toggleAddNewDebt);
                 });
             </script>
-        </div>
+      
 
     </body>
 </html>
