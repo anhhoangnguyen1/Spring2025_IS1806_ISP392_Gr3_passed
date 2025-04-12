@@ -66,7 +66,7 @@ public class HistoryExportPriceServlet extends HttpServlet {
         request.setAttribute("startDate", startDate);
         request.setAttribute("endDate", endDate);
 
-        request.getRequestDispatcher("/product/historyExportPrice.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/priceHistory/historyExportPrice.jsp").forward(request, response);
     }
 
     @Override
