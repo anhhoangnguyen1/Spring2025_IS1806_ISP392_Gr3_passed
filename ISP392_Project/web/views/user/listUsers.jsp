@@ -283,6 +283,7 @@
                     } else if ('${sessionScope.role}' === 'owner' && user.status === 'Active') {
                     banAction = '<a href="${pageContext.request.contextPath}/Users?service=banUser&user_id=' + user.id + '" class="btn btn-outline-danger">Ban</a>';
                     }
+                    }
 
 
                     tbody.append(
