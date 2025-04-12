@@ -364,6 +364,31 @@ public class DAOProduct extends DBContext {
         return 0;
     }
 
+    public int getLatestOrderId(int userId) {
+        String sql = """
+            SELECT o.id 
+            FROM Orders o 
+            WHERE o.user_id = ? 
+            AND o.type = 'Import' 
+            AND o.isDeleted = 0 
+            ORDER BY o.created_at DESC 
+            LIMIT 1
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in getLatestOrderId: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
     public static void main(String[] args) {
         // Khởi tạo instance của DAOProduct
         DAOProduct dao = DAOProduct.INSTANCE;

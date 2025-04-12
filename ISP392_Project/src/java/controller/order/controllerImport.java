@@ -18,6 +18,14 @@ import java.util.logging.Logger;
 @WebServlet(name = "controllerImport", urlPatterns = {"/Import"})
 public class controllerImport extends HttpServlet {
 
+    private DAOProduct daoProduct;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        daoProduct = DAOProduct.INSTANCE;
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -121,7 +129,7 @@ public class controllerImport extends HttpServlet {
                 }
                 
                 // Ghi log giá nhập vào lịch sử
-                DAOProduct.INSTANCE.logPriceChange(productID, unitPrice, "import", userId, customerId, fullName);
+                //daoProduct.logPriceChange(productID, unitPrice, "import", userId, customerId, fullName);
             }
 
             if (Math.abs(calculatedTotal - totalOrderPrice) > epsilon) {
@@ -150,6 +158,24 @@ public class controllerImport extends HttpServlet {
             OrderWorker.startWorker();
             OrderWorker.clearProcessedOrder(userId);
             OrderQueue.addOrder(new OrderTask(order, orderDetailsList, balanceAction));
+
+            // Đợi một chút để đảm bảo order đã được xử lý
+            Thread.sleep(100);
+
+            // Ghi log giá nhập với order_id
+            for (OrderDetails detail : orderDetailsList) {
+                int orderId = daoProduct.getLatestOrderId(userId);
+                if (orderId != -1) {
+                    daoProduct.logPriceChange(
+                        detail.getProductID().getProductId(), 
+                        detail.getUnitPrice(), 
+                        "import",
+                        userId,
+                        orderId,
+                        fullName
+                    );
+                }
+            }
 
             request.setAttribute("message", "success");
             request.getRequestDispatcher("views/invoice/import.jsp").forward(request, response);
