@@ -44,6 +44,10 @@ import java.util.Random;
 public class controllerProducts extends HttpServlet {
 
     private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList("image/jpeg", "image/png", "image/gif");
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final String[] VALID_STATUSES = {"Active", "Inactive"};
+    private static final int MIN_QUANTITY = 0;
+    private static final BigDecimal MIN_PRICE = BigDecimal.ZERO;
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -63,12 +67,20 @@ public class controllerProducts extends HttpServlet {
         zoneDAO zonesDao = new zoneDAO();
 
         String fullName = (String) session.getAttribute("fullName");
+        String storeIDStr = (String) session.getAttribute("storeID");
+        
+        // Validate storeID
+        if (storeIDStr == null || storeIDStr.trim().isEmpty()) {
+            session.setAttribute("Notification", "Cannot find store information");
+            response.sendRedirect("Products?service=products");
+            return;
+        }
+        int storeID = Integer.parseInt(storeIDStr);
+
         if (service == null) {
             service = "products";
         }
         if (service.equals("products")) {
-            String storeIDStr = (String) session.getAttribute("storeID");
-            int storeID = Integer.parseInt(storeIDStr);
             String indexPage = request.getParameter("index");
             String pageSizeStr = request.getParameter("pageSize");
             String command = request.getParameter("command");
@@ -132,8 +144,6 @@ public class controllerProducts extends HttpServlet {
         }
 
         if (service.equals("searchProducts")) {
-            String storeIDStr = (String) session.getAttribute("storeID");
-            int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("browser");
             try {
                 List<Products> list = products.searchProductsByNameO(name, storeID);
@@ -153,12 +163,10 @@ public class controllerProducts extends HttpServlet {
             if (isUpdated) {
                 response.sendRedirect("Products?service=products&index=" + index); // Load lại trang sau khi cập nhật
             } else {
-                response.getWriter().println("Lỗi khi cập nhật trạng thái sản phẩm.");
+                response.getWriter().println("Error updating product status.");
             }
         }
         if (service.equals("searchProductsEditHistory")) {
-            String storeIDStr = (String) session.getAttribute("storeID");
-            int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("browser");
             try {
                 List<Products> list = products.searchProductsByNameO(name, storeID);
@@ -170,8 +178,6 @@ public class controllerProducts extends HttpServlet {
         }
 
         if (service.equals("getProductById")) {
-            String storeIDStr = (String) session.getAttribute("storeID");
-            int storeID = Integer.parseInt(storeIDStr);
             String id_raw = request.getParameter("product_id");
             int id;
             try {
@@ -184,8 +190,6 @@ public class controllerProducts extends HttpServlet {
         }
 
         if (service.equals("detailProduct")) {
-            String storeIDStr = (String) session.getAttribute("storeID");
-            int storeID = Integer.parseInt(storeIDStr);
             int id = Integer.parseInt(request.getParameter("product_id"));
             List<Products> list = products.getProductById(id, storeID);
             request.setAttribute("product", list);
@@ -194,8 +198,6 @@ public class controllerProducts extends HttpServlet {
         }
 
         if (service.equals("editProduct")) {
-            String storeIDStr = (String) session.getAttribute("storeID");
-            int storeID = Integer.parseInt(storeIDStr);
             try {
                 int productId = Integer.parseInt(request.getParameter("product_id"));
                 String name = request.getParameter("name");
@@ -204,11 +206,26 @@ public class controllerProducts extends HttpServlet {
                 String imageFileName = (currentImage != null && !currentImage.isEmpty()) ? currentImage : "";
                 int index = Integer.parseInt(request.getParameter("index"));
 
+                // Kiểm tra xem tên sản phẩm có bị thay đổi không
+                Products existingProduct = products.getProductByIdSimple(productId, storeID);
+                if (existingProduct != null && !existingProduct.getName().equals(name)) {
+                    session.setAttribute("Notification", "Cannot change product name!");
+                    response.sendRedirect("Products?service=products");
+                    return;
+                }
+
                 if (file != null && file.getSize() > 0) {
-                    // 1. Kiểm tra loại file
+                    // Validate file size
+                    if (file.getSize() > MAX_FILE_SIZE) {
+                        session.setAttribute("Notification", "File size cannot exceed 5MB");
+                        response.sendRedirect("Products?service=products&index=" + index);
+                        return;
+                    }
+
+                    // Validate file type
                     String fileType = file.getContentType();
                     if (!ALLOWED_MIME_TYPES.contains(fileType)) {
-                        session.setAttribute("Notification", "Chỉ chấp nhận file ảnh (JPG, PNG, GIF)");
+                        session.setAttribute("Notification", "Only image files (JPG, PNG, GIF) are allowed");
                         response.sendRedirect("Products?service=products&index=" + index);
                         return;
                     }
@@ -224,7 +241,7 @@ public class controllerProducts extends HttpServlet {
                     File uploadDir = new File(uploadDirectory);
                     if (!uploadDir.exists()) {
                         if (!uploadDir.mkdirs()) {
-                            session.setAttribute("Notification", "Không thể tạo thư mục lưu ảnh");
+                            session.setAttribute("Notification", "Cannot create image directory");
                             response.sendRedirect("Products?service=products&index=" + index);
                             return;
                         }
@@ -249,24 +266,39 @@ public class controllerProducts extends HttpServlet {
                             }
                         }
                     } catch (IOException e) {
-                        session.setAttribute("Notification", "Lỗi khi lưu ảnh: " + e.getMessage());
+                        session.setAttribute("Notification", "Error saving image: " + e.getMessage());
                         response.sendRedirect("Products?service=products&index=" + index);
                         return;
                     }
                 }
 
                 BigDecimal price = new BigDecimal(request.getParameter("price"));
-                if (price.compareTo(BigDecimal.ZERO) <= 0) {
-                    session.setAttribute("Notification", "Price must be greater than 0.");
-                    response.sendRedirect("Products");
+                if (price.compareTo(MIN_PRICE) <= 0) {
+                    session.setAttribute("Notification", "Price must be greater than 0");
+                    response.sendRedirect("Products?service=products&index=" + index);
                     return;
                 }
                 String quantityStr = request.getParameter("quantity");
                 int quantity = Integer.parseInt(quantityStr);
+                if (quantity < MIN_QUANTITY) {
+                    session.setAttribute("Notification", "Quantity cannot be negative");
+                    response.sendRedirect("Products?service=products&index=" + index);
+                    return;
+                }
                 String createBy = request.getParameter("createBy");
                 String deletedBy = request.getParameter("deletedBy");
                 String description = request.getParameter("description");
+                if (description == null || description.trim().isEmpty()) {
+                    session.setAttribute("Notification", "Description cannot be empty");
+                    response.sendRedirect("Products?service=products&index=" + index);
+                    return;
+                }
                 String status = request.getParameter("status");
+                if (!Arrays.asList(VALID_STATUSES).contains(status)) {
+                    session.setAttribute("Notification", "Invalid status");
+                    response.sendRedirect("Products?service=products&index=" + index);
+                    return;
+                }
 
                 Date deletedAt = new java.sql.Date(System.currentTimeMillis());
                 Date updatedAt = new java.sql.Date(System.currentTimeMillis());
@@ -286,13 +318,11 @@ public class controllerProducts extends HttpServlet {
 
                 Products product = new Products(productId, name, imageFileName, price, quantity, description, createdAt, createBy, deletedAt, deletedBy, isDelete, updatedAt, status);
                 List<Zone> zones = new ArrayList<>();
-                if (zoneNames != null && zoneNames.length > 0) {
-                    for (String zoneName : zoneNames) {
-                        if (zoneName != null && !zoneName.trim().isEmpty()) {
-                            Zone zone = new Zone();
-                            zone.setName(zoneName);
-                            zones.add(zone);
-                        }
+                for (String zoneName : zoneNames) {
+                    if (zoneName != null && !zoneName.trim().isEmpty()) {
+                        Zone zone = new Zone();
+                        zone.setName(zoneName);
+                        zones.add(zone);
                     }
                 }
 //                boolean success = products.editProduct(product, zones);
@@ -315,17 +345,15 @@ public class controllerProducts extends HttpServlet {
             }
         }
         if (service.equals("addProduct")) {
-            String storeIDStr = (String) session.getAttribute("storeID");
-            int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("name");
-            if (products.isProductNameExists(name, storeID)) {
-                request.setAttribute("Notification", "Product name already exists!");
+            if (name == null || name.trim().isEmpty()) {
+                request.setAttribute("Notification", "Product name cannot be empty");
                 request.getRequestDispatcher("Products?service=products").forward(request, response);
                 return;
             }
 
-            if (name == null || name.trim().isEmpty()) {
-                request.setAttribute("Notification", "Product name is required.");
+            if (products.isProductNameExists(name, storeID)) {
+                request.setAttribute("Notification", "Product name already exists");
                 request.getRequestDispatcher("Products?service=products").forward(request, response);
                 return;
             }
@@ -334,10 +362,17 @@ public class controllerProducts extends HttpServlet {
             String imageFileName = null;
 
             if (file != null && file.getSize() > 0) {
-                // 1. Kiểm tra loại file
+                // Validate file size
+                if (file.getSize() > MAX_FILE_SIZE) {
+                    request.setAttribute("Notification", "File size cannot exceed 5MB");
+                    request.getRequestDispatcher("Products?service=products").forward(request, response);
+                    return;
+                }
+
+                // Validate file type
                 String fileType = file.getContentType();
                 if (!ALLOWED_MIME_TYPES.contains(fileType)) {
-                    request.setAttribute("Notification", "Chỉ chấp nhận file ảnh JPG, PNG hoặc GIF");
+                    request.setAttribute("Notification", "Only image files (JPG, PNG, GIF) are allowed");
                     request.getRequestDispatcher("Products?service=products").forward(request, response);
                     return;
                 }
@@ -370,7 +405,7 @@ public class controllerProducts extends HttpServlet {
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                    request.setAttribute("Notification", "Lỗi khi upload ảnh: " + e.getMessage());
+                    request.setAttribute("Notification", "Error uploading image: " + e.getMessage());
                     request.getRequestDispatcher("Products?service=products").forward(request, response);
                     return;
                 }
@@ -380,13 +415,13 @@ public class controllerProducts extends HttpServlet {
             BigDecimal price;
             try {
                 price = new BigDecimal(priceRaw);
-                if (price.compareTo(BigDecimal.ZERO) <= 0) {
-                    request.setAttribute("Notification", "Price must be greater than 0.");
+                if (price.compareTo(MIN_PRICE) <= 0) {
+                    request.setAttribute("Notification", "Price must be greater than 0");
                     request.getRequestDispatcher("Products?service=products").forward(request, response);
                     return;
                 }
             } catch (NumberFormatException | NullPointerException e) {
-                request.setAttribute("Notification", "Invalid price format.");
+                request.setAttribute("Notification", "Invalid price");
                 request.getRequestDispatcher("Products?service=products").forward(request, response);
                 return;
             }
@@ -395,18 +430,27 @@ public class controllerProducts extends HttpServlet {
             try {
                 String quantityRaw = request.getParameter("quantity");
                 quantity = (quantityRaw != null && !quantityRaw.isEmpty()) ? Integer.parseInt(quantityRaw) : 0;
-                if (quantity < 0) {
-                    request.setAttribute("Notification", "Quantity must be 0 or greater.");
+                if (quantity < MIN_QUANTITY) {
+                    request.setAttribute("Notification", "Quantity cannot be negative");
                     request.getRequestDispatcher("Products?service=products").forward(request, response);
                     return;
                 }
             } catch (NumberFormatException e) {
-                request.setAttribute("Notification", "Invalid quantity format.");
+                request.setAttribute("Notification", "Invalid quantity");
                 request.getRequestDispatcher("Products?service=products").forward(request, response);
                 return;
             }
 
             String description = request.getParameter("description");
+            if (description == null || description.trim().isEmpty()) {
+                request.setAttribute("Notification", "Description cannot be empty");
+                request.getRequestDispatcher("Products?service=products").forward(request, response);
+                return;
+            }
+
+
+            String[] zoneNames = request.getParameterValues("zoneName");
+
             String createdBy = fullName; // Sử dụng fullName từ session
             String deletedBy = null; // Không cần deletedBy khi thêm mới
             String status = request.getParameter("status") != null ? request.getParameter("status") : "Active";
@@ -420,16 +464,13 @@ public class controllerProducts extends HttpServlet {
 
             // Lấy danh sách Zone Active để kiểm tra
             List<String> activeZoneNames = zonesDao.getActiveZoneNames(storeID);
-            String[] zoneNames = request.getParameterValues("zoneName");
             List<Zone> zones = new ArrayList<>();
 
-            if (zoneNames != null) {
-                for (String zoneName : zoneNames) {
-                    if (zoneName != null && !zoneName.trim().isEmpty() && activeZoneNames.contains(zoneName)) {
-                        Zone zone = new Zone();
-                        zone.setName(zoneName);
-                        zones.add(zone);
-                    }
+            for (String zoneName : zoneNames) {
+                if (zoneName != null && !zoneName.trim().isEmpty() && activeZoneNames.contains(zoneName)) {
+                    Zone zone = new Zone();
+                    zone.setName(zoneName);
+                    zones.add(zone);
                 }
             }
 
@@ -477,7 +518,6 @@ public class controllerProducts extends HttpServlet {
             boolean isDelete = Boolean.parseBoolean(request.getParameter("isDelete"));
             String updatedBy = fullName;
             Date updatedAt = new java.sql.Date(System.currentTimeMillis());
-            int storeID = Integer.parseInt((String) session.getAttribute("storeID"));
 
             Products product = new Products(id, name, image, price, quantity, description, null, null, null, null, isDelete, updatedAt, status, null);
 

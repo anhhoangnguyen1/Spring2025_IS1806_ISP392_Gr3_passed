@@ -4,6 +4,12 @@
 <html>
     <head>
         <title>Edit Product</title>
+        <style>
+            .readonly-field {
+                background-color: #e9ecef;
+                pointer-events: none;
+            }
+        </style>
     </head>
     <body>
 
@@ -12,9 +18,10 @@
             <div id="editProductModal${product.getProductId()}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel${product.getProductId()}" aria-hidden="true">
                 <div class="modal-dialog modal-xl" role="document">
                     <div class="modal-content">
-                        <form action="${pageContext.request.contextPath}/Products" method="POST" enctype="multipart/form-data">
+                        <form action="${pageContext.request.contextPath}/Products" method="POST" enctype="multipart/form-data" onsubmit="return validateForm(this);">
                             <input type="hidden" name="service" value="editProduct" />
                             <input type="hidden" name="product_id" value="${product.getProductId()}" />
+                            <input type="hidden" name="original_name" value="${product.getName()}" />
 
                             <!-- Modal Header -->
                             <div class="modal-header">
@@ -28,7 +35,7 @@
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Product Name</label>
-                                    <input type="text" class="form-control" name="name" value="${product.getName()}" readonly="">
+                                    <input type="text" class="form-control readonly-field" name="name" value="${product.getName()}" readonly data-original="${product.getName()}">
                                 </div>
                                 <div class="form-group">
                                     <label>Product Image</label>
@@ -91,6 +98,55 @@
                 }
             }
 
+            // Add form validation
+            function validateForm(form) {
+                var nameInput = form.querySelector('input[name="name"]');
+                var originalName = nameInput.getAttribute('data-original');
+                
+                if (nameInput.value !== originalName) {
+                    alert('Không được phép thay đổi tên sản phẩm!');
+                    nameInput.value = originalName;
+                    return false;
+                }
+                
+                return true;
+            }
+
+            // Add protection against DOM manipulation
+            document.addEventListener('DOMContentLoaded', function() {
+                var nameInputs = document.querySelectorAll('input[name="name"]');
+                nameInputs.forEach(function(input) {
+                    // Prevent copy/paste
+                    input.addEventListener('paste', function(e) {
+                        e.preventDefault();
+                    });
+                    
+                    // Prevent drag/drop
+                    input.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                    });
+                    
+                    // Prevent keyboard input
+                    input.addEventListener('keydown', function(e) {
+                        e.preventDefault();
+                    });
+                    
+                    // Prevent context menu
+                    input.addEventListener('contextmenu', function(e) {
+                        e.preventDefault();
+                    });
+                    
+                    // Prevent programmatic changes
+                    Object.defineProperty(input, 'value', {
+                        get: function() {
+                            return this.getAttribute('data-original');
+                        },
+                        set: function(val) {
+                            this.setAttribute('value', this.getAttribute('data-original'));
+                        }
+                    });
+                });
+            });
         </script>
     </body>
 </html>
