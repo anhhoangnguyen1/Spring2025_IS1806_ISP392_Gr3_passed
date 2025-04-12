@@ -10,7 +10,7 @@
                 <tr>
                     <th style="min-width: 150px;">Product Name</th>
                     <th style="min-width: 120px;">Unit Price</th>
-                    <th style="min-width: 100px;">Quantity</th>
+                    <th style="min-width: 100px;">Weight</th>
                     <th style="min-width: 120px;">Total</th>
                 </tr>
             </thead>
@@ -18,9 +18,9 @@
                 <c:forEach var="item" items="${details}">
                     <tr>
                         <td>${item.productName}</td>
-                        <td><fmt:formatNumber value="${item.unitPrice}" type="currency"/></td>
-                        <td>${item.quantity}</td>
-                        <td><fmt:formatNumber value="${item.unitPrice * item.quantity}" type="currency"/></td>
+                        <td><fmt:formatNumber value="${item.unitPrice}" pattern="#,###" /></td>
+                        <td>${item.quantity} Kg</td>
+                        <td><fmt:formatNumber value="${item.unitPrice * item.quantity}" pattern="#,###" /></td>
                     </tr>
                 </c:forEach>
             </tbody>
@@ -28,7 +28,7 @@
     </div>
 
     <div class="mt-3">
-        <p><strong>Total Amount:</strong> <fmt:formatNumber value="${totalAmount}" type="currency"/></p>
-        <p><strong>Paid:</strong> <fmt:formatNumber value="${order.paidAmount}" type="currency"/></p>
+        <p><strong>Total Amount:</strong> <fmt:formatNumber value="${totalAmount}" pattern="#,###" /></p>
+        <p><strong>Paid:</strong> <fmt:formatNumber value="${order.paidAmount}" pattern="#,###" /></p>
     </div>
 </div>

@@ -240,8 +240,8 @@
                                             <td>${order.id}</td>
                                             <td>${order.customerID.name}</td>
                                             <td>${order.type}</td>
-                                            <td>${order.amount}</td>
-                                            <td>${order.paidAmount}</td>
+                                            <td><fmt:formatNumber value="${order.amount}" pattern="#,###" /></td>
+                                            <td><fmt:formatNumber value="${order.paidAmount}" pattern="#,###" /></td>
                                             <td><fmt:formatDate value="${order.createdAt}" pattern="yyyy-MM-dd"/></td>
                                             <td>${order.createdBy}</td>
                                             <td>${order.description}</td>

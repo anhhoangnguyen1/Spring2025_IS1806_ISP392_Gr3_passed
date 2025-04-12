@@ -337,6 +337,72 @@ public class OrdersDAO extends DBContext {
         return list;
     }
 
+    public List<Orders> getOrdersByStoreId(int storeId) {
+        List<Orders> list = new ArrayList<>();
+        String sql = """
+        SELECT o.*, c.name AS customer_name
+        FROM Orders o
+        JOIN Customers c ON o.customers_id = c.id
+        WHERE o.store_id = ? AND o.isDeleted = false
+        ORDER BY o.id DESC
+    """;
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeId);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToOrder(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<Orders> getOrdersByStoreIdPaging(int storeId, int offset, int limit) {
+        List<Orders> list = new ArrayList<>();
+        String sql = """
+        SELECT o.*, c.name AS customer_name
+        FROM Orders o
+        JOIN Customers c ON o.customers_id = c.id
+        WHERE o.store_id = ? AND o.isDeleted = false
+        ORDER BY o.id DESC
+        LIMIT ? OFFSET ?
+    """;
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeId);
+            st.setInt(2, limit);
+            st.setInt(3, offset);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToOrder(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public int getTotalOrdersCountByStoreId(int storeId) {
+        String sql = "SELECT COUNT(*) FROM Orders WHERE store_id = ? AND isDeleted = false";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeId);
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public static void main(String[] args) {
         OrdersDAO dao = new OrdersDAO();
 

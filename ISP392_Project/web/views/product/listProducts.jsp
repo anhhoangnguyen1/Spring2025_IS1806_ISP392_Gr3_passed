@@ -82,7 +82,7 @@
                         <th class="resizable" style="width: 150px" onclick="sortTable(3)">Image</th>
                         <th class="resizable" style="width: 70px" onclick="sortTable(4)">Price</th>
                         <th class="resizable" style="width: 70px" onclick="sortTable(5)">Zone name</th>
-                        <th class="resizable" style="width: 85px" onclick="sortTable(6)">Quantity</th>
+                        <th class="resizable" style="width: 85px" onclick="sortTable(6)">Weight</th>
                         <th class="resizable" style="width: 400px" onclick="sortTable(7)">Description</th>
                         <th class="resizable" style="width: 150px" onclick="sortTable(8)">Created At</th>
                         <th class="resizable" style="width: 150px" onclick="sortTable(9)">Updated At</th>
