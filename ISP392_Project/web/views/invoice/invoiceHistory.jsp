@@ -225,7 +225,11 @@
                                     <th class="resizable">Order ID</th>
                                     <th class="resizable">Customer Name</th>
                                     <th class="resizable">Type</th>
+                                    <th class="resizable">Total Amount</th>
+                                    <th class="resizable">Paid</th>
                                     <th class="resizable">Created At</th>
+                                    <th class="resizable">Created By</th>
+                                    <th class="resizable">Note</th>
                                     <th class="sticky-col">Actions</th>
                                 </tr>
                             </thead>
@@ -236,7 +240,11 @@
                                             <td>${order.id}</td>
                                             <td>${order.customerID.name}</td>
                                             <td>${order.type}</td>
+                                            <td>${order.amount}</td>
+                                            <td>${order.paidAmount}</td>
                                             <td><fmt:formatDate value="${order.createdAt}" pattern="yyyy-MM-dd"/></td>
+                                            <td>${order.createdBy}</td>
+                                            <td>${order.description}</td>
                                             <td class="sticky-col">
                                                 <button type="button"
                                                         class="btn btn-outline-primary btn-sm"

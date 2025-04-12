@@ -195,7 +195,7 @@ public class controllerOrders extends HttpServlet {
                             .build();
 
                     orderDetailsList.add(od);
-                    // ✅ Trừ số lượng tồn kho
+                    //  Trừ số lượng tồn kho
                     int availableQuantity = productsDAO.INSTANCE.getProductQuantity(productID);
                     int newQuantity = availableQuantity - quantity;
                     boolean updated = productsDAO.INSTANCE.updateProductQuantity(productID, newQuantity);

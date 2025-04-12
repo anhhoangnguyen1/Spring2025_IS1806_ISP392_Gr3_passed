@@ -11,7 +11,7 @@
     <head>
         <meta charset="UTF-8">
 
-        <title>Add Order</title>
+        <title>Sales Order</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
@@ -27,7 +27,7 @@
             }
 
             body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
                 background-color: var(--bg-color);
                 color: var(--text-color);
                 padding: 20px;
@@ -39,27 +39,42 @@
 
             .order-container {
                 display: flex;
+                flex-direction: column;
                 gap: 20px;
             }
 
-            .left-panel, .right-panel {
+
+            .panel-box {
                 background-color: #ffffff;
                 border: 1px solid var(--border-color);
                 border-radius: 8px;
                 padding: 20px;
-                overflow: visible;
-                position: relative;
+                margin-bottom: 20px;
             }
 
-            .left-panel {
-                flex: 3;
-                min-width: 600px;
+            .customer-section {
+
             }
 
-            .right-panel {
-                flex: 2;
-                min-width: 350px;
+            .product-section {
+
             }
+
+            .payment-section {
+                background-color: #f9f9f9;
+            }
+
+            .overlay {
+                display: none; /* Ẩn mặc định */
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5); /* nền mờ */
+                z-index: 9990; /* thấp hơn popup nhưng che toàn trang */
+            }
+
 
             /* Form elements */
             input[type="text"],
@@ -146,7 +161,7 @@
 
             #orderItems th:nth-child(4),
             #orderItems td:nth-child(4) {
-                width: 60px;
+                width: 80px;
                 min-width: 60px;
                 text-align: center;
             }
@@ -298,7 +313,7 @@
             }
 
 
-            /* Ảnh sản phẩm */
+
             .product-item h3 {
                 font-size: 15px;
                 font-weight: bold;
@@ -388,6 +403,8 @@
                 z-index: 9999;
             }
 
+
+
             .popup h2 {
                 font-size: 24px;
                 text-align: center;
@@ -454,10 +471,12 @@
     </head>
     <body>
         <div class="main-content">
+            <div class="top-actions d-flex justify-content-end" style="gap: 10px; margin-bottom: 20px;">
+                <button onclick="openNewTab()" class="btn btn-primary">Add New Order</button>
+                <button type="button"  onclick="window.location.href = '${pageContext.request.contextPath}/dashboard'">
+                    Back to Dashboard</button>
 
-
-            <button onclick="openNewTab()" style="background-color: #007bff">Add New Order</button>
-            <a href="${pageContext.request.contextPath}/dashboard" class="back-button">Back to Dashboard</a>
+            </div>
 
             <script>
                 // Kiểm tra số hóa đơn hiện tại trong sessionStorage
@@ -510,12 +529,41 @@
                 </c:if>
                 <div class="order-container">
 
-                    <!-- LEFT PANEL: Product search, order items, notes -->
-                    <div class="left-panel">
 
-                        <!-- Product search -->
+                    <div class="customer-section panel-box">
+                        <div class="customer-search-box right-panel" style="margin-bottom: 20px;">
+                            <h2>Customer Information</h2>
+
+                            <div class="search-boxx">
+
+                                <input type="text" id="searchCustomerInput"  placeholder="Search for customer." >
 
 
+                                <div id="suggestionsCustomer" class="search-suggestions"></div>
+
+
+                            </div>
+
+
+                            <div style="margin-top: 10px;">
+                                <button type="button" onclick="openAddCustomerPopup()" style="background-color: #28a745; color: white;">
+                                    Add New Customer
+                                </button>
+                            </div>
+
+                            <div id="customerInfo" class="customer-info" style="display: none;">
+                                <h3 class="info-value success-text" id="customerName"></h3>
+                                <p id="customerPhone"></p>
+                                <p id="customerDebt"></p>
+                                <input type="hidden" id="customerId" name="customerId">
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="product-section panel-box">
+                        <h2>Order Details</h2>
                         <div class="search-boxx">
 
                             <input type="text" id="search" placeholder="Search for product." >
@@ -527,81 +575,81 @@
 
                         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                         <script>
-                $(document).ready(function () {
-                    let currentLoad;
-                    $("#search").on("input", function () {
-                        if (currentLoad) {
-                            console.log("Clear timeout");
-                            clearTimeout(currentLoad);
-                        }
-                        let that = this;
-                        currentLoad = setTimeout(function () {
-                            console.log("fetch product");
-                            let query = $(that).val();
-                            if (query.trim().length > 0) {
-                                $.ajax({
-                                    url: "SearchServlet",
-                                    type: "GET",
-                                    data: {
-                                        searchProduct: query,
-                                        orderType: "Export"
-                                    },
-                                    success: function (data) {
-                                        console.log("Search response:", data);
-                                        if (data.trim() !== "") {
-                                            $("#suggestions").html(data).fadeIn(); // dùng fadeIn thay vì .show()
-                                        } else {
-                                            $("#suggestions").fadeOut(100);
-                                        }
-                                    },
-                                    error: function (xhr, status, error) {
-                                        console.error("Search error:", error);
-                                        console.error("Status:", status);
-                                        console.error("Response:", xhr.responseText);
-                                    }
-                                });
-                            } else {
-                                $("#suggestions").hide();
-                            }
-                            currentLoad = null;
-                        }, 500);
-                    });
+                                    $(document).ready(function () {
+                                        let currentLoad;
+                                        $("#search").on("input", function () {
+                                            if (currentLoad) {
+                                                console.log("Clear timeout");
+                                                clearTimeout(currentLoad);
+                                            }
+                                            let that = this;
+                                            currentLoad = setTimeout(function () {
+                                                console.log("fetch product");
+                                                let query = $(that).val();
+                                                if (query.trim().length > 0) {
+                                                    $.ajax({
+                                                        url: "SearchServlet",
+                                                        type: "GET",
+                                                        data: {
+                                                            searchProduct: query,
+                                                            orderType: "Export"
+                                                        },
+                                                        success: function (data) {
+                                                            console.log("Search response:", data);
+                                                            if (data.trim() !== "") {
+                                                                $("#suggestions").html(data).fadeIn();
+                                                            } else {
+                                                                $("#suggestions").fadeOut(100);
+                                                            }
+                                                        },
+                                                        error: function (xhr, status, error) {
+                                                            console.error("Search error:", error);
+                                                            console.error("Status:", status);
+                                                            console.error("Response:", xhr.responseText);
+                                                        }
+                                                    });
+                                                } else {
+                                                    $("#suggestions").hide();
+                                                }
+                                                currentLoad = null;
+                                            }, 500);
+                                        });
 
-                    // Kiểm tra khi click trên document
-                    $(document).on("click", function (event) {
-                        if (!$(event.target).closest("#search").length &&
-                                !$(event.target).closest("#suggestions").length) {
-                            $("#suggestions").fadeOut(100); // hiệu ứng nhẹ nhàng
-                        }
-                    });
+                                        // Kiểm tra khi click trên document
+                                        $(document).on("click", function (event) {
+                                            if (!$(event.target).closest("#search").length &&
+                                                    !$(event.target).closest("#suggestions").length) {
+                                                $("#suggestions").fadeOut(100);
+                                            }
+                                        });
 
-                    // Hiển thị lại khi focus
-                    $("#search").on("focus", function () {
-                        console.log("Search focused");
-                        if ($(this).val().length > 0) {
-                            $.ajax({
-                                url: "SearchServlet",
-                                type: "GET",
-                                data: {
-                                    searchProduct: $(this).val(),
-                                    orderType: "Export"
-                                },
-                                success: function (data) {
-                                    console.log("Refreshed data on focus");
-                                    $("#suggestions").html(data);
-                                    $("#suggestions").show();
-                                }
-                            });
-                        }
-                    });
-                });
+                                        // Hiển thị lại khi focus
+                                        $("#search").on("focus", function () {
+                                            console.log("Search focused");
+                                            if ($(this).val().length > 0) {
+                                                $.ajax({
+                                                    url: "SearchServlet",
+                                                    type: "GET",
+                                                    data: {
+                                                        searchProduct: $(this).val(),
+                                                        orderType: "Export"
+                                                    },
+                                                    success: function (data) {
+                                                        console.log("Refreshed data on focus");
+                                                        $("#suggestions").html(data);
+                                                        $("#suggestions").show();
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    });
                         </script>
 
                         <input type="hidden" name="orderType" value="Export"><!-- xuất -->
 
                         <!-- Order items table -->
                         <div class="order-items-container">
-                            <h3>Order Details</h3>
+
                             <table id="orderItems">
                                 <thead>
                                     <tr>
@@ -643,32 +691,11 @@
                         <!-- Order notes -->
                         <div class="order-notes">
                             <h3>Note</h3>
-                            <textarea id="status" name="status" rows="4" placeholder="Note"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT PANEL: Order info, customer, payment -->
-                    <div class="right-panel">
-                        <h2>Order Information</h2>
-                        <!-- Customer search -->
-                        <div class="search-boxx">
-
-                            <input type="text" id="searchCustomerInput"  placeholder="Search for customer." >
-
-
-                            <div id="suggestionsCustomer" class="search-suggestions"></div>
-
-
+                            <textarea id="status" name="status" rows="4" placeholder="..."></textarea>
                         </div>
 
-                        <!-- Ô hiển thị thông tin khách hàng sau khi chọn -->
-                        <div id="customerInfo" class="customer-info" style="display: none;">
-                            <h3 class="info-value success-text" id="customerName"></h3>
-                            <p id="customerPhone"></p>
-                            <p id="customerDebt"></p>
-                            <input type="hidden" id="customerId" name="customerId">
 
-                        </div>
+
 
                         <script>
                             // Thêm biến role từ session
@@ -739,12 +766,7 @@
                                         currentLoad = null;
                                     }, 500);
                                 });
-                                // Ẩn danh sách khi click ra ngoài
-                                $(document).on("click", function (event) {
-                                    if (!$(event.target).closest("#searchCustomerInput, #suggestionsCustomer").length) {
-                                        $("#suggestionsCustomer").hide();
-                                    }
-                                });
+
                                 // Hiển thị lại danh sách khi focus vào ô tìm kiếm (nếu có nội dung)
                                 $("#searchCustomerInput").on("focus", function () {
                                     if ($(this).val().length > 0) {
@@ -771,6 +793,8 @@
                                 }
 
                                 $("#customerInfo").show(); // Hiển thị div chứa thông tin khách hàng
+                                $("#searchCustomerInput").val("");
+                                $("#suggestionsCustomer").hide();
                             }
 
                             function updateCustomerSuggestions() {
@@ -848,6 +872,7 @@
                             }
                         </script>
 
+
                         <div class="payment-options">
 
                             <div class="info-row">
@@ -874,383 +899,384 @@
                                 </div>
                             </div>
                         </div>
-
-
-
-                        <script>
-
-
-                            $(document).ready(function () {
-                                $("#submitOrder").on("click", function (event) {
-                                    if ($("#customerId").val() === "") {
-                                        event.preventDefault(); // Ngăn form hoặc hành động tiếp theo
-                                        alert("Vui lòng chọn khách hàng trước khi tạo đơn hàng!");
-                                    }
-                                    // Kiểm tra nếu bảng sản phẩm không có sản phẩm nào
-                                    if ($("#orderItems tbody tr").length === 0) {
-                                        event.preventDefault(); // Ngăn form hoặc hành động tiếp theo
-                                        alert("Vui lòng chọn ít nhất một sản phẩm để tạo đơn hàng.");
-                                        return; // Ngừng quá trình gửi form
-                                    }
-                                    let paidAmount = $("#paidAmount").val().trim();
-                                    // Kiểm tra đã nhập số tiền thanh toán chưa
-                                    if (!paidAmount || isNaN(parseFloat(paidAmount))) {
-                                        event.preventDefault();
-                                        alert("Vui lòng nhập số tiền khách thanh toán!");
-                                        return;
-                                    }
-
-                                    let selectedOption = $("input[name='balanceAction']:checked").val();
-                                    // Kiểm tra nếu có tiền dư/thừa, phải chọn phương án xử lý
-                                    if ($("#balanceOptions").is(":visible") && !selectedOption) {
-                                        event.preventDefault();
-                                        alert("Vui lòng chọn cách xử lý số tiền còn lại!");
-                                        return;
-                                    }
-
-                                });
-                            });
-
-                        </script>
-
-
-                        <!-- Action buttons -->
-                        <div class="action-buttons">
-
-                            <button type="submit" id="submitOrder" style="background-color: #007bff">Create Order Invoice</button>
-
-                        </div>
-
-                        <p id="orderStatus"></p>
                     </div>
-
                 </div>
 
-
-                <script>
-                    function addProductToOrder(productID, productName, pricePerKg, availableQuantity, unitSizes) {
-
-
-
-                        // Kiểm tra nếu sản phẩm hết hàng
-                        if (availableQuantity <= 0) {
-                            alert("Sản phẩm đã hết hàng! Không thể thêm vào đơn hàng.");
-                            return; // Dừng hàm nếu sản phẩm không còn hàng
-                        }
-
-                        var table = document.getElementById("orderItems").getElementsByTagName('tbody')[0];
-                        // Nếu sản phẩm chưa có, thêm dòng mới
-
-                        var newRow = table.insertRow(table.rows.length);
-                        var cell1 = newRow.insertCell(0);
-                        var cell2 = newRow.insertCell(1);
-                        var cell3 = newRow.insertCell(2);
-                        var cell4 = newRow.insertCell(3);
-                        var cell5 = newRow.insertCell(4);
-                        var cell6 = newRow.insertCell(5);
-                        var cell7 = newRow.insertCell(6);
-                        var cell8 = newRow.insertCell(7);
-                        // Hiển thị tên sản phẩm
-                        cell1.innerHTML =
-                                '<input type="hidden" name="productID" value="' + productID + '">' +
-                                '<input type="hidden" name="productName" value="' + productName + '">' +
-                                productName;
-                        // Chọn đơn vị tính: kg hoặc bao
-                        // Tạo dropdown từ danh sách unitSizes
-                        var unitSelectHTML = '<select name="unitType" class="unitType" style="width: auto; min-width: 50px; white-space: normal;">';
-                        if (unitSizes && unitSizes.length > 0) {
-                            unitSizes.forEach(size => {
-                                unitSelectHTML += '<option value="' + size + '">' + (size === 1 ? "Kg" : "Bag (" + size + "kg)") + '</option>';
-                            });
-                        } else {
-                            unitSelectHTML += '<option value="1">Kg</option>'; // Mặc định nếu không có dữ liệu
-                        }
-                        unitSelectHTML += '</select>';
-                        cell3.innerHTML = unitSelectHTML;
-                        cell2.innerHTML = '<input type="number" name="quantity" class="quantity" required value="1" min="1" max="' + availableQuantity + '">';
-                        // Nếu xuất kho, giá cố định
-                        cell5.innerHTML = '<input type="hidden" name="unitPriceHidden" class="unitPriceHidden" value="' + pricePerKg + '">' +
-                                '<input type="text" name="unitPrice" class="unitPrice" value="' + formatNumberVND(pricePerKg) + '" readonly>';
-                        // Giảm giá (VND/kg)
-                        cell6.innerHTML = '<input type="number" name="discount" class="discount" value="0" min="0">';
-                        cell7.innerHTML =
-                                '<input type="hidden" name="totalPriceHidden" class="totalPriceHidden">' +
-                                '<input type="text" name="totalPrice" class="totalPrice" readonly>';
-                        // Nút xóa
-                        cell8.innerHTML = '<button type="button" onclick="deleteRow(this)" style="background-color: #007bff">Delete</button>';
-                        // Thêm input ẩn để lưu totalWeight
-                        cell4.innerHTML = '<input type="number" name="totalWeight" class="totalWeight" readonly >';
-                        //không cho phép nhập âm số lượng và giảm giá
-
-                        var quantityInput = cell2.querySelector('.quantity');
-                        // Không cho nhập số âm
-                        quantityInput.addEventListener("input", function () {
-                            if (this.value < 0) {
-                                this.value = 1; // Đặt giá trị tối thiểu là 1
-                            }
-                            recalculateRow(newRow, pricePerKg, availableQuantity);
-                        });
-                        var unitTypeInput = cell3.querySelector('.unitType');
-                        var discountInput = cell6.querySelector('.discount');
-                        // Không cho nhập số âm
-                        discountInput.addEventListener("input", function () {
-                            if (this.value < 0) {
-                                this.value = 0; // Đặt giá trị tối thiểu là 1
-                            }
-                            if (parseFloat(this.value) > pricePerKg) {
-                                alert("Giảm giá không được vượt quá giá của 1 kg gạo!");
-                                this.value = pricePerKg; // Đặt lại giá trị bằng giá gốc nếu vượt quá
-                            }
-                            recalculateRow(newRow, pricePerKg, availableQuantity);
-                        });
-                        unitTypeInput.addEventListener('change', () => recalculateRow(newRow, pricePerKg, availableQuantity));
-                        discountInput.addEventListener('input', () => recalculateRow(newRow, pricePerKg, availableQuantity));
-                        recalculateRow(newRow, pricePerKg, availableQuantity);
-                        $("#suggestions").hide();
-                    }
-                    function recalculateRow(row, pricePerKg, availableQuantity) {
-
-                        var quantityInput = row.querySelector(".quantity");
-                        var unitTypeInput = row.querySelector(".unitType");
-                        var discountInput = row.querySelector(".discount");
-                        var totalPriceInput = row.querySelector(".totalPrice");
-                        var totalPriceHidden = row.querySelector(".totalPriceHidden");
-                        var totalWeightInput = row.querySelector(".totalWeight");
-                        var unitMultiplier = parseInt(unitTypeInput.value);
-                        var quantity = parseInt(quantityInput.value);
-                        var totalWeight = quantity * unitMultiplier;
-                        if (totalWeight > availableQuantity) {
-                            alert("Số lượng sản phẩm vượt quá tồn kho! Vui lòng nhập lại.");
-                            quantityInput.value = Math.floor(availableQuantity / unitMultiplier); // Tự động điều chỉnh số lượng phù hợp
-                            totalWeight = quantityInput.value * unitMultiplier; // Cập nhật lại tổng khối lượng
-                        }
-
-
-
-                        var discount = parseInt(discountInput.value) || 0;
-                        var totalDiscount = totalWeight * discount;
-                        var totalPrice = (totalWeight * pricePerKg) - totalDiscount;
-                        totalWeightInput.value = totalWeight;
-                        totalPriceHidden.value = totalPrice; // Lưu giá trị số
-                        totalPriceInput.value = formatNumberVND(totalPrice);
-                        updateTotalOrderPrice();
-                    }
-
-                    function deleteRow(button) {
-                        var row = button.parentNode.parentNode;
-                        row.parentNode.removeChild(row);
-                        updateTotalOrderPrice();
-                    }
-
-                    function updateTotalOrderPrice() {
-                        var total = 0;
-                        var totalDiscount = 0;
-                        var totalPriceInputs = document.querySelectorAll(".totalPriceHidden");
-                        var discountInputs = document.querySelectorAll(".discount");
-                        var quantityInputs = document.querySelectorAll(".quantity");
-                        var unitTypeInputs = document.querySelectorAll(".unitType");
-                        totalPriceInputs.forEach((input, index) => {
-                            total += parseInt(input.value) || 0;
-                            var discount = parseInt(discountInputs[index].value) || 0;
-                            var quantity = parseInt(quantityInputs[index].value);
-                            var unitMultiplier = parseInt(unitTypeInputs[index].value); // 1kg hoặc bao 10kg, 20kg, 50kg
-                            var totalWeight = quantity * unitMultiplier; // Tổng số kg của sản phẩm này
-
-                            totalDiscount += totalWeight * discount; // Tổng số tiền giảm giá của sản phẩm này
-                        });
-                        document.getElementById("totalOrderPriceHidden").value = total; // Lưu giá trị số thực
-                        document.getElementById("totalOrderPrice").value = formatNumberVND(total);
-                        document.getElementById("totalDiscount").value = totalDiscount;
-                        document.getElementById("totalDiscountHidden").value = formatNumberVND(totalDiscount);
-                    }
-
-
-
-
-
-
-                </script>
-
                 <script>
 
 
-                    function formatNumberVND(number) {
-                        return new Intl.NumberFormat('vi-VN').format(number);
-                    }
+                    $(document).ready(function () {
+                        $("#submitOrder").on("click", function (event) {
+                            if ($("#customerId").val() === "") {
+                                event.preventDefault(); // Ngăn form hoặc hành động tiếp theo
+                                alert("Please select a customer before creating the order!");
+                            }
+                            // Kiểm tra nếu bảng sản phẩm không có sản phẩm nào
+                            if ($("#orderItems tbody tr").length === 0) {
+                                event.preventDefault(); // Ngăn form hoặc hành động tiếp theo
+                                alert("Please select at least one product to create the order.");
+                                return; // Ngừng quá trình gửi form
+                            }
+                            let paidAmount = $("#paidAmount").val().trim();
+                            // Kiểm tra đã nhập số tiền thanh toán chưa
+                            if (!paidAmount || isNaN(parseFloat(paidAmount))) {
+                                event.preventDefault();
+                                alert("Please enter the amount paid by the customer!");
+                                return;
+                            }
+
+                            let selectedOption = $("input[name='balanceAction']:checked").val();
+                            // Kiểm tra nếu có tiền dư/thừa, phải chọn phương án xử lý
+                            if ($("#balanceOptions").is(":visible") && !selectedOption) {
+                                event.preventDefault();
+                                alert("Please choose how to handle the remaining amount!");
+                                return;
+                            }
+
+                        });
+                    });
 
                 </script>
 
 
+                <!-- Action buttons -->
+                <div class="top-actions d-flex justify-content-end" style="gap: 10px; margin-bottom: 20px;">
+                    <button type="submit" id="submitOrder" style="background-color: #007bff">Submit Order</button>
+                    <button type="button"  onclick="window.location.href = '${pageContext.request.contextPath}/InvoiceHistory'">
+                        Go to Order List </button>
+                </div>
 
-
-            </form>
-
-            <div id="addCustomerPopup" class="popup" style="background-color: whitesmoke">
-
-                <span class="close" onclick="closeAddCustomerPopup()">&times;</span>
-                <h2>Add new customer</h2>
-
-                <form id="addCustomerForm">
-                    <label for="newCustomerName">Name:</label>
-                    <input type="text" id="newCustomerName" name="name" required>
-
-                    <label for="newCustomerPhone">Phone:</label>
-                    <input type="number" id="newCustomerPhone" name="phone" required>
-
-
-                    <input type="hidden" name="address" value="">
-                    <input type="hidden" name="email" value="">
-                    <input type="hidden" name="total" value="0"> 
-
-                    <button type="button" onclick="saveNewCustomer()" style="background-color: #007bff">Save</button>
-                </form>
-
-            </div>
-
-
-
-            <script>
-
-                $("#paidAmount").on("input", function () {
-                    if ($(this).val() < 0) {
-                        $(this).val(0);
-                    }
-                });
-
-
-            </script>
-            <script>
-                function openAddCustomerPopup() {
-                    $("#addCustomerPopup").show();
-                }
-
-                function closeAddCustomerPopup() {
-                    $("#addCustomerPopup").hide();
-                }
-
-                function saveNewCustomer() {
-                    let name = $("#newCustomerName").val().trim();
-                    let phone = $("#newCustomerPhone").val().trim();
-
-                    if (name === "" || phone === "") {
-                        alert("Enter full information!");
-                        return;
-                    }
-
-                    // Tạo object chứa đầy đủ dữ liệu theo yêu cầu của Servlet
-                    let customerData = {
-                        name: name,
-                        phone: phone,
-                        address: "", // Giá trị mặc định
-                        email: "", // Giá trị mặc định
-                        total: "0" // Để Servlet chấp nhận
-                    };
-
-                    // Gửi dữ liệu lên server để lưu khách hàng mới
-                    $.ajax({
-                        url: "AddCustomer",
-                        type: "POST",
-                        data: customerData,
-                        success: function (response) {
-                            console.log("Server Response:", response); // In ra phản hồi từ server
-
-                            // Kiểm tra phản hồi JSON từ server
-                            if (response.status === "success") {
-                                alert("Add customer successful!");
-                                closeAddCustomerPopup();
-                            } else if (response.status === "error") {
-                                alert(response.message); // Hiển thị thông báo lỗi từ server
-                            } else {
-                                alert("Unexpected response from server!");
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error("AJAX error:", error); // In lỗi ra console
-                            alert("Error to server!"); // Thông báo lỗi khi có sự cố
-                        }
-                    });
-                }
-
-
-            </script>
-
-            <script>
-
-                $(document).ready(function () {
-                    $("#orderForm").submit(function (event) {
-                        event.preventDefault(); // Ngăn chặn việc tải lại trang
-
-                        $("#orderStatus").text("⏳ Đơn hàng đang xử lý..."); // Hiển thị trạng thái ngay lập tức
-                        $("#submitOrder").prop("disabled", true); // Disable nút submit
-
-                        $.ajax({
-                            url: "Orders",
-                            type: "POST",
-                            data: $(this).serialize(), // Gửi dữ liệu form bằng AJAX
-                            //Lấy toàn bộ dữ liệu từ form và serialize (chuyển đổi) chúng thành chuỗi dạng key-value, để có thể gửi đi qua AJAX.
-                            dataType: "json",
-                            success: function (response) {
-                                if (response.status === "processing") {
-                                    checkOrderStatus(); // Kiểm tra trạng thái đơn hàng
-                                } else if (response.status === "error") {
-                                    $("#orderStatus").html("<span style='color: red;'>❌ " + response.message + "</span>");
-                                }
-                            }
-                        });
-                    });
-                    function checkOrderStatus() {
-                        var userId = ${sessionScope.userID}; // Đảm bảo lấy đúng userID từ session
-
-                        $.ajax({
-                            url: "CheckOrderStatusServlet",
-                            type: "GET",
-                            data: {userId: userId},
-                            dataType: "json",
-                            success: function (response) {
-                                if (response.status === "done") {
-                                    $("#orderStatus").text("✅ Tạo đơn hàng thành công!");
-                                    setTimeout(function () {
-                                        window.location.href = "orders/list"; // <-- Đường dẫn tới trang danh sách hóa đơn
-                                    }, 1500); // đợi 1.5 giây rồi chuyển hướng
-                                } else if (response.status === "error") {
-                                    $("#orderStatus").text("❌ Lỗi: Tạo đơn hàng không thành công!");
-                                } else {
-                                    setTimeout(checkOrderStatus, 1000); // Tiếp tục kiểm tra sau 1 giây
-                                }
-                            }
-                        });
-                    }
-
-                    // ---- Code từ GitHub ----
-                    // Lấy các phần tử cần ẩn/hiện
-                    const openAddNewDebt = document.querySelector('.js-hidden-menu'); // Nút toggle
-                    const newDebt = document.querySelector('.menu'); // Menu
-                    const newDebt1 = document.querySelector('.main-content'); // Nội dung chính
-                    const newDebt2 = document.querySelector('.sidebar'); // Sidebar
-
-                    // Kiểm tra trạng thái đã lưu trong localStorage khi trang load
-                    document.addEventListener("DOMContentLoaded", function () {
-                        if (localStorage.getItem("menuHidden") === "true") {
-                            newDebt.classList.add('hiden');
-                            newDebt1.classList.add('hiden');
-                            newDebt2.classList.add('hiden');
-                        }
-                    });
-                    // Hàm toggle hiển thị
-                    function toggleAddNewDebt() {
-                        newDebt.classList.toggle('hiden');
-                        newDebt1.classList.toggle('hiden');
-                        newDebt2.classList.toggle('hiden');
-                        // Lưu trạng thái vào localStorage
-                        const isHidden = newDebt.classList.contains('hiden');
-                        localStorage.setItem("menuHidden", isHidden);
-                    }
-
-                    // Gán sự kiện click
-                    openAddNewDebt.addEventListener('click', toggleAddNewDebt);
-                });
-            </script>
+                <p id="orderStatus"></p>
         </div>
+        <script>
+            function addProductToOrder(productID, productName, pricePerKg, availableQuantity, unitSizes) {
+                // Kiểm tra nếu sản phẩm hết hàng
+                if (availableQuantity <= 0) {
+                    alert("The product is out of stock!");
+                    return; // Dừng hàm nếu sản phẩm không còn hàng
+                }
 
-    </body>
+                var table = document.getElementById("orderItems").getElementsByTagName('tbody')[0];
+                // Nếu sản phẩm chưa có, thêm dòng mới
+
+                var newRow = table.insertRow(table.rows.length);
+                var cell1 = newRow.insertCell(0);
+                var cell2 = newRow.insertCell(1);
+                var cell3 = newRow.insertCell(2);
+                var cell4 = newRow.insertCell(3);
+                var cell5 = newRow.insertCell(4);
+                var cell6 = newRow.insertCell(5);
+                var cell7 = newRow.insertCell(6);
+                var cell8 = newRow.insertCell(7);
+                // Hiển thị tên sản phẩm
+                cell1.innerHTML =
+                        '<input type="hidden" name="productID" value="' + productID + '">' +
+                        '<input type="hidden" name="productName" value="' + productName + '">' +
+                        productName;
+                // Chọn đơn vị tính: kg hoặc bao
+                // Tạo dropdown từ danh sách unitSizes
+                var unitSelectHTML = '<select name="unitType" class="unitType" style="width: auto; min-width: 50px; white-space: normal;">';
+                if (unitSizes && unitSizes.length > 0) {
+                    unitSizes.forEach(size => {
+                        unitSelectHTML += '<option value="' + size + '">' + (size === 1 ? "Kg" : "Bag (" + size + "kg)") + '</option>';
+                    });
+                } else {
+                    unitSelectHTML += '<option value="1">Kg</option>'; // Mặc định nếu không có dữ liệu
+                }
+                unitSelectHTML += '</select>';
+                cell3.innerHTML = unitSelectHTML;
+                cell2.innerHTML = '<input type="number" name="quantity" class="quantity" required value="1" min="1" max="' + availableQuantity + '">';
+                // Nếu xuất kho, giá cố định
+                cell5.innerHTML = '<input type="hidden" name="unitPriceHidden" class="unitPriceHidden" value="' + pricePerKg + '">' +
+                        '<input type="text" name="unitPrice" class="unitPrice" value="' + formatNumberVND(pricePerKg) + '" readonly>';
+                // Giảm giá (VND/kg)
+                cell6.innerHTML = '<input type="number" name="discount" class="discount" value="0" min="0">';
+                cell7.innerHTML =
+                        '<input type="hidden" name="totalPriceHidden" class="totalPriceHidden">' +
+                        '<input type="text" name="totalPrice" class="totalPrice" readonly>';
+                // Nút xóa
+                cell8.innerHTML = '<button type="button" onclick="deleteRow(this)" style="background-color: #007bff">Delete</button>';
+                // Thêm input ẩn để lưu totalWeight
+                cell4.innerHTML = '<input type="number" name="totalWeight" class="totalWeight" readonly >';
+                //không cho phép nhập âm số lượng và giảm giá
+
+                var quantityInput = cell2.querySelector('.quantity');
+                // Không cho nhập số âm
+                quantityInput.addEventListener("input", function () {
+                    if (this.value < 0) {
+                        this.value = 1; // Đặt giá trị tối thiểu là 1
+                    }
+                    recalculateRow(newRow, pricePerKg, availableQuantity);
+                });
+                var unitTypeInput = cell3.querySelector('.unitType');
+                var discountInput = cell6.querySelector('.discount');
+                // Không cho nhập số âm
+                discountInput.addEventListener("input", function () {
+                    if (this.value < 0) {
+                        this.value = 0; // Đặt giá trị tối thiểu là 1
+                    }
+                    if (parseFloat(this.value) > pricePerKg) {
+                        alert("The discount must not exceed the price of 1 kg of rice!");
+                        this.value = 0;
+                    }
+                    recalculateRow(newRow, pricePerKg, availableQuantity);
+                });
+                unitTypeInput.addEventListener('change', () => recalculateRow(newRow, pricePerKg, availableQuantity));
+                discountInput.addEventListener('input', () => recalculateRow(newRow, pricePerKg, availableQuantity));
+                recalculateRow(newRow, pricePerKg, availableQuantity);
+                $("#suggestions").hide();
+            }
+            function recalculateRow(row, pricePerKg, availableQuantity) {
+
+                var quantityInput = row.querySelector(".quantity");
+                var unitTypeInput = row.querySelector(".unitType");
+                var discountInput = row.querySelector(".discount");
+                var totalPriceInput = row.querySelector(".totalPrice");
+                var totalPriceHidden = row.querySelector(".totalPriceHidden");
+                var totalWeightInput = row.querySelector(".totalWeight");
+                var unitMultiplier = parseInt(unitTypeInput.value);
+                var quantity = parseInt(quantityInput.value);
+                var totalWeight = quantity * unitMultiplier;
+                if (totalWeight > availableQuantity) {
+                    alert(" The quantity exceeds the available stock! Please re-enter.");
+                    quantityInput.value = Math.floor(availableQuantity / unitMultiplier); // Tự động điều chỉnh số lượng phù hợp
+                    totalWeight = quantityInput.value * unitMultiplier; // Cập nhật lại tổng khối lượng
+                }
+
+
+
+                var discount = parseInt(discountInput.value) || 0;
+                var totalDiscount = totalWeight * discount;
+                var totalPrice = (totalWeight * pricePerKg) - totalDiscount;
+                totalWeightInput.value = totalWeight;
+                totalPriceHidden.value = totalPrice; // Lưu giá trị số
+                totalPriceInput.value = formatNumberVND(totalPrice);
+                updateTotalOrderPrice();
+            }
+
+            function deleteRow(button) {
+                var row = button.parentNode.parentNode;
+                row.parentNode.removeChild(row);
+                updateTotalOrderPrice();
+            }
+
+            function updateTotalOrderPrice() {
+                var total = 0;
+                var totalDiscount = 0;
+                var totalPriceInputs = document.querySelectorAll(".totalPriceHidden");
+                var discountInputs = document.querySelectorAll(".discount");
+                var quantityInputs = document.querySelectorAll(".quantity");
+                var unitTypeInputs = document.querySelectorAll(".unitType");
+                totalPriceInputs.forEach((input, index) => {
+                    total += parseInt(input.value) || 0;
+                    var discount = parseInt(discountInputs[index].value) || 0;
+                    var quantity = parseInt(quantityInputs[index].value);
+                    var unitMultiplier = parseInt(unitTypeInputs[index].value); // 1kg hoặc bao 10kg, 20kg, 50kg
+                    var totalWeight = quantity * unitMultiplier; // Tổng số kg của sản phẩm này
+
+                    totalDiscount += totalWeight * discount; // Tổng số tiền giảm giá của sản phẩm này
+                });
+                document.getElementById("totalOrderPriceHidden").value = total; // Lưu giá trị số thực
+                document.getElementById("totalOrderPrice").value = formatNumberVND(total);
+                document.getElementById("totalDiscount").value = totalDiscount;
+                document.getElementById("totalDiscountHidden").value = formatNumberVND(totalDiscount);
+            }
+
+
+
+
+
+
+        </script>
+
+        <script>
+
+
+            function formatNumberVND(number) {
+                return new Intl.NumberFormat('vi-VN').format(number);
+            }
+
+        </script>
+
+
+
+
+    </form>
+    <div id="overlay" class="overlay"></div>
+
+    <div id="addCustomerPopup" class="popup" style="background-color: whitesmoke">
+
+        <span class="close" onclick="closeAddCustomerPopup()">&times;</span>
+        <h2>Add new customer</h2>
+
+        <form id="addCustomerForm">
+            <label for="newCustomerName">Name:</label>
+            <input type="text" id="newCustomerName" name="name" required>
+
+            <label for="newCustomerPhone">Phone:</label>
+            <input type="number" id="newCustomerPhone" name="phone" required>
+
+
+            <input type="hidden" name="address" value="">
+            <input type="hidden" name="email" value="">
+            <input type="hidden" name="total" value="0"> 
+
+            <button type="button" onclick="saveNewCustomer()" style="background-color: #007bff">Save</button>
+        </form>
+
+    </div>
+
+
+
+    <script>
+
+        $("#paidAmount").on("input", function () {
+            if ($(this).val() < 0) {
+                $(this).val(0);
+            }
+        });
+
+
+    </script>
+    <script>
+        function openAddCustomerPopup() {
+            $("#overlay").fadeIn(200);
+            $("#addCustomerPopup").fadeIn(200);
+        }
+
+        function closeAddCustomerPopup() {
+            $("#addCustomerPopup").fadeOut(200);
+            $("#overlay").fadeOut(200);
+        }
+
+        $("#overlay").on("click", function () {
+            closeAddCustomerPopup();
+        });
+
+
+
+        function saveNewCustomer() {
+            let name = $("#newCustomerName").val().trim();
+            let phone = $("#newCustomerPhone").val().trim();
+
+            if (name === "" || phone === "") {
+                alert("Enter full information!");
+                return;
+            }
+
+            // Tạo object chứa đầy đủ dữ liệu theo yêu cầu của Servlet
+            let customerData = {
+                name: name,
+                phone: phone,
+                address: "", // Giá trị mặc định
+                email: "", // Giá trị mặc định
+                total: "0" // Để Servlet chấp nhận
+            };
+
+            // Gửi dữ liệu lên server để lưu khách hàng mới
+            $.ajax({
+                url: "AddCustomer",
+                type: "POST",
+                data: customerData,
+                success: function (response) {
+                    console.log("Server Response:", response); // In ra phản hồi từ server
+
+                    // Kiểm tra phản hồi JSON từ server
+                    if (response.status === "success") {
+                        alert("Add customer successful!");
+                        closeAddCustomerPopup();
+                    } else if (response.status === "error") {
+                        alert(response.message); // Hiển thị thông báo lỗi từ server
+                    } else {
+                        alert("Unexpected response from server!");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX error:", error); // In lỗi ra console
+                    alert("Error to server!"); // Thông báo lỗi khi có sự cố
+                }
+            });
+        }
+
+
+    </script>
+
+    <script>
+
+        $(document).ready(function () {
+            $("#orderForm").submit(function (event) {
+                event.preventDefault(); // Ngăn chặn việc tải lại trang
+
+                $("#orderStatus").text("The order is being processed..."); // Hiển thị trạng thái ngay lập tức
+                $("#submitOrder").prop("disabled", true); // Disable nút submit
+
+                $.ajax({
+                    url: "Orders",
+                    type: "POST",
+                    data: $(this).serialize(), // Gửi dữ liệu form bằng AJAX
+                    //Lấy toàn bộ dữ liệu từ form và serialize (chuyển đổi) chúng thành chuỗi dạng key-value, để có thể gửi đi qua AJAX.
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.status === "processing") {
+                            checkOrderStatus(); // Kiểm tra trạng thái đơn hàng
+                        } else if (response.status === "error") {
+                            $("#orderStatus").html("<span style='color: red;'>❌ " + response.message + "</span>");
+                        }
+                    }
+                });
+            });
+            function checkOrderStatus() {
+                var userId = ${sessionScope.userID}; // Đảm bảo lấy đúng userID từ session
+
+                $.ajax({
+                    url: "CheckOrderStatusServlet",
+                    type: "GET",
+                    data: {userId: userId},
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.status === "done") {
+                            $("#orderStatus").text("Order created successfully!");
+                            setTimeout(function () {
+                                window.location.href = "orders/list"; // <-- Đường dẫn tới trang danh sách hóa đơn
+                            }, 1500); // đợi 1.5 giây rồi chuyển hướng
+                        } else if (response.status === "error") {
+                            $("#orderStatus").text("Error: Failed to create the order!");
+                        } else {
+                            setTimeout(checkOrderStatus, 1000); // Tiếp tục kiểm tra sau 1 giây
+                        }
+                    }
+                });
+            }
+
+
+            // Lấy các phần tử cần ẩn/hiện
+            const openAddNewDebt = document.querySelector('.js-hidden-menu'); // Nút toggle
+            const newDebt = document.querySelector('.menu'); // Menu
+            const newDebt1 = document.querySelector('.main-content'); // Nội dung chính
+            const newDebt2 = document.querySelector('.sidebar'); // Sidebar
+
+            // Kiểm tra trạng thái đã lưu trong localStorage khi trang load
+            document.addEventListener("DOMContentLoaded", function () {
+                if (localStorage.getItem("menuHidden") === "true") {
+                    newDebt.classList.add('hiden');
+                    newDebt1.classList.add('hiden');
+                    newDebt2.classList.add('hiden');
+                }
+            });
+            // Hàm toggle hiển thị
+            function toggleAddNewDebt() {
+                newDebt.classList.toggle('hiden');
+                newDebt1.classList.toggle('hiden');
+                newDebt2.classList.toggle('hiden');
+                // Lưu trạng thái vào localStorage
+                const isHidden = newDebt.classList.contains('hiden');
+                localStorage.setItem("menuHidden", isHidden);
+            }
+
+            // Gán sự kiện click
+            openAddNewDebt.addEventListener('click', toggleAddNewDebt);
+        });
+    </script>
+
+</body>
 </html>
