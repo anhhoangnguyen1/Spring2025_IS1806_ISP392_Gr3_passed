@@ -11,7 +11,7 @@
     <head>
         <meta charset="UTF-8">
 
-        <title>Sales Order</title>
+        <title>Sales Invoice</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
@@ -45,7 +45,7 @@
 
 
             .panel-box {
-                background-color: #ffffff;
+                background-color: #f7f7f7;
                 border: 1px solid var(--border-color);
                 border-radius: 8px;
                 padding: 20px;
@@ -63,6 +63,8 @@
             .payment-section {
                 background-color: #f9f9f9;
             }
+
+
 
             .overlay {
                 display: none; /* Ẩn mặc định */
@@ -106,6 +108,29 @@
 
             button:hover {
                 background-color: var(--primary-hover);
+            }
+
+
+            .customer-info {
+                margin-top: 15px;
+                padding: 16px 20px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                background-color: #f8f9fa;
+                font-size: 16px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            }
+
+            .customer-info p {
+                margin: 8px 0;
+                color: #333;
+                font-size: 16px;
+            }
+
+            .customer-info strong {
+                font-weight: 600;
+                margin-right: 6px;
+                color: #000;
             }
 
 
@@ -227,6 +252,9 @@
             .info-label {
                 font-weight: bold;
                 min-width: 150px;
+                font-size: 14px;
+                color: #333;
+                line-height: 1.6;
             }
 
             .info-value {
@@ -299,7 +327,6 @@
             .product-item {
                 display: flex;
                 align-items: center;
-
                 padding: 6px 8px;
                 cursor: pointer;
                 transition: background-color 0.2s ease-in-out;
@@ -307,8 +334,8 @@
 
             /* Khi hover */
             .product-item:hover {
-                background-color: var(--primary-hover);
-                transform: scale(1.02);
+                background-color:  #007bff;
+                transform: scale(1.01);
                 transition: all 0.3s ease;
             }
 
@@ -363,8 +390,8 @@
 
             /* Khi hover */
             .customer-item:hover {
-                background-color: var(--primary-hover);
-                transform: scale(1.02);
+                background-color: #007bff;
+                transform: scale(1.01);
                 transition: all 0.3s ease;
             }
 
@@ -466,13 +493,37 @@
                 background-color: #0056b3;
             }
 
+            #balanceOptions {
+                margin-top: 8px;
+            }
+
+            #balanceOptions label {
+                display: flex;
+                align-items: center;
+                font-size: 14px;
+                color: #333;
+                margin-bottom: 8px;
+                cursor: pointer;
+                transition: color 0.2s ease;
+            }
+
+            #balanceOptions input[type="radio"] {
+                margin-right: 8px;
+                accent-color: #007bff;
+            }
+
+            #balanceOptions label:hover {
+                color: #007bff;
+            }
+
         </style>
 
     </head>
     <body>
         <div class="main-content">
-            <div class="top-actions d-flex justify-content-end" style="gap: 10px; margin-bottom: 20px;">
-                <button onclick="openNewTab()" class="btn btn-primary">Add New Order</button>
+            <div class="d-flex justify-content-end align-items-center mb-2" style="gap: 10px;">
+
+                <button onclick="openNewTab()" style="background-color: #007bff; color: white;">Add New Order</button>
                 <button type="button"  onclick="window.location.href = '${pageContext.request.contextPath}/dashboard'">
                     Back to Dashboard</button>
 
@@ -532,38 +583,39 @@
 
                     <div class="customer-section panel-box">
                         <div class="customer-search-box right-panel" style="margin-bottom: 20px;">
-                            <h2>Customer Information</h2>
+                            <h3>Customer Information</h3>
 
-                            <div class="search-boxx">
+                            <div class="d-flex align-items-center" style="gap: 10px; margin-bottom: 15px;">
+                                <div class="search-boxx flex-grow-1">
 
-                                <input type="text" id="searchCustomerInput"  placeholder="Search for customer." >
-
-
-                                <div id="suggestionsCustomer" class="search-suggestions"></div>
+                                    <input type="text" id="searchCustomerInput"  placeholder="Search for customer." >
 
 
-                            </div>
+                                    <div id="suggestionsCustomer" class="search-suggestions"></div>
 
 
-                            <div style="margin-top: 10px;">
-                                <button type="button" onclick="openAddCustomerPopup()" style="background-color: #28a745; color: white;">
+                                </div>
+
+
+
+                                <button type="button" onclick="openAddCustomerPopup()" style="background-color: #007bff; color: white;">
                                     Add New Customer
                                 </button>
+
                             </div>
 
                             <div id="customerInfo" class="customer-info" style="display: none;">
-                                <h3 class="info-value success-text" id="customerName"></h3>
-                                <p id="customerPhone"></p>
-                                <p id="customerDebt"></p>
+                                <p><strong>Name:</strong> <span id="customerName"></span></p>
+                                <p><strong>Phone:</strong> <span id="customerPhone"></span></p>
+                                <p><strong>Debt </strong> <span id="customerDebt"></span></p>
                                 <input type="hidden" id="customerId" name="customerId">
-
                             </div>
 
                         </div>
                     </div>
 
                     <div class="product-section panel-box">
-                        <h2>Order Details</h2>
+                        <h3>Order Details</h3>
                         <div class="search-boxx">
 
                             <input type="text" id="search" placeholder="Search for product." >
@@ -673,7 +725,7 @@
 
                                         <td colspan="4">
                                             <input type="hidden" id="totalOrderPriceHidden" name="totalOrderPriceHidden">
-                                            <input type="text" id="totalOrderPrice" name="totalOrderPrice" readonly>
+                                            <input type="text" id="totalOrderPrice" name="totalOrderPrice" class="money-format" readonly>
                                         </td>
 
                                     </tr>
@@ -690,8 +742,8 @@
 
                         <!-- Order notes -->
                         <div class="order-notes">
-                            <h3>Note</h3>
-                            <textarea id="status" name="status" rows="4" placeholder="..."></textarea>
+                            <h4>Note</h4>
+                            <textarea id="status" name="status" rows="2" placeholder="..."></textarea>
                         </div>
 
 
@@ -712,19 +764,19 @@
                             // Cập nhật hàm selectCustomer
                             function selectCustomer(id, name, phone, balance) {
                                 $("#customerId").val(id);
-                                $("#customerName").text("Name: " + name);
+                                $("#customerName").text("" + name);
 
                                 // Xử lý hiển thị số điện thoại dựa trên role
                                 let displayPhone = userRole === "staff" ? maskPhoneNumber(phone) : phone;
-                                $("#customerPhone").text("Phone: " + displayPhone);
+                                $("#customerPhone").text("" + displayPhone);
 
                                 // Xác định cách hiển thị tổng nợ
                                 if (balance < 0) {
-                                    $("#customerDebt").text("Amount Due: " + formatNumberVND(-balance));
+                                    $("#customerDebt").text("(Amount Due): " + formatNumberVND(-balance));
                                 } else if (balance > 0) {
-                                    $("#customerDebt").text("Amount Owed: " + formatNumberVND(balance));
+                                    $("#customerDebt").text("(Amount Owed): " + formatNumberVND(balance));
                                 } else {
-                                    $("#customerDebt").text("Total Debt: " + formatNumberVND(balance));
+                                    $("#customerDebt").text("(Total Debt):" + formatNumberVND(balance));
                                 }
 
                                 $("#customerInfo").show();
@@ -777,19 +829,19 @@
                             // Hàm chọn khách hàng từ danh sách
                             function selectCustomer(id, name, phone, debt) {
                                 $("#customerId").val(id);
-                                $("#customerName").text("Name: " + name);
+                                $("#customerName").text("" + name);
 
                                 // Ẩn 3 số cuối số điện thoại
                                 let maskedPhone = (userRole === 'owner') ? phone : phone.slice(0, 3) + "xxxxx" + phone.slice(8);
-                                $("#customerPhone").text("Phone: " + maskedPhone);
+                                $("#customerPhone").text("" + maskedPhone);
 
                                 // Xác định cách hiển thị tổng nợ
                                 if (debt < 0) {
-                                    $("#customerDebt").text("Amount Due: " + formatNumberVND(-debt));
+                                    $("#customerDebt").text("(Amount Due): " + formatNumberVND(-debt));
                                 } else if (debt > 0) {
-                                    $("#customerDebt").text("Amount Owed:  " + formatNumberVND(debt));
+                                    $("#customerDebt").text("(Amount Owed): " + formatNumberVND(debt));
                                 } else {
-                                    $("#customerDebt").text("Total Debt: " + formatNumberVND(debt));
+                                    $("#customerDebt").text("(Total Debt): " + formatNumberVND(debt));
                                 }
 
                                 $("#customerInfo").show(); // Hiển thị div chứa thông tin khách hàng
@@ -878,7 +930,7 @@
                             <div class="info-row">
                                 <span class="info-label">Payment</span>
                                 <span class="info-value">
-                                    <input type="number" id="paidAmount" name="paidAmount"oninput="calculateBalance()">
+                                    <input type="number" id="paidAmount" name="paidAmount" oninput="calculateBalance()">
                                 </span>
                             </div>
 
@@ -886,7 +938,7 @@
                                 <span class="info-label">Remaining amount</span>
                                 <span class="info-value">
                                     <input type="hidden" id="balanceAmount" name="balanceAmount">
-                                    <input type="text" id="balanceAmountHidden" name="balanceAmountHidden" readonly>
+                                    <input type="text" id="balanceAmountHidden" name="balanceAmountHidden" class="money-format" readonly>
                                 </span>
                             </div>
 
@@ -985,7 +1037,7 @@
                 }
                 unitSelectHTML += '</select>';
                 cell3.innerHTML = unitSelectHTML;
-                cell2.innerHTML = '<input type="number" name="quantity" class="quantity" required value="1" min="1" max="' + availableQuantity + '">';
+                cell2.innerHTML = '<input type="number" name="quantity" class="quantity" required value="1" min="1" step="1" max="' + availableQuantity + '">';
                 // Nếu xuất kho, giá cố định
                 cell5.innerHTML = '<input type="hidden" name="unitPriceHidden" class="unitPriceHidden" value="' + pricePerKg + '">' +
                         '<input type="text" name="unitPrice" class="unitPrice" value="' + formatNumberVND(pricePerKg) + '" readonly>';
@@ -1015,10 +1067,12 @@
                     if (this.value < 0) {
                         this.value = 0; // Đặt giá trị tối thiểu là 1
                     }
-                    if (parseFloat(this.value) > pricePerKg) {
-                        alert("The discount must not exceed the price of 1 kg of rice!");
+                    let maxDiscount = pricePerKg * 0.7;
+                    if (parseFloat(this.value) > maxDiscount) {
+                        alert("The discount must not exceed 70% of the unit price!");
                         this.value = 0;
                     }
+
                     recalculateRow(newRow, pricePerKg, availableQuantity);
                 });
                 unitTypeInput.addEventListener('change', () => recalculateRow(newRow, pricePerKg, availableQuantity));
@@ -1090,12 +1144,34 @@
         </script>
 
         <script>
-
-
             function formatNumberVND(number) {
-                return new Intl.NumberFormat('vi-VN').format(number);
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            function unformatNumber(value) {
+                return parseInt(value.replace(/,/g, '')) || 0;
             }
 
+            function setupMoneyFormat() {
+                document.querySelectorAll('input.money-format').forEach(function (input) {
+                    input.addEventListener('input', function () {
+                        let cursorPosition = input.selectionStart;
+                        let value = this.value.replace(/[^0-9]/g, "");
+                        if (value === "") {
+                            this.value = "";
+                            return;
+                        }
+                        this.value = formatNumberVND(value);
+                        input.setSelectionRange(cursorPosition, cursorPosition);
+                    });
+
+                    // Format on load
+                    if (input.value) {
+                        input.value = formatNumberVND(input.value.replace(/[^0-9]/g, ""));
+                    }
+                });
+            }
+
+            document.addEventListener("DOMContentLoaded", setupMoneyFormat);
         </script>
 
 
