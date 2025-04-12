@@ -22,5 +22,7 @@ public class OrderTask {
     private Orders order;
     private List<OrderDetails> orderDetails;
     private String balanceAction; // 👈 Thêm dòng này
-
+    private String fullName;
+    
+    
 }

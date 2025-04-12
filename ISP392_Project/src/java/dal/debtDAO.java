@@ -102,15 +102,16 @@ public class debtDAO extends DBContext {
         return list;
     }
 
-    public void insertDebtNote(int customerId, double amount, String description, String createdBy, int storeId) {
-        String sql = "INSERT INTO debt_note (customers_id, amount, description, created_by, store_id, created_at, isDeleted) "
-                + "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 0)";
+    public void insertDebtNote(int customerId, double amount, String description, String createdBy, int storeId, String status) {
+        String sql = "INSERT INTO debt_note (customers_id, amount, description, created_by, store_id, status, created_at, isDeleted) "
+                + "VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 0)";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, customerId);
             st.setDouble(2, amount);
             st.setString(3, description);
             st.setString(4, createdBy);
             st.setInt(5, storeId);
+            st.setString(6, status);
             st.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

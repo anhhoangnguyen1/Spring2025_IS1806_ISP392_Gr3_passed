@@ -63,18 +63,20 @@ public class OrderWorker extends Thread {
                         debtDAO debtNoteDAO = new debtDAO();
                         String note = "Order ID: " + orderId;
                         int storeId = order.getStoreId().getId();
-
+                        String fullName = task.getFullName();
                         if ("Export".equalsIgnoreCase(order.getType())) {
                             // Xuất kho, khách hàng nợ
                             if ("debt".equalsIgnoreCase(balanceAction)) {
+                                String status = "Customer borrows debt";
                                 customersDAO.updateCustomerDebt(order.getCustomerID().getId(), debt);
-                                debtNoteDAO.insertDebtNote(order.getCustomerID().getId(), -debt, note, order.getUserID().getName(), storeId);
+                                debtNoteDAO.insertDebtNote(order.getCustomerID().getId(), -debt, note, fullName, storeId, status);
                             }
                         } else if ("Import".equalsIgnoreCase(order.getType())) {
                             // Nhập kho, cửa hàng nợ nhà cung cấp
                             if ("debt".equalsIgnoreCase(balanceAction)) {
+                                String status = "Owner borrows debt";
                                 customersDAO.updateCustomerDebt(order.getCustomerID().getId(), debt); // dùng lại customer nếu nhà cung cấp cùng bảng
-                                debtNoteDAO.insertDebtNote(order.getCustomerID().getId(), -debt, note, order.getUserID().getName(), storeId);
+                                debtNoteDAO.insertDebtNote(order.getCustomerID().getId(), -debt, note, fullName, storeId, status);
                             }
                         }
                     }

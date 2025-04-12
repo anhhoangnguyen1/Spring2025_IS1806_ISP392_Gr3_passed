@@ -238,7 +238,7 @@ public class controllerOrders extends HttpServlet {
             // Gửi vào hàng đợi
             OrderWorker.startWorker();
             OrderWorker.clearProcessedOrder(userId);
-            OrderQueue.addOrder(new OrderTask(order, orderDetailsList, balanceAction));
+            OrderQueue.addOrder(new OrderTask(order, orderDetailsList, balanceAction, fullName));
 
             request.setAttribute("message", "success");
             request.getRequestDispatcher("views/invoice/addOrder.jsp").forward(request, response);

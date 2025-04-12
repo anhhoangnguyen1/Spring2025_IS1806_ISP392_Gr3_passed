@@ -157,7 +157,8 @@ public class controllerImport extends HttpServlet {
 
             OrderWorker.startWorker();
             OrderWorker.clearProcessedOrder(userId);
-            OrderQueue.addOrder(new OrderTask(order, orderDetailsList, balanceAction));
+            
+            OrderQueue.addOrder(new OrderTask(order, orderDetailsList, balanceAction, fullName));
 
             // Đợi một chút để đảm bảo order đã được xử lý
             Thread.sleep(100);

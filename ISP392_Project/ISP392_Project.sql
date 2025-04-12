@@ -231,22 +231,22 @@ VALUES
 
 INSERT INTO Zones (name, description, product_id, store_id, created_by, status)
 VALUES 
-('T1', 'Trái 1', 1, 1, 'System', 'Active'),
-('T2', 'Trái 2', 2, 1, 'System', 'Active'),
-('T3', 'Trái 3', 3, 1, 'System', 'Active'),
-('T4', 'Trái 4', 4, 1, 'System', 'Active'),
-('T5', 'Trái 5', 5, 1, 'System', 'Active'),
-('T6', 'Trái 6', 6, 1, 'System', 'Active'),
-('T7', 'Trái 7', 7, 1, 'System', 'Active'),
-('T8', 'Trái 8', 8, 1, 'System', 'Active'),
-('P1', 'Phải 1', 9, 1, 'System', 'Active'),
-('P2', 'Phải 2', 10, 1, 'System', 'Active'),
-('P3', 'Phải 3', 11, 1, 'System', 'Active'),
-('P4', 'Phải 4', 12, 1, 'System', 'Active'),
-('P5', 'Phải 5', 13, 1, 'System', 'Active'),
-('P6', 'Phải 6', 14, 1, 'System', 'Active'),
-('P7', 'Phải 7', 15, 1, 'System', 'Active'),
-('P8', 'Phải 8', 16, 1, 'System', 'Active');
+('T1', 'Trái 1', 1, 1, 'Phan Ngọc Mai', 'Active'),
+('T2', 'Trái 2', 2, 1, 'Phan Ngọc Mai', 'Active'),
+('T3', 'Trái 3', 3, 1, 'Phan Ngọc Mai', 'Active'),
+('T4', 'Trái 4', 4, 1, 'Phan Ngọc Mai', 'Active'),
+('T5', 'Trái 5', 5, 1, 'Phan Ngọc Mai', 'Active'),
+('T6', 'Trái 6', 6, 1, 'Phan Ngọc Mai', 'Active'),
+('T7', 'Trái 7', 7, 1, 'Phan Ngọc Mai', 'Active'),
+('T8', 'Trái 8', 8, 1, 'Phan Ngọc Mai', 'Active'),
+('P1', 'Phải 1', 9, 1, 'Phan Ngọc Mai', 'Active'),
+('P2', 'Phải 2', 10, 1, 'Phan Ngọc Mai', 'Active'),
+('P3', 'Phải 3', 11, 1, 'Phan Ngọc Mai', 'Active'),
+('P4', 'Phải 4', 12, 1, 'Phan Ngọc Mai', 'Active'),
+('P5', 'Phải 5', 13, 1, 'Phan Ngọc Mai', 'Active'),
+('P6', 'Phải 6', 14, 1, 'Phan Ngọc Mai', 'Active'),
+('P7', 'Phải 7', 15, 1, 'Phan Ngọc Mai', 'Active'),
+('P8', 'Phải 8', 16, 1, 'Phan Ngọc Mai', 'Active');
 
 
 -- Insert into Customers
