@@ -341,6 +341,191 @@ public class productsDAO extends DBContext {
         return 0;
     }
 
+    public List<Products> getProductById(int id, int storeId) {
+        List<Products> products = new ArrayList<>();
+        String sql = "SELECT * FROM products WHERE id = ? AND store_id = ? AND isDeleted = 0";
+        Map<Integer, List<String>> zoneMap = new HashMap<>();
+        String zoneQuery = "SELECT product_id, name FROM zones WHERE product_id = ? AND store_id = ?";  // Filter zones by product_id and store_id
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, id);
+            st.setInt(2, storeId);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    int productId = rs.getInt("id");
+
+                    // Fetching zone names for the product
+                    try (PreparedStatement zoneSt = connection.prepareStatement(zoneQuery)) {
+                        zoneSt.setInt(1, productId);
+                        zoneSt.setInt(2, storeId);
+                        try (ResultSet zoneRs = zoneSt.executeQuery()) {
+                            List<String> zones = new ArrayList<>();
+                            while (zoneRs.next()) {
+                                zones.add(zoneRs.getString("name"));
+                            }
+                            zoneMap.put(productId, zones);
+                        }
+                    }
+
+                    // Getting zone names or default value
+                    List<String> zones = zoneMap.getOrDefault(productId, List.of("Unknown"));
+                    String zoneNames = String.join(",", zones);
+
+                    Products product = new Products(
+                            productId,
+                            rs.getString("name"),
+                            rs.getString("image"),
+                            rs.getBigDecimal("price"),
+                            rs.getInt("quantity"),
+                            rs.getString("description"),
+                            rs.getDate("created_at"),
+                            rs.getString("created_by"),
+                            rs.getDate("deletedAt"),
+                            rs.getString("deleteBy"),
+                            rs.getBoolean("isDeleted"),
+                            rs.getDate("updated_at"),
+                            rs.getString("status"),
+                            zoneNames // Adding the zone names to the product
+                    );
+
+                    products.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+
+    public List<Products> searchProductsByName(String name, int storeId) {
+        List<Products> products = new ArrayList<>();
+
+        // Ensure connection is open
+        if (connection == null) {
+            logSevere("Error: Cannot connect to database!");
+            return products;
+        }
+
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        String sql = "SELECT * FROM Products WHERE name LIKE ? AND store_id = ? AND isDeleted = 0";
+
+        try {
+            pst = connection.prepareStatement(sql);
+            pst.setString(1, "%" + name + "%");
+            pst.setInt(2, storeId);
+            rs = pst.executeQuery();
+
+            while (rs.next()) {
+                products.add(getFromResultSet(rs));
+            }
+        } catch (SQLException ex) {
+            logSevere("Error searching products by name: " + name, ex);
+        } finally {
+            // Close ResultSet and PreparedStatement
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pst != null) {
+                    pst.close();
+                }
+            } catch (SQLException ex) {
+                logSevere("Error closing ResultSet or PreparedStatement", ex);
+            }
+        }
+
+        return products;
+    }
+
+    public List<Products> searchProductsByNameO(String keyword, int storeId) {
+        List<Products> products = new ArrayList<>();
+        // Sửa câu SQL để sử dụng GROUP_CONCAT để gộp các zone_name thành một chuỗi
+        String sql = "SELECT p.id AS product_id, p.name, p.image, p.price, p.quantity, p.description, "
+                + "p.created_at, p.created_by, p.deletedAt, p.deleteBy, p.isDeleted, p.updated_at, p.status, "
+                + "GROUP_CONCAT(z.name) AS zone_names "
+                + "FROM Products p "
+                + "LEFT JOIN Zones z ON p.id = z.product_id "
+                + "WHERE p.name LIKE ? AND p.store_id = ? AND p.isDeleted = 0 AND z.store_id = ? "
+                + "GROUP BY p.id, p.name, p.image, p.price, p.quantity, p.description, "
+                + "p.created_at, p.created_by, p.deletedAt, p.deleteBy, p.isDeleted, p.updated_at, p.status";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ps.setInt(2, storeId);
+            ps.setInt(3, storeId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Products product = new Products(
+                            rs.getInt("product_id"),
+                            rs.getString("name"),
+                            rs.getString("image"),
+                            rs.getBigDecimal("price"),
+                            rs.getInt("quantity"),
+                            rs.getString("description"),
+                            rs.getDate("created_at"),
+                            rs.getString("created_by"),
+                            rs.getDate("deletedAt"),
+                            rs.getString("deleteBy"),
+                            rs.getBoolean("isDeleted"),
+                            rs.getDate("updated_at"),
+                            rs.getString("status"),
+                            rs.getString("zone_names") // Lấy chuỗi các zone_name đã được gộp
+                    );
+                    products.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return products;
+    }
+
+    public Products getProductById02(int id, int storeId) {
+        List<Products> list = getProductById(id, storeId);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    public List<Products> searchProducts(String name, boolean onlyEdited, int storeId) {
+        String sql = "SELECT * FROM products WHERE store_id = ? AND MATCH(name, description) AGAINST (? IN NATURAL LANGUAGE MODE) "
+                + "AND isDeleted = FALSE";
+
+        if (onlyEdited) {
+            sql += " AND updated_at IS NOT NULL";  // Chỉ lấy sản phẩm đã được chỉnh sửa
+        }
+
+        List<Products> productsList = new ArrayList<>();
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeId);
+            st.setString(2, name);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Products product = new Products(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("image"),
+                            rs.getBigDecimal("price"),
+                            rs.getInt("quantity"),
+                            rs.getString("description"),
+                            rs.getDate("created_at"),
+                            rs.getString("created_by"),
+                            rs.getDate("deletedAt"),
+                            rs.getString("deleteBy"),
+                            rs.getBoolean("isDeleted"),
+                            rs.getDate("updated_at"),
+                            rs.getString("status")
+                    );
+                    productsList.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productsList;
+    }
+
     public List<Products> getProductById(int id) {
         List<Products> products = new ArrayList<>();
         String sql = "SELECT * FROM products WHERE id = ?";
@@ -384,187 +569,6 @@ public class productsDAO extends DBContext {
                             rs.getDate("updated_at"),
                             rs.getString("status"),
                             zoneNames // Adding the zone names to the product
-                    );
-
-                    products.add(product);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return products;
-    }
-
-    public List<Products> searchProductsByName(String name) {
-        List<Products> products = new ArrayList<>();
-
-        // Ensure connection is open
-        if (connection == null) {
-            logSevere("Error: Cannot connect to database!");
-            return products;
-        }
-
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        String sql = "SELECT * FROM Products WHERE name LIKE ? AND isDeleted = false";
-
-        try {
-            pst = connection.prepareStatement(sql);
-            pst.setString(1, "%" + name + "%");
-            rs = pst.executeQuery();
-
-            while (rs.next()) {
-                products.add(getFromResultSet(rs));
-            }
-        } catch (SQLException ex) {
-            logSevere("Error searching products by name: " + name, ex);
-        } finally {
-            // Close ResultSet and PreparedStatement
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (pst != null) {
-                    pst.close();
-                }
-            } catch (SQLException ex) {
-                logSevere("Error closing ResultSet or PreparedStatement", ex);
-            }
-        }
-
-        return products;
-    }
-
-    public List<Products> searchProductsByNameO(String keyword) {
-        List<Products> products = new ArrayList<>();
-        // Sửa câu SQL để sử dụng GROUP_CONCAT để gộp các zone_name thành một chuỗi
-        String sql = "SELECT p.id AS product_id, p.name, p.image, p.price, p.quantity, p.description, "
-                + "p.created_at, p.created_by, p.deletedAt, p.deleteBy, p.isDeleted, p.updated_at, p.status, "
-                + "GROUP_CONCAT(z.name) AS zone_names "
-                + "FROM Products p "
-                + "LEFT JOIN Zones z ON p.id = z.product_id "
-                + "WHERE p.name LIKE ? AND p.isDeleted = 0 "
-                + "GROUP BY p.id, p.name, p.image, p.price, p.quantity, p.description, "
-                + "p.created_at, p.created_by, p.deletedAt, p.deleteBy, p.isDeleted, p.updated_at, p.status";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, "%" + keyword + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Products product = new Products(
-                            rs.getInt("product_id"),
-                            rs.getString("name"),
-                            rs.getString("image"),
-                            rs.getBigDecimal("price"),
-                            rs.getInt("quantity"),
-                            rs.getString("description"),
-                            rs.getDate("created_at"),
-                            rs.getString("created_by"),
-                            rs.getDate("deletedAt"),
-                            rs.getString("deleteBy"),
-                            rs.getBoolean("isDeleted"),
-                            rs.getDate("updated_at"),
-                            rs.getString("status"),
-                            rs.getString("zone_names") // Lấy chuỗi các zone_name đã được gộp
-                    );
-                    products.add(product);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return products;
-    }
-
-    public Products getProductById02(int id) {
-        List<Products> list = getProductById(id);
-        return list.isEmpty() ? null : list.get(0);
-    }
-
-    public List<Products> searchProducts(String name, boolean onlyEdited, int storeId) {
-        String sql = "SELECT * FROM products WHERE store_id = ? AND MATCH(name, description) AGAINST (? IN NATURAL LANGUAGE MODE) "
-                + "AND isDeleted = FALSE";
-
-        if (onlyEdited) {
-            sql += " AND updated_at IS NOT NULL";  // Chỉ lấy sản phẩm đã được chỉnh sửa
-        }
-
-        List<Products> productsList = new ArrayList<>();
-
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setInt(1, storeId);
-            st.setString(2, name);
-            try (ResultSet rs = st.executeQuery()) {
-                while (rs.next()) {
-                    Products product = new Products(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getString("image"),
-                            rs.getBigDecimal("price"),
-                            rs.getInt("quantity"),
-                            rs.getString("description"),
-                            rs.getDate("created_at"),
-                            rs.getString("created_by"),
-                            rs.getDate("deletedAt"),
-                            rs.getString("deleteBy"),
-                            rs.getBoolean("isDeleted"),
-                            rs.getDate("updated_at"),
-                            rs.getString("status")
-                    );
-                    productsList.add(product);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return productsList;
-    }
-
-    public List<Products> getProductById(int id, int storeId) {
-        List<Products> products = new ArrayList<>();
-        String sql = "SELECT * FROM products WHERE id = ? AND store_id = ?";
-        Map<Integer, List<String>> zoneMap = new HashMap<>();
-        String zoneQuery = "SELECT product_id, name FROM zones WHERE product_id = ?";  // Filter zones by product_id
-
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setInt(1, id);
-            st.setInt(2, storeId);
-            try (ResultSet rs = st.executeQuery()) {
-                while (rs.next()) {
-                    int productId = rs.getInt("id");
-
-                    // Lấy danh sách zone của sản phẩm
-                    try (PreparedStatement zoneSt = connection.prepareStatement(zoneQuery)) {
-                        zoneSt.setInt(1, productId);
-                        try (ResultSet zoneRs = zoneSt.executeQuery()) {
-                            List<String> zones = new ArrayList<>();
-                            while (zoneRs.next()) {
-                                zones.add(zoneRs.getString("name"));
-                            }
-                            zoneMap.put(productId, zones);
-                        }
-                    }
-
-                    // Nếu không có zone nào, để giá trị mặc định là "Unknown"
-                    List<String> zones = zoneMap.getOrDefault(productId, List.of("Unknown"));
-                    String zoneNames = String.join(",", zones);
-
-                    Products product = new Products(
-                            productId,
-                            rs.getString("name"),
-                            rs.getString("image"),
-                            rs.getBigDecimal("price"),
-                            rs.getInt("quantity"),
-                            rs.getString("description"),
-                            rs.getDate("created_at"),
-                            rs.getString("created_by"),
-                            rs.getDate("deletedAt"),
-                            rs.getString("deleteBy"),
-                            rs.getBoolean("isDeleted"),
-                            rs.getDate("updated_at"),
-                            rs.getString("status"),
-                            zoneNames // Thêm thông tin zone vào sản phẩm
                     );
 
                     products.add(product);
@@ -694,7 +698,7 @@ public class productsDAO extends DBContext {
             connection.setAutoCommit(false); // Bắt đầu transaction
 
             // Lấy giá cũ của sản phẩm
-            Products oldProduct = getProductByIdSimple(product.getProductId());
+            Products oldProduct = getProductByIdSimple(product.getProductId(), storeId);
             if (oldProduct != null && !oldProduct.getPrice().equals(product.getPrice())) {
                 // Nếu giá thay đổi, ghi log vào lịch sử
                 int userId = getUserIdByStoreId(storeId);
@@ -901,7 +905,7 @@ public class productsDAO extends DBContext {
         return products;
     }
 
-    public List<Products> findAllAsList() {
+    public List<Products> findAllAsList(int storeId) {
         List<Products> products = new ArrayList<>();
 
         // Ensure connection is open
@@ -912,10 +916,11 @@ public class productsDAO extends DBContext {
 
         PreparedStatement pst = null;
         ResultSet rs = null;
-        String sql = "SELECT * FROM Products WHERE isDeleted = false";
+        String sql = "SELECT * FROM Products WHERE isDeleted = 0 AND store_id = ?";
 
         try {
             pst = connection.prepareStatement(sql);
+            pst.setInt(1, storeId);
             rs = pst.executeQuery();
 
             while (rs.next()) {
@@ -940,7 +945,7 @@ public class productsDAO extends DBContext {
         return products;
     }
 
-    public Vector<Products> findAll() {
+    public Vector<Products> findAll(int storeId) {
         Vector<Products> products = new Vector<>();
 
         // Ensure connection is open
@@ -951,9 +956,10 @@ public class productsDAO extends DBContext {
 
         PreparedStatement pst = null;
         ResultSet rs = null;
-        String sql = "SELECT * FROM Products WHERE isDeleted = false AND status != 'Inactive' AND quantity > 0";
+        String sql = "SELECT * FROM Products WHERE isDeleted = 0 AND status != 'Inactive' AND quantity > 0 AND store_id = ?";
         try {
             pst = connection.prepareStatement(sql);
+            pst.setInt(1, storeId);
             rs = pst.executeQuery();
 
             while (rs.next()) {
@@ -1036,10 +1042,11 @@ public class productsDAO extends DBContext {
         }
     }
 
-    public Products getProductByIdSimple(int id) {
-        String sql = "SELECT * FROM Products WHERE id = ? AND isDeleted = 0";
+    public Products getProductByIdSimple(int id, int storeId) {
+        String sql = "SELECT * FROM Products WHERE id = ? AND store_id = ? AND isDeleted = 0";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
+            ps.setInt(2, storeId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return Products.builder()
@@ -1096,7 +1103,7 @@ public class productsDAO extends DBContext {
 
         // Test tìm kiếm sản phẩm với từ khóa
         String searchKeyword = "Thơm Thái"; // Bạn có thể thay đổi từ khóa để kiểm tra
-        List<Products> products = productsDAO.INSTANCE.searchProductsByNameO(searchKeyword);
+        List<Products> products = productsDAO.INSTANCE.searchProductsByNameO(searchKeyword, 1);
 
 //         // Thử kiểm tra hàm tìm kiếm sản phẩm theo tên
 //        String searchKeyword = "gạo";  // Từ khóa tìm kiếm (thử tìm sản phẩm "gạo")

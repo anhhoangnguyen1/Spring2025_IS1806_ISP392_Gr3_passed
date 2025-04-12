@@ -395,7 +395,7 @@
                         <!--   === Analytics Chart Starts ===   -->
                         <div class="chart">
                             <div class="chart-header">
-                                <h2>Revenue Analytics</h2>
+                                <h2>Income Analytics</h2>
                                 <form method="GET" action="dashboard" id="revenueForm">
                                     <label for="period">Select Period:</label>
                                     <select id="period" name="period" onchange="document.getElementById('revenueForm').submit();">

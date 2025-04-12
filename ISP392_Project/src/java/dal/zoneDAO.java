@@ -313,12 +313,15 @@ public class zoneDAO extends DBContext {
         }
     }
 
-    public List<String> getActiveZoneNames() {
+    public List<String> getActiveZoneNames(int storeId) {
         List<String> list = new ArrayList<>();
-        String sql = "SELECT name FROM Zones WHERE status = 'Active' AND isDeleted = 0";
-        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
-            while (rs.next()) {
-                list.add(rs.getString("name"));
+        String sql = "SELECT name FROM Zones WHERE status = 'Active' AND isDeleted = 0 AND store_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, storeId);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    list.add(rs.getString("name"));
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error fetching active zone names: " + e.getMessage());

@@ -881,4 +881,28 @@ public class controllerZones extends HttpServlet {
                     .replace("%", "\\%")
                     .replace("_", "\\_");
     }
+
+    public List<Products> searchProducts(String keyword, int storeId) {
+        return productsDAO.searchProductsByNameO(keyword, storeId);
+    }
+
+    public List<Products> getProductById(int id, int storeId) {
+        return productsDAO.getProductById(id, storeId);
+    }
+
+    public Products getProductById02(int id, int storeId) {
+        return productsDAO.getProductById02(id, storeId);
+    }
+
+    public Products getProductByIdSimple(int id, int storeId) {
+        return productsDAO.getProductByIdSimple(id, storeId);
+    }
+
+    public List<Products> findAll(int storeId) {
+        return productsDAO.findAll(storeId);
+    }
+
+    public List<Products> findAllAsList(int storeId) {
+        return productsDAO.findAllAsList(storeId);
+    }
 }

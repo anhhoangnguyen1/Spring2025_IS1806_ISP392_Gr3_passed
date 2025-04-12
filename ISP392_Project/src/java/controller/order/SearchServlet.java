@@ -55,7 +55,7 @@ public class SearchServlet extends HttpServlet {
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             // Thêm storeID vào tìm kiếm sản phẩm để lọc theo cửa hàng
-            List<Products> products = productsDAO.INSTANCE.searchProductsByNameO(keyword);
+            List<Products> products = productsDAO.INSTANCE.searchProductsByNameO(keyword, storeID);
             // Hoặc nếu bạn muốn lọc theo cửa hàng:
             // List<Products> products = productsDAO.INSTANCE.searchProductsByNameAndStore(keyword, storeID);
 

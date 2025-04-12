@@ -111,7 +111,7 @@ public class controllerProducts extends HttpServlet {
 
             // Lấy danh sách sản phẩm và Zone Active
             List<Products> listProducts = products.viewAllProducts(command, index, pageSize, storeID);
-            List<String> listZoneName = zonesDao.getActiveZoneNames(); // Thay đổi ở đây
+            List<String> listZoneName = zonesDao.getActiveZoneNames(storeID);
 
             // Đặt các thuộc tính cho request
             request.setAttribute("totalProducts", count);
@@ -136,7 +136,7 @@ public class controllerProducts extends HttpServlet {
             int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("browser");
             try {
-                List<Products> list = products.searchProducts(name, false, storeID);
+                List<Products> list = products.searchProductsByNameO(name, storeID);
                 request.setAttribute("list", list);
                 request.setAttribute("name", name);
                 request.getRequestDispatcher("views/product/products.jsp").forward(request, response);
@@ -161,7 +161,7 @@ public class controllerProducts extends HttpServlet {
             int storeID = Integer.parseInt(storeIDStr);
             String name = request.getParameter("browser");
             try {
-                List<Products> list = products.searchProducts(name, true, storeID);
+                List<Products> list = products.searchProductsByNameO(name, storeID);
                 request.setAttribute("listHistory", list);
                 request.setAttribute("name", name);
                 request.getRequestDispatcher("views/product/productEditHistory.jsp").forward(request, response);
@@ -419,7 +419,7 @@ public class controllerProducts extends HttpServlet {
             Products product = new Products(0, name, imageFileName, price, quantity, description, createdAt, createdBy, deletedAt, deletedBy, isDelete, updatedAt, status);
 
             // Lấy danh sách Zone Active để kiểm tra
-            List<String> activeZoneNames = zonesDao.getActiveZoneNames();
+            List<String> activeZoneNames = zonesDao.getActiveZoneNames(storeID);
             String[] zoneNames = request.getParameterValues("zoneName");
             List<Zone> zones = new ArrayList<>();
 
@@ -477,11 +477,12 @@ public class controllerProducts extends HttpServlet {
             boolean isDelete = Boolean.parseBoolean(request.getParameter("isDelete"));
             String updatedBy = fullName;
             Date updatedAt = new java.sql.Date(System.currentTimeMillis());
+            int storeID = Integer.parseInt((String) session.getAttribute("storeID"));
 
             Products product = new Products(id, name, image, price, quantity, description, null, null, null, null, isDelete, updatedAt, status, null);
 
             // Lấy giá cũ của sản phẩm
-            Products oldProduct = products.getProductByIdSimple(id);
+            Products oldProduct = products.getProductByIdSimple(id, storeID);
             if (oldProduct != null && !oldProduct.getPrice().equals(price)) {
                 // Lấy userId từ session
                 int userId = Integer.parseInt((String) session.getAttribute("userID"));
