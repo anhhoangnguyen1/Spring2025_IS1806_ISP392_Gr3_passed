@@ -35,8 +35,7 @@
                         <div class="modal-body">					
                             <div class="form-group">
                                 <label>Product Name</label>
-                                <input type="text" class="form-control" name="name" required minlength="1" maxlength="255">
-                                <div class="error-message" id="nameError"></div>
+                                <input type="text" class="form-control" name="name" required>
                             </div>
 
                             <div class="form-group">
@@ -82,78 +81,5 @@
                 </div>
             </div>
         </div>
-        <script>
-            function previewImage(event) {
-                const file = event.target.files[0];
-                const reader = new FileReader();
-                const imgPreview = document.getElementById('productImagePreview');
-                const imageError = document.getElementById('imageError');
-
-                // Reset error message
-                imageError.textContent = '';
-
-                if (file) {
-                    // Check file type
-                    if (!file.type.startsWith("image/")) {
-                        imageError.textContent = "Please select a valid image file";
-                        imgPreview.style.display = "none";
-                        return;
-                    }
-
-                    // Check file size (5MB)
-                    if (file.size > 5 * 1024 * 1024) {
-                        imageError.textContent = "File size cannot exceed 5MB";
-                        imgPreview.style.display = "none";
-                        return;
-                    }
-
-                    reader.onload = function(e) {
-                        imgPreview.src = e.target.result;
-                        imgPreview.style.display = "block";
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    imgPreview.style.display = "none";
-                }
-            }
-
-            function validateAddProductForm(form) {
-                let isValid = true;
-                const nameInput = form.querySelector('input[name="name"]');
-                const priceInput = form.querySelector('input[name="price"]');
-                const descriptionInput = form.querySelector('textarea[name="description"]');
-                const zoneSelect = form.querySelector('select[name="zoneName"]');
-                
-                // Reset all error messages
-                document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-
-                // Validate name
-                if (!nameInput.value.trim()) {
-                    document.getElementById('nameError').textContent = "Product name cannot be empty";
-                    isValid = false;
-                }
-
-                // Validate price
-                const price = parseFloat(priceInput.value);
-                if (isNaN(price) || price <= 0) {
-                    document.getElementById('priceError').textContent = "Price must be greater than 0";
-                    isValid = false;
-                }
-
-                // Validate description
-                if (!descriptionInput.value.trim()) {
-                    document.getElementById('descriptionError').textContent = "Description cannot be empty";
-                    isValid = false;
-                }
-
-                // Validate zone selection
-                if (zoneSelect.selectedOptions.length === 0) {
-                    document.getElementById('zoneError').textContent = "Please select at least one zone";
-                    isValid = false;
-                }
-
-                return isValid;
-            }
-        </script>
     </body>
 </html>
