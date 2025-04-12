@@ -50,10 +50,23 @@ public class HistoryImportPriceServlet extends HttpServlet {
             endDate = LocalDate.now().toString();
         }
 
-        List<ProductPriceHistory> HistoryList = new ArrayList<>();
-        HistoryList = DAOProduct.INSTANCE.getImportPriceHistory(
+        System.out.println("Debug - Parameters:");
+        System.out.println("userId: " + userId);
+        System.out.println("currentPage: " + currentPage);
+        System.out.println("keyword: " + keyword);
+        System.out.println("sortOrder: " + sortOrder);
+        System.out.println("startDate: " + startDate);
+        System.out.println("endDate: " + endDate);
+
+        List<ProductPriceHistory> HistoryList = DAOProduct.INSTANCE.getImportPriceHistory(
                 keyword, currentPage, recordsPerPage, userId, sortOrder, startDate, endDate
         );
+
+        System.out.println("Debug - Results:");
+        System.out.println("HistoryList size: " + (HistoryList != null ? HistoryList.size() : "null"));
+        if (HistoryList != null && !HistoryList.isEmpty()) {
+            System.out.println("First record: " + HistoryList.get(0).toString());
+        }
 
         int totalRecords = DAOProduct.INSTANCE.getTotalHistoryRecords(keyword, userId, startDate, endDate);
         int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
@@ -66,7 +79,7 @@ public class HistoryImportPriceServlet extends HttpServlet {
         request.setAttribute("startDate", startDate);
         request.setAttribute("endDate", endDate);
 
-        request.getRequestDispatcher("views/priceHistory/historyImportPrice.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/priceHistory/historyImportPrice.jsp").forward(request, response);
     }
 
     @Override
@@ -78,16 +91,16 @@ public class HistoryImportPriceServlet extends HttpServlet {
         
         String productIdStr = request.getParameter("productId");
         String importPriceStr = request.getParameter("importPrice");
-        String supplierIdStr = request.getParameter("supplierId");
+        String orderIdStr = request.getParameter("orderId");
         
-        if (productIdStr != null && importPriceStr != null && supplierIdStr != null) {
+        if (productIdStr != null && importPriceStr != null && orderIdStr != null) {
             try {
                 int productId = Integer.parseInt(productIdStr);
                 double importPrice = Double.parseDouble(importPriceStr);
-                int supplierId = Integer.parseInt(supplierIdStr);
+                int orderId = Integer.parseInt(orderIdStr);
                 
                 // Update import price and log history
-                boolean success = DAOProduct.INSTANCE.importProduct(productId, importPrice, userId, supplierId, userName);
+                boolean success = DAOProduct.INSTANCE.importProduct(productId, importPrice, userId, orderId, userName);
                 if (success) {
                     response.sendRedirect("HistoryImportPriceServlet?success=1");
                     return;

@@ -279,6 +279,11 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <c:if test="${empty HistoryList}">
+                                    <tr>
+                                        <td colspan="5" class="text-center">No records found</td>
+                                    </tr>
+                                </c:if>
                                 <c:forEach var="history" items="${HistoryList}">
                                     <tr>
                                         <td style="text-align: left;">${history.productName}</td>

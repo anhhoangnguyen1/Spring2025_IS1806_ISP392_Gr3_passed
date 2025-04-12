@@ -61,7 +61,8 @@ public class DAOProduct extends DBContext {
         FROM ProductPriceHistory pph
         JOIN Products p ON pph.product_id = p.id
         JOIN Users u ON pph.created_by = u.id
-        LEFT JOIN Customers c ON pph.order_id = c.id
+        LEFT JOIN Orders o ON pph.order_id = o.id
+        LEFT JOIN Customers c ON o.customers_id = c.id
         WHERE p.store_id = ? 
           AND pph.type = ? 
           AND pph.isDeleted = 0
@@ -97,21 +98,29 @@ public class DAOProduct extends DBContext {
         List<ProductPriceHistory> historyList = new ArrayList<>();
         int offset = (page - 1) * recordsPerPage;
 
+        System.out.println("Debug getImportPriceHistory:");
+        System.out.println("storeId: " + storeId);
+        System.out.println("keyword: " + keyword);
+        System.out.println("offset: " + offset);
+        System.out.println("recordsPerPage: " + recordsPerPage);
+        System.out.println("startDate: " + startDate);
+        System.out.println("endDate: " + endDate);
+
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT pph.id, p.id as productID, p.name as productName, p.image, ");
         sqlBuilder.append("pph.importPrice as price, pph.type, pph.created_at, ");
         sqlBuilder.append("pph.created_by as changedByName, c.name as supplierName ");
         sqlBuilder.append("FROM ProductPriceHistory pph ");
         sqlBuilder.append("JOIN Products p ON pph.product_id = p.id ");
-        sqlBuilder.append("LEFT JOIN Customers c ON pph.supplier_id = c.id ");
+        sqlBuilder.append("LEFT JOIN Orders o ON pph.order_id = o.id ");
+        sqlBuilder.append("LEFT JOIN Customers c ON o.customers_id = c.id ");
         sqlBuilder.append("WHERE p.store_id = ? ");
         sqlBuilder.append("AND pph.type = 'import' ");
         sqlBuilder.append("AND pph.isDeleted = 0 ");
         sqlBuilder.append("AND (p.name LIKE ? OR ? = '') ");
         sqlBuilder.append("AND (pph.created_at BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY)) ");
         sqlBuilder.append("ORDER BY pph.created_at ").append(sortOrder).append(" ");
-        sqlBuilder.append("LIMIT ").append(recordsPerPage).append(" ");
-        sqlBuilder.append("OFFSET ").append(offset);
+        sqlBuilder.append("LIMIT ? OFFSET ?");
 
         try (PreparedStatement ps = connection.prepareStatement(sqlBuilder.toString())) {
             ps.setInt(1, storeId);
@@ -119,10 +128,13 @@ public class DAOProduct extends DBContext {
             ps.setString(3, keyword);
             ps.setString(4, startDate);
             ps.setString(5, endDate);
+            ps.setInt(6, recordsPerPage);
+            ps.setInt(7, offset);
 
+            System.out.println("Executing SQL: " + sqlBuilder.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    historyList.add(new ProductPriceHistory(
+                    ProductPriceHistory history = new ProductPriceHistory(
                             rs.getInt("id"),
                             rs.getInt("productID"),
                             rs.getString("productName"),
@@ -132,7 +144,9 @@ public class DAOProduct extends DBContext {
                             rs.getString("created_at"),
                             rs.getString("changedByName"),
                             rs.getString("supplierName")
-                    ));
+                    );
+                    historyList.add(history);
+                    System.out.println("Found record: " + history.toString());
                 }
             }
         } catch (SQLException e) {
@@ -199,7 +213,7 @@ public class DAOProduct extends DBContext {
         return historyList;
     }
 
-    public boolean logPriceChange(int productId, double newPrice, String priceType, int userId, Integer supplierID, String userName) {
+    public boolean logPriceChange(int productId, double newPrice, String priceType, int userId, Integer orderId, String userName) {
         // Kiểm tra sản phẩm có tồn tại không
         String checkProductSql = "SELECT id FROM Products WHERE id = ? AND isDeleted = 0";
         try (PreparedStatement checkPs = connection.prepareStatement(checkProductSql)) {
@@ -223,7 +237,7 @@ public class DAOProduct extends DBContext {
 
         String sql = """
         INSERT INTO ProductPriceHistory 
-        (product_id, price, importPrice, type, created_by, store_id, supplier_id) 
+        (product_id, price, importPrice, type, created_by, store_id, order_id) 
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """;
 
@@ -239,10 +253,10 @@ public class DAOProduct extends DBContext {
             stmt.setString(4, priceType);
             stmt.setString(5, userName);
             stmt.setInt(6, storeId);
-            if (supplierID == null) {
+            if (orderId == null) {
                 stmt.setNull(7, java.sql.Types.INTEGER);
             } else {
-                stmt.setInt(7, supplierID);
+                stmt.setInt(7, orderId);
             }
 
             int rowsAffected = stmt.executeUpdate();
@@ -273,8 +287,8 @@ public class DAOProduct extends DBContext {
         return false;
     }
 
-    public boolean importProduct(int productId, double importPrice, int userId, int supplierId, String userName) {
-        return logPriceChange(productId, importPrice, "import", userId, supplierId, userName);
+    public boolean importProduct(int productId, double importPrice, int userId, int orderId, String userName) {
+        return logPriceChange(productId, importPrice, "import", userId, orderId, userName);
     }
 
     private int getStoreIdByUserId(int userId) {
@@ -426,11 +440,11 @@ public class DAOProduct extends DBContext {
 
         // 7. Test importProduct
         System.out.println("7. Test importProduct:");
-        // Thay đổi supplierId theo database của bạn
-        int testSupplierId = 1; // Giả sử supplierId = 1
+        // Thay đổi orderId theo database của bạn
+        int testOrderId = 1; // Giả sử orderId = 1
         double importPrice = 45000.0;
 
-        boolean importResult = dao.importProduct(testProductId, importPrice, testUserId, testSupplierId, "Jane Smith");
+        boolean importResult = dao.importProduct(testProductId, importPrice, testUserId, testOrderId, "Jane Smith");
         System.out.println("Kết quả cập nhật giá nhập: " + importResult);
 
         System.out.println("\n=== KẾT THÚC KIỂM TRA ===");
