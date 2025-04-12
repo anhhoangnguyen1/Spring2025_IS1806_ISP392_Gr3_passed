@@ -9,6 +9,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,7 +20,7 @@ public class invoiceHistoryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        HttpSession session = request.getSession();
         // Kiểm tra đăng nhập
         Users user = (Users) request.getSession().getAttribute("user");
         if (user == null) {
@@ -27,6 +28,15 @@ public class invoiceHistoryServlet extends HttpServlet {
             return;
         }
 
+        String storeIDStr = (String) session.getAttribute("storeID");
+
+        // Validate storeID
+        if (storeIDStr == null || storeIDStr.trim().isEmpty()) {
+            session.setAttribute("Notification", "Cannot find");
+            response.sendRedirect("InvoiceHistory?service=detail");
+            return;
+        }
+        int storeID = Integer.parseInt(storeIDStr);
         // Kiểm tra quyền truy cập
         if (!user.getRole().equals("owner") && !user.getRole().equals("staff")) {
             request.setAttribute("errorMessage", "You don't have permission to access this page");
@@ -60,14 +70,9 @@ public class invoiceHistoryServlet extends HttpServlet {
             try {
                 int orderId = Integer.parseInt(request.getParameter("order_id"));
                 Orders order = ordersDAO.getOrderById(orderId);
-                
-                // Kiểm tra quyền truy cập chi tiết hóa đơn
-                if (order != null && order.getStoreId().getId() != storeId) {
-                    request.setAttribute("errorMessage", "You don't have permission to view this invoice");
-                    request.getRequestDispatcher("views/invoice/invoiceDetail.jsp").forward(request, response);
-                    return;
-                }
-                
+
+               
+
                 if (order != null) {
                     List<OrderDetails> details = ordersDAO.getOrderDetailsByOrderId(orderId);
                     double totalAmount = details.stream().mapToDouble(d -> d.getUnitPrice() * d.getQuantity()).sum();
