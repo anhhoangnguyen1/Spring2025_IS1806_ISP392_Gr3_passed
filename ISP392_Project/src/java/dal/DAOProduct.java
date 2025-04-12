@@ -8,6 +8,7 @@ import java.util.List;
 import entity.ProductPriceHistory;
 
 public class DAOProduct extends DBContext {
+
     public static DAOProduct INSTANCE = new DAOProduct();
 
     public List<ProductPriceHistory> getAllExportPriceHistory(int userId, String priceType) {
@@ -32,14 +33,14 @@ public class DAOProduct extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     historyList.add(new ProductPriceHistory(
-                        rs.getInt("id"),
-                        rs.getInt("productID"),
-                        rs.getString("productName"),
-                        rs.getString("image"),
-                        rs.getDouble("price"),
-                        rs.getString("type"),
-                        rs.getString("created_at"),
-                        rs.getString("changedByName")
+                            rs.getInt("id"),
+                            rs.getInt("productID"),
+                            rs.getString("productName"),
+                            rs.getString("image"),
+                            rs.getDouble("price"),
+                            rs.getString("type"),
+                            rs.getString("created_at"),
+                            rs.getString("changedByName")
                     ));
                 }
             }
@@ -73,15 +74,15 @@ public class DAOProduct extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     historyList.add(new ProductPriceHistory(
-                        rs.getInt("id"),
-                        rs.getInt("productID"),
-                        rs.getString("productName"),
-                        rs.getString("image"),
-                        rs.getDouble("price"),
-                        rs.getString("type"),
-                        rs.getString("created_at"),
-                        rs.getString("changedByName"),
-                        rs.getString("supplierName")
+                            rs.getInt("id"),
+                            rs.getInt("productID"),
+                            rs.getString("productName"),
+                            rs.getString("image"),
+                            rs.getDouble("price"),
+                            rs.getString("type"),
+                            rs.getString("created_at"),
+                            rs.getString("changedByName"),
+                            rs.getString("supplierName")
                     ));
                 }
             }
@@ -96,21 +97,13 @@ public class DAOProduct extends DBContext {
         List<ProductPriceHistory> historyList = new ArrayList<>();
         int offset = (page - 1) * recordsPerPage;
 
-        // Debug info
-        System.out.println("Debug getImportPriceHistory:");
-        System.out.println("storeId: " + storeId);
-        System.out.println("keyword: " + keyword);
-        System.out.println("offset: " + offset);
-        System.out.println("recordsPerPage: " + recordsPerPage);
-        System.out.println("startDate: " + startDate);
-        System.out.println("endDate: " + endDate);
-
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT pph.id, p.id as productID, p.name as productName, p.image, ");
-        sqlBuilder.append("pph.importPrice as price, pph.type, pph.created_at, pph.created_by as changedByName, c.name as supplierName ");
+        sqlBuilder.append("pph.importPrice as price, pph.type, pph.created_at, ");
+        sqlBuilder.append("pph.created_by as changedByName, c.name as supplierName ");
         sqlBuilder.append("FROM ProductPriceHistory pph ");
         sqlBuilder.append("JOIN Products p ON pph.product_id = p.id ");
-        sqlBuilder.append("LEFT JOIN Customers c ON pph.order_id = c.id ");
+        sqlBuilder.append("LEFT JOIN Customers c ON pph.supplier_id = c.id ");
         sqlBuilder.append("WHERE p.store_id = ? ");
         sqlBuilder.append("AND pph.type = 'import' ");
         sqlBuilder.append("AND pph.isDeleted = 0 ");
@@ -127,19 +120,18 @@ public class DAOProduct extends DBContext {
             ps.setString(4, startDate);
             ps.setString(5, endDate);
 
-            System.out.println("Executing SQL: " + sqlBuilder.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     historyList.add(new ProductPriceHistory(
-                        rs.getInt("id"),
-                        rs.getInt("productID"),
-                        rs.getString("productName"),
-                        rs.getString("image"),
-                        rs.getDouble("price"),
-                        rs.getString("type"),
-                        rs.getString("created_at"),
-                        rs.getString("changedByName"),
-                        rs.getString("supplierName")
+                            rs.getInt("id"),
+                            rs.getInt("productID"),
+                            rs.getString("productName"),
+                            rs.getString("image"),
+                            rs.getDouble("price"),
+                            rs.getString("type"),
+                            rs.getString("created_at"),
+                            rs.getString("changedByName"),
+                            rs.getString("supplierName")
                     ));
                 }
             }
@@ -189,14 +181,14 @@ public class DAOProduct extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     historyList.add(new ProductPriceHistory(
-                        rs.getInt("id"),
-                        rs.getInt("productID"),
-                        rs.getString("productName"),
-                        rs.getString("image"),
-                        rs.getDouble("price"),
-                        rs.getString("type"),
-                        rs.getString("created_at"),
-                        rs.getString("changedByName")
+                            rs.getInt("id"),
+                            rs.getInt("productID"),
+                            rs.getString("productName"),
+                            rs.getString("image"),
+                            rs.getDouble("price"),
+                            rs.getString("type"),
+                            rs.getString("created_at"),
+                            rs.getString("changedByName")
                     ));
                 }
             }
@@ -208,22 +200,41 @@ public class DAOProduct extends DBContext {
     }
 
     public boolean logPriceChange(int productId, double newPrice, String priceType, int userId, Integer supplierID, String userName) {
+        // Kiểm tra sản phẩm có tồn tại không
+        String checkProductSql = "SELECT id FROM Products WHERE id = ? AND isDeleted = 0";
+        try (PreparedStatement checkPs = connection.prepareStatement(checkProductSql)) {
+            checkPs.setInt(1, productId);
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (!rs.next()) {
+                    System.out.println("Product not found or deleted: " + productId);
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
         int storeId = getStoreIdByUserId(userId);
+        if (storeId == -1) {
+            System.out.println("Store not found for user: " + userId);
+            return false;
+        }
 
         String sql = """
         INSERT INTO ProductPriceHistory 
-        (product_id, price, importPrice, type, created_by, store_id, order_id) 
+        (product_id, price, importPrice, type, created_by, store_id, supplier_id) 
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, productId);
             if ("sell".equals(priceType)) {
-                stmt.setDouble(2, newPrice); // price là giá bán
-                stmt.setDouble(3, 0); // importPrice = 0 khi là giá bán
+                stmt.setDouble(2, newPrice);
+                stmt.setDouble(3, 0);
             } else {
-                stmt.setDouble(2, 0); // price = 0 khi là giá nhập
-                stmt.setDouble(3, newPrice); // importPrice là giá nhập
+                stmt.setDouble(2, 0);
+                stmt.setDouble(3, newPrice);
             }
             stmt.setString(4, priceType);
             stmt.setString(5, userName);
@@ -238,6 +249,9 @@ public class DAOProduct extends DBContext {
             return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("SQL Error: " + e.getMessage());
+            System.out.println("SQL State: " + e.getSQLState());
+            System.out.println("Error Code: " + e.getErrorCode());
         }
         return false;
     }
@@ -248,7 +262,7 @@ public class DAOProduct extends DBContext {
             stmt.setDouble(1, newPrice);
             stmt.setInt(2, productId);
             int rowsAffected = stmt.executeUpdate();
-            
+
             if (rowsAffected > 0) {
                 // Log price change to history
                 return logPriceChange(productId, newPrice, "sell", userId, null, userName);
@@ -339,18 +353,18 @@ public class DAOProduct extends DBContext {
     public static void main(String[] args) {
         // Khởi tạo instance của DAOProduct
         DAOProduct dao = DAOProduct.INSTANCE;
-        
+
         // Test userId - thay đổi giá trị này theo user thực tế trong database của bạn
         int testUserId = 2; // Giả sử userId = 2
-        
+
         System.out.println("=== BẮT ĐẦU KIỂM TRA CÁC PHƯƠNG THỨC ===\n");
-        
+
         // 1. Test getStoreIdByUserId
         System.out.println("1. Test getStoreIdByUserId:");
         int storeId = dao.getStoreIdByUserId(testUserId);
         System.out.println("Store ID của user " + testUserId + ": " + storeId);
         System.out.println();
-        
+
         // 2. Test getAllImportPriceHistory
         System.out.println("2. Test getAllImportPriceHistory:");
         List<ProductPriceHistory> importHistory = dao.getAllImportPriceHistory(testUserId, "import");
@@ -361,7 +375,7 @@ public class DAOProduct extends DBContext {
             printProductPriceHistory(firstRecord);
         }
         System.out.println();
-        
+
         // 3. Test getAllExportPriceHistory
         System.out.println("3. Test getAllExportPriceHistory:");
         List<ProductPriceHistory> exportHistory = dao.getAllExportPriceHistory(testUserId, "sell");
@@ -372,7 +386,7 @@ public class DAOProduct extends DBContext {
             printProductPriceHistory(firstRecord);
         }
         System.out.println();
-        
+
         // 4. Test getImportPriceHistory với phân trang
         System.out.println("4. Test getImportPriceHistory với phân trang:");
         String keyword = "";
@@ -381,9 +395,9 @@ public class DAOProduct extends DBContext {
         String sortOrder = "desc";
         String startDate = "2025-01-01";
         String endDate = "2025-12-31";
-        
+
         List<ProductPriceHistory> pagedImportHistory = dao.getImportPriceHistory(
-            keyword, page, recordsPerPage, testUserId, sortOrder, startDate, endDate
+                keyword, page, recordsPerPage, testUserId, sortOrder, startDate, endDate
         );
         System.out.println("Số lượng record trên trang " + page + ": " + pagedImportHistory.size());
         if (!pagedImportHistory.isEmpty()) {
@@ -393,35 +407,35 @@ public class DAOProduct extends DBContext {
             }
         }
         System.out.println();
-        
+
         // 5. Test getTotalHistoryRecords
         System.out.println("5. Test getTotalHistoryRecords:");
         int totalRecords = dao.getTotalHistoryRecords(keyword, testUserId, startDate, endDate);
         System.out.println("Tổng số records: " + totalRecords);
         System.out.println();
-        
+
         // 6. Test logPriceChange và updateProductPrice
         System.out.println("6. Test logPriceChange và updateProductPrice:");
         // Thay đổi productId theo database của bạn
         int testProductId = 17; // Giả sử productId = 17
         double newPrice = 50000.0;
-        
+
         boolean updateResult = dao.updateProductPrice(testProductId, newPrice, testUserId, "John Doe");
         System.out.println("Kết quả cập nhật giá bán: " + updateResult);
         System.out.println();
-        
+
         // 7. Test importProduct
         System.out.println("7. Test importProduct:");
         // Thay đổi supplierId theo database của bạn
         int testSupplierId = 1; // Giả sử supplierId = 1
         double importPrice = 45000.0;
-        
+
         boolean importResult = dao.importProduct(testProductId, importPrice, testUserId, testSupplierId, "Jane Smith");
         System.out.println("Kết quả cập nhật giá nhập: " + importResult);
-        
+
         System.out.println("\n=== KẾT THÚC KIỂM TRA ===");
     }
-    
+
     private static void printProductPriceHistory(ProductPriceHistory history) {
         System.out.println("----------------------------------------");
         System.out.println("ID: " + history.getHistoryID());
@@ -431,9 +445,9 @@ public class DAOProduct extends DBContext {
         System.out.println("Type: " + history.getPriceType());
         System.out.println("Created At: " + history.getChangedAt());
         System.out.println("Changed By: " + history.getChangedBy());
-        if (history.getSupplier()!= null) {
+        if (history.getSupplier() != null) {
             System.out.println("Supplier Name: " + history.getSupplier());
         }
         System.out.println("----------------------------------------");
     }
-} 
+}
