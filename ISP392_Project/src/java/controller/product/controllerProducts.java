@@ -318,14 +318,17 @@ public class controllerProducts extends HttpServlet {
 
                 Products product = new Products(productId, name, imageFileName, price, quantity, description, createdAt, createBy, deletedAt, deletedBy, isDelete, updatedAt, status);
                 List<Zone> zones = new ArrayList<>();
-                for (String zoneName : zoneNames) {
-                    if (zoneName != null && !zoneName.trim().isEmpty()) {
-                        Zone zone = new Zone();
-                        zone.setName(zoneName);
-                        zones.add(zone);
+                
+                // Cho phép zone null
+                if (zoneNames != null && zoneNames.length > 0) {
+                    for (String zoneName : zoneNames) {
+                        if (zoneName != null && !zoneName.trim().isEmpty()) {
+                            Zone zone = new Zone();
+                            zone.setName(zoneName);
+                            zones.add(zone);
+                        }
                     }
                 }
-//                boolean success = products.editProduct(product, zones);
 
                 // Truyền fullName làm updatedBy
                 boolean success = products.editProduct(product, zones, fullName, storeID);
@@ -442,11 +445,6 @@ public class controllerProducts extends HttpServlet {
             }
 
             String description = request.getParameter("description");
-            if (description == null || description.trim().isEmpty()) {
-                request.setAttribute("Notification", "Description cannot be empty");
-                request.getRequestDispatcher("Products?service=products").forward(request, response);
-                return;
-            }
 
 
             String[] zoneNames = request.getParameterValues("zoneName");
@@ -466,11 +464,14 @@ public class controllerProducts extends HttpServlet {
             List<String> activeZoneNames = zonesDao.getActiveZoneNames(storeID);
             List<Zone> zones = new ArrayList<>();
 
-            for (String zoneName : zoneNames) {
-                if (zoneName != null && !zoneName.trim().isEmpty() && activeZoneNames.contains(zoneName)) {
-                    Zone zone = new Zone();
-                    zone.setName(zoneName);
-                    zones.add(zone);
+            // Cho phép zone null
+            if (zoneNames != null && zoneNames.length > 0) {
+                for (String zoneName : zoneNames) {
+                    if (zoneName != null && !zoneName.trim().isEmpty() && activeZoneNames.contains(zoneName)) {
+                        Zone zone = new Zone();
+                        zone.setName(zoneName);
+                        zones.add(zone);
+                    }
                 }
             }
 

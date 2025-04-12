@@ -56,7 +56,7 @@
 
                                 <div class="form-group col-md-6">
                                     <label>Zone name</label>
-                                    <select class="form-control selectpicker" name="zoneName" multiple data-live-search="true" required>
+                                    <select class="form-control selectpicker" name="zoneName" multiple data-live-search="true">
                                         <c:forEach var="zone" items="${zoneName}">
                                             <option value="${zone}">${zone}</option>
                                         </c:forEach>
@@ -67,7 +67,7 @@
 
                             <div class="form-group">
                                 <label>Description</label>
-                                <textarea class="form-control" name="description" rows="3" required minlength="1"></textarea>
+                                <textarea class="form-control" name="description" rows="3" minlength="1"></textarea>
                                 <div class="error-message" id="descriptionError"></div>
                             </div>
                         </div>
